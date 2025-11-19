@@ -1,0 +1,144 @@
+@model SurveyApp.Models.SurveyModel
+
+<div class="modal-header bg-primary">
+    <h5 class="modal-title text-white" id="viewSurveyModalLabel">
+        <i class="bi bi-clipboard-data me-2"></i>Survey Details
+    </h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+    <div class="container-fluid">
+        <div class="row g-3">
+            <!-- Survey Basic Information -->
+            <div class="col-12">
+                <h6 class="border-bottom pb-2 mb-3 text-primary">
+                    <i class="bi bi-info-circle me-2"></i>Basic Information
+                </h6>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-muted small">Survey ID</label>
+                <p class="form-control-plaintext border-bottom">@Model.SurveyId</p>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-muted small">Survey Name</label>
+                <p class="form-control-plaintext border-bottom">@Model.SurveyName</p>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-muted small">Implementation Type</label>
+                <p class="form-control-plaintext border-bottom">@(Model.ImplementationType ?? "-")</p>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-muted small">Survey Date</label>
+                <p class="form-control-plaintext border-bottom">@(Model.SurveyDate?.ToString("dd-MMM-yyyy") ?? "-")</p>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-muted small">Survey Status</label>
+                <p class="form-control-plaintext border-bottom">
+                    <span class="badge bg-@(Model.SurveyStatus == "Completed" ? "success" : 
+                                          Model.SurveyStatus == "In Progress" ? "primary" : 
+                                          Model.SurveyStatus == "On Hold" ? "warning" : "secondary")">
+                        @(Model.SurveyStatus ?? "Pending")
+                    </span>
+                </p>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-muted small">Region</label>
+                <p class="form-control-plaintext border-bottom">@(Model.RegionName ?? "-")</p>
+            </div>
+
+            <!-- Team Information -->
+            <div class="col-12 mt-4">
+                <h6 class="border-bottom pb-2 mb-3 text-primary">
+                    <i class="bi bi-people me-2"></i>Team Information
+                </h6>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-muted small">Survey Team Name</label>
+                <p class="form-control-plaintext border-bottom">@(Model.SurveyTeamName ?? "-")</p>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-muted small">Survey Team Contact</label>
+                <p class="form-control-plaintext border-bottom">@(Model.SurveyTeamContact ?? "-")</p>
+            </div>
+
+            <div class="col-md-12">
+                <label class="form-label fw-bold text-muted small">Client Name</label>
+                <p class="form-control-plaintext border-bottom">@(Model.AgencyName ?? "-")</p>
+            </div>
+
+            <!-- Location Information -->
+            <div class="col-12 mt-4">
+                <h6 class="border-bottom pb-2 mb-3 text-primary">
+                    <i class="bi bi-geo-alt me-2"></i>Location Information
+                </h6>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-muted small">State</label>
+                <p class="form-control-plaintext border-bottom">@(Model.MapMarking ?? "-")</p>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-muted small">City/District</label>
+                <p class="form-control-plaintext border-bottom">@(Model.CityDistrict ?? "-")</p>
+            </div>
+
+            <div class="col-md-12">
+                <label class="form-label fw-bold text-muted small">Location Site Name</label>
+                <p class="form-control-plaintext border-bottom">@(Model.LocationSiteName ?? "-")</p>
+            </div>
+
+            <div class="col-md-12">
+                <label class="form-label fw-bold text-muted small">Scope of Work</label>
+                <p class="form-control-plaintext border-bottom">@(Model.ScopeOfWork ?? "-")</p>
+            </div>
+
+            <!-- Coordinates -->
+            <div class="col-12 mt-4">
+                <h6 class="border-bottom pb-2 mb-3 text-primary">
+                    <i class="bi bi-pin-map me-2"></i>Coordinates
+                </h6>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-muted small">Latitude</label>
+                <p class="form-control-plaintext border-bottom">@(Model.Latitude?.ToString() ?? "-")</p>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-muted small">Longitude</label>
+                <p class="form-control-plaintext border-bottom">@(Model.Longitude?.ToString() ?? "-")</p>
+            </div>
+
+            @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+            {
+                <div class="col-12 mt-3">
+                    <a href="https://www.google.com/maps?q=@Model.Latitude,@Model.Longitude" 
+                       target="_blank" 
+                       class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-map me-2"></i>View on Google Maps
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <a asp-controller="SurveyCreation" 
+       asp-action="Edit" 
+       asp-route-id="@Model.SurveyId" 
+       class="btn btn-primary">
+        <i class="bi bi-pencil me-2"></i>Edit Survey
+    </a>
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        <i class="bi bi-x-circle me-2"></i>Close
+    </button>
+</div>

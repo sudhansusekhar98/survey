@@ -1,0 +1,67 @@
+﻿@model AnalyticaDocs.Models.UserModel
+   
+@section Scripts {
+
+    <script src="~/js/ui-modals.js"></script>
+}
+<div class="modal fade" id="viewDataModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header py-4 bg-purple">
+                <h5 class="modal-title  text-white">User Detail</h5>
+                <button type="button" class="btn-close btn-danger" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container mt-6">
+                <div class="row gx-4 gy-6">
+                    <div class="col-12 col-md-6">
+                        <div class="form-custom-floating">
+                                <input asp-for="LoginId" type="text" class="form-control form-control-lg" placeholder=" " readonly>
+                            <label asp-for="LoginId"></label>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <div class="form-custom-floating">
+                                <input asp-for="LoginName" type="text" class="form-control  form-control-lg" placeholder=" " readonly>
+                            <label asp-for="LoginName"></label>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="form-custom-floating">
+                                <input asp-for="MobileNo" type="text" class="form-control  form-control-lg" placeholder=" " readonly>
+                            <label asp-for="MobileNo"></label>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="form-custom-floating">
+                                <input asp-for="EmailID" type="text" class="form-control  form-control-lg" placeholder=" " readonly>
+                            <label asp-for="EmailID"></label>
+                        </div>
+                    </div>
+                   
+                    <div class="col-12 col-md-6">
+                        <div class="form-custom-floating">
+                                <input asp-for="ISActivedesc" type="text" class="form-control  form-control-lg" placeholder=" " readonly>
+                            <label asp-for="ISActive"></label>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="form-custom-floating">
+                                <input asp-for="RoleName" type="text" class="form-control  form-control-lg" placeholder=" " readonly>
+                            <label asp-for="RoleId"></label>
+                        </div>
+                    </div>
+                </div>
+                </div>
+               
+            </div>
+            <div class="modal-footer py-2">
+                <a asp-controller="Users" asp-action="Edit" asp-route-id="@Model.UserId" class="btn btn-warning">
+                    <i class="bi bi-pencil me-2"></i> Edit
+                </a>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="bi bi-slash-circle me-2"></i>Close</button>
+            </div>
+        </div>
+    </div>
+</div>

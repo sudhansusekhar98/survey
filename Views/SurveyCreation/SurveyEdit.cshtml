@@ -1,0 +1,297 @@
+﻿@model SurveyApp.Models.SurveyModel
+@{
+    ViewData["Title"] = "Edit Survey";
+}
+
+<form asp-controller="SurveyCreation" asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="SurveyId" />
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10">
+                <div class="card shadow mt-6">
+                    <div class="card-header bg-purple mb-8 py-2">
+                        <div class="row">
+                            <div class="col-6">
+                                <h6 class="text-white fs-4 pt-1">
+                                    Edit Survey - @Model.SurveyName
+                                </h6>
+                            </div>
+                            <div class="col-6 text-end">
+                                <a href="javascript:void(0);"
+                                   class="btn btn-outline-danger text-white border-0 mx-0 my-0"
+                                   onclick="showBackConfirmModal('@Url.Action("Index", "SurveyCreation")','Unsaved changes will be lost. Do you want to continue?')">
+                                    <i class="bi bi-arrow-left-circle me-2"></i> Back To List
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row gx-4 gy-6">
+                            <div class="col-12">
+                                @if (TempData["ResultMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
+                                {
+                                    <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show" role="alert">
+                                        @Html.Raw(TempData["ResultMessage"])
+                                        <button type="button" class="btn-close btn-sm align-top" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input asp-for="SurveyId" type="number" class="form-control" placeholder=" " readonly>
+                                    <label asp-for="SurveyId"></label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input asp-for="SurveyName" type="text" class="form-control" placeholder=" " required>
+                                    <label asp-for="SurveyName"></label>
+                                    <span asp-validation-for="SurveyName" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <select asp-for="RegionID" asp-items="@(ViewBag.Regions as SelectList)" class="form-select" placeholder=" ">
+                                        <option value="">--Select Region--</option>
+                                    </select>
+                                    <label asp-for="RegionID"></label>
+                                    <span asp-validation-for="RegionID" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <select asp-for="ImplementationType" asp-items="Model.ImplementationTypeOptions" class="form-select" placeholder=" ">
+                                        <option value="">--Select--</option>
+                                    </select>
+                                    <label asp-for="ImplementationType"></label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input asp-for="SurveyDate" type="date" class="form-control" placeholder=" ">
+                                    <label asp-for="SurveyDate"></label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input asp-for="SurveyTeamName" type="text" class="form-control" placeholder=" ">
+                                    <label asp-for="SurveyTeamName"></label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input asp-for="SurveyTeamContact" type="text" class="form-control" placeholder=" " maxlength="15">
+                                    <label asp-for="SurveyTeamContact"></label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input asp-for="AgencyName" type="text" class="form-control" placeholder=" ">
+                                    <label>Client Name</label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <select asp-for="StateId" id="stateDropdown" class="form-select" placeholder=" ">
+                                        <option value="">--Select State--</option>
+                                    </select>
+                                    <label asp-for="StateId"></label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <select asp-for="CityId" id="cityDropdown" class="form-select" placeholder=" " disabled>
+                                        <option value="">--Select City--</option>
+                                    </select>
+                                    <label asp-for="CityId"></label>
+                                </div>
+                            </div>
+
+                            <!-- Hidden fields to store state and city names -->
+                            <input type="hidden" asp-for="MapMarking" id="stateNameHidden" />
+                            <input type="hidden" asp-for="CityDistrict" id="cityNameHidden" />
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input asp-for="LocationSiteName" type="text" class="form-control" placeholder=" ">
+                                    <label asp-for="LocationSiteName"></label>
+                                </div>
+                            </div>
+
+
+                            <div class="col-12">
+                                <div class="form-custom-floating">
+                                    <textarea asp-for="ScopeOfWork" class="form-control" placeholder=" " rows="3" style="min-height: 100px;"></textarea>
+                                    <label asp-for="ScopeOfWork"></label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input asp-for="Latitude" type="number" step="any" class="form-control" placeholder=" ">
+                                    <label asp-for="Latitude"></label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input asp-for="Longitude" type="number" step="any" class="form-control" placeholder=" ">
+                                    <label asp-for="Longitude"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer mt-12">
+                        <div class="row">
+                            <div class="col text-end">
+                                <button type="submit" class="btn btn-primary me-2"><i class="bi bi-check2-circle me-2"></i> Update</button>
+                                <a asp-controller="SurveyCreation" asp-action="Index" class="btn btn-secondary"><i class="bi bi-x-circle me-2"></i> Cancel</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var initialStateId = @(Model.StateId ?? 0);
+            var initialCityId = @(Model.CityId ?? 0);
+            
+            // Load states on page load
+            loadStates(initialStateId, initialCityId);
+        });
+
+        function loadStates(selectedStateId, selectedCityId) {
+            $.ajax({
+                url: '/api/Location/states',
+                type: 'GET',
+                success: function(states) {
+                    var stateDropdown = $('#stateDropdown');
+                    stateDropdown.empty();
+                    stateDropdown.append('<option value="">--Select State--</option>');
+                    
+                    var selectedStateName = '';
+                    $.each(states, function(index, state) {
+                        var option = $('<option></option>').val(state.id).text(state.name);
+                        if (state.id == selectedStateId) {
+                            option.attr('selected', 'selected');
+                            selectedStateName = state.name;
+                        }
+                        stateDropdown.append(option);
+                    });
+                    
+                    // Update hidden field if state was pre-selected
+                    if (selectedStateName) {
+                        $('#stateNameHidden').val(selectedStateName);
+                    }
+                    
+                    // Load cities if state was selected
+                    if (selectedStateId > 0) {
+                        loadCities(selectedStateId, selectedCityId);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error loading states:', error);
+                    alert('Failed to load states. Please refresh the page.');
+                }
+            });
+        }
+
+        function loadCities(stateId, selectedCityId) {
+            var cityDropdown = $('#cityDropdown');
+            cityDropdown.prop('disabled', true);
+            cityDropdown.empty();
+            cityDropdown.append('<option value="">Loading cities...</option>');
+            
+            $.ajax({
+                url: '/api/Location/cities/' + stateId,
+                type: 'GET',
+                success: function(cities) {
+                    cityDropdown.empty();
+                    cityDropdown.append('<option value="">--Select City--</option>');
+                    
+                    var selectedCityName = '';
+                    $.each(cities, function(index, city) {
+                        var option = $('<option></option>').val(city.id).text(city.name);
+                        if (city.id == selectedCityId) {
+                            option.attr('selected', 'selected');
+                            selectedCityName = city.name;
+                        }
+                        cityDropdown.append(option);
+                    });
+                    
+                    // Update hidden field if city was pre-selected
+                    if (selectedCityName) {
+                        $('#cityNameHidden').val(selectedCityName);
+                    }
+                    
+                    cityDropdown.prop('disabled', false);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error loading cities:', error);
+                    cityDropdown.empty();
+                    cityDropdown.append('<option value="">Error loading cities</option>');
+                }
+            });
+        }
+
+        // When state changes, load cities
+        $('#stateDropdown').change(function() {
+            var stateId = $(this).val();
+            var stateName = $('#stateDropdown option:selected').text();
+            var cityDropdown = $('#cityDropdown');
+            
+            // Update hidden field with state name
+            $('#stateNameHidden').val(stateName !== '--Select State--' ? stateName : '');
+            
+            if (stateId) {
+                loadCities(stateId, 0);
+            } else {
+                cityDropdown.empty();
+                cityDropdown.append('<option value="">--Select City--</option>');
+                cityDropdown.prop('disabled', true);
+                $('#cityNameHidden').val('');
+            }
+        });
+
+        // When city changes, update hidden field
+        $('#cityDropdown').change(function() {
+            var cityName = $('#cityDropdown option:selected').text();
+            $('#cityNameHidden').val(cityName !== '--Select City--' ? cityName : '');
+        });
+
+        function showBackConfirmModal(url, message) {
+            let modal = document.getElementById("backConfirmModal");
+
+            if (message) {
+                modal.querySelector(".modal-body").innerText = message;
+            }
+
+            // set URL on continue button
+            document.getElementById("confirmContinueBtn").setAttribute("href", url);
+
+            // show modal
+            var myModal = new bootstrap.Modal(modal, {
+                backdrop: 'static',
+                keyboard: false
+            });
+            myModal.show();
+        }
+    </script>
+}

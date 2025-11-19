@@ -1,0 +1,303 @@
+﻿@model SurveyApp.Models.SurveyDetailsUpdate
+@{
+    ViewData["Title"] = "Add New User";
+}
+
+@{
+    var cameraTypes = new[] {
+        "ALPR Camera",
+        "Bullet Camera",
+        "Dome Camera",
+        "PTZ Camera",
+        "Thermal Camera",
+        "FRS - Facial Recognition System"
+    };
+}
+<style>
+    .cam-preview-wrapper {
+        width: 120px;
+        height: 90px;
+        overflow: hidden;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 4px;
+        background: #fff;
+        position: relative
+    }
+
+    .cam-preview-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover
+    }
+
+    .cam-preview-wrapper .btn-danger.position-absolute {
+        display: none;
+        top: 2px;
+        right: 2px;
+        z-index: 2
+    }
+
+    .cam-preview-wrapper:hover .btn-danger.position-absolute {
+        display: block
+    }
+</style>
+
+@* Post to Survey/UpdateItem (change controller if your UpdateItem is in a different controller) *@
+<form asp-controller="SurveyDetails" asp-action="UpdateItem" method="post">
+    @Html.AntiForgeryToken()
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                <div class="card shadow mt-6">
+                    <div class="card-header bg-purple mb-8 py-2">
+                        <div class="row">
+                            <div class="col-6">
+                                <h6 class="text-white fs-4 pt-1">
+                                    Add New Users
+                                </h6>
+                            </div>
+                            <div class="col-6 text-end">
+
+                                <a href="javascript:void(0);"
+                                   class="btn btn-outline-danger text-white border-0 mx-0 my-0"
+                                   onclick="showBackConfirmModal('@Url.Action("Index", "SurveyDetails")','Unsaved changes will be lost. Do you want to continue?')">
+                                    <i class="bi bi-arrow-left-circle me-2"></i> Back To List
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="col-12">
+                            @if (TempData["ResultMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
+                            {
+                                <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show" role="alert">
+                                    @Html.Raw(TempData["ResultMessage"])
+                                    <button type="button" class="btn-close btn-sm align-top" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            }
+                        </div>
+                        <div class="mt-4">
+                            @* Keep route/context values so binder can reconstruct model on POST *@
+                            <input type="hidden" asp-for="SurveyID" />
+                            <input type="hidden" asp-for="LocID" />
+                            <input type="hidden" asp-for="ItemTypeID" />
+                            <div>
+                                @if (Model.ItemLists != null && Model.ItemLists.Count > 0)
+                                {
+                                    @* Use for loop so inputs are named ItemLists[0].ItemQtyReq etc. *@
+                                    for (int i = 0; i < Model.ItemLists.Count; i++)
+                                    {
+                                        <div class="col-md-12 mb-2">
+                                            @* Hidden ItemID for binding *@
+                                            <input type="hidden" asp-for="ItemLists[@i].ItemID" />
+
+                                            <div class="d-flex align-items-center cam-device-row">
+                                                <span class="ms-3">@Model.ItemLists[i].ItemCode</span>
+                                                <input type="number" asp-for="ItemLists[@i].ItemQtyReq" class="form-control text-center mx-1 cam-qty-input" min="0" style="width:60px;" />
+                                                <input type="number" asp-for="ItemLists[@i].ItemQtyExist" class="form-control text-center mx-1 cam-qty-input" min="0" style="width:60px;" />
+                                               
+                                            </div>
+
+                                            <div class="cam-extra-section card mt-2 p-3" style="display:none;">
+                                                <div class="mb-2">
+                                                    <label class="form-label">Images</label>
+                                                    <input type="file" class="form-control mb-2 cam-upload-input" multiple accept="image/*" style="display:none;" />
+                                                    <button type="button" class="btn btn-primary me-2 cam-take-photo-btn"><i class="bi bi-camera"></i> Take Photo</button>
+                                                    <button type="button" class="btn btn-secondary cam-gallery-btn"><i class="bi bi-images"></i> Gallery</button>
+                                                    <div class="cam-preview mt-2 d-flex flex-wrap gap-2"></div>
+                                                </div>
+                                                <div>
+                                                    <label class="form-label">Remarks</label>
+                                                    <textarea asp-for="ItemLists[@i].Remarks" class="form-control" placeholder="Enter remarks..."></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div>No items found.</div>
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col text-end">
+                                <button type="submit" class="btn btn-primary me-2"><i class="bi bi-check2-circle me-2"></i> Submit</button>
+                                <a asp-controller="SurveyDetails" asp-action="Create" class="btn btn-danger"><i class="bi bi-slash-circle me-2"></i> Reset</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+</form>
+
+
+@section Scripts {
+
+    <script>
+        function showBackConfirmModal(url, message) {
+            let modal = document.getElementById("backConfirmModal");
+
+            if (message) {
+                modal.querySelector(".modal-body").innerText = message;
+            }
+
+            // set URL on continue button
+            document.getElementById("confirmContinueBtn").setAttribute("href", url);
+
+            // show modal
+            var myModal = new bootstrap.Modal(modal, {
+                backdrop: 'static',
+                keyboard: false
+            });
+            myModal.show();
+        }
+    </script>
+
+    <script>
+        document.addEventListener('click', function (e) {
+            // Use closest to ensure button click works even if icon is clicked
+            const plusBtn = e.target.closest('.cam-qty-plus');
+            const minusBtn = e.target.closest('.cam-qty-minus');
+            if (!plusBtn && !minusBtn) return;
+
+            const row = e.target.closest('.cam-device-row');
+            if (!row) return;
+            const input = row.querySelector('.cam-qty-input');
+            if (!input) return;
+
+            let current = parseInt(input.value, 10);
+            if (isNaN(current) || current < 0) current = 0;
+
+            if (plusBtn) {
+                current++;
+                input.value = current;
+                updateExtraSection(input);
+            }
+            if (minusBtn) {
+                if (current > 0) current--;
+                input.value = current;
+                updateExtraSection(input);
+            }
+        });
+
+        document.addEventListener('input', function (e) {
+            if (e.target.classList.contains('cam-qty-input')) {
+                let val = parseInt(e.target.value, 10);
+                if (isNaN(val) || val < 0) val = 0;
+                e.target.value = val;
+                updateExtraSection(e.target);
+            }
+        });
+
+        function updateExtraSection(input) {
+            if (!input) return;
+            const row = input.closest('.col-md-12');
+            const qty = parseInt(input.value, 10) || 0;
+            const extraSection = row.querySelector('.cam-extra-section');
+            if (extraSection) {
+                extraSection.style.display = qty > 0 ? '' : 'none';
+            }
+        }
+
+        // Camera and Gallery logic
+        document.addEventListener('click', function (e) {
+            // Take Photo
+            if (e.target.closest('.cam-take-photo-btn')) {
+                const btn = e.target.closest('.cam-take-photo-btn');
+                const section = btn.closest('.cam-extra-section');
+                const preview = section.querySelector('.cam-preview');
+                const modal = new bootstrap.Modal(document.getElementById('camDeviceVideoModal'));
+                const video = document.getElementById('camDeviceCaptureVideo');
+                const captureBtn = document.getElementById('camDeviceCaptureBtn');
+                let stream = null;
+                video.srcObject = null;
+
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({ video: true }).then(function (s) {
+                        stream = s;
+                        video.srcObject = stream;
+                        modal.show();
+
+                        captureBtn.onclick = function () {
+                            let canvas = document.createElement('canvas');
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                            let wrapper = document.createElement('div');
+                            wrapper.className = 'cam-preview-wrapper position-relative d-inline-block';
+                            let img = document.createElement('img');
+                            img.src = canvas.toDataURL('image/png');
+                            img.className = 'cam-preview-img';
+                            wrapper.appendChild(img);
+
+                            let cancelBtn = document.createElement('button');
+                            cancelBtn.className = 'btn btn-sm btn-danger position-absolute';
+                            cancelBtn.innerHTML = '<i class="bi bi-x"></i>';
+                            cancelBtn.onclick = function () { wrapper.remove(); };
+                            wrapper.appendChild(cancelBtn);
+
+                            preview.appendChild(wrapper);
+                            modal.hide();
+                            if (stream) stream.getTracks().forEach(track => track.stop());
+                        };
+
+                        document.getElementById('camDeviceVideoModal').addEventListener('hidden.bs.modal', function () {
+                            if (stream) stream.getTracks().forEach(track => track.stop());
+                        }, { once: true });
+                    }).catch(function (err) {
+                        alert('Camera access denied.');
+                    });
+                } else {
+                    alert('Camera not supported.');
+                }
+            }
+
+            // Gallery Upload
+            if (e.target.closest('.cam-gallery-btn')) {
+                const btn = e.target.closest('.cam-gallery-btn');
+                const section = btn.closest('.cam-extra-section');
+                const uploadInput = section.querySelector('.cam-upload-input');
+                const preview = section.querySelector('.cam-preview');
+                uploadInput.click();
+                uploadInput.onchange = function () {
+                    Array.from(uploadInput.files).forEach(file => {
+                        if (file.type.startsWith('image/')) {
+                            let reader = new FileReader();
+                            reader.onload = function (e) {
+                                let wrapper = document.createElement('div');
+                                wrapper.className = 'cam-preview-wrapper position-relative d-inline-block';
+                                let img = document.createElement('img');
+                                img.src = e.target.result;
+                                img.className = 'cam-preview-img';
+                                wrapper.appendChild(img);
+
+                                let cancelBtn = document.createElement('button');
+                                cancelBtn.className = 'btn btn-sm btn-danger position-absolute';
+                                cancelBtn.innerHTML = '<i class="bi bi-x"></i>';
+                                cancelBtn.onclick = function () { wrapper.remove(); };
+                                wrapper.appendChild(cancelBtn);
+
+                                preview.appendChild(wrapper);
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                };
+            }
+        });
+    </script>
+}

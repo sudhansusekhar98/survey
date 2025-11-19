@@ -1,0 +1,99 @@
+﻿@model AnalyticaDocs.Models.UsersRightsModel
+@{
+    ViewData["Title"] = "User Rights";
+}
+<form asp-controller="UsersRights" asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                <div class="card shadow mt-6">
+                    <div class="card-header bg-purple mb-8 py-2">
+                        <div class="row">
+                            <div class="col-6">
+                                <h6 class="text-white fs-4 pt-1">
+                                    Users Rights
+                                </h6>
+                            </div>
+                            <div class="col-6 text-end">
+
+                               @*  <a href="javascript:void(0);"
+                                   class="btn btn-outline-danger text-white border-0 mx-0 my-0"
+                                   onclick="showBackConfirmModal('@Url.Action("Index", "Users")','Unsaved changes will be lost. Do you want to continue?')">
+                                    <i class="bi bi-arrow-left-circle me-2"></i> Back To List
+                                </a> *@
+
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="card-body">
+
+
+                        <div class="row gx-4 gy-6">
+                            <div class="col-12">
+                                @if (TempData["ResultMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
+                                {
+                                    <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show " role="alert">
+                                        @Html.Raw(TempData["ResultMessage"])
+                                        <button type="button" class="btn-close btn-sm align-top" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                }
+
+
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    @* <select id="userDropdown" asp-for="UserID" class="form-select"
+                                            asp-items="@(new SelectList(ViewBag.UserOptions, "UserID", "LoginName"))">
+                                        <option value="">--Select--</option>
+                                    </select> *@
+                                    <label for="userDropdown">Select User</label>
+                                </div>
+                            </div>
+                            <div id="userDetailsContainer">
+                                <!-- Employee details will be loaded here -->
+                            </div>
+
+                           
+                        </div>
+                    </div>
+
+                    <div class="card-footer mt-12">
+                        <div class="row">
+                            <div class="col text-end">
+                                <button type="submit" class="btn btn-warning me-2"><i class="bi bi-check2-circle me-2"></i> Update</button>
+                                <a asp-controller="UsersRights" asp-action="Index" class="btn btn-danger"><i class="bi bi-slash-circle me-2"></i> Reset</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+@section Scripts 
+{
+    <script>
+
+        $('#userDropdown').on('change', function () {
+            const recordId = $(this).val();
+            if (recordId) {
+                $.ajax({
+                    type: 'GET',
+                    url: '@Url.Action("BindRecord", "UserRights")',
+                    data: { recordId: recordId },
+                    success: function (response) {
+                        $('#userDetailsContainer').html(response);
+                    },
+                    error: function () {
+                        alert("Failed to load employee details.");
+                    }
+                });
+            }
+        });
+
+    </script>
+}

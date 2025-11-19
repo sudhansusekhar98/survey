@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <title>Survey - @ViewData["Title"]</title>
+
+    <link rel="icon" type="image/x-icon" href="~/img/favicon/favicon.png" />
+
+    <!-- Core Styles -->
+    @await Html.PartialAsync("Sections/_Styles")
+
+    <!-- Vendor Styles -->
+    @RenderSection("VendorStyles", required: false)
+
+    <!-- Page Styles -->
+    @RenderSection("PageStyles", required: false)
+
+    <!-- Include Scripts for customizer, helper, analytics, config -->
+    @await Html.PartialAsync("Sections/_ScriptsIncludes")
+
+
+</head>
+<body>
+   
+    <div class="container-fluid mt-4">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- Core Scripts -->
+    @await Html.PartialAsync("Sections/_Scripts")
+
+    <!-- Vendor Scripts -->
+    @RenderSection("VendorScripts", required: false)
+
+
+
+    <!-- Main JS-->
+    <script src='~/js/main.js'></script>
+
+    <!-- Page Scripts-->
+    @RenderSection("PageScripts", required: false)
+
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+    <partial name="_ValidationScriptsPartial" />
+</body>
+</html>

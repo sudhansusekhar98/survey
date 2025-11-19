@@ -1,0 +1,220 @@
+﻿@model SurveyApp.Models.SurveyAssignmentModel
+@{
+    ViewData["Title"] = Model.TransID > 0 ? "Edit Survey Assignment" : "Create Survey Assignment";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="card shadow mt-4">
+                <div class="card-header bg-purple py-3">
+                    <h5 class="text-white mb-0">
+                        <i class="bi bi-@(Model.TransID > 0 ? "pencil-square" : "person-plus") me-2"></i>
+                        @(Model.TransID > 0 ? "Edit Survey Assignment" : "Assign Survey to Employees")
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    @if (TempData["ResultMessage"] != null)
+                    {
+                        <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show" role="alert">
+                            @Html.Raw(TempData["ResultMessage"])
+                            <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\"></button>
+                        </div>
+                    }
+
+                    <form asp-controller="SurveyCreation" 
+                          asp-action="@(Model.TransID > 0 ? "EditSurveyAssignment" : "CreateSurveyAssignment")" 
+                          method="post" id="assignmentForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="SurveyID" />
+                        @if (Model.TransID > 0)
+                        {
+                            <input type="hidden" asp-for="TransID" />
+                        }
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-card-list me-1"></i>Survey ID
+                                </label>
+                                <input type="text" class="form-control" value="@Model.SurveyID" readonly />
+                                <div class="form-text">This assignment is for survey ID: @Model.SurveyID</div>
+                            </div>
+                        </div>
+
+                        @if (Model.TransID > 0)
+                        {
+                            <!-- Edit mode: Single employee -->
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label asp-for="EmpID" class="form-label fw-bold required">
+                                        <i class="bi bi-person me-1"></i>Employee
+                                    </label>
+                                    <select asp-for="EmpID" class="form-select" required>
+                                        <option value="">-- Select Employee --</option>
+                                        @foreach (var emp in ViewBag.Employees as SelectList)
+                                        {
+                                            <option value="@emp.Value" selected="@(emp.Value == Model.EmpID.ToString())">@emp.Text</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="EmpID" class="text-danger"></span>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- Create mode: Multiple employees -->
+                            @* <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label asp-for="SelectedEmpIDs" class="form-label fw-bold required">
+                                        <i class="bi bi-people me-1"></i>Select Employees
+                                    </label>
+                                    <select asp-for="SelectedEmpIDs" 
+                                            class="form-select" 
+                                            multiple 
+                                            size="10" 
+                                            required
+                                            id="employeeSelect">
+                                        @foreach (var emp in ViewBag.Employees as SelectList)
+                                        {
+                                            <option value="@emp.Value">@emp.Text</option>
+                                        }
+                                    </select>
+                                    <div class="form-text">
+                                        <i class=\"bi bi-info-circle me-1\"></i>
+                                        Hold Ctrl (Windows) or Cmd (Mac) to select multiple employees
+                                    </div>
+                                    <span asp-validation-for="SelectedEmpIDs" class="text-danger"></span>
+                                </div>
+                            </div> *@
+
+                            <div class="mb-3">
+    <label class="form-label fw-bold required"><i class="bi bi-people me-1"></i>Select Employees</label>
+    
+    <div class="bg-light border rounded p-2" style="max-height: 250px; overflow-y: auto;">
+        <div class="row g-2">
+            @if (ViewBag.Employees is SelectList list)
+            {
+                foreach (var emp in list)
+                {
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-body p-2 d-flex align-items-center">
+                                <div class="form-check m-0 text-truncate">
+                                    <input class="form-check-input me-2" 
+                                           type="checkbox" 
+                                           name="SelectedEmpIDs" 
+                                           value="@emp.Value" 
+                                           id="e_@emp.Value"
+                                           @(emp.Selected ? "checked" : "")>
+                                    <label class="form-check-label stretched-link small fw-semibold" 
+                                           for="e_@emp.Value" 
+                                           title="@emp.Text">
+                                        @emp.Text
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+    <span asp-validation-for="SelectedEmpIDs" class="text-danger small"></span>
+</div>
+                            
+                            }
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label asp-for="DueDate" class="form-label fw-bold required">
+                                    <i class="bi bi-calendar-event me-1"></i>Due Date
+                                </label>
+                                <input asp-for="DueDate" 
+                                       type="date" 
+                                       class="form-control" 
+                                       min="@DateTime.Now.ToString("yyyy-MM-dd")"
+                                       required />
+                                <div class="form-text">Select the deadline for completing this survey</div>
+                                <span asp-validation-for="DueDate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                            <a asp-controller="SurveyCreation" 
+                               asp-action="SurveyAssignment" 
+                               asp-route-surveyId="@Model.SurveyID"
+                               class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-@(Model.TransID > 0 ? "check-circle" : "plus-circle") me-2"></i>
+                                @(Model.TransID > 0 ? "Update Assignment" : "Assign Survey")
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section PageStyles {
+    <style>
+        .bg-purple {
+            background-color: #6f42c1 !important;
+            color: #fff !important;
+        }
+        .required:after {
+            content: " *";
+            color: #dc3545;
+        }
+        #employeeSelect {
+            min-height: 200px;
+        }
+        #employeeSelect option {
+            padding: 8px 12px;
+            margin: 2px 0;
+        }
+        #employeeSelect option:hover {
+            background-color: #6f42c1;
+            color: white;
+        }
+    </style>
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            $('input[type="date"]').attr('min', today);
+
+            // Form validation feedback
+            $('#assignmentForm').on('submit', function(e) {
+                const checkedEmployees = $('input[name="SelectedEmpIDs"]:checked').length;
+                @if (Model.TransID == 0)
+                {
+                    <text>
+                    if (checkedEmployees === 0) {
+                        e.preventDefault();
+                        alert('Please select at least one employee');
+                        return false;
+                    }
+                    </text>
+                }
+            });
+
+            // Highlight selected checkboxes
+            $('input[name="SelectedEmpIDs"]').on('change', function() {
+                const count = $('input[name="SelectedEmpIDs"]:checked').length;
+                if (count > 0) {
+                    $(this).closest('.bg-light').removeClass('is-invalid').addClass('is-valid');
+                } else {
+                    $(this).closest('.bg-light').removeClass('is-valid').addClass('is-invalid');
+                }
+            });
+        });
+    </script>
+}

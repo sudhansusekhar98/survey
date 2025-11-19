@@ -1,0 +1,400 @@
+﻿@{
+
+    ViewData["Title"] = "Dashboard - Analytics";
+}
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/apex-charts/apex-charts.css" />
+}
+@section VendorScripts {
+    <script src="~/vendor/libs/apex-charts/apexcharts.js"></script>
+}
+@section PageScripts {
+    <script src="~/js/dashboards-analytics.js"></script>
+}
+
+@* ************** Content ************** *@
+<div class="row">
+    <div class="col-xxl-8 mb-6 order-0">
+        <div class="card">
+            <div class="d-flex align-items-start row">
+                <div class="col-sm-7">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary mb-3">Survey Management Dashboard 📊</h5>
+                        <p class="mb-6">Monitor all your infrastructure surveys.<br>Track progress and manage assignments efficiently.</p>
+
+                        <a asp-controller="SurveyCreation" asp-action="Index" class="btn btn-sm btn-outline-primary">View All Surveys</a>
+                    </div>
+                </div>
+                <div class="col-sm-5 text-center text-sm-left">
+                    <div class="card-body pb-0 px-0 px-md-6">
+                        <img src="~/img/illustrations/man-with-laptop.png" height="175" alt="Survey Dashboard">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+    <!-- Survey Completion Chart -->
+    <div class="col-12 col-xxl-8 order-2 order-md-3 order-xxl-2 mb-6">
+        <div class="card">
+            <div class="row row-bordered g-0">
+                <div class="col-lg-8">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <div class="card-title mb-0">
+                            <h5 class="m-0 me-2">Survey Completion Timeline</h5>
+                            <small class="text-muted">Monthly completion rate</small>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn p-0" type="button" id="surveyTimeline" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="bx bx-dots-vertical-rounded bx-lg text-muted"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="surveyTimeline">
+                                <a class="dropdown-item" href="javascript:void(0);">Last 6 Months</a>
+                                <a class="dropdown-item" href="javascript:void(0);">Last Year</a>
+                                <a class="dropdown-item" href="javascript:void(0);">All Time</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="totalRevenueChart" class="px-3"></div>
+                </div>
+                <div class="col-lg-4 d-flex align-items-center">
+                    <div class="card-body px-xl-9">
+                        <div class="text-center mb-6">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-outline-primary">
+                                    <script>
+                                        document.write(new Date().getFullYear())
+                                    </script>
+                                </button>
+                                <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="visually-hidden">Toggle Dropdown</span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">2025</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">2024</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">2023</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div id="growthChart"></div>
+                        <div class="text-center fw-medium my-6">85% On-Time Completion</div>
+
+                        <div class="d-flex gap-3 justify-content-between">
+                            <div class="d-flex">
+                                <div class="avatar me-2">
+                                    <span class="avatar-initial rounded-2 bg-label-success"><i class="bx bx-check-double bx-lg text-success"></i></span>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <small>On Time</small>
+                                    <h6 class="mb-0">44</h6>
+                                </div>
+                            </div>
+                            <div class="d-flex">
+                                <div class="avatar me-2">
+                                    <span class="avatar-initial rounded-2 bg-label-danger"><i class="bx bx-error bx-lg text-danger"></i></span>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <small>Delayed</small>
+                                    <h6 class="mb-0">8</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--/ Survey Completion Chart -->
+    <div class="col-12 col-md-8 col-lg-12 col-xxl-4 order-3 order-md-2">
+        <div class="row">
+            <div class="col-12 mb-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center flex-sm-row flex-column gap-10">
+                            <div class="d-flex flex-sm-column flex-row align-items-start justify-content-between">
+                                <div class="card-title mb-6">
+                                    <h5 class="text-nowrap mb-1">Completion Rate</h5>
+                                    <span class="badge bg-label-success">YEAR 2025</span>
+                                </div>
+                                <div class="mt-sm-auto">
+                                    <span class="text-success text-nowrap fw-medium"><i class='bx bx-up-arrow-alt'></i> 85%</span>
+                                    <h4 class="mb-0">On Schedule</h4>
+                                </div>
+                            </div>
+                            <div id="profileReportChart"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+</div>
+
+<div class="row">
+    <!-- Survey Statistics -->
+    <div class="col-md-6 col-lg-4 col-xl-4 order-0 mb-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between">
+                <div class="card-title mb-0">
+                    <h5 class="mb-1 me-2">Survey Statistics</h5>
+                    <p class="card-subtitle">Total 52 Surveys</p>
+                </div>
+                <div class="dropdown">
+                    <button class="btn text-muted p-0" type="button" id="surveyStatistics" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="bx bx-dots-vertical-rounded bx-lg"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="surveyStatistics">
+                        <a class="dropdown-item" asp-controller="SurveyCreation" asp-action="Index">View All</a>
+                        <a class="dropdown-item" asp-controller="SurveyCreation" asp-action="Create">Create New</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-6">
+                    <div class="d-flex flex-column align-items-center gap-1">
+                        <h3 class="mb-1">52</h3>
+                        <small>Total Surveys</small>
+                    </div>
+                    <div id="orderStatisticsChart"></div>
+                </div>
+                <ul class="p-0 m-0">
+                    <li class="d-flex align-items-center mb-5">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-success"><i class='bx bx-check-circle'></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0">Completed</h6>
+                                <small>Finished surveys</small>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">24</h6>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-center mb-5">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-warning"><i class='bx bx-time-five'></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0">In Progress</h6>
+                                <small>Currently ongoing</small>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">15</h6>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-center mb-5">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-secondary"><i class='bx bx-pause-circle'></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0">Pending</h6>
+                                <small>Not yet started</small>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">8</h6>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-center">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-danger"><i class='bx bx-error-circle'></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0">Overdue</h6>
+                                <small>Missed deadline</small>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">5</h6>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!--/ Survey Statistics -->
+    <!-- Survey Overview -->
+    <div class="col-md-6 col-lg-4 order-1 mb-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between">
+                <div class="card-title mb-0">
+                    <h5 class="mb-1 me-2">Quick Stats</h5>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="d-flex mb-6">
+                    <div class="avatar flex-shrink-0 me-3">
+                        <span class="avatar-initial rounded bg-label-primary"><i class='bx bx-map bx-lg'></i></span>
+                    </div>
+                    <div>
+                        <p class="mb-0">Total Locations</p>
+                        <div class="d-flex align-items-center">
+                            <h6 class="mb-0 me-1">127</h6>
+                            <small class="text-success fw-medium">
+                                <i class='bx bx-chevron-up bx-lg'></i>
+                                8.2%
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex mb-6">
+                    <div class="avatar flex-shrink-0 me-3">
+                        <span class="avatar-initial rounded bg-label-info"><i class='bx bx-user bx-lg'></i></span>
+                    </div>
+                    <div>
+                        <p class="mb-0">Team Members</p>
+                        <div class="d-flex align-items-center">
+                            <h6 class="mb-0 me-1">32</h6>
+                            <small class="text-muted fw-medium">Active</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex mb-6">
+                    <div class="avatar flex-shrink-0 me-3">
+                        <span class="avatar-initial rounded bg-label-warning"><i class='bx bx-calendar bx-lg'></i></span>
+                    </div>
+                    <div>
+                        <p class="mb-0">This Month</p>
+                        <div class="d-flex align-items-center">
+                            <h6 class="mb-0 me-1">12 Surveys</h6>
+                            <small class="text-success fw-medium">
+                                <i class='bx bx-trending-up'></i>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="avatar flex-shrink-0 me-3">
+                        <span class="avatar-initial rounded bg-label-danger"><i class='bx bx-error-circle bx-lg'></i></span>
+                    </div>
+                    <div>
+                        <p class="mb-0">Overdue Surveys</p>
+                        <div class="d-flex align-items-center">
+                            <h6 class="mb-0 me-1 text-danger">5</h6>
+                            <small class="text-danger fw-medium">Needs attention!</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--/ Survey Overview -->
+    <!-- Recent Surveys -->
+    <div class="col-md-6 col-lg-4 order-2 mb-6">
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="card-title m-0 me-2">Recent Surveys</h5>
+                <div class="dropdown">
+                    <button class="btn text-muted p-0" type="button" id="recentSurveys" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="bx bx-dots-vertical-rounded bx-lg"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="recentSurveys">
+                        <a class="dropdown-item" asp-controller="SurveyCreation" asp-action="Index">View All</a>
+                        <a class="dropdown-item" asp-controller="SurveyCreation" asp-action="Create">Create New</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body pt-4">
+                <ul class="p-0 m-0">
+                    <li class="d-flex align-items-center mb-6">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-success"><i class='bx bx-check'></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <small class="d-block text-muted">City Surveillance</small>
+                                <h6 class="fw-normal mb-0">North Zone Survey</h6>
+                            </div>
+                            <div class="user-progress">
+                                <span class="badge bg-success">Completed</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-center mb-6">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-warning"><i class='bx bx-time'></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <small class="d-block text-muted">New Installation</small>
+                                <h6 class="fw-normal mb-0">Smart City Project</h6>
+                            </div>
+                            <div class="user-progress">
+                                <span class="badge bg-warning">In Progress</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-center mb-6">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-info"><i class='bx bx-wrench'></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <small class="d-block text-muted">Upgrade</small>
+                                <h6 class="fw-normal mb-0">Traffic System</h6>
+                            </div>
+                            <div class="user-progress">
+                                <span class="badge bg-info">In Progress</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-center mb-6">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-danger"><i class='bx bx-error'></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <small class="d-block text-muted">City Surveillance</small>
+                                <h6 class="fw-normal mb-0">East Zone Survey</h6>
+                            </div>
+                            <div class="user-progress">
+                                <span class="badge bg-danger">Overdue</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-center mb-6">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-secondary"><i class='bx bx-pause'></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <small class="d-block text-muted">Replacement</small>
+                                <h6 class="fw-normal mb-0">Old Infrastructure</h6>
+                            </div>
+                            <div class="user-progress">
+                                <span class="badge bg-secondary">Pending</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-center">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-success"><i class='bx bx-check-double'></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <small class="d-block text-muted">New Installation</small>
+                                <h6 class="fw-normal mb-0">West Zone CCTV</h6>
+                            </div>
+                            <div class="user-progress">
+                                <span class="badge bg-success">Completed</span>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!--/ Recent Surveys -->
+</div>

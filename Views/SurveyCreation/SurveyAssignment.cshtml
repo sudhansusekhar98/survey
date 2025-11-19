@@ -1,0 +1,191 @@
+﻿@model List<SurveyApp.Models.SurveyAssignmentModel>
+@{
+    ViewData["Title"] = "Survey Assignments";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mt-4">
+                <div class="card-header bg-purple py-3 mb-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5 class="text-white mb-1">
+                                <i class="bi bi-people-fill me-2"></i>Survey Assignments
+                            </h5>
+                            <small class="text-white-50">
+                                Survey: @ViewBag.SurveyName (ID: @ViewBag.SurveyID)
+                            </small>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <a asp-controller="SurveyCreation" 
+                               asp-action="Index"
+                               class="btn btn-sm btn-outline-light me-2">
+                                <i class="bi bi-arrow-left me-1"></i>Back to Surveys
+                            </a>
+                            <a asp-controller="SurveyCreation" 
+                               asp-action="CreateSurveyAssignment" 
+                               asp-route-surveyId="@ViewBag.SurveyID"
+                               class="btn btn-sm btn-light">
+                                <i class="bi bi-plus-circle me-1"></i>Add Assignment
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (TempData["ResultMessage"] != null)
+                    {
+                        <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show" role="alert">
+                            @Html.Raw(TempData["ResultMessage"])
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover datatables-basic" id="assignmentsTable">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Trans ID</th>
+                                        <th>Employee ID</th>
+                                        <th>Employee Name</th>
+                                        <th>Due Date</th>
+                                        <th>Created By</th>
+                                        <th class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{ int counter = 1; }
+                                    @foreach (var assignment in Model)
+                                    {
+                                        <tr>
+                                            <td>@counter</td>
+                                            <td>@assignment.TransID</td>
+                                            <td>@assignment.EmpID</td>
+                                            <td>@assignment.EmpName</td>
+                                            <td>
+                                                <span class="badge bg-info">
+                                                    <i class="bi bi-calendar-event me-1"></i>@assignment.DueDate.ToString("dd MMM yyyy")
+                                                </span>
+                                            </td>
+                                            <td>@assignment.CreateBy</td>
+                                            <td class="text-center">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a asp-controller="SurveyCreation" 
+                                                       asp-action="EditSurveyAssignment" 
+                                                       asp-route-transId="@assignment.TransID"
+                                                       asp-route-surveyId="@ViewBag.SurveyID"
+                                                       class="btn btn-outline-primary"
+                                                       title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <button type="button" 
+                                                            class="btn btn-outline-danger delete-assignment"
+                                                            data-trans-id="@assignment.TransID"
+                                                            data-survey-id="@ViewBag.SurveyID"
+                                                            data-emp-name="@assignment.EmpName"
+                                                            title="Delete">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        counter++;
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
+                            <h5 class="text-muted mb-3">No Assignments Found</h5>
+                            <p class="text-muted mb-4">Start by assigning employees to this survey.</p>
+                            <a asp-controller="SurveyCreation" 
+                               asp-action="CreateSurveyAssignment" 
+                               asp-route-surveyId="@ViewBag.SurveyID"
+                               class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i>Add First Assignment
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Confirm Deletion
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the assignment for <strong id="empNameDisplay"></strong>?</p>
+                <p class="text-muted small mb-0">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" asp-controller="SurveyCreation" asp-action="DeleteSurveyAssignment">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="transId" id="deleteTransId" />
+                    <input type="hidden" name="surveyId" id="deleteSurveyId" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-2"></i>Delete Assignment
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section PageStyles {
+    <style>
+        .bg-purple {
+            background-color: #6f42c1 !important;
+        }
+        .text-white-50 {
+            opacity: 0.8;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            if ($('#assignmentsTable').length) {
+                $('#assignmentsTable').DataTable({
+                    "pageLength": 25,
+                    "order": [[1, "desc"]],
+                    "language": {
+                        "search": "Search assignments:",
+                        "lengthMenu": "Show _MENU_ assignments per page",
+                        "info": "Showing _START_ to _END_ of _TOTAL_ assignments"
+                    }
+                });
+            }
+
+            // Delete button handler
+            $('.delete-assignment').on('click', function() {
+                const transId = $(this).data('trans-id');
+                const surveyId = $(this).data('survey-id');
+                const empName = $(this).data('emp-name');
+                
+                $('#deleteTransId').val(transId);
+                $('#deleteSurveyId').val(surveyId);
+                $('#empNameDisplay').text(empName);
+                
+                new bootstrap.Modal(document.getElementById('deleteModal')).show();
+            });
+        });
+    </script>
+}

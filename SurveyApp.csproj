@@ -1,0 +1,116 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="AlloysModels\**" />
+    <Compile Remove="pdfHelper\**" />
+    <Compile Remove="Views\Charts\**" />
+    <Compile Remove="Views\Dashboards\**" />
+    <Compile Remove="Views\FeedingReport\**" />
+    <Compile Remove="Views\PowerConsumption\**" />
+    <Compile Remove="Views\PowerReport\**" />
+    <Compile Remove="Views\Shared\Sections\Menu\**" />
+    <Compile Remove="Views\Shared\Sections\Navbar\**" />
+    <Compile Remove="Views\StoreDailyConsumption\**" />
+    <Compile Remove="Views\StoreFeeding\**" />
+    <Compile Remove="Views\StoreRMReport\**" />
+    <Compile Remove="wwwroot\lib\**" />
+    <Content Remove="AlloysModels\**" />
+    <Content Remove="pdfHelper\**" />
+    <Content Remove="Views\Charts\**" />
+    <Content Remove="Views\Dashboards\**" />
+    <Content Remove="Views\FeedingReport\**" />
+    <Content Remove="Views\PowerConsumption\**" />
+    <Content Remove="Views\PowerReport\**" />
+    <Content Remove="Views\Shared\Sections\Menu\**" />
+    <Content Remove="Views\Shared\Sections\Navbar\**" />
+    <Content Remove="Views\StoreDailyConsumption\**" />
+    <Content Remove="Views\StoreFeeding\**" />
+    <Content Remove="Views\StoreRMReport\**" />
+    <Content Remove="wwwroot\lib\**" />
+    <EmbeddedResource Remove="AlloysModels\**" />
+    <EmbeddedResource Remove="pdfHelper\**" />
+    <EmbeddedResource Remove="Views\Charts\**" />
+    <EmbeddedResource Remove="Views\Dashboards\**" />
+    <EmbeddedResource Remove="Views\FeedingReport\**" />
+    <EmbeddedResource Remove="Views\PowerConsumption\**" />
+    <EmbeddedResource Remove="Views\PowerReport\**" />
+    <EmbeddedResource Remove="Views\Shared\Sections\Menu\**" />
+    <EmbeddedResource Remove="Views\Shared\Sections\Navbar\**" />
+    <EmbeddedResource Remove="Views\StoreDailyConsumption\**" />
+    <EmbeddedResource Remove="Views\StoreFeeding\**" />
+    <EmbeddedResource Remove="Views\StoreRMReport\**" />
+    <EmbeddedResource Remove="wwwroot\lib\**" />
+    <None Remove="AlloysModels\**" />
+    <None Remove="pdfHelper\**" />
+    <None Remove="Views\Charts\**" />
+    <None Remove="Views\Dashboards\**" />
+    <None Remove="Views\FeedingReport\**" />
+    <None Remove="Views\PowerConsumption\**" />
+    <None Remove="Views\PowerReport\**" />
+    <None Remove="Views\Shared\Sections\Menu\**" />
+    <None Remove="Views\Shared\Sections\Navbar\**" />
+    <None Remove="Views\StoreDailyConsumption\**" />
+    <None Remove="Views\StoreFeeding\**" />
+    <None Remove="Views\StoreRMReport\**" />
+    <None Remove="wwwroot\lib\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\DashboardsController.cs" />
+    <Compile Remove="Controllers\FeedingReportController.cs" />
+    <Compile Remove="Controllers\PoleInfrastructureController.cs" />
+    <Compile Remove="Controllers\PowerConsumptionController.cs" />
+    <Compile Remove="Controllers\PowerReportController.cs" />
+    <Compile Remove="Controllers\StoreDailyConsumptionController.cs" />
+    <Compile Remove="Controllers\StoreFeedingController.cs" />
+    <Compile Remove="Controllers\StoreRMReportController.cs" />
+    <Compile Remove="Controllers\SurveyLocationController.cs" />
+    <Compile Remove="Models\MeterConsumptionModel.cs" />
+    <Compile Remove="Models\MeterConsumptionViewModel.cs" />
+    <Compile Remove="Models\MeterModel.cs" />
+    <Compile Remove="Models\PowerReportViewModel.cs" />
+    <Compile Remove="Models\StockMonthlyConsumptionModel.cs" />
+    <Compile Remove="Models\StoreConsumption.cs" />
+    <Compile Remove="Models\StoreRMReportViewModel.cs" />
+    <Compile Remove="Models\StoreViewModel.cs" />
+    <Compile Remove="Repo\IPower.cs" />
+    <Compile Remove="Repo\IStore.cs" />
+    <Compile Remove="Repo\ISurveyLocation.cs" />
+    <Compile Remove="Repo\PowerRepo.cs" />
+    <Compile Remove="Repo\StoreRepo.cs" />
+    <Compile Remove="Repo\SurveyLocationRepo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Views\SurveyCreation\Camera.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Chart.js" Version="3.7.1" />
+    <PackageReference Include="CloudinaryDotNet" Version="1.27.8" />
+    <PackageReference Include="EPPlus" Version="8.1.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+    <PackageReference Include="QuestPDF" Version="2025.7.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Views\Shared\Chart\" />
+    <Folder Include="Views\Shared\Popups\" />
+    <Folder Include="wwwroot\SurveyImage\" />
+    <Folder Include="wwwroot\vendor\dtPick\" />
+  </ItemGroup>
+
+</Project>

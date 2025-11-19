@@ -1,0 +1,34 @@
+﻿@* @model AnalyticaDocs.Models.UsersRightsModel
+<form  asp-controller="Users" asp-action="UpdateRights" method="post">
+    @Html.AntiForgeryToken() *@
+    <div class="table-responsive text-nowrap">
+        <table class="datatables-basic table table-responsive">
+            <thead>
+                <tr class="text-nowrap fw-semibold table-header">
+                    <th class="px-2 py-3">#</th>
+                    <th class="px-2 py-3">Rights</th>
+                    <th class="px-2 py-3">View</th>
+                    <th class="px-2 py-3">Create</th>
+                    <th class="px-2 py-3">Update</th>
+                </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+                @if (ViewBag.UserRights != null && ((List<UsersRightsModel>)ViewBag.UserRights).Count > 0)
+                {
+                    foreach (var GridData in (List<UsersRightsModel>)ViewBag.UserRights)
+                    {
+                        <tr class="small text-nowrap">
+                            <td class="px-2 py-1">@GridData.Srno</td>
+                           @*  <td class="px-2 py-1">@GridData.UserID</td> *@
+                            <td class="px-2 py-1">@GridData.DeptName</td>
+                            <td class="px-2 py-1">@GridData.IsView</td>
+                            <td class="px-2 py-1">@GridData.IsCreate</td>
+                            <td class="px-2 py-1">@GridData.IsUpdate</td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+@* </form> *@

@@ -1,0 +1,141 @@
+﻿@model AnalyticaDocs.Models.UserModel
+@{
+    ViewData["Title"] = "Add New User";
+}
+<form asp-controller="Users" asp-action="Create" method="post" >
+    @Html.AntiForgeryToken()
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                <div class="card shadow mt-6">
+                    <div class="card-header bg-purple mb-8 py-2">
+                        <div class="row">
+                            <div class="col-6">
+                                <h6 class="text-white fs-4 pt-1">
+                                    Add New Users
+                                </h6>
+                            </div>
+                            <div class="col-6 text-end">
+
+                                <a href="javascript:void(0);"
+                                   class="btn btn-outline-danger text-white border-0 mx-0 my-0"
+                                   onclick="showBackConfirmModal('@Url.Action("Index", "Users")','Unsaved changes will be lost. Do you want to continue?')">
+                                    <i class="bi bi-arrow-left-circle me-2"></i> Back To List
+                                </a>
+                                
+                            </div>
+                        </div>
+                       
+
+                    </div>
+                    <div class="card-body">
+                       
+
+                        <div class="row gx-4 gy-6">
+                            <div class="col-12">
+                                @if (TempData["ResultMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
+                                {
+                                    <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show " role="alert">
+                                        @Html.Raw(TempData["ResultMessage"])
+                                        <button type="button" class="btn-close btn-sm align-top" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                }
+
+                              
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input  asp-for="LoginId" type="text" class="form-control" placeholder=" ">
+                                    <label asp-for="LoginId" required></label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input asp-for="LoginName" type="text" class="form-control" placeholder=" ">
+                                    <label asp-for="LoginName"></label>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input asp-for="MobileNo" type="text" oninput="allowOnlyNumbers(this)" maxlength="10" class="form-control" placeholder=" ">
+                                    <label asp-for="MobileNo"></label>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input asp-for="EmailID" type="text" class="form-control" placeholder=" ">
+                                    <label asp-for="EmailID"></label>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input asp-for="LoginPassword" type="password" class="form-control" placeholder=" ">
+                                    <label asp-for="LoginPassword"></label>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <select asp-for="ISActive" asp-items="Model.StatusOptions" class="form-select" placeholder=" "></select>
+                                    <label asp-for="ISActive"></label>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <select asp-for="RoleId" asp-items="Model.RoleOptions" class="form-select" placeholder=" "></select>
+                                    <label asp-for="RoleId"></label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <select asp-for="EmpID" asp-items="Model.EmployeeOptions" class="form-select" placeholder=" ">
+                                        <option value="">-- Select Employee --</option>
+                                    </select>
+                                    <label asp-for="EmpID"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                   
+                    <div class="card-footer mt-12">
+                        <div class="row">
+                            <div class="col text-end">
+                                <button type="submit" class="btn btn-primary me-2"><i class="bi bi-check2-circle me-2"></i> Submit</button>
+                                <a asp-controller="Users" asp-action="Create" class="btn btn-danger"><i class="bi bi-slash-circle me-2"></i> Reset</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+
+@section Scripts {
+
+       <script>
+        function showBackConfirmModal(url, message) {
+            let modal = document.getElementById("backConfirmModal");
+
+            if (message) {
+                modal.querySelector(".modal-body").innerText = message;
+            }
+
+            // set URL on continue button
+            document.getElementById("confirmContinueBtn").setAttribute("href", url);
+
+            // show modal
+            var myModal = new bootstrap.Modal(modal, {
+                backdrop: 'static',
+                keyboard: false
+            });
+            myModal.show();
+        }
+    </script>
+    
+
+}
+                            

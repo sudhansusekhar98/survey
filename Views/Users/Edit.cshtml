@@ -1,0 +1,269 @@
+﻿@model AnalyticaDocs.Models.UserModel
+@{
+    ViewData["Title"] = "Edit User";
+}
+<form id="editUserForm">
+    @Html.AntiForgeryToken()
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                <div class="card shadow mt-6">
+                    <div class="card-header bg-purple mb-8 py-2">
+                        <div class="row">
+                            <div class="col-6">
+                                <h6 class="text-white fs-4 pt-1">
+                                    Edit Users
+                                </h6>
+                            </div>
+                            <div class="col-6 text-end">
+
+                                <a href="javascript:void(0);"
+                                   class="btn btn-outline-danger text-white border-0 mx-0 my-0"
+                                   onclick="showBackConfirmModal('@Url.Action("Index", "Users")','Unsaved changes will be lost. Do you want to continue?')">
+                                    <i class="bi bi-arrow-left-circle me-2"></i> Back To List
+                                </a>
+
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="card-body">
+
+
+                        <div class="row gx-4 gy-6">
+                            <div class="col-12">
+                                @if (TempData["ResultMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
+                                {
+                                    <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show " role="alert">
+                                        @Html.Raw(TempData["ResultMessage"])
+                                        <button type="button" class="btn-close btn-sm align-top" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                }
+
+
+                            </div>
+                            <div class="col-12">
+                                <div class="form-custom-floating">
+                                    <input asp-for="UserId" type="text" class="form-control" placeholder=" " readonly>
+                                    <label asp-for="UserId"></label>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input asp-for="LoginId" type="text" class="form-control" placeholder=" ">
+                                    <label asp-for="LoginId"></label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input asp-for="LoginName" type="text" class="form-control" placeholder=" ">
+                                    <label asp-for="LoginName"></label>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input asp-for="MobileNo" type="text" oninput="allowOnlyNumbers(this)" maxlength="10" class="form-control" placeholder=" ">
+                                    <label asp-for="MobileNo"></label>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input asp-for="EmailID" type="text" class="form-control" placeholder=" ">
+                                    <label asp-for="EmailID"></label>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input asp-for="LoginPassword" type="password" class="form-control" placeholder=" ">
+                                    <label asp-for="LoginPassword"></label>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <select asp-for="ISActive" asp-items="Model.StatusOptions" class="form-select" placeholder=" "></select>
+                                    <label asp-for="ISActive"></label>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <select asp-for="RoleId" asp-items="Model.RoleOptions" class="form-select" placeholder=" "></select>
+                                    <label asp-for="RoleId"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col text-end">
+                                <button id="btnedit" type="submit" class="btn btn-warning me-2"><i class="bi bi-check2-circle me-2"></i> Update</button>
+                                <a asp-controller="Users" asp-action="Index" class="btn btn-danger"><i class="bi bi-arrow-left-circle me-2"></i> Back To List</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+@await Html.PartialAsync("_SuccessModal")
+
+
+@section Scripts {
+
+    <script>
+        function showBackConfirmModal(url, message) {
+            let modal = document.getElementById("backConfirmModal");
+
+            if (message) {
+                modal.querySelector(".modal-body").innerText = message;
+            }
+
+            // set URL on continue button
+            document.getElementById("confirmContinueBtn").setAttribute("href", url);
+
+            // show modal
+            var myModal = new bootstrap.Modal(modal, {
+                backdrop: 'static',
+                keyboard: false
+            });
+            myModal.show();
+        }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+          // Existing form submission logic
+          $('#editUserForm').on('submit', function (e) {
+            e.preventDefault();
+
+            var form = $(this);
+            var formData = form.serialize();
+
+            $.ajax({
+              type: 'POST',
+              url: '@Url.Action("Edit", "Users")',
+              data: formData,
+              headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+              },
+              success: function (response) {
+                if (response === "success") {
+                  var modal = new bootstrap.Modal(document.getElementById('SuccessModal'));
+                  modal.show();
+                }
+              },
+              error: function () {
+                alert("Something went wrong.");
+              }
+            });
+          });
+
+          // logic for Confirm OK button
+          $('#btnConformOk').on('click', function (e) {
+            e.preventDefault();
+
+            $.ajax({
+              type: 'POST',
+              url: '@Url.Action("ConfirmUpdate", "Users")', // Replace with your actual action
+              headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+              },
+              success: function (response) {
+                if (response === "OK") {
+                  window.location.href = '@Url.Action("Index", "Users")'; // target page
+                } else {
+                  alert("Confirmation action completed.");
+                }
+              },
+              error: function () {
+                alert("Something went wrong during confirmation.");
+              }
+            });
+          });
+        });
+    </script>
+
+
+
+    @* <script>
+        $(document).ready(function () {
+          $('#editUserForm').on('submit', function (e) {
+            e.preventDefault();
+
+            var form = $(this);
+            var formData = form.serialize();
+
+            $.ajax({
+              type: 'POST',
+              url: '@Url.Action("Edit", "Users")', // Adjust controller name if needed
+              data: formData,
+              headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+              },
+              success: function (response) {
+                if (response === "success") {
+                  var modal = new bootstrap.Modal(document.getElementById('SuccessModal'));
+                  modal.show();
+                } 
+                // else {
+                //   alert("Update failed. Please try again.");
+                // }
+              },
+              error: function () {
+                alert("Something went wrong.");
+              }
+            });
+          });
+        });
+    </script> *@
+
+    <script src="~/js/ui-modals.js"></script>
+
+   @*  <script>
+          $(document).ready(function () {
+          // If any input has .input-validation-error, apply .was-validated to the form
+          if ($('.input-validation-error').length > 0) {
+              $('#editUserForm').addClass('was-validated');
+          }
+        });
+    </script> *@
+
+   @*  <script>
+        $(document).ready(function () {
+          $('#btnedit').on('click', function (e) {
+            e.preventDefault();
+
+            var form = $('#editUserForm');
+            var formData = form.serialize();
+
+            $.ajax({
+              type: 'POST',
+              url: '@Url.Action("Edit", "Users")', // Adjust controller name if needed
+              data: formData,
+              headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+              },
+              success: function (response) {
+                if (response === "success") {
+                  var modal = new bootstrap.Modal(document.getElementById('updateSuccessModal'));
+                  modal.show();
+                } else {
+                  alert("Update failed. Please try again.");
+                }
+              },
+              error: function () {
+                alert("Something went wrong.");
+              }
+            });
+          });
+        });
+    </script> *@
+
+
+
+}

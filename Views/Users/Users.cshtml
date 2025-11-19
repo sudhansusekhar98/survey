@@ -1,0 +1,129 @@
+﻿
+@model AnalyticaDocs.Models.UserModel
+@{
+    ViewData["Title"] = "User";
+}
+
+
+<form>
+   
+    <div class="card">
+        <div class="card-header bg-purple mb-8 py-2">
+                    <h6 class="text-white fs-4 pt-1">
+                        Application Users
+                    </h6>
+        </div>
+        <div class="card-body">
+
+                <div class="col-md-12">
+                   
+                        <div class="nav-align-top">
+                            <ul class="nav nav-pills flex-column flex-md-row mb-6">
+                                <li class="nav-item me-4"> <a asp-controller="Users" asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i>Add New User </a></li>
+                            </ul>
+                        </div>
+                   
+                </div>
+
+                <div class="col-12">
+                    @if (TempData["ResultMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
+                    {
+                        <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show " role="alert">
+                            @Html.Raw(TempData["ResultMessage"])
+                            <button type="button" class="btn-close btn-sm align-top" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+
+                </div>
+            <div class="table-responsive text-nowrap">
+                <table id="userDataTable" class="datatables-basic table table-outer-border table-responsive table-hover custom-hover">
+                    <thead>
+                        <tr class="text-nowrap fw-semibold table-header">
+                            <th class="px-2 py-3">#</th>
+                            <th class="px-2 py-3">User ID</th>
+                            <th class="px-2 py-3">Login Name</th>
+                            <th class="px-2 py-3 d-none d-lg-table-cell">Login ID</th>
+                            <th class="px-2 py-3 d-none d-lg-table-cell">Mobile No</th>
+                            <th class="px-2 py-3 d-none d-lg-table-cell">Email ID</th>
+                            <th class="px-2 py-3 d-none d-lg-table-cell">Password</th>
+                            <th class="px-2 py-3">Status</th>
+                            <th class="px-2 py-3">Role</th>
+                            <th class="px-2 py-3 text-center" style="width:100px">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        @if (ViewBag.DataForGrid != null && ((List<UserModel>)ViewBag.DataForGrid).Count > 0)
+                        {
+                            foreach (var GridData in (List<UserModel>)ViewBag.DataForGrid)
+                            {
+                                <tr class="small text-nowrap">
+                                    <td class="px-2 py-1">@GridData.Srno</td>
+                                    <td class="px-2 py-1">@GridData.UserId</td>
+                                    <td class="px-2 py-1">@GridData.LoginName</td>
+                                    <td class="px-2 py-1  d-none d-lg-table-cell">@GridData.LoginId</td>
+                                    <td class="px-2 py-1  d-none d-lg-table-cell">@GridData.MobileNo</td>
+                                    <td class="px-2 py-1  d-none d-lg-table-cell">@GridData.EmailID</td>
+                                    <td class="px-2 py-1  d-none d-lg-table-cell">*******</td>
+                                    <td class="px-2 py-1">
+                                        <span class="badge @(GridData.ISActive == "Y" ? "bg-label-success" : "bg-label-danger")">@GridData.ISActivedesc</span>
+                                    </td>
+                                    <td class="px-2 py-1">@GridData.RoleName</td>
+                                    <td class="px-2 py-1 text-center">
+                                       @*  <a asp-route-id="@GridData.UserId" class="btn btn-sm btn-outline-primary py-1 px-2" data-bs-toggle="modal" data-bs-target="#basicModal">
+                                            <i class="bi bi-eye me-1"></i> View
+                                        </a> *@
+
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-primary"
+                                                data-userid="@GridData.UserId"
+                                                onclick="openUserModal(this)">
+                                            <i class="bi bi-eye me-1"></i> View
+                                        </button>
+
+
+                                        <a asp-action="Edit" asp-route-id="@GridData.UserId" class="btn btn-sm btn-outline-warning" >
+                                            <i class="bi bi-pencil me-1"></i> Edit
+                                        </a>
+                                    
+                                    </td>
+                                </tr>
+                            }
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+   
+</form>
+<div id="modalContainer"></div>
+
+
+@section Scripts {
+    <script>
+        function openUserModal(button) {
+            const userId = $(button).data("userid");
+
+            $.get("/Users/GetUserModal", { id: userId }, function (html) {
+                $("#modalContainer").html(html);
+                const modal = new bootstrap.Modal(document.getElementById("viewDataModal"));
+                modal.show();
+            });
+        }
+
+    </script>
+    <script>
+        $(document).ready(function () {
+          var table = $('#userDataTable').DataTable({
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']], // Use -1 for 'All'
+            order: [[2, 'asc']]
+          });
+
+          
+        });
+    </script>
+
+}

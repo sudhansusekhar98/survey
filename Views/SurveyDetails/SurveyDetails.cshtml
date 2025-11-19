@@ -1,0 +1,220 @@
+﻿@using SurveyApp.Models
+@model IEnumerable<SurveyDetailsLocationModel>
+
+@{
+    ViewData["Title"] = "Survey Details";
+    var index = 0;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mt-4">
+                <div class="card-header bg-purple py-2">
+                    <div class="row">
+                        <div class="col-6">
+                            <h6 class="text-white fs-4 pt-1">Survey Details</h6>
+                        </div>
+                        <div class="col-6 text-end">
+                            <a href="@Url.Action("Index", "SurveyCreation")" 
+                               class="btn btn-outline-light text-white border-0">
+                                <i class="bi bi-arrow-left-circle me-2"></i> Back to Surveys
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    @if (TempData["ResultMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
+                    {
+                        <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show" role="alert">
+                            @Html.Raw(TempData["ResultMessage"])
+                            <button type="button" class="btn-close btn-sm align-top" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="mb-4">
+                        <span class="badge bg-purple me-2 fs-6 px-3 py-2">
+                            <i class="bi bi-clipboard-data me-1"></i>
+                            @(Model?.FirstOrDefault()?.SurveyName ?? "Survey Details")
+                        </span>
+                        <span class="badge bg-secondary fs-6 px-3 py-2">
+                            <i class="bi bi-geo-alt-fill me-1"></i>
+                            @(Model?.FirstOrDefault()?.LocName ?? "Location Details")
+                        </span>
+                    </div>
+
+                    <div class="accordion mt-4" id="accordionExample">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var gridData in Model)
+                        {
+                            var headingId = $"heading_{index}";
+                            var collapseId = $"collapse_{index}";
+                            <div class="card accordion-item shadow-sm mb-2">
+                                <h2 class="accordion-header" id="@headingId">
+                                    <button type="button"
+                                            class="accordion-button collapsed"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#@collapseId"
+                                            aria-expanded="false"
+                                            aria-controls="@collapseId">
+
+                                        <div class="d-flex align-items-center w-100">
+                                            <i class="bi bi-cpu fs-2 text-primary me-3"></i>
+                                            <span class="fw-semibold fs-5">
+                                                @gridData.TypeName
+                                            </span>
+                                            <span class="badge bg-info ms-auto me-3">ID: @gridData.ItemTypeID</span>
+                                        </div>
+                                    </button>
+                                </h2>
+
+                                <div id="@collapseId"
+                                     class="accordion-collapse collapse"
+                                     data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        @if (!string.IsNullOrWhiteSpace(gridData.TypeDesc))
+                                        {
+                                            <div class="alert alert-info mb-3">
+                                                <i class="bi bi-info-circle me-2"></i><strong>Description:</strong> @gridData.TypeDesc
+                                            </div>
+                                        }
+
+                                        @if (gridData.ItemLists != null && gridData.ItemLists.Any())
+                                        {
+                                            <div class="row g-3">
+                                                @foreach (var item in gridData.ItemLists)
+                                                {
+                                                    <div class="col-12 col-md-6 col-lg-4">
+                                                        <div class="card h-100 shadow-sm border-0 hover-lift">
+                                                            <div class="card-header card-h bg-light border-0 d-flex justify-content-between align-items-center">
+                                                                <h6 class="mb-0 fw-semibold text-dark">@item.ItemName</h6>
+                                                                <span class="badge bg-purple">ID: @item.ItemID</span>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                @* <div class="mb-3 text-center">
+                                                                    @if (!string.IsNullOrWhiteSpace(item.ImgPath))
+                                                                    {
+                                                                        <img src="@Url.Content(item.ImgPath)" alt="item image"
+                                                                             class="img-fluid rounded shadow-sm" style="max-height:180px; object-fit:cover; width:100%;"
+                                                                             loading="lazy" />
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <img src="~/img/elements/Noimage.png" alt="placeholder"
+                                                                             class="img-fluid rounded shadow-sm" style="max-height:180px; object-fit:cover; width:100%;"
+                                                                             loading="lazy" />
+                                                                    }
+                                                                </div> *@
+
+                                                                <div class="row mb-3">
+                                                                    <div class="col-6">
+                                                                        <small class="text-muted d-block mb-1">
+                                                                            <i class="bi bi-box me-1"></i><strong>Existing:</strong>
+                                                                        </small>
+                                                                        <span class="badge bg-secondary fs-6">@item.ItemQtyExist</span>
+                                                                    </div>
+                                                                    <div class="col-6">
+                                                                        <small class="text-muted d-block mb-1">
+                                                                            <i class="bi bi-cart-plus me-1"></i><strong>Required:</strong>
+                                                                        </small>
+                                                                        <span class="badge bg-success fs-6">@item.ItemQtyReq</span>
+                                                                    </div>
+                                                                </div>
+
+                                                                @if (!string.IsNullOrWhiteSpace(item.Remarks))
+                                                                {
+                                                                    <div class="mb-2">
+                                                                        <small class="text-muted d-block mb-1">
+                                                                            <i class="bi bi-chat-left-text me-1"></i><strong>Remarks:</strong>
+                                                                        </small>
+                                                                        <p class="text-dark small mb-0">@item.Remarks</p>
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                            @* <div class="card-footer bg-white border-0 d-flex gap-2 justify-content-center pb-3">
+                                                                <a href="@Url.Action("UpdateItem", "SurveyDetails", new { surveyId = gridData.SurveyID, locId = gridData.LocID, itemTypeID = gridData.ItemTypeID, itemId = item.ItemID })"
+                                                                   class="btn btn-sm btn-warning"
+                                                                   title="Edit Item">
+                                                                    <i class="bi bi-pencil me-1"></i>Edit
+                                                                </a>
+                                                                <a class="btn btn-sm btn-info"
+                                                                   href="@Url.Action("ViewItem", "SurveyDetails", new { itemId = item.ItemID })"
+                                                                   title="View Details">
+                                                                    <i class="bi bi-eye me-1"></i>View
+                                                                </a>
+                                                            </div> *@
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="text-center mt-4">
+                                                <a href="@Url.Action("UpdateItem", "SurveyDetails", new { surveyId = gridData.SurveyID, locId = gridData.LocID, itemTypeID = gridData.ItemTypeID, itemId = 0 })"
+                                                   class="btn btn-primary">
+                                                    <i class="bi bi-plus-circle me-2"></i> View / Edit
+                                                </a>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="text-center py-5">
+                                                <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+                                                <p class="text-muted fs-5 mb-3">No items added yet for this device type.</p>
+                                                <a href="@Url.Action("UpdateItem", "SurveyDetails", new { surveyId = gridData.SurveyID, locId = gridData.LocID, itemTypeID = gridData.ItemTypeID, itemId = 0 })"
+                                                   class="btn btn-primary">
+                                                    <i class="bi bi-play-circle me-2"></i> Start Survey
+                                                </a>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            index++;
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+                            <p class="text-muted fs-5">No survey data found. Please select a survey and location.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<style>
+    .hover-lift {
+        transition: all 0.3s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+    .card-h {
+        --bs-bg-opacity: 1;
+        background-color: rgb(159 139 233 / 78%) !important;
+        padding: 0.75rem 1rem;
+    }
+    .accordion-button:not(.collapsed) {
+        background-color: rgb(159 139 233 / 78%) !important;
+        color: #212529;
+    }
+    .accordion-button:focus {
+        box-shadow: none;
+        border-color: rgba(0,0,0,.125);
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Initialize any plugins if needed
+        });
+    </script>
+}

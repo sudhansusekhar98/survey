@@ -1,0 +1,158 @@
+﻿@model AnalyticaDocs.Models.UsersRightsFormModel
+@{
+    ViewData["Title"] = "User Rights";
+}
+<form asp-controller="UserRights" asp-action="UpdateRights" method="post">
+    @Html.AntiForgeryToken()
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-6">
+                <div class="card shadow mt-6">
+                    <div class="card-header bg-purple mb-8 py-2">
+                        <div class="row">
+                            <div class="col-6">
+                                <h6 class="text-white fs-4 pt-1">
+                                    Users Rights
+                                </h6>
+                            </div>
+                            <div class="col-6 text-end">
+
+                               @*  <a href="javascript:void(0);"
+                                   class="btn btn-outline-danger text-white border-0 mx-0 my-0"
+                                   onclick="showBackConfirmModal('@Url.Action("Index", "Users")','Unsaved changes will be lost. Do you want to continue?')">
+                                    <i class="bi bi-arrow-left-circle me-2"></i> Back To List
+                                </a> *@
+
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="card-body">
+                        <div class="row gx-4 gy-4">
+                            <div class="col-12">
+                                @if (TempData["ResultMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
+                                {
+                                    <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show " role="alert">
+                                        @Html.Raw(TempData["ResultMessage"])
+                                        <button type="button" class="btn-close btn-sm align-top" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                }
+
+
+                            </div>
+                            <div class="col-12">
+                                <div class="form-custom-floating">
+                                    <select id="userDropdown" asp-for="UserID" class="form-select"
+                                            asp-items="@(new SelectList(ViewBag.UserOptions, "UserID", "LoginName"))">
+                                        <option value="0">--Select--</option>
+                                    </select>
+                                    <label for="userDropdown">Select User</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                @if (Model.RoleID == 101)
+                                {
+                                    <div class="alert alert-primary d-flex align-items-center" role="alert">
+                                        <i class="bi bi-shield-check me-2 fs-5 text-primary"></i>
+                                        <div class="fst-italic fs-5">
+                                             Rights update is not required for <strong>@Model.UserName</strong> due to Super User privileges.
+                                        </div>
+                                    </div>
+
+                                }
+                                else 
+                                {
+                                    <table class="datatables-basic table table-responsive table-hover table-outer-border custom-hover">
+                                        <thead>
+                                        <tr class="text-nowrap fw-semibold table-header">
+                                            <th class="px-2 py-3" style="width:60px">#</th>
+                                                <th class="px-2 py-3">Region</th>
+                                                <th class="px-2 py-3">Rights</th>
+                                                <th class="px-2 py-3" style="width:80px">View</th>
+                                                <th class="px-2 py-3" style="width:80px">Create</th>
+                                                <th class="px-2 py-3" style="width:80px">Update</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="table-border-bottom-0">
+                                        @if (@Model.RightsList != null && @Model.RightsList.Count > 0)
+                                            {
+                                            @for (int i = 0; i < Model.RightsList.Count; i++)
+                                                {
+                                                        <tr class="small text-nowrap">
+                                                            <td class="px-2 py-1"><input asp-for="RightsList[i].Srno" class="form-control-plaintext p-0 m-0" readonly /></td>
+                                                            <td class="px-2 py-1"><input asp-for="RightsList[i].RegionName" class="form-control-plaintext p-0 m-0" readonly /></td>
+                                                            <td class="px-2 py-1">
+                                                            <input type="hidden" asp-for="RightsList[i].RightsID" />
+                                                            <input type="hidden" asp-for="RightsList[i].RegionID" />
+                                                                <input asp-for="RightsList[i].RightsName" class="form-control-plaintext  p-0 m-0" readonly />
+                                                            </td>
+                                                            <td class="px-2 py-1">
+
+                                                                <label class="switch switch-text switch-primary switch-pill">
+                                                                    <input type="checkbox" class="switch-input" asp-for="RightsList[i].IsView">
+                                                                    <span data-on="Yes" data-off="NO" class="switch-label"></span><span class="switch-handle"></span>
+                                                                </label>
+                                                            </td>
+                                                            <td class="px-2 py-1">
+
+                                                                <label class="switch switch-text switch-primary switch-pill">
+                                                                    <input type="checkbox" class="switch-input" asp-for="RightsList[i].IsCreate">
+                                                                    <span data-on="Yes" data-off="NO" class="switch-label"></span><span class="switch-handle"></span>
+                                                                </label>
+                                                            </td>
+                                                            <td class="px-2 py-1">
+
+                                                                <label class="switch switch-text switch-primary switch-pill">
+                                                                    <input type="checkbox" class="switch-input" asp-for="RightsList[i].IsUpdate">
+                                                                    <span data-on="Yes" data-off="NO" class="switch-label"></span><span class="switch-handle"></span>
+                                                                </label>
+                                                            </td>
+                                                        </tr>
+                                                
+                                                }
+                                            }
+
+                                        </tbody>
+                                    </table>
+                                }
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col text-end">
+                                <button id="btnsubmit" type="submit" class="btn btn-warning me-2"><i class="bi bi-check2-circle me-2"></i> Update</button>
+                                <a asp-controller="UserRights" asp-action="Index" class="btn btn-danger"><i class="bi bi-slash-circle me-2"></i> Reset</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+@section Scripts 
+{
+    <script>
+        $(document).ready(function () {
+            const recordId = parseInt('@Model.UserID');
+            if (recordId > 0) {
+                $('#btnsubmit').prop('disabled', false);
+            } else {
+                $('#btnsubmit').prop('disabled', true);
+            }
+        });
+
+        $('#userDropdown').on('change', function () {
+            const recordId = $(this).val();
+            if (recordId) {
+                window.location.href = `/UserRights/BindRecord?recordId=${recordId}`;
+            }
+        });
+    </script>
+
+}
