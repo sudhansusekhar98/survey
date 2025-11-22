@@ -179,7 +179,7 @@
 
         function loadStates(selectedStateId, selectedCityId) {
             $.ajax({
-                url: '/api/Location/states',
+                url: '@Url.Content("~/api/Location/states")',
                 type: 'GET',
                 success: function(states) {
                     var stateDropdown = $('#stateDropdown');
@@ -208,6 +208,7 @@
                 },
                 error: function(xhr, status, error) {
                     console.error('Error loading states:', error);
+                    console.error('XHR:', xhr);
                     alert('Failed to load states. Please refresh the page.');
                 }
             });
@@ -220,7 +221,7 @@
             cityDropdown.append('<option value="">Loading cities...</option>');
             
             $.ajax({
-                url: '/api/Location/cities/' + stateId,
+                url: '@Url.Content("~/api/Location/cities/")' + stateId,
                 type: 'GET',
                 success: function(cities) {
                     cityDropdown.empty();
@@ -245,6 +246,7 @@
                 },
                 error: function(xhr, status, error) {
                     console.error('Error loading cities:', error);
+                    console.error('XHR:', xhr);
                     cityDropdown.empty();
                     cityDropdown.append('<option value="">Error loading cities</option>');
                 }

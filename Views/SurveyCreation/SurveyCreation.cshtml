@@ -23,7 +23,7 @@
 
 <form asp-controller="SurveyCreation" asp-action="Create" method="post">
     @Html.AntiForgeryToken()
-    <div class="container-fluid p-5 m-1">
+    <div class="container-fluid p-4 m-0">
         <div class="row g-0">
             <div class="col-12">
                 <div class="card shadow mt-0 rounded-0 full-screen-card">
@@ -185,7 +185,7 @@
 
         function loadStates() {
             $.ajax({
-                url: '/api/Location/states',
+                url: '@Url.Content("~/api/Location/states")',
                 type: 'GET',
                 success: function(states) {
                     var stateDropdown = $('#stateDropdown');
@@ -198,6 +198,7 @@
                 },
                 error: function(xhr, status, error) {
                     console.error('Error loading states:', error);
+                    console.error('XHR:', xhr);
                     alert('Failed to load states. Please refresh the page.');
                 }
             });
@@ -218,7 +219,7 @@
                 cityDropdown.append('<option value="">Loading cities...</option>');
                 
                 $.ajax({
-                    url: '/api/Location/cities/' + stateId,
+                    url: '@Url.Content("~/api/Location/cities/")' + stateId,
                     type: 'GET',
                     success: function(cities) {
                         cityDropdown.empty();
@@ -232,6 +233,7 @@
                     },
                     error: function(xhr, status, error) {
                         console.error('Error loading cities:', error);
+                        console.error('XHR:', xhr);
                         cityDropdown.empty();
                         cityDropdown.append('<option value="">Error loading cities</option>');
                     }

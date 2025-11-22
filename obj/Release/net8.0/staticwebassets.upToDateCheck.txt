@@ -1,8 +1,8 @@
 wwwroot\css\cloudinary-images.css
 wwwroot\css\customControl.css
-wwwroot\css\demo.css
-wwwroot\css\floadingforms.css
 wwwroot\css\site.css
+wwwroot\css\floadingforms.css
+wwwroot\css\demo.css
 wwwroot\favicon.ico
 wwwroot\flatpickr\esm\l10n\ar-dz.js
 wwwroot\flatpickr\esm\l10n\ar-dz.min.js

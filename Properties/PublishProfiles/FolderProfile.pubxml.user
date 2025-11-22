@@ -2,8 +2,6 @@
 <!-- https://go.microsoft.com/fwlink/?LinkID=208121. -->
 <Project>
   <PropertyGroup>
-    <_PublishTargetUrl>D:\Dot Net Core\Deployments\CoreTheme</_PublishTargetUrl>
-    <History>True|2025-08-18T17:14:41.3808983Z||;True|2025-08-18T22:34:55.6580809+05:30||;True|2025-08-18T22:24:18.2741294+05:30||;True|2025-08-18T22:22:11.7473577+05:30||;True|2025-08-18T22:11:28.9499752+05:30||;</History>
-    <LastFailureDetails />
+    <_PublishTargetUrl>D:\Deployement\v01</_PublishTargetUrl>
   </PropertyGroup>
 </Project>

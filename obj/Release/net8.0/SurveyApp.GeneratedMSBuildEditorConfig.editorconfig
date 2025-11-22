@@ -168,6 +168,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5RGV0YWlsc1xVcGRhdGVTdXJ2ZXlEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/VL Access/Survey/AS.NET SURVEY/Survey-App-v2.0-main/Views/SurveyDetails/_LocationPreview.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5RGV0YWlsc1xfTG9jYXRpb25QcmV2aWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/VL Access/Survey/AS.NET SURVEY/Survey-App-v2.0-main/Views/UserLogin/LoginBasic.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlckxvZ2luXExvZ2luQmFzaWMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 

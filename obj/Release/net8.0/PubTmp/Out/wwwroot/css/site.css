@@ -269,3 +269,20 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .text-shadow-head {
     text-shadow: 2px 2px 4px #808080;
 }
+
+/* visual highlight when card is selected */
+.assign-card {
+    cursor: pointer;
+    transition: box-shadow 0.12s, border-color 0.12s, background-color 0.12s;
+}
+
+    .assign-card:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(13,110,253,0.12);
+    }
+
+    .assign-card.selected {
+        border: 2px solid rgba(13,110,253,0.5); /* blue-ish border */
+        background-color: #f8fbff;
+    }
+

@@ -309,13 +309,43 @@
 					video.srcObject = stream;
 				} catch (err) {
 					console.error('Camera error:', err);
-					alert('Camera access denied or not available.');
+					let errorMessage = 'Camera access denied or not available.';
+					
+					// Provide specific error messages
+					if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+						errorMessage = 'Camera permission denied. Please allow camera access in your browser settings.';
+					} else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+						errorMessage = 'No camera found on this device.';
+					} else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+						errorMessage = 'Camera is already in use by another application.';
+					} else if (err.name === 'OverconstrainedError') {
+						errorMessage = 'Camera does not support the requested settings.';
+					} else if (err.name === 'NotSupportedError') {
+						errorMessage = 'Camera not supported. HTTPS connection required for camera access.';
+					} else if (err.name === 'TypeError') {
+						errorMessage = 'Camera not supported. Please use HTTPS connection or enable camera permissions.';
+					}
+					
+					alert(errorMessage);
+					modal.hide();
 				}
 			}
 			
-			if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-				startCamera();
-				modal.show();
+			// Check for secure context (HTTPS, localhost, or file://)
+			const isSecureContext = window.isSecureContext || location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+			
+			if (!isSecureContext) {
+				alert('Camera access requires HTTPS connection.\n\nCurrent URL: ' + location.protocol + '//' + location.host + '\n\nPlease access the application via HTTPS or localhost for camera functionality.');
+				return;
+			}
+			
+			if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+				alert('Camera not supported. Your browser or device does not support camera access.\n\nPlease use a modern browser (Chrome, Firefox, Edge, Safari) and ensure camera permissions are enabled.');
+				return;
+			}
+			
+			startCamera();
+			modal.show();
 				
 				// Flip camera button handler
 				flipBtn.onclick = function() {
@@ -340,8 +370,6 @@
 				document.getElementById('camDeviceVideoModal').addEventListener('hidden.bs.modal', function () {
 					if (stream) stream.getTracks().forEach(track => track.stop());
 				}, { once: true });
-			} else {
-				alert('Camera not supported.');
 			}
 		}
 		
