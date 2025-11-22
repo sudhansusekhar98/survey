@@ -47,7 +47,7 @@ namespace AnalyticaDocs.Models
         [NotMapped]
         public List<SelectListItem> EmployeeOptions { get; set; } = new List<SelectListItem>
         {
-            new SelectListItem { Text = "-- Select Employee --", Value = "" }
+            new SelectListItem { Text = " ", Value = "" , Selected = true}
         };
 
         public List<SelectListItem> StatusOptions => new List<SelectListItem>

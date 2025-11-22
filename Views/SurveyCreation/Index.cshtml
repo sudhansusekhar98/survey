@@ -3,23 +3,50 @@
     ViewData["Title"] = "Survey List";
 }
 
-<div class="container-fluid">
-    <div class="row">
+@section PageStyles {
+    <style>
+        body, html {
+            overflow-x: hidden;
+            max-width: 100vw;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        .container-fluid {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+            padding-left: 0;
+            padding-right: 0;
+            margin-left: 0;
+            margin-right: 0;
+        }
+        
+        /* Mobile full-screen card */
+        @@media (max-width: 767.98px) {
+            .full-screen-card {
+                min-height: 100vh;
+                border-radius: 0 !important;
+                margin: 0 !important;
+            }
+        }
+    </style>
+}
+
+<div class="container-fluid p-0 m-0">
+    <div class="row g-0">
         <div class="col-12">
-            <div class="card shadow mt-4">
+            <div class="card shadow mt-0 rounded-0 full-screen-card">
                 <div class="card-header bg-purple py-2">
-                    <div class="row">
-                        <div class="col-6">
-                            <h6 class="text-white fs-4 pt-1">
-                                Survey Management
-                            </h6>
-                        </div>
-                        <div class="col-6 text-end">
-                            <a asp-controller="SurveyCreation" asp-action="Create" 
-                               class="btn btn-outline-success text-white border-0">
-                                <i class="bi bi-plus-circle me-2"></i> Add New Survey
-                            </a>
-                        </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="text-white fs-4 mb-0">
+                            All Surveys
+                        </h6>
+                        <a asp-controller="SurveyCreation" asp-action="Create" 
+                           class="btn btn-outline-success text-white border-0">
+                            <i class="bi bi-plus-circle"></i>
+                            <span class="d-none d-md-inline ms-2">Create New Survey</span>
+                        </a>
                     </div>
                 </div>
                 <div class="card-body">
@@ -47,71 +74,73 @@
                                                 @survey.SurveyStatus
                                             </span>
                                         </div>
-                                        <div class="card-body">
-                                            <h5 class="card-title text-dark fw-semibold mb-3">
-                                                <i class="bi bi-clipboard-data text-primary me-2"></i>@survey.SurveyName
-                                            </h5>
-                                            <div class="mb-2">
-                                                <small class="text-muted d-block mb-1">
-                                                    <i class="bi bi-building me-1"></i><strong>Type:</strong>
-                                                </small>
-                                                <span class="text-dark">@survey.ImplementationType</span>
+                                        <div class="d-flex flex-row flex-md-column">
+                                            <div class="card-body flex-grow-1">
+                                                <h5 class="card-title text-dark fw-semibold mb-3">
+                                                    <i class="bi bi-clipboard-data text-primary me-2"></i>@survey.SurveyName
+                                                </h5>
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block mb-1">
+                                                        <i class="bi bi-building me-1"></i><strong>Type:</strong>
+                                                    </small>
+                                                    <span class="text-dark">@survey.ImplementationType</span>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block mb-1">
+                                                        <i class="bi bi-calendar-event me-1"></i><strong>Date:</strong>
+                                                    </small>
+                                                    <span class="text-dark">@(survey.SurveyDate?.ToString("dd-MMM-yyyy") ?? "-")</span>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block mb-1">
+                                                        <i class="bi bi-people me-1"></i><strong>Team:</strong>
+                                                    </small>
+                                                    <span class="text-dark">@survey.SurveyTeamName</span>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block mb-1">
+                                                        <i class="bi bi-geo-alt me-1"></i><strong>Location:</strong>
+                                                    </small>
+                                                    <span class="text-dark">@survey.LocationSiteName, @survey.CityDistrict</span>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block mb-1">
+                                                        <i class="bi bi-map me-1"></i><strong>Region:</strong>
+                                                    </small>
+                                                    <span class="text-dark">@(survey.RegionName ?? "-")</span>
+                                                </div>
                                             </div>
-                                            <div class="mb-2">
-                                                <small class="text-muted d-block mb-1">
-                                                    <i class="bi bi-calendar-event me-1"></i><strong>Date:</strong>
-                                                </small>
-                                                <span class="text-dark">@(survey.SurveyDate?.ToString("dd-MMM-yyyy") ?? "-")</span>
+                                            <div class="card-footer bg-white border-0 d-flex flex-column flex-md-row gap-2 justify-content-center align-items-stretch p-3" style="border-left: 1px solid rgba(0,0,0,.125) !important;">
+                                                <a asp-controller="SurveyCreation"
+                                                   asp-action="Edit"
+                                                   asp-route-id="@survey.SurveyId"
+                                                   class="btn btn-sm btn-warning"
+                                                   title="Edit Survey">
+                                                    <i class="bi bi-pencil me-1"></i><span class="d-none d-sm-inline">Edit</span>
+                                                </a>
+                                                <a asp-controller="SurveyCreation"
+                                                   asp-action="SurveyLocation"
+                                                   asp-route-surveyId="@survey.SurveyId"
+                                                   asp-route-SurveyName="@survey.SurveyName"
+                                                   class="btn btn-sm btn-info"
+                                                   title="View Locations">
+                                                    <i class="bi bi-geo-alt-fill me-1"></i><span class="d-none d-sm-inline">Locations</span>
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-success"
+                                                        title="View Details"
+                                                        onclick="openSurveyDetailsModal(@survey.SurveyId)">
+                                                    <i class="bi bi-file-earmark-spreadsheet me-1"></i><span class="d-none d-sm-inline">Details</span>
+                                                </button>
+                                                <a asp-controller="SurveyCreation"
+                                                   asp-action="SurveyAssignment"
+                                                   asp-route-surveyId="@survey.SurveyId"
+                                                   asp-route-SurveyName="@survey.SurveyName"
+                                                   class="btn btn-sm btn-primary"
+                                                   title="Assign Team">
+                                                    <i class="bi bi-people-fill me-1"></i><span class="d-none d-sm-inline">Team</span>
+                                                </a>
                                             </div>
-                                            <div class="mb-2">
-                                                <small class="text-muted d-block mb-1">
-                                                    <i class="bi bi-people me-1"></i><strong>Team:</strong>
-                                                </small>
-                                                <span class="text-dark">@survey.SurveyTeamName</span>
-                                            </div>
-                                            <div class="mb-2">
-                                                <small class="text-muted d-block mb-1">
-                                                    <i class="bi bi-geo-alt me-1"></i><strong>Location:</strong>
-                                                </small>
-                                                <span class="text-dark">@survey.LocationSiteName, @survey.CityDistrict</span>
-                                            </div>
-                                            <div class="mb-2">
-                                                <small class="text-muted d-block mb-1">
-                                                    <i class="bi bi-map me-1"></i><strong>Region:</strong>
-                                                </small>
-                                                <span class="text-dark">@(survey.RegionName ?? "-")</span>
-                                            </div>
-                                        </div>
-                                        <div class="card-footer bg-white border-0 d-flex gap-2 justify-content-center pb-3">
-                                            <a asp-controller="SurveyCreation"
-                                               asp-action="Edit"
-                                               asp-route-id="@survey.SurveyId"
-                                               class="btn btn-sm btn-warning"
-                                               title="Edit Survey">
-                                                <i class="bi bi-pencil me-1"></i>Edit
-                                            </a>
-                                            <a asp-controller="SurveyCreation"
-                                               asp-action="SurveyLocation"
-                                               asp-route-surveyId="@survey.SurveyId"
-                                               asp-route-SurveyName="@survey.SurveyName"
-                                               class="btn btn-sm btn-info"
-                                               title="View Locations">
-                                                <i class="bi bi-geo-alt-fill me-1"></i>Locations
-                                            </a>
-                                            <button type="button"
-                                                    class="btn btn-sm btn-success"
-                                                    title="View Details"
-                                                    onclick="openSurveyDetailsModal(@survey.SurveyId)">
-                                                <i class="bi bi-file-earmark-spreadsheet me-1"></i>Details
-                                            </button>
-                                            <a asp-controller="SurveyCreation"
-                                               asp-action="SurveyAssignment"
-                                               asp-route-surveyId="@survey.SurveyId"
-                                               asp-route-SurveyName="@survey.SurveyName"
-                                               class="btn btn-sm btn-primary"
-                                               title="Assign Team">
-                                                <i class="bi bi-people-fill me-1"></i>Team
-                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -161,6 +190,40 @@
             background-color: rgb(159 139 233 / 78%) !important;
             padding: 1rem;
             margin-bottom: 1rem;
+        }
+        
+        /* Mobile responsive styles */
+        @@media (max-width: 767.98px) {
+            body, html {
+                margin: 0;
+                padding: 0;
+            }
+            
+            .card-footer {
+                border-left: 1px solid rgba(0,0,0,.125) !important;
+                border-top: 0 !important;
+            }
+            
+            .card-footer .btn {
+                font-size: 0.875rem;
+                padding: 0.5rem 0.75rem;
+            }
+            
+            .card-footer .btn i {
+                font-size: 1rem;
+            }
+        }
+        
+        @@media (min-width: 768px) {
+            .card-footer {
+                border-left: 0 !important;
+                border-top: 1px solid rgba(0,0,0,.125) !important;
+            }
+        }
+        
+        /* Ensure cards don't overflow */
+        .card-footer {
+            overflow: hidden;
         }
     </style>
     <script>

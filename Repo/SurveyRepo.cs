@@ -796,6 +796,32 @@ namespace SurveyApp.Repo
             }
         }
 
+        public bool MarkLocationAsCompleted(long surveyId, int locId, int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpSurveyDetails", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                // Use SpType to mark location as completed
+                // You may need to add this SpType to your stored procedure
+                cmd.Parameters.AddWithValue("@SpType", 3); // 3 for marking location complete
+                cmd.Parameters.AddWithValue("@SurveyID", surveyId);
+                cmd.Parameters.AddWithValue("@LocID", locId);
+                cmd.Parameters.AddWithValue("@CreateBy", userId);
+
+                con.Open();
+                int result = cmd.ExecuteNonQuery();
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                // Log exception
+                throw;
+            }
+        }
+
     }
 }
 

@@ -49,7 +49,7 @@ namespace AnalyticaDocs.Controllers
                 Value = e.EmpID.ToString(),
                 Text = e.EmpName
             }).ToList();
-            model.EmployeeOptions.Insert(0, new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Text = "-- Select Employee --", Value = "" });
+            model.EmployeeOptions.Insert(0, new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Text = "", Value = "" });
             
             return View("Create", model); 
         }

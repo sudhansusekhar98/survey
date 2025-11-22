@@ -40,6 +40,8 @@ namespace SurveyApp.Repo
         List<SurveyDetailsUpdatelist> GetSurveyUpdateItemList(Int64 SurveyID, int LocId, int ItemTypeID);
 
         public bool UpdateSurveyDetails(SurveyDetailsUpdate model);
+
+        bool MarkLocationAsCompleted(Int64 surveyId, int locId, int userId);
     }
 }
 

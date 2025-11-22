@@ -1,0 +1,10 @@
+{
+  "version": "3.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "flatpickr@4.6.13",
+      "destination": "wwwroot/flatpickr"
+    }
+  ]
+}

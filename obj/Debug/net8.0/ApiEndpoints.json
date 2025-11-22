@@ -1,1 +1,65 @@
-[]
+[
+  {
+    "ContainingType": "SurveyApp.Controllers.LocationController",
+    "Method": "GetCitiesByState",
+    "RelativePath": "api/Location/cities/{stateId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "stateId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "SurveyApp.Controllers.LocationController",
+    "Method": "GetCityName",
+    "RelativePath": "api/Location/city/{cityId}/name",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "cityId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "stateId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "SurveyApp.Controllers.LocationController",
+    "Method": "GetStateName",
+    "RelativePath": "api/Location/state/{stateId}/name",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "stateId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "SurveyApp.Controllers.LocationController",
+    "Method": "GetStates",
+    "RelativePath": "api/Location/states",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  }
+]

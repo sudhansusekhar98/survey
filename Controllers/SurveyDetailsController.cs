@@ -142,6 +142,83 @@ namespace SurveyApp.Controllers
             }
         }
 
+        // GET: SurveyDetails/GetLocationPreview
+        public IActionResult GetLocationPreview(long surveyId, int locId)
+        {
+            try
+            {
+                // Get the list of types/locations assigned
+                var deviceTypes = _repository.GetAssignedTypeList(surveyId, locId)
+                                  ?? new List<SurveyDetailsLocationModel>();
+
+                var modelList = new List<SurveyDetailsLocationModel>();
+
+                foreach (var dt in deviceTypes)
+                {
+                    // Load item list for this type/location
+                    var items = _repository.GetAssignedItemList(dt.SurveyID, dt.LocID, dt.ItemTypeID)
+                                ?? new List<SurveyDetailsModel>();
+
+                    // Create a new instance so we keep any extra properties from dt
+                    modelList.Add(new SurveyDetailsLocationModel
+                    {
+                        SurveyID = dt.SurveyID,
+                        LocID = dt.LocID,
+                        ItemTypeID = dt.ItemTypeID,
+                        LocName = dt.LocName,
+                        SurveyName = dt.SurveyName,
+                        TypeName = dt.TypeName,
+                        TypeDesc = dt.TypeDesc,
+                        GroupName = dt.GroupName,
+                        CreatedBy = dt.CreatedBy,
+                        ItemLists = items
+                    });
+                }
+
+                return PartialView("_LocationPreview", modelList);
+            }
+            catch (Exception ex)
+            {
+                return Content($"<div class='alert alert-danger'><i class='bi bi-exclamation-triangle me-2'></i>Error loading preview: {ex.Message}</div>");
+            }
+        }
+
+        // POST: SurveyDetails/SubmitLocationCompletion
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult SubmitLocationCompletion(long surveyId, int locId)
+        {
+            try
+            {
+                int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
+                var result = _util.CheckAuthorizationAll(this, 103, null, surveyId, "Update");
+                if (result != null) 
+                    return Json(new { success = false, message = "Unauthorized access" });
+
+                var userId = HttpContext.Session.GetString("UserID");
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Json(new { success = false, message = "User not logged in" });
+                }
+
+                // Mark location as completed
+                bool isCompleted = _repository.MarkLocationAsCompleted(surveyId, locId, Convert.ToInt32(userId));
+
+                if (isCompleted)
+                {
+                    return Json(new { success = true, message = "Location marked as completed successfully!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to mark location as completed. Please try again." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

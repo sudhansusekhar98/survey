@@ -1,0 +1,130 @@
+@model IEnumerable<SurveyApp.Models.SurveyDetailsLocationModel>
+
+@if (Model != null && Model.Any())
+{
+    var firstItem = Model.FirstOrDefault();
+    
+    <div class="mb-4">
+        <div class="row">
+            <div class="col-md-6">
+                <h6 class="text-muted">Survey:</h6>
+                <p class="fw-bold">@(firstItem?.SurveyName ?? "N/A")</p>
+            </div>
+            <div class="col-md-6">
+                <h6 class="text-muted">Location:</h6>
+                <p class="fw-bold">@(firstItem?.LocName ?? "N/A")</p>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+
+    @foreach (var typeGroup in Model)
+    {
+        <div class="mb-4">
+            <h5 class="bg-light p-3 rounded">
+                <i class="bi bi-cpu me-2 text-primary"></i>@typeGroup.TypeName
+                @if (!string.IsNullOrWhiteSpace(typeGroup.TypeDesc))
+                {
+                    <small class="text-muted d-block mt-1">@typeGroup.TypeDesc</small>
+                }
+            </h5>
+
+            @if (typeGroup.ItemLists != null && typeGroup.ItemLists.Any())
+            {
+                <div class="row g-3 mt-2">
+                    @foreach (var item in typeGroup.ItemLists)
+                    {
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-header bg-purple text-white">
+                                    <h6 class="mb-0">@item.ItemName</h6>
+                                    <small>ID: @item.ItemID</small>
+                                </div>
+                                <div class="card-body">
+                                    @* Display Images *@
+                                    @if (!string.IsNullOrWhiteSpace(item.ImgPath))
+                                    {
+                                        var imagePaths = item.ImgPath.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                                        var imageIds = item.ImgID?.Split(',', StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
+                                        
+                                        <div class="mb-3">
+                                            <label class="fw-bold text-muted small mb-2">
+                                                <i class="bi bi-images me-1"></i>Captured Images (@imagePaths.Length)
+                                            </label>
+                                            <div class="row g-2">
+                                                @for (int i = 0; i < imagePaths.Length; i++)
+                                                {
+                                                    <div class="col-6">
+                                                        <img src="@imagePaths[i].Trim()" 
+                                                             alt="Item @item.ItemName - Image @(i+1)" 
+                                                             class="img-fluid rounded border"
+                                                             style="max-height: 150px; width: 100%; object-fit: cover;"
+                                                             onerror="this.src='/img/elements/Noimage.png'" />
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="mb-3 text-center">
+                                            <img src="~/img/elements/Noimage.png" 
+                                                 alt="No image" 
+                                                 class="img-fluid rounded border opacity-50"
+                                                 style="max-height: 150px;" />
+                                            <p class="text-muted small mt-2">No images captured</p>
+                                        </div>
+                                    }
+
+                                    @* Item Details *@
+                                    <div class="row mb-2">
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-box me-1"></i>Existing
+                                            </small>
+                                            <span class="badge bg-secondary">@item.ItemQtyExist</span>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-cart-plus me-1"></i>Required
+                                            </small>
+                                            <span class="badge bg-success">@item.ItemQtyReq</span>
+                                        </div>
+                                    </div>
+
+                                    @if (!string.IsNullOrWhiteSpace(item.Remarks))
+                                    {
+                                        <div class="mt-2">
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-chat-left-text me-1"></i>Remarks
+                                            </small>
+                                            <p class="small mb-0">@item.Remarks</p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>No items added for this type yet.
+                </div>
+            }
+        </div>
+    }
+
+    <div class="alert alert-info mt-4">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>Review all items above before submitting.</strong> Once submitted, this location will be marked as completed.
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>No data available for preview.
+    </div>
+}
