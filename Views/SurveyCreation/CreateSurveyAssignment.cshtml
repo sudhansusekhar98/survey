@@ -134,6 +134,7 @@
                                        type="date" 
                                        class="form-control" 
                                        min="@DateTime.Now.ToString("yyyy-MM-dd")"
+                                       value="@(Model.DueDate != default(DateTime) ? Model.DueDate.ToString("yyyy-MM-dd") : DateTime.Now.ToString("yyyy-MM-dd"))"
                                        required />
                                 <div class="form-text">Select the deadline for completing this survey</div>
                                 <span asp-validation-for="DueDate" class="text-danger"></span>

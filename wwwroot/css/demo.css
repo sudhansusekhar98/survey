@@ -37,6 +37,25 @@
   z-index: auto;
 }
 
+/* Ensure navbar and dropdowns are clickable */
+.navbar {
+  z-index: 1030 !important;
+  position: relative;
+}
+
+.navbar .dropdown-menu {
+  z-index: 1031 !important;
+}
+
+.navbar-nav .nav-link {
+  pointer-events: auto !important;
+  cursor: pointer;
+}
+
+.dropdown-submenu .dropdown-menu {
+  z-index: 1032 !important;
+}
+
 /*
 * Content
 ******************************************************************************/
