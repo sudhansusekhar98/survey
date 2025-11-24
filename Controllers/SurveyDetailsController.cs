@@ -11,11 +11,13 @@ namespace SurveyApp.Controllers
     {
         private readonly ISurvey _repository;
         private readonly ICommonUtil _util;
+        private readonly ISurveyLocationStatus _statusRepo;
 
-        public SurveyDetailsController(ISurvey repository, ICommonUtil util)
+        public SurveyDetailsController(ISurvey repository, ICommonUtil util, ISurveyLocationStatus statusRepo)
         {
             _repository = repository;
             _util = util;
+            _statusRepo = statusRepo;
         }
 
         public IActionResult Index(long? surveyId, int? locId)
@@ -30,6 +32,20 @@ namespace SurveyApp.Controllers
                 TempData["ResultMessage"] = "Please select a survey and location.";
                 TempData["ResultType"] = "warning";
                 return RedirectToAction("Index", "SurveyCreation");
+            }
+
+            // Check location status (with error handling)
+            try
+            {
+                var locationStatus = _statusRepo.GetLocationStatus(surveyId.Value, locId.Value);
+                ViewBag.LocationStatus = locationStatus?.Status ?? "Pending";
+                ViewBag.IsCompleted = locationStatus?.Status == "Completed" || locationStatus?.Status == "Verified";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading location status: {ex.Message}");
+                ViewBag.LocationStatus = "Pending";
+                ViewBag.IsCompleted = false;
             }
 
             // Get the list of types/locations assigned
@@ -80,6 +96,34 @@ namespace SurveyApp.Controllers
                 return RedirectToAction("Index", new { surveyId, locId });
             }
 
+            // Check location status (with error handling)
+            string currentStatus = "Pending";
+            try
+            {
+                var locationStatus = _statusRepo.GetLocationStatus(surveyId, locId);
+                currentStatus = locationStatus?.Status ?? "Pending";
+                
+                // Prevent editing if location is completed or verified
+                if (currentStatus == "Completed" || currentStatus == "Verified")
+                {
+                    TempData["ResultMessage"] = $"<strong>Location is {currentStatus}!</strong> Cannot modify items. Click 'Unlock for Editing' to make changes.";
+                    TempData["ResultType"] = "warning";
+                    return RedirectToAction("Index", new { surveyId, locId });
+                }
+
+                // Auto-mark as In Progress when user starts selecting items
+                var userId = HttpContext.Session.GetString("UserID");
+                if (!string.IsNullOrEmpty(userId) && currentStatus == "Pending")
+                {
+                    _statusRepo.MarkLocationAsInProgress(surveyId, locId, Convert.ToInt32(userId), "Auto-marked when item selection started");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error checking/updating location status: {ex.Message}");
+                // Continue anyway - don't block the user if status tracking fails
+            }
+
             var formModel = new SurveyDetailsUpdate
             {
                 SurveyID = surveyId,
@@ -89,11 +133,12 @@ namespace SurveyApp.Controllers
             };
 
             // Get survey and location names for display
-            var surveyInfo = _repository.GetAssignedTypeList(surveyId, locId)?.FirstOrDefault();
+            var surveyInfo = _repository.GetAssignedTypeList(surveyId, locId)?.FirstOrDefault(x => x.ItemTypeID == itemTypeID);
             if (surveyInfo != null)
             {
                 ViewBag.SelectedSurveyName = surveyInfo.SurveyName;
                 ViewBag.SelectedLocName = surveyInfo.LocName;
+                formModel.TypeName = surveyInfo.TypeName;
             }
 
             ViewBag.SelectedSurveyId = surveyId;
@@ -201,8 +246,8 @@ namespace SurveyApp.Controllers
                     return Json(new { success = false, message = "User not logged in" });
                 }
 
-                // Mark location as completed
-                bool isCompleted = _repository.MarkLocationAsCompleted(surveyId, locId, Convert.ToInt32(userId));
+                // Auto-mark location as completed using status repository
+                bool isCompleted = _statusRepo.MarkLocationAsCompleted(surveyId, locId, Convert.ToInt32(userId), "Auto-marked when items were submitted");
 
                 if (isCompleted)
                 {
@@ -211,6 +256,36 @@ namespace SurveyApp.Controllers
                 else
                 {
                     return Json(new { success = false, message = "Failed to mark location as completed. Please try again." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // POST: SurveyDetails/UnlockLocationForEditing
+        [HttpPost]
+        public IActionResult UnlockLocationForEditing(long surveyId, int locId)
+        {
+            try
+            {
+                var userId = HttpContext.Session.GetString("UserID");
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Json(new { success = false, message = "User not logged in" });
+                }
+
+                // Change status back to In Progress to allow editing
+                bool unlocked = _statusRepo.MarkLocationAsInProgress(surveyId, locId, Convert.ToInt32(userId), "Unlocked for editing");
+
+                if (unlocked)
+                {
+                    return Json(new { success = true, message = "Location unlocked for editing" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to unlock location" });
                 }
             }
             catch (Exception ex)

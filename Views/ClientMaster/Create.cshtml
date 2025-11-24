@@ -1,0 +1,184 @@
+@model SurveyApp.Models.ClientMasterModel
+@{
+    ViewData["Title"] = Model.ClientID > 0 ? "Edit Client" : "Add New Client";
+    bool isEdit = Model.ClientID > 0;
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-purple py-3">
+                    <div class="row align-items-center">
+                        <div class="col-6">
+                            <h5 class="text-white mb-0 fw-bold">
+                                <i class="bi bi-@(isEdit ? "pencil-square" : "plus-circle") me-2"></i>
+                                @ViewData["Title"]
+                            </h5>
+                        </div>
+                        <div class="col-6 text-end">
+                            <a asp-action="Index" class="btn btn-outline-light">
+                                <i class="bi bi-arrow-left-circle me-2"></i>Back to List
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    @if (TempData["ResultMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
+                    {
+                        <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show" role="alert">
+                            @Html.Raw(TempData["ResultMessage"])
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <form asp-action="@(isEdit ? "Edit" : "Create")" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="ClientID" />
+
+                        <div class="row g-3">
+                            @* Client Name *@
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="ClientName" class="form-control" placeholder="Client Name" required />
+                                    <label asp-for="ClientName"></label>
+                                    <span asp-validation-for="ClientName" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            @* Client Type *@
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select asp-for="ClientType" class="form-select" required>
+                                        <option value="">-- Select Client Type --</option>
+                                        <option value="Corporate">Corporate</option>
+                                        <option value="Government">Government</option>
+                                        <option value="Individual">Individual</option>
+                                        <option value="Non-Profit">Non-Profit</option>
+                                        <option value="Partner">Partner</option>
+                                        <option value="Vendor">Vendor</option>
+                                    </select>
+                                    <label asp-for="ClientType"></label>
+                                    <span asp-validation-for="ClientType" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            @* Address Line 1 *@
+                            <div class="col-md-12">
+                                <div class="form-floating">
+                                    <input asp-for="Address1" class="form-control" placeholder="Address Line 1" />
+                                    <label asp-for="Address1"></label>
+                                    <span asp-validation-for="Address1" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            @* Address Line 2 *@
+                            <div class="col-md-12">
+                                <div class="form-floating">
+                                    <input asp-for="Address3" class="form-control" placeholder="Address Line 2" />
+                                    <label asp-for="Address3"></label>
+                                    <span asp-validation-for="Address3" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            @* State *@
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select asp-for="State" id="stateSelect" class="form-select" required>
+                                        <option value="">-- Select State --</option>
+                                        @if (ViewBag.States != null)
+                                        {
+                                            @foreach (var state in (List<SurveyApp.Models.StateModel>)ViewBag.States)
+                                            {
+                                                <option value="@state.id">@state.name</option>
+                                            }
+                                        }
+                                    </select>
+                                    <label asp-for="State"></label>
+                                    <span asp-validation-for="State" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            @* City *@
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select asp-for="City" id="citySelect" class="form-select" required>
+                                        <option value="">-- Select City --</option>
+                                    </select>
+                                    <label asp-for="City"></label>
+                                    <span asp-validation-for="City" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            @* Contact Person *@
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="ContactPerson" class="form-control" placeholder="Contact Person" />
+                                    <label asp-for="ContactPerson"></label>
+                                    <span asp-validation-for="ContactPerson" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            @* Contact Number *@
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="ContactNumber" class="form-control" placeholder="Contact Number" />
+                                    <label asp-for="ContactNumber"></label>
+                                    <span asp-validation-for="ContactNumber" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 text-end">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="bi bi-check-circle me-2"></i>@(isEdit ? "Update" : "Save") Client
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary btn-lg px-5">
+                                <i class="bi bi-x-circle me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            // Load cities when state is selected
+            $('#stateSelect').on('change', function () {
+                var stateId = $(this).val();
+                var citySelect = $('#citySelect');
+
+                // Clear existing cities
+                citySelect.empty().append('<option value="">-- Loading Cities --</option>');
+
+                if (stateId) {
+                    $.ajax({
+                        url: '/api/Location/cities/' + stateId,
+                        type: 'GET',
+                        success: function (cities) {
+                            citySelect.empty().append('<option value="">-- Select City --</option>');
+                            $.each(cities, function (index, city) {
+                                citySelect.append($('<option>', {
+                                    value: city.id,
+                                    text: city.name
+                                }));
+                            });
+                        },
+                        error: function () {
+                            citySelect.empty().append('<option value="">-- Error loading cities --</option>');
+                            alert('Error loading cities. Please try again.');
+                        }
+                    });
+                } else {
+                    citySelect.empty().append('<option value="">-- Select City --</option>');
+                }
+            });
+        });
+    </script>
+}

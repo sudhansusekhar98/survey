@@ -64,15 +64,60 @@
                         </div>
                     }
 
-                    <div class="m-4">
-                        <span class="badge bg-purple me-2 fs-6 px-3 py-2">
-                            <i class="bi bi-clipboard-data me-1"></i>
+                    <div class="d-flex flex-row align-items-center gap-2 flex-wrap mb-1 mt-2">
+                        <span class="badge bg-purple d-flex align-items-center px-3 py-1 shadow-sm" style="font-size:0.92rem; height:32px; line-height:32px; border-radius:0.5rem;">
+                            <i class="bi bi-clipboard-data me-1" style="font-size:1.1em;"></i>
                             @(Model?.FirstOrDefault()?.SurveyName ?? "Survey Details")
                         </span>
-                        <span class="badge bg-secondary fs-6 px-3 py-2">
-                            <i class="bi bi-geo-alt-fill me-1"></i>
+                        <span class="badge bg-secondary d-flex align-items-center px-3 py-1 shadow-sm" style="font-size:0.92rem; height:32px; line-height:32px; border-radius:0.5rem;">
+                            <i class="bi bi-geo-alt-fill me-1" style="font-size:1.1em;"></i>
                             @(Model?.FirstOrDefault()?.LocName ?? "Location Details")
                         </span>
+                        @{
+                            var status = ViewBag.LocationStatus as string ?? "Pending";
+                            var statusBadgeClass = status switch {
+                                "Pending" => "bg-secondary",
+                                "In Progress" => "bg-info",
+                                "Completed" => "bg-success",
+                                "Verified" => "bg-primary",
+                                _ => "bg-secondary"
+                            };
+                            var statusIcon = status switch {
+                                "Pending" => "bi-clock",
+                                "In Progress" => "bi-play-circle",
+                                "Completed" => "bi-check-circle",
+                                "Verified" => "bi-shield-check",
+                                _ => "bi-question-circle"
+                            };
+                        }
+                        <span class="badge @statusBadgeClass d-flex align-items-center px-3 py-1 shadow-sm ms-1" style="font-size:0.92rem; letter-spacing:0.01em; height:32px; line-height:32px; border-radius:0.5rem;">
+                            <i class="bi @statusIcon me-1" style="font-size:1.1em;"></i>
+                            @status
+                        </span>
+                        @if (ViewBag.IsCompleted == true)
+                        {
+                            var firstItem = Model?.FirstOrDefault();
+                            if (firstItem != null)
+                            {
+                                <button type="button" 
+                                        class="btn btn-warning d-flex align-items-center gap-1 px-3 py-1 shadow-sm border-0 ms-1" 
+                                        style="font-size:0.92rem; height:32px; line-height:32px; font-weight:500; letter-spacing:0.01em; border-radius:0.5rem;" 
+                                        onclick="unlockLocationForEditing(@firstItem.SurveyID, @firstItem.LocID)">
+                                    <i class="bi bi-unlock" style="font-size:1.1em;"></i> 
+                                    <span class="d-none d-sm-inline">Unlock for Editing</span>
+                                    <span class="d-inline d-sm-none">Unlock</span>
+                                </button>
+                            }
+                        }
+                        
+                        @* Show warning if completed *@
+                        @if (ViewBag.IsCompleted == true)
+                        {
+                            <div class="alert alert-warning mt-3 mb-0">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                <strong>Location is @status!</strong> Items cannot be modified. Click "Unlock for Editing" to make changes.
+                            </div>
+                        }
                     </div>
 
                     <div class="accordion mt-4" id="accordionExample">
@@ -107,7 +152,7 @@
                                     <div class="accordion-body">
                                         @if (!string.IsNullOrWhiteSpace(gridData.TypeDesc))
                                         {
-                                            <div class="alert alert-info mb-3">
+                                            <div class="alert alert-info mb-2 mt-2">
                                                 <i class="bi bi-info-circle me-2"></i><strong>Description:</strong> @gridData.TypeDesc
                                             </div>
                                         }
@@ -222,8 +267,8 @@
 <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header bg-purple text-white">
-                <h5 class="modal-title" id="previewModalLabel">
+            <div class="modal-header bg-purple text-white py-3">
+                <h5 class="modal-title fw-bold text-white" id="previewModalLabel">
                     <i class="bi bi-eye-fill me-2"></i>Survey Preview - All Items
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -273,80 +318,15 @@
 </style>
 
 @section Scripts {
+    <script src="~/js/survey-details.js"></script>
     <script>
-        let currentSurveyId = 0;
-        let currentLocId = 0;
-
-        function showPreviewModal(surveyId, locId) {
-            currentSurveyId = surveyId;
-            currentLocId = locId;
-            
-            // Show modal
-            var modal = new bootstrap.Modal(document.getElementById('previewModal'));
-            modal.show();
-            
-            // Load preview data
-            $.ajax({
-                url: '@Url.Action("GetLocationPreview", "SurveyDetails")',
-                type: 'GET',
-                data: { surveyId: surveyId, locId: locId },
-                success: function(html) {
-                    $('#previewModalContent').html(html);
-                },
-                error: function(xhr, status, error) {
-                    $('#previewModalContent').html(
-                        '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>Failed to load preview. Please try again.</div>'
-                    );
-                }
-            });
-        }
-
-        function submitLocationCompletion() {
-            if (!confirm('Are you sure you want to submit and mark this location as completed? This action cannot be undone.')) {
-                return;
-            }
-            
-            $('#submitLocationBtn').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Submitting...');
-            
-            $.ajax({
-                url: '@Url.Action("SubmitLocationCompletion", "SurveyDetails")',
-                type: 'POST',
-                data: { 
-                    surveyId: currentSurveyId, 
-                    locId: currentLocId,
-                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Close modal
-                        var modal = bootstrap.Modal.getInstance(document.getElementById('previewModal'));
-                        modal.hide();
-                        
-                        // Show success message
-                        var alertHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
-                            '<strong>Success!</strong> ' + response.message +
-                            '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
-                            '</div>';
-                        $('.card-body').prepend(alertHtml);
-                        
-                        // Optionally reload the page
-                        setTimeout(function() {
-                            location.reload();
-                        }, 2000);
-                    } else {
-                        alert('Error: ' + response.message);
-                        $('#submitLocationBtn').prop('disabled', false).html('<i class="bi bi-check-circle me-2"></i>Submit & Mark as Completed');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    alert('Failed to submit. Please try again.');
-                    $('#submitLocationBtn').prop('disabled', false).html('<i class="bi bi-check-circle me-2"></i>Submit & Mark as Completed');
-                }
-            });
-        }
-
-        $(document).ready(function () {
-            // Initialize any plugins if needed
-        });
+        // Initialize survey details with Razor-generated URLs
+        initSurveyDetails(
+            '@Url.Action("GetLocationPreview", "SurveyDetails")',
+            '@Url.Action("SubmitLocationCompletion", "SurveyDetails")',
+            '@Url.Action("UnlockLocationForEditing", "SurveyDetails")',
+            @((ViewBag.IsCompleted ?? false).ToString().ToLower()),
+            $('input[name="__RequestVerificationToken"]').val()
+        );
     </script>
 }

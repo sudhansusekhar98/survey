@@ -12,13 +12,15 @@ namespace SurveyApp.Controllers
     {
         private readonly ISurvey _surveyRepository;
         private readonly ICommonUtil _util;
-        private readonly IAdmin _adminRepository; 
+        private readonly IAdmin _adminRepository;
+        private readonly ISurveyLocationStatus _statusRepo;
 
-        public SurveyCreationController(ISurvey surveyRepository, ICommonUtil util, IAdmin adminRepository)
+        public SurveyCreationController(ISurvey surveyRepository, ICommonUtil util, IAdmin adminRepository, ISurveyLocationStatus statusRepo)
         {
             _surveyRepository = surveyRepository;
             _util = util;
-            _adminRepository = adminRepository; 
+            _adminRepository = adminRepository;
+            _statusRepo = statusRepo;
         }
 
             // GET: SurveyCreation/CameraDevices 
@@ -438,8 +440,22 @@ namespace SurveyApp.Controllers
 
             // Fetch locations for the selected survey
             var locations = _surveyRepository.GetSurveyLocationById(surveyId) ?? new List<SurveyLocationModel>();
+            
+            // Get all location statuses for this survey (with error handling)
+            try
+            {
+                var statuses = _statusRepo.GetSurveyLocationStatuses(surveyId);
+                ViewBag.LocationStatuses = statuses.ToDictionary(s => s.LocID, s => s.Status);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading location statuses: {ex.Message}");
+                ViewBag.LocationStatuses = new Dictionary<int, string>();
+            }
+            
             ViewBag.SelectedSurveyId = surveyId;
             ViewBag.SelectedSurveyName = SurveyName;
+            ViewBag.LocationTypeOptions = SurveyLocationModel.LocationTypeOptions;
             return View("SurveyLocation", locations);
         }
 
@@ -696,6 +712,120 @@ namespace SurveyApp.Controllers
                 TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
                 TempData["ResultType"] = "danger";
                 return RedirectToAction("Index");
+            }
+        }
+
+        // Survey Location Status Management Actions
+        
+        [HttpPost]
+        public IActionResult MarkLocationAsCompleted(long surveyId, int locId, string? remarks)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
+                
+                // Log the parameters being sent
+                Console.WriteLine($"MarkLocationAsCompleted called: SurveyID={surveyId}, LocID={locId}, UserID={userId}, Remarks={remarks}");
+                
+                bool result = _statusRepo.MarkLocationAsCompleted(surveyId, locId, userId, remarks);
+                
+                if (result)
+                {
+                    return Json(new { success = true, message = "Location marked as completed successfully." });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to mark location as completed. Check server logs for details." });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"MarkLocationAsCompleted Exception: {ex.ToString()}");
+                return Json(new { success = false, message = $"Error: {ex.Message}\n{ex.StackTrace}" });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult MarkLocationAsInProgress(long surveyId, int locId, string? remarks)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
+                
+                bool result = _statusRepo.MarkLocationAsInProgress(surveyId, locId, userId, remarks);
+                
+                if (result)
+                {
+                    return Json(new { success = true, message = "Location marked as in progress successfully." });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to mark location as in progress." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult MarkLocationAsVerified(long surveyId, int locId, string? remarks)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
+                
+                bool result = _statusRepo.MarkLocationAsVerified(surveyId, locId, userId, remarks);
+                
+                if (result)
+                {
+                    return Json(new { success = true, message = "Location marked as verified successfully." });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to mark location as verified." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetLocationStatus(long surveyId, int locId)
+        {
+            try
+            {
+                var status = _statusRepo.GetLocationStatus(surveyId, locId);
+                
+                if (status != null)
+                {
+                    return Json(new { success = true, data = status });
+                }
+                else
+                {
+                    return Json(new { success = true, data = new { Status = "Pending" } });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetSurveyLocationStatuses(long surveyId)
+        {
+            try
+            {
+                var statuses = _statusRepo.GetSurveyLocationStatuses(surveyId);
+                return Json(new { success = true, data = statuses });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
             }
         }
     }

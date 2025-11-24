@@ -1,0 +1,186 @@
+@model IEnumerable<SurveyApp.Models.ClientMasterModel>
+@{
+    ViewData["Title"] = "Client Master";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-purple py-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5 class="text-white mb-0 fw-bold">
+                                <i class="bi bi-people-fill me-2"></i>Client Master
+                            </h5>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <a asp-action="Create" class="btn btn-light">
+                                <i class="bi bi-plus-circle me-2"></i>Add New Client
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    @if (TempData["ResultMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
+                    {
+                        <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show" role="alert">
+                            @Html.Raw(TempData["ResultMessage"])
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="table-responsive">
+                        <table class="table table-hover datatables-basic" id="clientsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Client ID</th>
+                                    <th>Client Name</th>
+                                    <th>Client Type</th>
+                                    <th>City</th>
+                                    <th>State</th>
+                                    <th>Contact Person</th>
+                                    <th>Contact Number</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.Any())
+                                {
+                                    foreach (var client in Model)
+                                    {
+                                        <tr>
+                                            <td>@client.ClientID</td>
+                                            <td><strong>@client.ClientName</strong></td>
+                                            <td><span class="badge bg-info">@client.ClientType</span></td>
+                                            <td>@(client.City ?? "-")</td>
+                                            <td>@(client.State ?? "-")</td>
+                                            <td>@(client.ContactPerson ?? "-")</td>
+                                            <td>@(client.ContactNumber ?? "-")</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="Edit" asp-route-id="@client.ClientID" 
+                                                       class="btn btn-sm btn-warning" title="Edit">
+                                                        <i class="bi bi-pencil-square"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-danger" 
+                                                            onclick="deleteClient(@client.ClientID, '@client.ClientName')" 
+                                                            title="Delete">
+                                                        <i class="bi bi-trash-fill"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted py-4">
+                                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                            No clients found. Click "Add New Client" to get started.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            @if (Model != null && Model.Any())
+            {
+                <text>
+                // Initialize DataTable
+                var table = $('#clientsTable').DataTable({
+                    "pageLength": 25,
+                    "order": [[0, "desc"]],
+                    "language": {
+                        "search": "Search clients:"
+                    }
+                });
+
+                // Load state and city names from API
+                loadLocationNames();
+
+                async function loadLocationNames() {
+                    try {
+                        // Fetch all states
+                        const statesResponse = await fetch('/api/Location/states');
+                        const states = await statesResponse.json();
+
+                        // Create a map of state IDs to names
+                        const stateMap = {};
+                        states.forEach(state => {
+                            stateMap[state.id] = state.name;
+                        });
+
+                        // Update all state cells
+                        table.rows().every(function() {
+                            const row = this.node();
+                            const stateCell = $(row).find('td:eq(4)'); // State column (index 4)
+                            const cityCell = $(row).find('td:eq(3)'); // City column (index 3)
+                            const stateId = stateCell.text().trim();
+
+                            if (stateId && stateId !== '-' && stateMap[stateId]) {
+                                stateCell.text(stateMap[stateId]);
+
+                                // Load cities for this state
+                                const cityId = cityCell.text().trim();
+                                if (cityId && cityId !== '-') {
+                                    loadCityName(stateId, cityId, cityCell);
+                                }
+                            }
+                        });
+                    } catch (error) {
+                        console.error('Error loading location names:', error);
+                    }
+                }
+
+                async function loadCityName(stateId, cityId, cityCell) {
+                    try {
+                        const citiesResponse = await fetch(`/api/Location/cities/${stateId}`);
+                        const cities = await citiesResponse.json();
+                        const city = cities.find(c => c.id.toString() === cityId);
+                        if (city) {
+                            cityCell.text(city.name);
+                        }
+                    } catch (error) {
+                        console.error(`Error loading city name for ID ${cityId}:`, error);
+                    }
+                }
+                </text>
+            }
+        });
+
+        function deleteClient(clientId, clientName) {
+            if (confirm(`Are you sure you want to delete client "${clientName}"?`)) {
+                $.ajax({
+                    url: '@Url.Action("Delete", "ClientMaster")',
+                    type: 'POST',
+                    data: {
+                        id: clientId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (result) {
+                        if (result.success) {
+                            location.reload();
+                        } else {
+                            alert('Error: ' + result.message);
+                        }
+                    },
+                    error: function () {
+                        alert('An error occurred while deleting the client.');
+                    }
+                });
+            }
+        }
+    </script>
+}

@@ -1,105 +1,160 @@
 @model IEnumerable<SurveyApp.Models.SurveyDetailsLocationModel>
 
+@* Custom Styles for this View *@
+<style>
+    :root {
+        --app-purple: #6f42c1; /* Adjust to match your exact brand purple */
+        --app-purple-light: #f3e8ff;
+    }
+    .bg-purple { background-color: var(--app-purple) !important; }
+    .text-purple { color: var(--app-purple) !important; }
+    .border-purple { border-color: var(--app-purple) !important; }
+    
+    .hover-lift {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    }
+    .stat-box {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 8px;
+        text-align: center;
+        border: 1px solid #e9ecef;
+    }
+    .stat-box.required {
+        background-color: #d1e7dd;
+        border-color: #badbcc;
+        color: #0f5132;
+    }
+    .img-wrapper {
+        position: relative;
+        overflow: hidden;
+        border-radius: 6px;
+    }
+</style>
+
 @if (Model != null && Model.Any())
 {
     var firstItem = Model.FirstOrDefault();
-    
-    <div class="mb-4">
-        <div class="row">
-            <div class="col-md-6">
-                <h6 class="text-muted">Survey:</h6>
-                <p class="fw-bold">@(firstItem?.SurveyName ?? "N/A")</p>
-            </div>
-            <div class="col-md-6">
-                <h6 class="text-muted">Location:</h6>
-                <p class="fw-bold">@(firstItem?.LocName ?? "N/A")</p>
+    @* Top Summary Card *@
+    <div class="card border-0 shadow-sm mb-4 border-start border-5 border-purple">
+        <div class="card-body py-3">
+            <div class="row align-items-center">
+                <div class="col-md-6 border-end-md">
+                    <small class="text-uppercase text-muted fw-bold" style="font-size: 0.75rem;">Survey Name</small>
+                    <h5 class="text-dark mb-0 fw-bold">
+                        <i class="bi bi-clipboard-data text-purple me-2"></i>@(firstItem?.SurveyName ?? "N/A")
+                    </h5>
+                </div>
+                <div class="col-md-6 ps-md-4 mt-3 mt-md-0">
+                    <small class="text-uppercase text-muted fw-bold" style="font-size: 0.75rem;">Location</small>
+                    <h5 class="text-dark mb-0 fw-bold">
+                        <i class="bi bi-geo-alt-fill text-danger me-2"></i>@(firstItem?.LocName ?? "N/A")
+                    </h5>
+                </div>
             </div>
         </div>
     </div>
 
-    <hr />
+    <hr class="my-4 text-muted opacity-25"/>
 
     @foreach (var typeGroup in Model)
     {
-        <div class="mb-4">
-            <h5 class="bg-light p-3 rounded">
-                <i class="bi bi-cpu me-2 text-primary"></i>@typeGroup.TypeName
-                @if (!string.IsNullOrWhiteSpace(typeGroup.TypeDesc))
-                {
-                    <small class="text-muted d-block mt-1">@typeGroup.TypeDesc</small>
-                }
-            </h5>
+        <div class="mb-5">
+            @* Section Header *@
+            <div class="d-flex align-items-center bg-purple p-3 rounded shadow-sm mb-3">
+                <div class="display-6 me-3 text-white"><i class="bi bi-cpu"></i></div>
+                <div>
+                    <h5 class="mb-0 fw-bold text-white">@typeGroup.TypeName</h5>
+                    @if (!string.IsNullOrWhiteSpace(typeGroup.TypeDesc))
+                    {
+                        <small class="text-white opacity-75">@typeGroup.TypeDesc</small>
+                    }
+                </div>
+            </div>
 
             @if (typeGroup.ItemLists != null && typeGroup.ItemLists.Any())
             {
-                <div class="row g-3 mt-2">
+                <div class="row g-3">
                     @foreach (var item in typeGroup.ItemLists)
                     {
                         <div class="col-12 col-md-6 col-lg-4">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-header bg-purple text-white">
-                                    <h6 class="mb-0">@item.ItemName</h6>
-                                    <small>ID: @item.ItemID</small>
+                            <div class="card h-100 shadow-sm border-0 hover-lift">
+                                @* Card Header *@
+                                <div class="card-header bg-purple py-3 d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0 fw-bold text-white text-truncate" title="@item.ItemName">
+                                        @item.ItemName
+                                    </h6>
+                                    <span class="badge bg-light text-dark border">ID: @item.ItemID</span>
                                 </div>
+
                                 <div class="card-body">
-                                    @* Display Images *@
-                                    @if (!string.IsNullOrWhiteSpace(item.ImgPath))
-                                    {
-                                        var imagePaths = item.ImgPath.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                                        var imageIds = item.ImgID?.Split(',', StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
-                                        
-                                        <div class="mb-3">
-                                            <label class="fw-bold text-muted small mb-2">
-                                                <i class="bi bi-images me-1"></i>Captured Images (@imagePaths.Length)
-                                            </label>
+                                    @* Image Section *@
+                                    <div class="mb-3">
+                                        @if (!string.IsNullOrWhiteSpace(item.ImgPath))
+                                        {
+                                            var imagePaths = item.ImgPath.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                                            var imageIds = item.ImgID?.Split(',', StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
+                                            
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="bi bi-camera text-muted me-2"></i>
+                                                <span class="text-muted small fw-bold">Photos (@imagePaths.Length)</span>
+                                            </div>
+                                            
                                             <div class="row g-2">
                                                 @for (int i = 0; i < imagePaths.Length; i++)
                                                 {
                                                     <div class="col-6">
-                                                        <img src="@imagePaths[i].Trim()" 
-                                                             alt="Item @item.ItemName - Image @(i+1)" 
-                                                             class="img-fluid rounded border"
-                                                             style="max-height: 150px; width: 100%; object-fit: cover;"
-                                                             onerror="this.src='/img/elements/Noimage.png'" />
+                                                        <div class="img-wrapper border">
+                                                            <img src="@imagePaths[i].Trim()" 
+                                                                 alt="Item @item.ItemName" 
+                                                                 class="img-fluid w-100"
+                                                                 style="height: 120px; object-fit: cover;"
+                                                                 onerror="this.src='/img/elements/Noimage.png'" />
+                                                        </div>
                                                     </div>
                                                 }
                                             </div>
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <div class="mb-3 text-center">
-                                            <img src="~/img/elements/Noimage.png" 
-                                                 alt="No image" 
-                                                 class="img-fluid rounded border opacity-50"
-                                                 style="max-height: 150px;" />
-                                            <p class="text-muted small mt-2">No images captured</p>
-                                        </div>
-                                    }
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light rounded p-4 text-center border border-dashed">
+                                                <img src="~/img/elements/Noimage.png" 
+                                                     class="opacity-25 mb-2" 
+                                                     style="width: 40px; height: auto;" />
+                                                <p class="text-muted small mb-0">No images captured</p>
+                                            </div>
+                                        }
+                                    </div>
 
-                                    @* Item Details *@
-                                    <div class="row mb-2">
+                                    @* Statistics / Quantities *@
+                                    <div class="row g-2 mb-3">
                                         <div class="col-6">
-                                            <small class="text-muted d-block">
-                                                <i class="bi bi-box me-1"></i>Existing
-                                            </small>
-                                            <span class="badge bg-secondary">@item.ItemQtyExist</span>
+                                            <div class="stat-box">
+                                                <div class="small text-muted text-uppercase fw-bold" style="font-size: 0.65rem;">Existing</div>
+                                                <div class="fs-5 fw-bold text-dark">@item.ItemQtyExist</div>
+                                            </div>
                                         </div>
                                         <div class="col-6">
-                                            <small class="text-muted d-block">
-                                                <i class="bi bi-cart-plus me-1"></i>Required
-                                            </small>
-                                            <span class="badge bg-success">@item.ItemQtyReq</span>
+                                            <div class="stat-box required">
+                                                <div class="small text-uppercase fw-bold" style="font-size: 0.65rem;">Required</div>
+                                                <div class="fs-5 fw-bold">@item.ItemQtyReq</div>
+                                            </div>
                                         </div>
                                     </div>
 
+                                    @* Remarks Section *@
                                     @if (!string.IsNullOrWhiteSpace(item.Remarks))
                                     {
-                                        <div class="mt-2">
-                                            <small class="text-muted d-block">
-                                                <i class="bi bi-chat-left-text me-1"></i>Remarks
-                                            </small>
-                                            <p class="small mb-0">@item.Remarks</p>
+                                        <div class="bg-light p-2 rounded border">
+                                            <div class="d-flex text-muted small mb-1">
+                                                <i class="bi bi-chat-quote-fill me-2 text-purple"></i>
+                                                <span class="fw-bold">Remarks</span>
+                                            </div>
+                                            <p class="small mb-0 text-dark fst-italic">"@item.Remarks"</p>
                                         </div>
                                     }
                                 </div>
@@ -110,21 +165,27 @@
             }
             else
             {
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle me-2"></i>No items added for this type yet.
+                <div class="alert alert-light border text-center py-4">
+                    <i class="bi bi-clipboard-x display-6 text-muted d-block mb-2"></i>
+                    <span class="text-muted">No items found for this category.</span>
                 </div>
             }
         </div>
     }
 
-    <div class="alert alert-info mt-4">
-        <i class="bi bi-info-circle me-2"></i>
-        <strong>Review all items above before submitting.</strong> Once submitted, this location will be marked as completed.
+    <div class="alert alert-info shadow-sm border-0 d-flex align-items-center mt-5">
+        <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+        <div>
+            <h6 class="alert-heading fw-bold mb-1">Ready to Submit?</h6>
+            <p class="mb-0 small">Please review all items above. Submitting will mark this location as completed.</p>
+        </div>
     </div>
 }
 else
 {
-    <div class="alert alert-warning">
-        <i class="bi bi-exclamation-triangle me-2"></i>No data available for preview.
+    <div class="text-center py-5">
+        <div class="display-1 text-muted opacity-25 mb-3"><i class="bi bi-folder-x"></i></div>
+        <h4 class="text-muted">No Data Available</h4>
+        <p class="text-muted small">There is no survey data to display for the selected criteria.</p>
     </div>
 }

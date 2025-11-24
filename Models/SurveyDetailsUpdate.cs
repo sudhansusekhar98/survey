@@ -5,6 +5,7 @@
         public Int64 SurveyID { get; set; }
         public int LocID { get; set; }
         public int ItemTypeID { get; set; }
+        public string? TypeName { get; set; }
 
         public int CreateBy { get; set; }
         public List<SurveyDetailsUpdatelist> ItemLists { get; set; } = new List<SurveyDetailsUpdatelist>();

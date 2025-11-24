@@ -2,6 +2,7 @@ using AnalyticaDocs.Repo;
 using AnalyticaDocs.Repository;
 using SurveyApp.Repo;
 using SurveyApp.Data;
+using SurveyApp.Services;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 
@@ -36,6 +37,9 @@ builder.Services.AddHttpClient<SurveyApp.Services.ILocationApiService, SurveyApp
 builder.Services.AddScoped<ICommonUtil, CommonUtil>();
 builder.Services.AddScoped<IAdmin, AdminRepo>();
 builder.Services.AddScoped<ISurvey, SurveyRepo>();
+builder.Services.AddScoped<ISurveyLocation, SurveyLocationRepo>();
+builder.Services.AddScoped<ISurveyLocationStatus, SurveyLocationStatusRepo>();
+builder.Services.AddScoped<IClientMaster, ClientMasterRepo>();
 
 // Register new EF Core repositories
 builder.Services.AddScoped<IItemTypeRepository, ItemTypeRepository>();

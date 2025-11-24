@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace SurveyApp.Models
 {
@@ -20,5 +21,14 @@ namespace SurveyApp.Models
         public DateTime? CreateOn { get; set; }
         public int? CreateBy { get; set; }
         public bool Isactive { get; set; }
+
+        [Display(Name = "Location Type")]
+        public string? LocationType { get; set; }
+
+        public static List<SelectListItem> LocationTypeOptions => new List<SelectListItem>
+        {
+            new SelectListItem { Text = "Traffic", Value = "Traffic" },
+            new SelectListItem { Text = "Non-Traffic", Value = "Non-Traffic" }
+        };
     }
 }

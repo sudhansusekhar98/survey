@@ -81,10 +81,8 @@
     <Compile Remove="Models\StoreViewModel.cs" />
     <Compile Remove="Repo\IPower.cs" />
     <Compile Remove="Repo\IStore.cs" />
-    <Compile Remove="Repo\ISurveyLocation.cs" />
     <Compile Remove="Repo\PowerRepo.cs" />
     <Compile Remove="Repo\StoreRepo.cs" />
-    <Compile Remove="Repo\SurveyLocationRepo.cs" />
   </ItemGroup>
 
   <ItemGroup>
