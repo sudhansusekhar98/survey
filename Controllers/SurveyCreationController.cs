@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using SurveyApp.Models;
 using SurveyApp.Repo;
 using System;
+using System.Linq;
 
 namespace SurveyApp.Controllers
 {
@@ -14,13 +15,17 @@ namespace SurveyApp.Controllers
         private readonly ICommonUtil _util;
         private readonly IAdmin _adminRepository;
         private readonly ISurveyLocationStatus _statusRepo;
+        private readonly IClientMaster _clientRepository;
+        private readonly SurveyApp.Services.ILocationApiService _locationService;
 
-        public SurveyCreationController(ISurvey surveyRepository, ICommonUtil util, IAdmin adminRepository, ISurveyLocationStatus statusRepo)
+        public SurveyCreationController(ISurvey surveyRepository, ICommonUtil util, IAdmin adminRepository, ISurveyLocationStatus statusRepo, IClientMaster clientRepository, SurveyApp.Services.ILocationApiService locationService)
         {
             _surveyRepository = surveyRepository;
             _util = util;
             _adminRepository = adminRepository;
             _statusRepo = statusRepo;
+            _clientRepository = clientRepository;
+            _locationService = locationService;
         }
 
             // GET: SurveyCreation/CameraDevices 
@@ -52,13 +57,11 @@ namespace SurveyApp.Controllers
         // GET: SurveyCreation/Create
         public IActionResult Create()
         {
-            //CheckAuthorization(Controller controller, int RightsId, int? RegionId, Int64? SurveyId, string Type)
-            //int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
             var result = _util.CheckAuthorizationAll(this, 103, null, null, "Create");
             if (result != null) return result;
 
-
             ViewBag.Regions = new SelectList(_adminRepository.GetRegionMaster(), "RegionID", "RegionDesc");
+            ViewBag.Clients = new SelectList(_clientRepository.GetAllClients(), "ClientID", "ClientName");
             return View("SurveyCreation", new SurveyModel());
         }
 
@@ -277,10 +280,14 @@ namespace SurveyApp.Controllers
                             ViewBag.Employees = new SelectList(_adminRepository.GetEmpMaster(), "EmpID", "EmpName");
                             foreach (var key in ModelState.Keys)
                             {
-                                var errors = ModelState[key].Errors;
-                                foreach (var error in errors)
+                                var modelStateEntry = ModelState[key];
+                                if (modelStateEntry != null)
                                 {
-                                    Console.WriteLine($"{key}: {error.ErrorMessage}");
+                                    var errors = modelStateEntry.Errors;
+                                    foreach (var error in errors)
+                                    {
+                                        Console.WriteLine($"{key}: {error.ErrorMessage}");
+                                    }
                                 }
                             }
                             TempData["ResultMessage"] = "<strong>Validation Error!</strong> Please check all required fields.";
@@ -822,6 +829,64 @@ namespace SurveyApp.Controllers
             {
                 var statuses = _statusRepo.GetSurveyLocationStatuses(surveyId);
                 return Json(new { success = true, data = statuses });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetClientDetails(int clientId)
+        {
+            try
+            {
+                var client = _clientRepository.GetClientById(clientId);
+                if (client == null)
+                {
+                    return Json(new { success = false, message = "Client not found" });
+                }
+
+                int? stateId = null;
+                int? cityId = null;
+
+                // Map state name to ID
+                if (!string.IsNullOrWhiteSpace(client.State))
+                {
+                    var states = await _locationService.GetStatesAsync();
+                    var matchedState = states.FirstOrDefault(s => 
+                        string.Equals(s.name, client.State, StringComparison.OrdinalIgnoreCase));
+                    
+                    if (matchedState != null)
+                    {
+                        stateId = matchedState.id;
+
+                        // Map city name to ID
+                        if (!string.IsNullOrWhiteSpace(client.City))
+                        {
+                            var cities = await _locationService.GetCitiesByStateAsync(matchedState.id);
+                            var matchedCity = cities.FirstOrDefault(c => 
+                                string.Equals(c.name, client.City, StringComparison.OrdinalIgnoreCase));
+                            cityId = matchedCity?.id;
+                        }
+                    }
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    data = new
+                    {
+                        clientName = client.ClientName,
+                        address = client.Address1,
+                        contactPerson = client.ContactPerson,
+                        contactNumber = client.ContactNumber,
+                        stateId,
+                        stateName = client.State,
+                        cityId,
+                        cityName = client.City
+                    }
+                });
             }
             catch (Exception ex)
             {

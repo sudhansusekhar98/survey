@@ -86,7 +86,6 @@ namespace SurveyApp.Controllers
         // GET: ClientMaster/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
             var result = _util.CheckAuthorizationAll(this, 104, null, null, "Update");
             if (result != null) return result;
 
@@ -100,10 +99,18 @@ namespace SurveyApp.Controllers
 
             ViewBag.States = await _locationService.GetStatesAsync();
             
-            // If client has a state, load cities for that state
-            if (!string.IsNullOrEmpty(client.State) && int.TryParse(client.State, out int stateId))
+            // If client has a state name, find matching state ID and load its cities
+            if (!string.IsNullOrWhiteSpace(client.State))
             {
-                ViewBag.Cities = await _locationService.GetCitiesByStateAsync(stateId);
+                var states = await _locationService.GetStatesAsync();
+                var matchedState = states.FirstOrDefault(s => 
+                    string.Equals(s.name, client.State, StringComparison.OrdinalIgnoreCase));
+                
+                if (matchedState != null)
+                {
+                    ViewBag.Cities = await _locationService.GetCitiesByStateAsync(matchedState.id);
+                    ViewBag.SelectedStateId = matchedState.id;
+                }
             }
 
             return View(client);
@@ -114,7 +121,6 @@ namespace SurveyApp.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(ClientMasterModel model)
         {
-            int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
             var result = _util.CheckAuthorizationAll(this, 104, null, null, "Update");
             if (result != null) return result;
 

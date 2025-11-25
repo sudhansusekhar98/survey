@@ -58,6 +58,10 @@ namespace SurveyApp.Models
         public int? RegionID { get; set; }
         public string? RegionName { get; set; }
 
+        [Display(Name = "Client")]
+        public int? ClientID { get; set; }
+        public string? ClientName { get; set; }
+
         // Options for dropdowns - populated from API
         public List<SelectListItem> StateOptions { get; set; } = new();
         public List<SelectListItem> CityOptions { get; set; } = new();

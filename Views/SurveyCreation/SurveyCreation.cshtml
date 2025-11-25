@@ -62,6 +62,16 @@
 
                             <div class="col-12 col-md-6">
                                 <div class="form-custom-floating">
+                                    <select asp-for="ClientID" id="clientDropdown" asp-items="@(ViewBag.Clients as SelectList)" class="form-select" placeholder=" ">
+                                        <option value=""> </option>
+                                    </select>
+                                    <label asp-for="ClientID"></label>
+                                    <span asp-validation-for="ClientID" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
                                     <select asp-for="RegionID" asp-items="@(ViewBag.Regions as SelectList)" class="form-select" placeholder=" ">
                                         <option value=""> </option>
                                     </select>
@@ -102,37 +112,49 @@
 
                             <div class="col-12 col-md-6">
                                 <div class="form-custom-floating">
-                                    <input asp-for="AgencyName" type="text" class="form-control" placeholder=" ">
-                                    <label>Client Name</label>
+                                    <input asp-for="AgencyName" type="text" class="form-control" placeholder=" " id="agencyNameInput" readonly>
+                                    <label asp-for="AgencyName"></label>
                                 </div>
                             </div>
 
                             <div class="col-12 col-md-6">
                                 <div class="form-custom-floating">
-                                    <select asp-for="StateId" id="stateDropdown" class="form-select" placeholder=" ">
-                                        <option value=""> </option>
-                                    </select>
-                                    <label asp-for="StateId"></label>
+                                    <input type="text" class="form-control" placeholder=" " id="stateInput" readonly>
+                                    <label>State</label>
                                 </div>
                             </div>
 
                             <div class="col-12 col-md-6">
                                 <div class="form-custom-floating">
-                                    <select asp-for="CityId" id="cityDropdown" class="form-select" placeholder=" " disabled>
-                                        <option value=""> </option>
-                                    </select>
-                                    <label asp-for="CityId"></label>
+                                    <input type="text" class="form-control" placeholder=" " id="cityInput" readonly>
+                                    <label>City</label>
                                 </div>
                             </div>
 
-                            <!-- Hidden fields to store state and city names -->
+                            <!-- Hidden fields to store state and city names and IDs -->
+                            <input type="hidden" asp-for="StateId" id="stateIdHidden" />
                             <input type="hidden" asp-for="MapMarking" id="stateNameHidden" />
+                            <input type="hidden" asp-for="CityId" id="cityIdHidden" />
                             <input type="hidden" asp-for="CityDistrict" id="cityNameHidden" />
 
                             <div class="col-12 col-md-6">
                                 <div class="form-custom-floating">
-                                    <input asp-for="LocationSiteName" type="text" class="form-control" placeholder=" ">
+                                    <input asp-for="LocationSiteName" type="text" class="form-control" placeholder=" " id="addressInput" readonly>
                                     <label asp-for="LocationSiteName"></label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input type="text" class="form-control" placeholder=" " id="contactPersonInput" readonly>
+                                    <label>Contact Person</label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-custom-floating">
+                                    <input type="text" class="form-control" placeholder=" " id="contactNumberInput" readonly>
+                                    <label>Contact Number</label>
                                 </div>
                             </div>
 
@@ -179,78 +201,52 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
-            // Load states on page load
-            loadStates();
-        });
-
-        function loadStates() {
-            $.ajax({
-                url: '@Url.Content("~/api/Location/states")',
-                type: 'GET',
-                success: function(states) {
-                    var stateDropdown = $('#stateDropdown');
-                    stateDropdown.empty();
-                    stateDropdown.append('<option value="">--Select State--</option>');
-                    
-                    $.each(states, function(index, state) {
-                        stateDropdown.append($('<option></option>').val(state.id).text(state.name));
+            // Handle client selection
+            $('#clientDropdown').change(function() {
+                var clientId = $(this).val();
+                
+                if (clientId) {
+                    $.ajax({
+                        url: '@Url.Action("GetClientDetails", "SurveyCreation")',
+                        type: 'GET',
+                        data: { clientId: clientId },
+                        success: function(response) {
+                            if (response.success) {
+                                applyClientDetails(response.data);
+                            } else {
+                                alert('Error loading client details: ' + response.message);
+                            }
+                        },
+                        error: function() {
+                            alert('Failed to load client details. Please try again.');
+                        }
                     });
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error loading states:', error);
-                    console.error('XHR:', xhr);
-                    alert('Failed to load states. Please refresh the page.');
+                } else {
+                    clearClientFields();
                 }
             });
+        });
+
+        function applyClientDetails(client) {
+            // Populate readonly fields
+            $('#agencyNameInput').val(client.clientName || '');
+            $('#addressInput').val(client.address || '');
+            $('#contactPersonInput').val(client.contactPerson || '');
+            $('#contactNumberInput').val(client.contactNumber || '');
+            $('#stateInput').val(client.stateName || '');
+            $('#cityInput').val(client.cityName || '');
+            
+            // Populate hidden fields for form submission
+            $('#stateIdHidden').val(client.stateId || '');
+            $('#stateNameHidden').val(client.stateName || '');
+            $('#cityIdHidden').val(client.cityId || '');
+            $('#cityNameHidden').val(client.cityName || '');
         }
 
-        // When state changes, load cities
-        $('#stateDropdown').change(function() {
-            var stateId = $(this).val();
-            var stateName = $('#stateDropdown option:selected').text();
-            var cityDropdown = $('#cityDropdown');
-            
-            // Update hidden field with state name
-            $('#stateNameHidden').val(stateName !== '--Select State--' ? stateName : '');
-            
-            if (stateId) {
-                cityDropdown.prop('disabled', true);
-                cityDropdown.empty();
-                cityDropdown.append('<option value="">Loading cities...</option>');
-                
-                $.ajax({
-                    url: '@Url.Content("~/api/Location/cities/")' + stateId,
-                    type: 'GET',
-                    success: function(cities) {
-                        cityDropdown.empty();
-                        cityDropdown.append('<option value="">--Select City--</option>');
-                        
-                        $.each(cities, function(index, city) {
-                            cityDropdown.append($('<option></option>').val(city.id).text(city.name));
-                        });
-                        
-                        cityDropdown.prop('disabled', false);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error loading cities:', error);
-                        console.error('XHR:', xhr);
-                        cityDropdown.empty();
-                        cityDropdown.append('<option value="">Error loading cities</option>');
-                    }
-                });
-            } else {
-                cityDropdown.empty();
-                cityDropdown.append('<option value="">--Select City--</option>');
-                cityDropdown.prop('disabled', true);
-                $('#cityNameHidden').val('');
-            }
-        });
-
-        // When city changes, update hidden field
-        $('#cityDropdown').change(function() {
-            var cityName = $('#cityDropdown option:selected').text();
-            $('#cityNameHidden').val(cityName !== '--Select City--' ? cityName : '');
-        });
+        function clearClientFields() {
+            $('#agencyNameInput, #addressInput, #contactPersonInput, #contactNumberInput, #stateInput, #cityInput').val('');
+            $('#stateIdHidden, #stateNameHidden, #cityIdHidden, #cityNameHidden').val('');
+        }
 
         function showBackConfirmModal(url, message) {
             let modal = document.getElementById("backConfirmModal");

@@ -997,4 +997,3 @@ D:\VL Access\Survey\AS.NET SURVEY\Survey-App-v2.0-main\obj\Debug\net8.0\refint\S
 D:\VL Access\Survey\AS.NET SURVEY\Survey-App-v2.0-main\obj\Debug\net8.0\SurveyApp.pdb
 D:\VL Access\Survey\AS.NET SURVEY\Survey-App-v2.0-main\obj\Debug\net8.0\SurveyApp.genruntimeconfig.cache
 D:\VL Access\Survey\AS.NET SURVEY\Survey-App-v2.0-main\obj\Debug\net8.0\ref\SurveyApp.dll
-D:\VL Access\Survey\AS.NET SURVEY\Survey-App-v2.0-main\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

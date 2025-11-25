@@ -89,7 +89,7 @@
                                         {
                                             @foreach (var state in (List<SurveyApp.Models.StateModel>)ViewBag.States)
                                             {
-                                                <option value="@state.id" selected="@(state.id.ToString() == Model.State)">@state.name</option>
+                                                <option value="@state.name" data-id="@state.id" selected="@(state.name == Model.State)">@state.name</option>
                                             }
                                         }
                                     </select>
@@ -101,13 +101,13 @@
                             @* City *@
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <select asp-for="City" id="citySelect" class="form-select" required data-selected-city="@Model.City">
+                                    <select asp-for="City" id="citySelect" class="form-select" required>
                                         <option value="">-- Select City --</option>
                                         @if (ViewBag.Cities != null)
                                         {
                                             @foreach (var city in (List<SurveyApp.Models.CityModel>)ViewBag.Cities)
                                             {
-                                                <option value="@city.id" selected="@(city.id.ToString() == Model.City)">@city.name</option>
+                                                <option value="@city.name" data-id="@city.id" selected="@(city.name == Model.City)">@city.name</option>
                                             }
                                         }
                                     </select>
@@ -154,12 +154,13 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         $(document).ready(function () {
+            var stateSelect = $('#stateSelect');
             var citySelect = $('#citySelect');
-            var selectedCity = citySelect.data('selected-city');
 
             // Load cities when state is selected
-            $('#stateSelect').on('change', function () {
-                var stateId = $(this).val();
+            stateSelect.on('change', function () {
+                var selectedOption = $(this).find('option:selected');
+                var stateId = selectedOption.data('id');
 
                 // Clear existing cities
                 citySelect.empty().append('<option value="">-- Loading Cities --</option>');
@@ -171,15 +172,11 @@
                         success: function (cities) {
                             citySelect.empty().append('<option value="">-- Select City --</option>');
                             $.each(cities, function (index, city) {
-                                var option = $('<option>', {
-                                    value: city.id,
-                                    text: city.name
-                                });
-                                // Preserve selection if editing
-                                if (selectedCity && city.id.toString() === selectedCity) {
-                                    option.attr('selected', 'selected');
-                                }
-                                citySelect.append(option);
+                                citySelect.append($('<option>', {
+                                    value: city.name,
+                                    text: city.name,
+                                    'data-id': city.id
+                                }));
                             });
                         },
                         error: function () {
