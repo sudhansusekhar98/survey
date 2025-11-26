@@ -71,7 +71,7 @@
                             <ul class="dropdown-menu" aria-labelledby="navbardropAdmin">
                                 <li><a class="dropdown-item" asp-controller="Users" asp-action="Index"><i class="bi bi-people-fill me-2"></i>Users</a></li>
                                 <li><a class="dropdown-item" asp-controller="UserRights" asp-action="Index"><i class="bi bi-shield-lock-fill me-2"></i>User Rights</a></li>
-                                <li><a class="dropdown-item" asp-controller="Employee" asp-action="Index"><i class="bi bi-person-badge-fill me-2"></i>Employee</a></li>
+                                <li><a class="dropdown-item" asp-controller="EmployeeMaster" asp-action="Index"><i class="bi bi-person-vcard-fill me-2"></i>Employee Master</a></li>
                                 <li><a class="dropdown-item" asp-controller="ClientMaster" asp-action="Index"><i class="bi bi-building me-2"></i>Client Master</a></li>
                             </ul>
                         </li>
@@ -105,8 +105,10 @@
                             <a class="nav-link text-dark dropdown-toggle" href="javascript:void(0)" id="navbardropReports"
                                data-bs-toggle="dropdown" aria-expanded="false"> Reports </a>
                             <ul class="dropdown-menu" aria-labelledby="navbardropReports">
-                                <li><a class="dropdown-item" asp-controller="Users" asp-action="Index"><i class="bi bi-clipboard-data-fill me-2"></i>Survey</a></li>
-                                <li><a class="dropdown-item" asp-controller="UserRights" asp-action="Index"><i class="bi bi-pencil-square me-2"></i>Update Survey</a></li>
+                                <li><h6 class="dropdown-header">Survey Reports</h6></li>
+                                <li><a class="dropdown-item" asp-controller="SurveyReports" asp-action="Index"><i class="bi bi-house-door-fill me-2"></i>Reports Home</a></li>
+                                <li><a class="dropdown-item" asp-controller="SurveyReports" asp-action="SummaryReport"><i class="bi bi-bar-chart-fill me-2"></i>Summary Report</a></li>
+                                <li><a class="dropdown-item" asp-controller="SurveyReports" asp-action="ExportToExcel"><i class="bi bi-file-earmark-excel-fill me-2"></i>Export to Excel</a></li>
                             </ul>
                         </li>
                     </ul>

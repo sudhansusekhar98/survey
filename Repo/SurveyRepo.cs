@@ -108,10 +108,18 @@ namespace SurveyApp.Repo
             try
             {
                 using var con = new SqlConnection(DBConnection.ConnectionString);
-                using var cmd = new SqlCommand("dbo.SpSurvey", con);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@SpType", 2);
-                cmd.Parameters.AddWithValue("@CreatedBy", UserId);
+                using var cmd = new SqlCommand(@"
+                    SELECT s.*, r.RegionName,
+                           (SELECT MIN(DueDate) FROM SurveyAssignment WHERE SurveyID = s.SurveyId) AS DueDate
+                    FROM Survey s
+                    LEFT JOIN RegionMaster r ON s.RegionID = r.RegionID
+                    WHERE (@CreatedBy IS NULL OR s.CreatedBy = @CreatedBy)
+                    ORDER BY s.SurveyId DESC", con);
+                
+                if (UserId == 0)
+                    cmd.Parameters.AddWithValue("@CreatedBy", DBNull.Value);
+                else
+                    cmd.Parameters.AddWithValue("@CreatedBy", UserId);
 
                 con.Open();
 
@@ -620,6 +628,36 @@ namespace SurveyApp.Repo
             }
         }
 
+        public List<SurveyAssignmentModel> GetAllSurveyAssignments(int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpSurvey", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@SpType", 16);
+                // If userId is 0, pass DBNull to get all assignments
+                if (userId == 0)
+                    cmd.Parameters.AddWithValue("@CreatedBy", DBNull.Value);
+                else
+                    cmd.Parameters.AddWithValue("@CreatedBy", userId);
+
+                con.Open();
+
+                using var adapter = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                adapter.Fill(dt);
+
+                List<SurveyAssignmentModel> assignments = SqlDbHelper.DataTableToList<SurveyAssignmentModel>(dt);
+                return assignments;
+            }
+            catch (Exception)
+            {
+                // Return empty list if there's an error (e.g., no assignments table)
+                return new List<SurveyAssignmentModel>();
+            }
+        }
+
         //public bool AssignSurvey(SurveyAssignmentModel model)
         //{
         //    try
@@ -747,7 +785,15 @@ namespace SurveyApp.Repo
             using var transaction = con.BeginTransaction();
             try
             {
-
+                // Validate that all items have quantities selected (at least one qty must be > 0)
+                foreach (var items in model.ItemLists)
+                {
+                    if (items.ItemQtyExist == 0 && items.ItemQtyReq == 0)
+                    {
+                        transaction.Rollback();
+                        throw new InvalidOperationException($"Please enter quantity for item: {items.ItemName}. Both Existing and Required quantities cannot be zero.");
+                    }
+                }
 
                 foreach (var items in model.ItemLists)
                 {
@@ -794,7 +840,7 @@ namespace SurveyApp.Repo
             catch (Exception)
             {
                 transaction.Rollback();
-                return false;
+                throw;
             }
         }
 
@@ -817,10 +863,280 @@ namespace SurveyApp.Repo
                 int result = cmd.ExecuteNonQuery();
                 return result > 0;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Log exception
                 throw;
+            }
+        }
+
+        // Survey Submission Methods
+        public bool SubmitSurvey(long surveyId, int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpSurveySubmission", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@SpType", 1); // Insert/Update
+                cmd.Parameters.AddWithValue("@SurveyId", surveyId);
+                cmd.Parameters.AddWithValue("@SubmissionStatus", "Submitted");
+                cmd.Parameters.AddWithValue("@SubmittedBy", userId);
+                cmd.Parameters.AddWithValue("@SubmissionDate", DateTime.Now);
+
+                con.Open();
+                cmd.ExecuteNonQuery();
+                
+                // Update survey status to Completed
+                using var updateCmd = new SqlCommand("UPDATE Survey SET SurveyStatus = 'Completed' WHERE SurveyId = @SurveyId", con);
+                updateCmd.Parameters.AddWithValue("@SurveyId", surveyId);
+                updateCmd.ExecuteNonQuery();
+                
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool WithdrawSubmission(long surveyId)
+        {
+            try
+            {
+                // Get current survey status BEFORE opening transaction
+                var survey = GetSurveyById(surveyId);
+                
+                if (survey == null)
+                {
+                    Console.WriteLine($"WithdrawSubmission: Survey {surveyId} not found");
+                    return false;
+                }
+
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                con.Open();
+                using var transaction = con.BeginTransaction();
+
+                try
+                {
+                    // Update submission status to Draft
+                    using var cmd = new SqlCommand("dbo.SpSurveySubmission", con, transaction);
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@SpType", 1); // Insert/Update
+                    cmd.Parameters.AddWithValue("@SurveyId", surveyId);
+                    cmd.Parameters.AddWithValue("@SubmissionStatus", "Draft");
+                    cmd.Parameters.AddWithValue("@SubmittedBy", DBNull.Value);
+                    cmd.Parameters.AddWithValue("@SubmissionDate", DBNull.Value);
+
+                    int submissionResult = cmd.ExecuteNonQuery();
+                    Console.WriteLine($"WithdrawSubmission: Submission update affected {submissionResult} rows");
+
+                    // Always change survey status to In Progress when unlocking
+                    using var cmdUpdate = new SqlCommand("dbo.SpSurvey", con, transaction);
+                    cmdUpdate.CommandType = CommandType.StoredProcedure;
+                    cmdUpdate.Parameters.AddWithValue("@SpType", 8); // Update Survey (same as UpdateSurvey)
+                    cmdUpdate.Parameters.AddWithValue("@SurveyId", surveyId);
+                    cmdUpdate.Parameters.AddWithValue("@SurveyName", survey.SurveyName ?? (object)DBNull.Value);
+                    cmdUpdate.Parameters.AddWithValue("@ImplementationType", survey.ImplementationType ?? (object)DBNull.Value);
+                    cmdUpdate.Parameters.AddWithValue("@SurveyDate", survey.SurveyDate ?? (object)DBNull.Value);
+                    cmdUpdate.Parameters.AddWithValue("@SurveyTeamName", survey.SurveyTeamName ?? (object)DBNull.Value);
+                    cmdUpdate.Parameters.AddWithValue("@SurveyTeamContact", survey.SurveyTeamContact ?? (object)DBNull.Value);
+                    cmdUpdate.Parameters.AddWithValue("@AgencyName", survey.AgencyName ?? (object)DBNull.Value);
+                    cmdUpdate.Parameters.AddWithValue("@LocationSiteName", survey.LocationSiteName ?? (object)DBNull.Value);
+                    cmdUpdate.Parameters.AddWithValue("@CityDistrict", survey.CityDistrict ?? (object)DBNull.Value);
+                    cmdUpdate.Parameters.AddWithValue("@ScopeOfWork", survey.ScopeOfWork ?? (object)DBNull.Value);
+                    cmdUpdate.Parameters.AddWithValue("@Latitude", survey.Latitude ?? (object)DBNull.Value);
+                    cmdUpdate.Parameters.AddWithValue("@Longitude", survey.Longitude ?? (object)DBNull.Value);
+                    cmdUpdate.Parameters.AddWithValue("@MapMarking", survey.MapMarking ?? (object)DBNull.Value);
+                    cmdUpdate.Parameters.AddWithValue("@SurveyStatus", "In Progress"); // Always change to In Progress
+                    cmdUpdate.Parameters.AddWithValue("@RegionID", survey.RegionID);
+                    cmdUpdate.Parameters.AddWithValue("@CreatedBy", survey.CreatedBy);
+
+                    int surveyResult = cmdUpdate.ExecuteNonQuery();
+                    Console.WriteLine($"WithdrawSubmission: Survey status update affected {surveyResult} rows, new status: In Progress");
+
+                    transaction.Commit();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"WithdrawSubmission transaction error: {ex.Message}");
+                    Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"WithdrawSubmission outer error: {ex.Message}");
+                return false;
+            }
+        }
+
+        public SurveySubmissionModel? GetSubmissionBySurveyId(long surveyId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpSurveySubmission", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@SpType", 5); // Select by SurveyId
+                cmd.Parameters.AddWithValue("@SurveyId", surveyId);
+
+                con.Open();
+                var dt = new DataTable();
+                using var da = new SqlDataAdapter(cmd);
+                da.Fill(dt);
+
+                if (dt.Rows.Count == 0)
+                    return null;
+
+                var list = SqlDbHelper.DataTableToList<SurveySubmissionModel>(dt);
+                return list.FirstOrDefault();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public List<SurveySubmissionModel> GetAllSubmissions(int? userId = null)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpSurveySubmission", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@SpType", 4); // Select All
+                cmd.Parameters.AddWithValue("@SubmittedBy", userId.HasValue ? userId.Value : (object)DBNull.Value);
+
+                con.Open();
+                var dt = new DataTable();
+                using var da = new SqlDataAdapter(cmd);
+                da.Fill(dt);
+
+                return SqlDbHelper.DataTableToList<SurveySubmissionModel>(dt);
+            }
+            catch (Exception)
+            {
+                return new List<SurveySubmissionModel>();
+            }
+        }
+
+        public bool UpdateSubmissionStatus(long submissionId, string status, int reviewedBy, string? comments = null)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpSurveySubmission", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@SpType", 2); // Update Review
+                cmd.Parameters.AddWithValue("@SubmissionId", submissionId);
+                cmd.Parameters.AddWithValue("@SubmissionStatus", status);
+                cmd.Parameters.AddWithValue("@ReviewedBy", reviewedBy);
+                cmd.Parameters.AddWithValue("@ReviewDate", DateTime.Now);
+                cmd.Parameters.AddWithValue("@ReviewComments", comments ?? (object)DBNull.Value);
+
+                con.Open();
+                cmd.ExecuteNonQuery();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool CanEditSurvey(long surveyId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpSurveySubmission", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@SpType", 6); // Check if can edit
+                cmd.Parameters.AddWithValue("@SurveyId", surveyId);
+
+                con.Open();
+                var result = cmd.ExecuteScalar();
+                return result != null && Convert.ToInt32(result) == 1;
+            }
+            catch (Exception)
+            {
+                return true; // Allow editing if check fails
+            }
+        }
+
+        public SurveyCompletionStatus CheckSurveyCompletionStatus(long surveyId)
+        {
+            var status = new SurveyCompletionStatus();
+            
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                
+                // Get all locations for the survey
+                using var cmd = new SqlCommand(@"
+                    SELECT 
+                        sl.LocID,
+                        sl.LocName,
+                        ISNULL(sls.Status, 'Pending') AS LocationStatus
+                    FROM SurveyLocation sl
+                    LEFT JOIN SurveyLocationStatus sls ON sl.LocID = sls.LocID AND sl.SurveyID = sls.SurveyID
+                    WHERE sl.SurveyID = @SurveyId 
+                    AND CAST(sl.Isactive AS VARCHAR(10)) IN ('Y', '1', 'True')", con);
+                
+                cmd.Parameters.AddWithValue("@SurveyId", surveyId);
+                
+                con.Open();
+                using var reader = cmd.ExecuteReader();
+                
+                while (reader.Read())
+                {
+                    status.TotalLocations++;
+                    var locationStatus = reader["LocationStatus"]?.ToString()?.Trim() ?? "Pending";
+                    var locationName = reader["LocName"]?.ToString() ?? "Unknown";
+                    
+                    if (locationStatus.Equals("Completed", StringComparison.OrdinalIgnoreCase) || 
+                        locationStatus.Equals("Verified", StringComparison.OrdinalIgnoreCase))
+                    {
+                        status.CompletedLocations++;
+                    }
+                    else
+                    {
+                        status.PendingLocations++;
+                        status.IncompleteLocationNames.Add($"{locationName} ({locationStatus})");
+                    }
+                }
+                
+                status.IsComplete = status.TotalLocations > 0 && status.PendingLocations == 0;
+                
+                if (status.TotalLocations == 0)
+                {
+                    status.Message = "No locations found for this survey. Please add at least one location.";
+                }
+                else if (!status.IsComplete)
+                {
+                    status.Message = $"{status.PendingLocations} out of {status.TotalLocations} location(s) are not completed.";
+                }
+                else
+                {
+                    status.Message = "All locations are completed. Survey is ready for submission.";
+                }
+                
+                return status;
+            }
+            catch (Exception ex)
+            {
+                status.IsComplete = false;
+                status.Message = $"Error checking completion status: {ex.Message}";
+                return status;
             }
         }
 

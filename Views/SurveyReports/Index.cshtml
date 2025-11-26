@@ -1,0 +1,136 @@
+@{
+    ViewData["Title"] = "Survey Reports";
+}
+
+<div class="container-fluid">
+    <div class="card shadow">
+        <div class="card-header bg-purple py-3 mb-3">
+            <h5 class="text-white mb-0">
+                <i class="bi bi-file-earmark-bar-graph me-2"></i>Survey Reports
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                <!-- Summary Report Card -->
+                <div class="col-md-6 col-lg-4 ">
+                    <div class="card h-100 shadow-sm hover-lift">
+                        <div class="card-body text-center">
+                            <div class="avatar avatar-xl mx-auto mb-3">
+                                <div class="avatar-initial rounded-circle bg-label-primary">
+                                    <i class="bi bi-graph-up" style="font-size: 2rem;"></i>
+                                </div>
+                            </div>
+                            <h5 class="card-title">Summary Report</h5>
+                            <p class="card-text text-muted">
+                                View overall statistics, trends, and breakdown by status, region, and type
+                            </p>
+                            <a asp-action="SummaryReport" class="btn btn-primary mt-2">
+                                <i class="bi bi-bar-chart me-2"></i>View Report
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Survey Report Card -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm hover-lift">
+                        <div class="card-body text-center">
+                            <div class="avatar avatar-xl mx-auto mb-3">
+                                <div class="avatar-initial rounded-circle bg-label-success">
+                                    <i class="bi bi-file-text" style="font-size: 2rem;"></i>
+                                </div>
+                            </div>
+                            <h5 class="card-title">Detailed Survey Report</h5>
+                            <p class="card-text text-muted">
+                                View comprehensive details for individual surveys including locations and assignments
+                            </p>
+                            <a asp-controller="SurveyCreation" asp-action="Index" class="btn btn-success mt-2">
+                                <i class="bi bi-search me-2"></i>Select Survey
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export to Excel Card -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm hover-lift">
+                        <div class="card-body text-center">
+                            <div class="avatar avatar-xl mx-auto mb-3">
+                                <div class="avatar-initial rounded-circle bg-label-info">
+                                    <i class="bi bi-file-earmark-spreadsheet" style="font-size: 2rem;"></i>
+                                </div>
+                            </div>
+                            <h5 class="card-title">Export to Excel</h5>
+                            <p class="card-text text-muted">
+                                Download survey data in Excel format for further analysis
+                            </p>
+                            <a asp-action="SummaryReport" class="btn btn-info mt-2">
+                                <i class="bi bi-download me-2"></i>Export Data
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats Section -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <h6 class="mb-3 fw-semibold">Report Features</h6>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-filter-circle text-primary me-2" style="font-size: 1.5rem;"></i>
+                                <div>
+                                    <small class="text-muted d-block">Advanced Filtering</small>
+                                    <strong>By Date, Status & Region</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-pie-chart text-success me-2" style="font-size: 1.5rem;"></i>
+                                <div>
+                                    <small class="text-muted d-block">Visual Analytics</small>
+                                    <strong>Charts & Graphs</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-file-earmark-excel text-info me-2" style="font-size: 1.5rem;"></i>
+                                <div>
+                                    <small class="text-muted d-block">Export Options</small>
+                                    <strong>Excel & PDF</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-calendar-range text-warning me-2" style="font-size: 1.5rem;"></i>
+                                <div>
+                                    <small class="text-muted d-block">Time-based Reports</small>
+                                    <strong>Monthly Trends</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .bg-purple {
+        background-color: #667eea !important;
+    }
+</style>

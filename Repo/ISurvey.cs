@@ -29,6 +29,7 @@ namespace SurveyApp.Repo
         bool AddSurveyAssignment(SurveyAssignmentModel assignment);
         bool UpdateSurveyAssignment(SurveyAssignmentModel assignment);
         bool DeleteSurveyAssignment(int transId);
+        List<SurveyAssignmentModel> GetAllSurveyAssignments(int userId);
 
 
         //------------------- Survey Details -------------------//
@@ -42,6 +43,15 @@ namespace SurveyApp.Repo
         public bool UpdateSurveyDetails(SurveyDetailsUpdate model);
 
         bool MarkLocationAsCompleted(Int64 surveyId, int locId, int userId);
+        
+        // Survey Submission Methods
+        bool SubmitSurvey(Int64 surveyId, int userId);
+        bool WithdrawSubmission(Int64 surveyId);
+        SurveySubmissionModel? GetSubmissionBySurveyId(Int64 surveyId);
+        List<SurveySubmissionModel> GetAllSubmissions(int? userId = null);
+        bool UpdateSubmissionStatus(Int64 submissionId, string status, int reviewedBy, string? comments = null);
+        bool CanEditSurvey(Int64 surveyId);
+        SurveyCompletionStatus CheckSurveyCompletionStatus(Int64 surveyId);
     }
 }
 

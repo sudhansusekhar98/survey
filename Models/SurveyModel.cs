@@ -54,6 +54,9 @@ namespace SurveyApp.Models
         public string? SurveyStatus { get; set; }
         public int CreatedBy { get; set; }
 
+        [Display(Name = "Due Date")]
+        public DateTime? DueDate { get; set; }
+
         [Display(Name = "Region")]
         public int? RegionID { get; set; }
         public string? RegionName { get; set; }

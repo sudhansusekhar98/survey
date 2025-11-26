@@ -171,18 +171,33 @@ namespace SurveyApp.Controllers
                 return Json(new { success = false, message = "Validation failed", errors });
             }
 
-            bool isSaved = _repository.UpdateSurveyDetails(model);
+            try
+            {
+                bool isSaved = _repository.UpdateSurveyDetails(model);
 
-            if (isSaved)
-            {
-                TempData["ResultMessage"] = "Survey details updated successfully.";
-                TempData["ResultType"] = "success";
-                return RedirectToAction("Index", new { surveyId = model.SurveyID, locId = model.LocID });
+                if (isSaved)
+                {
+                    TempData["ResultMessage"] = "<strong>Success!</strong> Survey details updated successfully.";
+                    TempData["ResultType"] = "success";
+                    return RedirectToAction("Index", new { surveyId = model.SurveyID, locId = model.LocID });
+                }
+                else
+                {
+                    TempData["ResultMessage"] = "<strong>Error!</strong> Failed to update survey details.";
+                    TempData["ResultType"] = "danger";
+                    return RedirectToAction("UpdateItem", new { surveyId = model.SurveyID, locId = model.LocID, itemTypeID = model.ItemTypeID, itemId = 0 });
+                }
             }
-            else
+            catch (InvalidOperationException ex)
             {
-                TempData["ResultMessage"] = "Failed to update survey details.";
-                TempData["ResultType"] = "error";
+                TempData["ResultMessage"] = $"<strong>Validation Error!</strong> {ex.Message}";
+                TempData["ResultType"] = "warning";
+                return RedirectToAction("UpdateItem", new { surveyId = model.SurveyID, locId = model.LocID, itemTypeID = model.ItemTypeID, itemId = 0 });
+            }
+            catch (Exception ex)
+            {
+                TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
+                TempData["ResultType"] = "danger";
                 return RedirectToAction("UpdateItem", new { surveyId = model.SurveyID, locId = model.LocID, itemTypeID = model.ItemTypeID, itemId = 0 });
             }
         }
@@ -244,6 +259,43 @@ namespace SurveyApp.Controllers
                 if (string.IsNullOrEmpty(userId))
                 {
                     return Json(new { success = false, message = "User not logged in" });
+                }
+
+                // Validate that all device types have at least one item with quantity
+                var deviceTypes = _repository.GetAssignedTypeList(surveyId, locId) ?? new List<SurveyDetailsLocationModel>();
+                var deviceTypesWithoutItems = new List<string>();
+
+                foreach (var deviceType in deviceTypes)
+                {
+                    var items = _repository.GetSurveyUpdateItemList(surveyId, locId, deviceType.ItemTypeID);
+                    
+                    // Check if device type has no items added at all OR all items have zero quantities
+                    if (items == null || !items.Any())
+                    {
+                        deviceTypesWithoutItems.Add(deviceType.TypeName);
+                    }
+                    else
+                    {
+                        // Check if at least one item has quantity > 0
+                        bool hasAtLeastOneItemWithQty = items.Any(item => item.ItemQtyExist > 0 || item.ItemQtyReq > 0);
+                        
+                        if (!hasAtLeastOneItemWithQty)
+                        {
+                            deviceTypesWithoutItems.Add(deviceType.TypeName);
+                        }
+                    }
+                }
+
+                // Build error message if validation fails
+                if (deviceTypesWithoutItems.Any())
+                {
+                    return Json(new 
+                    { 
+                        success = false, 
+                        message = "Cannot submit location. The following device types need at least one item with quantity:",
+                        errorDetails = string.Join("<br>", deviceTypesWithoutItems.Select(dt => $"• {dt}")),
+                        deviceTypesWithoutItems = deviceTypesWithoutItems
+                    });
                 }
 
                 // Auto-mark location as completed using status repository

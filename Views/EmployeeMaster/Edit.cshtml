@@ -1,0 +1,267 @@
+@model SurveyApp.Models.EmpMasterModel
+@{
+    ViewData["Title"] = "Edit Employee";
+}
+
+@section PageStyles {
+    <style>
+        body {
+            overflow-x: hidden !important;
+        }
+        
+        @@media (max-width: 767.98px) {
+            .full-screen-card {
+                min-height: 100vh;
+                border-radius: 0 !important;
+                margin: 0 !important;
+            }
+        }
+
+        .bg-purple {
+            background-color: #667eea !important;
+        }
+    </style>
+}
+
+<div class="container-fluid p-4 m-0">
+    <div class="row g-0">
+        <div class="col-12">
+            <div class="card shadow mt-0 rounded-0 full-screen-card">
+                <div class="card-header bg-purple py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="text-white fs-4 mb-0">
+                            <i class="bi bi-pencil-square me-2"></i>Edit Employee
+                        </h6>
+                        <a asp-action="Index" class="btn btn-outline-danger text-white border-0">
+                            <i class="bi bi-arrow-left-circle"></i>
+                            <span class="d-none d-md-inline ms-2">Back To List</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-body p-3 p-md-4">
+                    @if (TempData["ResultMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
+                    {
+                        <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show" role="alert">
+                            @Html.Raw(TempData["ResultMessage"])
+                            <button type="button" class="btn-close btn-sm align-top" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <form asp-action="Edit" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="EmpID" />
+
+                        <!-- Basic Information -->
+                        <div class="card border-info mb-4">
+                            <div class="card-header bg-info bg-opacity-10 border-bottom border-info mb-2"
+                                style="padding-top: 10px; padding-bottom: 10px;">
+                                <h6 class="mb-0 text-info">
+                                    <i class="bi bi-person-badge me-2"></i>Basic Information
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <div class="form-custom-floating">
+                                            <input asp-for="EmpCode" type="text" class="form-control" placeholder=" " required>
+                                            <label asp-for="EmpCode"></label>
+                                            <span asp-validation-for="EmpCode" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-6">
+                                        <div class="form-custom-floating">
+                                            <input asp-for="EmpName" type="text" class="form-control" placeholder=" " required>
+                                            <label asp-for="EmpName"></label>
+                                            <span asp-validation-for="EmpName" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-6">
+                                        <div class="form-custom-floating">
+                                            <select asp-for="Gender" class="form-select" placeholder=" ">
+                                                <option value=""> </option>
+                                                <option value="M">Male</option>
+                                                <option value="F">Female</option>
+                                                <option value="O">Other</option>
+                                            </select>
+                                            <label asp-for="Gender"></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-6">
+                                        <div class="form-custom-floating">
+                                            <input name="DateOfBirth" type="date" class="form-control" placeholder=" " 
+                                                   value="@(Model.DateOfBirth.HasValue && Model.DateOfBirth.Value > DateTime.MinValue ? Model.DateOfBirth.Value.ToString("yyyy-MM-dd") : "")">
+                                            <label for="DateOfBirth">Date of Birth</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="card border-success mb-4">
+                            <div class="card-header bg-success bg-opacity-10 border-bottom border-success mb-2" 
+                                    style="padding-top: 10px; padding-bottom: 10px;">
+                                <h6 class="mb-0 text-success">
+                                    <i class="bi bi-telephone me-2"></i>Contact Information
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <div class="form-custom-floating">
+                                            <input asp-for="MobileNo" type="tel" class="form-control" placeholder=" ">
+                                            <label asp-for="MobileNo"></label>
+                                            <span asp-validation-for="MobileNo" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-6">
+                                        <div class="form-custom-floating">
+                                            <input asp-for="Email" type="email" class="form-control" placeholder=" ">
+                                            <label asp-for="Email"></label>
+                                            <span asp-validation-for="Email" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-6">
+                                        <div class="form-custom-floating">
+                                            <input asp-for="AddressLine1" type="text" class="form-control" placeholder=" ">
+                                            <label asp-for="AddressLine1"></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-6">
+                                        <div class="form-custom-floating">
+                                            <input asp-for="AddressLine2" type="text" class="form-control" placeholder=" ">
+                                            <label asp-for="AddressLine2"></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-4">
+                                        <div class="form-custom-floating">
+                                            <input asp-for="City" type="text" class="form-control" placeholder=" ">
+                                            <label asp-for="City"></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-4">
+                                        <div class="form-custom-floating">
+                                            <input asp-for="State" type="text" class="form-control" placeholder=" ">
+                                            <label asp-for="State"></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-4">
+                                        <div class="form-custom-floating">
+                                            <input asp-for="Country" type="text" class="form-control" placeholder=" ">
+                                            <label asp-for="Country"></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-4">
+                                        <div class="form-custom-floating">
+                                            <input asp-for="PinCode" type="text" class="form-control" placeholder=" ">
+                                            <label asp-for="PinCode"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Employment Details -->
+                        <div class="card border-warning mb-4">
+                            <div class="card-header bg-warning bg-opacity-10 border-bottom border-warning mb-2" 
+                                style="padding-top: 10px; padding-bottom: 10px;">
+                                <h6 class="mb-0 text-warning">
+                                    <i class="bi bi-briefcase me-2"></i>Employment Details
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <div class="form-custom-floating">
+                                            <input asp-for="Designation" type="text" class="form-control" placeholder=" ">
+                                            <label asp-for="Designation"></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-6">
+                                        <div class="form-custom-floating">
+                                            <input asp-for="DeptID" type="number" class="form-control" placeholder=" ">
+                                            <label asp-for="DeptID"></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-4">
+                                        <div class="form-custom-floating">
+                                            <select asp-for="EmploymentType" class="form-select" placeholder=" ">
+                                                <option value=""> </option>
+                                                <option value="Full-Time">Full-Time</option>
+                                                <option value="Part-Time">Part-Time</option>
+                                                <option value="Contract">Contract</option>
+                                                <option value="Intern">Intern</option>
+                                            </select>
+                                            <label asp-for="EmploymentType"></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-4">
+                                        <div class="form-custom-floating">
+                                            <input name="DateOfJoining" type="date" class="form-control" placeholder=" "
+                                                   value="@(Model.DateOfJoining.HasValue && Model.DateOfJoining.Value > DateTime.MinValue ? Model.DateOfJoining.Value.ToString("yyyy-MM-dd") : "")">
+                                            <label for="DateOfJoining">Date of Joining</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-4">
+                                        <div class="form-custom-floating">
+                                            <input name="DateOfLeaving" type="date" class="form-control" placeholder=" "
+                                                   value="@(Model.DateOfLeaving.HasValue && Model.DateOfLeaving.Value > DateTime.MinValue ? Model.DateOfLeaving.Value.ToString("yyyy-MM-dd") : "")">
+                                            <label for="DateOfLeaving">Date of Leaving</label>
+                                            <small class="text-muted">Optional - Leave blank if currently employed</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="form-check form-switch">
+                                            <input asp-for="IsActive" type="checkbox" class="form-check-input" id="isActiveSwitch">
+                                            <label asp-for="IsActive" class="form-check-label" for="isActiveSwitch"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-column flex-sm-row gap-2 justify-content-end">
+                            <button type="submit" class="btn btn-success order-1 order-sm-0">
+                                <i class="bi bi-check-circle me-2"></i> Update Employee
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary order-2 order-sm-1">
+                                <i class="bi bi-x-circle me-2"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Clear empty date fields before form submission to avoid SQL datetime errors
+        $('form').on('submit', function(e) {
+            $(this).find('input[type="date"]').each(function() {
+                if (!$(this).val()) {
+                    $(this).prop('disabled', true);
+                }
+            });
+        });
+    </script>
+}
+

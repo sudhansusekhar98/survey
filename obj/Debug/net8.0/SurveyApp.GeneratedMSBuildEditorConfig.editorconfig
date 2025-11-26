@@ -44,6 +44,22 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGFzaGJvYXJkXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/VL Access/Survey/AS.NET SURVEY/Survey-App-v2.0-main/Views/EmployeeMaster/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVNYXN0ZXJcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/AS.NET SURVEY/Survey-App-v2.0-main/Views/EmployeeMaster/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVNYXN0ZXJcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/AS.NET SURVEY/Survey-App-v2.0-main/Views/EmployeeMaster/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVNYXN0ZXJcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/AS.NET SURVEY/Survey-App-v2.0-main/Views/EmployeeMaster/_EmployeeDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVNYXN0ZXJcX0VtcGxveWVlRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/VL Access/Survey/AS.NET SURVEY/Survey-App-v2.0-main/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -140,6 +156,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5Q3JlYXRpb25cSXRlbVR5cGVNYXN0ZXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/VL Access/Survey/AS.NET SURVEY/Survey-App-v2.0-main/Views/SurveyCreation/SubmissionsList.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5Q3JlYXRpb25cU3VibWlzc2lvbnNMaXN0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/VL Access/Survey/AS.NET SURVEY/Survey-App-v2.0-main/Views/SurveyCreation/SurveyAssignment.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5Q3JlYXRpb25cU3VydmV5QXNzaWdubWVudC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -182,6 +202,18 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/VL Access/Survey/AS.NET SURVEY/Survey-App-v2.0-main/Views/SurveyDetails/_LocationPreview.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5RGV0YWlsc1xfTG9jYXRpb25QcmV2aWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/AS.NET SURVEY/Survey-App-v2.0-main/Views/SurveyReports/DetailedReport.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5UmVwb3J0c1xEZXRhaWxlZFJlcG9ydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/AS.NET SURVEY/Survey-App-v2.0-main/Views/SurveyReports/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5UmVwb3J0c1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/AS.NET SURVEY/Survey-App-v2.0-main/Views/SurveyReports/SummaryReport.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5UmVwb3J0c1xTdW1tYXJ5UmVwb3J0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/VL Access/Survey/AS.NET SURVEY/Survey-App-v2.0-main/Views/UserLogin/LoginBasic.cshtml]

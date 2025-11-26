@@ -35,8 +35,8 @@ namespace SurveyApp.Controllers
             }
             
 
-        // GET: SurveyCreation/Index - List all surveys
-        public IActionResult Index()
+        // GET: SurveyCreation/Index - List all surveys with filtering
+        public IActionResult Index(string? status = null, string? region = null, string? type = null, string? search = null, bool? missed = null)
         {
             var result = _util.CheckAuthorizationAll(this, 103, null,null,"View");
             //if (result != null) return result;
@@ -44,6 +44,109 @@ namespace SurveyApp.Controllers
             try
             {
                 var surveys = _surveyRepository.GetAllSurveys(UserID) ?? new List<SurveyModel>();
+                var today = DateTime.Now.Date;
+                
+                // Handle "Missed Deadline" as a special status value
+                if (status == "Missed Deadline")
+                {
+                    missed = true;
+                    status = null;
+                }
+                
+                // Apply filters
+                if (!string.IsNullOrEmpty(status))
+                {
+                    surveys = surveys.Where(s => s.SurveyStatus == status).ToList();
+                }
+                
+                if (!string.IsNullOrEmpty(region))
+                {
+                    surveys = surveys.Where(s => s.RegionName == region).ToList();
+                }
+                
+                if (!string.IsNullOrEmpty(type))
+                {
+                    surveys = surveys.Where(s => s.ImplementationType == type).ToList();
+                }
+                
+                if (missed == true)
+                {
+                    surveys = surveys.Where(s => 
+                        s.DueDate.HasValue && 
+                        s.DueDate.Value.Date < today && 
+                        s.SurveyStatus != "Completed"
+                    ).ToList();
+                }
+                
+                if (!string.IsNullOrEmpty(search))
+                {
+                    var searchLower = search.ToLower();
+                    surveys = surveys.Where(s => 
+                        (s.SurveyName != null && s.SurveyName.ToLower().Contains(searchLower)) ||
+                        (s.LocationSiteName != null && s.LocationSiteName.ToLower().Contains(searchLower)) ||
+                        (s.CityDistrict != null && s.CityDistrict.ToLower().Contains(searchLower)) ||
+                        (s.SurveyTeamName != null && s.SurveyTeamName.ToLower().Contains(searchLower))
+                    ).ToList();
+                }
+                
+                // Get submission status and assignment status for each survey
+                foreach (var survey in surveys)
+                {
+                    var submission = _surveyRepository.GetSubmissionBySurveyId(survey.SurveyId);
+                    if (submission != null)
+                    {
+                        ViewData[$"IsSubmitted_{survey.SurveyId}"] = submission.SubmissionStatus == "Submitted" || submission.SubmissionStatus == "Approved";
+                        ViewData[$"IsLocked_{survey.SurveyId}"] = submission.IsLockedForEditing;
+                    }
+                    
+                    // Check if survey has team assignments
+                    var assignments = _surveyRepository.GetSurveyAssignments(survey.SurveyId);
+                    ViewData[$"HasAssignments_{survey.SurveyId}"] = assignments != null && assignments.Count > 0;
+                }
+                
+                // Get all surveys for filter options
+                var allSurveys = _surveyRepository.GetAllSurveys(UserID) ?? new List<SurveyModel>();
+                
+                // Pass filter options to view
+                ViewBag.StatusOptions = allSurveys
+                    .Where(s => !string.IsNullOrEmpty(s.SurveyStatus))
+                    .Select(s => s.SurveyStatus)
+                    .Distinct()
+                    .OrderBy(s => s)
+                    .ToList();
+                    
+                ViewBag.RegionOptions = allSurveys
+                    .Where(s => !string.IsNullOrEmpty(s.RegionName))
+                    .Select(s => s.RegionName)
+                    .Distinct()
+                    .OrderBy(r => r)
+                    .ToList();
+                    
+                ViewBag.TypeOptions = allSurveys
+                    .Where(s => !string.IsNullOrEmpty(s.ImplementationType))
+                    .Select(s => s.ImplementationType)
+                    .Distinct()
+                    .OrderBy(t => t)
+                    .ToList();
+                
+                // Pass current filter values
+                ViewBag.CurrentStatus = status;
+                ViewBag.CurrentRegion = region;
+                ViewBag.CurrentType = type;
+                ViewBag.CurrentSearch = search;
+                ViewBag.CurrentMissed = missed;
+                ViewBag.IsFiltered = !string.IsNullOrEmpty(status) || !string.IsNullOrEmpty(region) || 
+                                     !string.IsNullOrEmpty(type) || !string.IsNullOrEmpty(search) || missed == true;
+                ViewBag.TotalCount = allSurveys.Count;
+                ViewBag.FilteredCount = surveys.Count;
+                
+                // Calculate missed deadline count for display
+                ViewBag.MissedDeadlineCount = allSurveys.Count(s => 
+                    s.DueDate.HasValue && 
+                    s.DueDate.Value.Date < today && 
+                    s.SurveyStatus != "Completed"
+                );
+                
                 return View(surveys);
             }
             catch (Exception ex)
@@ -887,6 +990,190 @@ namespace SurveyApp.Controllers
                         cityName = client.City
                     }
                 });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+        
+        // Survey Submission Actions
+        
+        [HttpGet]
+        public IActionResult CheckSurveyCompletion(long surveyId)
+        {
+            try
+            {
+                var completionStatus = _surveyRepository.CheckSurveyCompletionStatus(surveyId);
+                return Json(new { success = true, data = completionStatus });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+        
+        [HttpPost]
+        public IActionResult SubmitSurvey(long surveyId)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
+                
+                if (userId == 0)
+                {
+                    return Json(new { success = false, message = "User not logged in." });
+                }
+                
+                // Check if all locations are completed
+                var completionStatus = _surveyRepository.CheckSurveyCompletionStatus(surveyId);
+                
+                if (!completionStatus.IsComplete)
+                {
+                    return Json(new 
+                    { 
+                        success = false, 
+                        message = completionStatus.Message,
+                        incompleteLocations = completionStatus.IncompleteLocationNames,
+                        totalLocations = completionStatus.TotalLocations,
+                        completedLocations = completionStatus.CompletedLocations,
+                        pendingLocations = completionStatus.PendingLocations
+                    });
+                }
+                
+                bool result = _surveyRepository.SubmitSurvey(surveyId, userId);
+                
+                if (result)
+                {
+                    TempData["ResultMessage"] = "<strong>Success!</strong> Survey submitted successfully.";
+                    TempData["ResultType"] = "success";
+                    return Json(new { success = true, message = "Survey submitted successfully." });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to submit survey." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult WithdrawSubmission(long surveyId)
+        {
+            try
+            {
+                bool result = _surveyRepository.WithdrawSubmission(surveyId);
+                
+                if (result)
+                {
+                    TempData["ResultMessage"] = "<strong>Success!</strong> Submission withdrawn successfully.";
+                    TempData["ResultType"] = "info";
+                    return Json(new { success = true, message = "Submission withdrawn successfully." });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to withdraw submission." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UnlockSurvey(long surveyId)
+        {
+            try
+            {
+                bool result = _surveyRepository.WithdrawSubmission(surveyId);
+                
+                if (result)
+                {
+                    return Json(new { success = true, message = "Survey unlocked successfully. You can now edit locations." });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to unlock survey." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetSubmissionStatus(long surveyId)
+        {
+            try
+            {
+                var submission = _surveyRepository.GetSubmissionBySurveyId(surveyId);
+                var canEdit = _surveyRepository.CanEditSurvey(surveyId);
+                
+                return Json(new 
+                { 
+                    success = true, 
+                    submission = submission,
+                    canEdit = canEdit
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult SubmissionsList()
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
+                int roleId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "0");
+                
+                // If admin/manager (roleId 1 or 2), show all submissions, otherwise show only user's submissions
+                var submissions = roleId <= 2 
+                    ? _surveyRepository.GetAllSubmissions() 
+                    : _surveyRepository.GetAllSubmissions(userId);
+                
+                return View(submissions);
+            }
+            catch (Exception ex)
+            {
+                TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
+                TempData["ResultType"] = "danger";
+                return View(new List<SurveySubmissionModel>());
+            }
+        }
+
+        [HttpPost]
+        public IActionResult UpdateSubmissionStatus(long submissionId, string status, string? comments)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
+                
+                if (userId == 0)
+                {
+                    return Json(new { success = false, message = "User not logged in." });
+                }
+                
+                bool result = _surveyRepository.UpdateSubmissionStatus(submissionId, status, userId, comments);
+                
+                if (result)
+                {
+                    return Json(new { success = true, message = "Submission status updated successfully." });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to update submission status." });
+                }
             }
             catch (Exception ex)
             {

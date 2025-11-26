@@ -9,6 +9,9 @@
 }
 
 @section PageStyles {
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css" />
+    
     <style>
         /* Prevent horizontal overflow */
         body {
@@ -22,6 +25,45 @@
                 border-radius: 0 !important;
                 margin: 0 !important;
             }
+        }
+        
+        /* MapBox Container */
+        #mapContainer {
+            height: 300px;
+            width: 100%;
+            border-radius: 0.5rem;
+            border: 2px solid #dee2e6;
+            margin-bottom: 1rem;
+        }
+        
+        .mapboxgl-ctrl-attrib {
+            font-size: 10px;
+        }
+        
+        .mapboxgl-ctrl-geocoder {
+            min-width: 100%;
+            max-width: 100%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .mapboxgl-ctrl-top-right {
+            width: 100%;
+            max-width: 400px;
+            margin: 10px;
+        }
+        
+        @@media (max-width: 768px) {
+            .mapboxgl-ctrl-top-right {
+                max-width: calc(100% - 20px);
+            }
+        }
+        
+        .map-instructions {
+            background: #f8f9fa;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            border-left: 4px solid #667eea;
+            margin-bottom: 1rem;
         }
     </style>
 }
@@ -56,6 +98,17 @@
                         <form asp-action="SurveyLocation" asp-controller="SurveyCreation" method="post" id="locationForm">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="LocID" value="@(isEdit ? editLocation?.LocID : 0)" />
+                            
+                            <!-- MapBox Section -->
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <div class="map-instructions">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        <strong>Select Location:</strong> Search for a location using the search box, drag the red marker, or click anywhere on the map. Coordinates will update automatically.
+                                    </div>
+                                    <div id="mapContainer"></div>
+                                </div>
+                            </div>
                             <div class="row gx-4 gy-2">
                                 
                                 <div class="col-md-4">
@@ -314,7 +367,119 @@
     }
 </style>
 
+<script src='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js'></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
 <script>
+    let map;
+    let marker;
+    let geocoder;
+    const MAPBOX_TOKEN = 'pk.eyJ1Ijoic3VkaGFuc3VtYXBib3giLCJhIjoiY21pZTh0ZjI2MDA2bTNmc2d3ZGJqMjhsMSJ9.P0jMewzu7PpPhL0LcikXgg';
+
+    function initializeMap() {
+        mapboxgl.accessToken = MAPBOX_TOKEN;
+        
+        // Get initial coordinates from form
+        const latInput = document.querySelector('input[name="LocLat"]');
+        const lngInput = document.querySelector('input[name="LocLog"]');
+        const hasExistingCoords = latInput.value && lngInput.value;
+        const initialLat = hasExistingCoords ? parseFloat(latInput.value) : 20.5937;
+        const initialLng = hasExistingCoords ? parseFloat(lngInput.value) : 78.9629;
+        
+        // Initialize map
+        map = new mapboxgl.Map({
+            container: 'mapContainer',
+            style: 'mapbox://styles/mapbox/streets-v12',
+            center: [initialLng, initialLat],
+            zoom: 12
+        });
+        
+        // Add geocoder (search box)
+        geocoder = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl,
+            marker: false,
+            placeholder: 'Search for a location...',
+            proximity: {
+                longitude: initialLng,
+                latitude: initialLat
+            }
+        });
+        
+        map.addControl(geocoder, 'top-right');
+        
+        // When a location is selected from search
+        geocoder.on('result', function(e) {
+            const coords = e.result.geometry.coordinates;
+            marker.setLngLat(coords);
+            updateCoordinates(coords[1], coords[0]);
+            
+            // Optionally update location name if field exists
+            const locationNameInput = document.querySelector('input[name="LocName"]');
+            if (locationNameInput && !locationNameInput.value) {
+                locationNameInput.value = e.result.place_name.split(',')[0];
+            }
+        });
+        
+        // Add navigation controls
+        map.addControl(new mapboxgl.NavigationControl());
+        
+        // Add fullscreen control
+        map.addControl(new mapboxgl.FullscreenControl());
+        
+        // Create draggable marker
+        marker = new mapboxgl.Marker({
+            draggable: true,
+            color: '#FF0000'
+        })
+        .setLngLat([initialLng, initialLat])
+        .addTo(map);
+        
+        // Update coordinates when marker is dragged
+        marker.on('dragend', function() {
+            const lngLat = marker.getLngLat();
+            updateCoordinates(lngLat.lat, lngLat.lng);
+        });
+        
+        // Update marker when clicking on map
+        map.on('click', function(e) {
+            marker.setLngLat(e.lngLat);
+            updateCoordinates(e.lngLat.lat, e.lngLat.lng);
+        });
+        
+        // If no existing coordinates, try to get user's current location
+        if (!hasExistingCoords && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    // Update map, marker and inputs
+                    map.flyTo({
+                        center: [lng, lat],
+                        zoom: 15,
+                        essential: true
+                    });
+                    marker.setLngLat([lng, lat]);
+                    updateCoordinates(lat, lng);
+                },
+                function(error) {
+                    // Silently fail - user can manually select or use GPS button
+                    console.log('Auto-location detection failed:', error.message);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
+        }
+    }
+    
+    function updateCoordinates(lat, lng) {
+        document.querySelector('input[name="LocLat"]').value = lat.toFixed(6);
+        document.querySelector('input[name="LocLog"]').value = lng.toFixed(6);
+    }
+    
     function fetchLocation() {
         // Check if geolocation is supported
         if (!navigator.geolocation) {
@@ -341,8 +506,20 @@
         navigator.geolocation.getCurrentPosition(
             function (position) {
                 // Success callback
-                document.querySelector('input[name="LocLat"]').value = position.coords.latitude.toFixed(6);
-                document.querySelector('input[name="LocLog"]').value = position.coords.longitude.toFixed(6);
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                
+                updateCoordinates(lat, lng);
+                
+                // Update map and marker
+                if (map && marker) {
+                    map.flyTo({
+                        center: [lng, lat],
+                        zoom: 15,
+                        essential: true
+                    });
+                    marker.setLngLat([lng, lat]);
+                }
                 
                 // Reset button state
                 if (fetchBtn) {
@@ -351,7 +528,7 @@
                 }
                 
                 // Show success message
-                alert('Location fetched successfully!\nLatitude: ' + position.coords.latitude.toFixed(6) + '\nLongitude: ' + position.coords.longitude.toFixed(6));
+                alert('Location fetched successfully!\nLatitude: ' + lat.toFixed(6) + '\nLongitude: ' + lng.toFixed(6));
             },
             function (error) {
                 // Error callback
@@ -389,9 +566,37 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        // Initialize MapBox
+        initializeMap();
+        
+        // Fetch location button
         var btn = document.getElementById('fetchLocationBtn');
         if (btn) {
             btn.addEventListener('click', fetchLocation);
+        }
+        
+        // Update marker when coordinates are manually changed
+        const latInput = document.querySelector('input[name="LocLat"]');
+        const lngInput = document.querySelector('input[name="LocLog"]');
+        
+        if (latInput && lngInput) {
+            latInput.addEventListener('change', function() {
+                const lat = parseFloat(this.value);
+                const lng = parseFloat(lngInput.value);
+                if (!isNaN(lat) && !isNaN(lng) && marker && map) {
+                    marker.setLngLat([lng, lat]);
+                    map.flyTo({ center: [lng, lat], zoom: 12 });
+                }
+            });
+            
+            lngInput.addEventListener('change', function() {
+                const lat = parseFloat(latInput.value);
+                const lng = parseFloat(this.value);
+                if (!isNaN(lat) && !isNaN(lng) && marker && map) {
+                    marker.setLngLat([lng, lat]);
+                    map.flyTo({ center: [lng, lat], zoom: 12 });
+                }
+            });
         }
     });
 </script>

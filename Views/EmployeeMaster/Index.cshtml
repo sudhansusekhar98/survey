@@ -1,0 +1,228 @@
+@model List<SurveyApp.Models.EmpMasterModel>
+@{
+    ViewData["Title"] = "Employee Management";
+}
+
+@section PageStyles {
+    <style>
+        body {
+            overflow-x: hidden !important;
+        }
+        
+        @@media (max-width: 767.98px) {
+            .full-screen-card {
+                min-height: 100vh;
+                border-radius: 0 !important;
+                margin: 0 !important;
+            }
+        }
+    </style>
+}
+
+<div class="container-fluid p-0 m-0">
+    <div class="row g-0">
+        <div class="col-12">
+            <div class="card shadow mt-0 rounded-0 full-screen-card">
+                <div class="card-header bg-purple py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="text-white fs-4 mb-0">
+                            <i class="bi bi-people-fill me-2"></i>Employee Management
+                        </h6>
+                        <a asp-action="Create" class="btn btn-outline-success text-white border-0">
+                            <i class="bi bi-plus-circle"></i>
+                            <span class="d-none d-md-inline ms-2">Add New Employee</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    @if (TempData["ResultMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
+                    {
+                        <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show" role="alert">
+                            @Html.Raw(TempData["ResultMessage"])
+                            <button type="button" class="btn-close btn-sm align-top" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="table-responsive mt-3">
+                        <table class="table table-hover datatables-basic">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Employee Code</th>
+                                    <th>Employee Name</th>
+                                    <th>Email</th>
+                                    <th>Mobile No</th>
+                                    <th>Designation</th>
+                                    <th>Department</th>
+                                    <th>Status</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.Count > 0)
+                                {
+                                    foreach (var employee in Model)
+                                    {
+                                        <tr>
+                                            <td>@employee.EmpCode</td>
+                                            <td>@employee.EmpName</td>
+                                            <td>@(employee.Email ?? "-")</td>
+                                            <td>@(employee.MobileNo ?? "-")</td>
+                                            <td>@(employee.Designation ?? "-")</td>
+                                            <td>@(employee.DeptID?.ToString() ?? "-")</td>
+                                            <td>
+                                                @if (employee.IsActive)
+                                                {
+                                                    <span class="badge bg-success">Active</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Inactive</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <button type="button" 
+                                                            class="btn btn-info" 
+                                                            onclick="viewEmployeeDetails(@employee.EmpID)"
+                                                            title="View Details">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                    <a asp-action="Edit" 
+                                                       asp-route-id="@employee.EmpID" 
+                                                       class="btn btn-warning"
+                                                       title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <button type="button" 
+                                                            class="btn btn-danger" 
+                                                            onclick="confirmDelete(@employee.EmpID, '@employee.EmpName')"
+                                                            title="Delete">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div class="modal fade" id="employeeDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="employeeDetailsContent">
+            <!-- Partial view content will load here -->
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Html.AntiForgeryToken()
+    <style>
+        .bg-purple {
+            background-color: #667eea !important;
+        }
+    </style>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function viewEmployeeDetails(empId) {
+            $.ajax({
+                url: '@Url.Action("Details", "EmployeeMaster")' + '/' + empId,
+                type: 'GET',
+                success: function(html) {
+                    $('#employeeDetailsContent').html(html);
+                    var modal = new bootstrap.Modal(document.getElementById('employeeDetailsModal'));
+                    modal.show();
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to load employee details.',
+                        confirmButtonColor: '#667eea'
+                    });
+                }
+            });
+        }
+
+        function confirmDelete(empId, empName) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Delete Employee?',
+                html: `<p>Are you sure you want to delete:</p>
+                       <p><strong>"${empName}"</strong>?</p>
+                       <p class="text-danger mt-3">
+                           <i class="bi bi-exclamation-triangle me-1"></i>
+                           This action cannot be undone!
+                       </p>`,
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    performDelete(empId);
+                }
+            });
+        }
+
+        function performDelete(empId) {
+            var token = $('input[name="__RequestVerificationToken"]').val();
+            
+            Swal.fire({
+                title: 'Deleting...',
+                text: 'Please wait',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Delete", "EmployeeMaster")',
+                data: {
+                    id: empId,
+                    __RequestVerificationToken: token
+                },
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: response.message,
+                            confirmButtonColor: '#28a745'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message,
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while deleting the employee: ' + error,
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            });
+        }
+    </script>
+}

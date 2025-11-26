@@ -63,12 +63,10 @@ function showPreviewModal(surveyId, locId) {
  * Submit location completion and mark as completed
  */
 function submitLocationCompletion() {
-    if (!confirm('Are you sure you want to submit and mark this location as completed? This action cannot be undone.')) {
-        return;
-    }
+    // Disable button and show loading
+    $('#submitLocationBtn').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Checking...');
     
-    $('#submitLocationBtn').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Submitting...');
-    
+    // First, check validation via AJAX without confirmation
     $.ajax({
         url: window.surveyDetailsConfig.submitCompletionUrl,
         type: 'POST',
@@ -79,28 +77,51 @@ function submitLocationCompletion() {
         },
         success: function(response) {
             if (response.success) {
-                // Close modal
+                // Validation passed, close modal and show success
                 var modal = bootstrap.Modal.getInstance(document.getElementById('previewModal'));
                 modal.hide();
                 
-                // Show success message
-                var alertHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
-                    '<strong>Success!</strong> ' + response.message +
-                    '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
-                    '</div>';
-                $('.card-body').prepend(alertHtml);
-                
-                // Reload the page to show updated status
-                setTimeout(function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: response.message,
+                    confirmButtonColor: '#28a745',
+                    timer: 2000,
+                    timerProgressBar: true
+                }).then(() => {
                     location.reload();
-                }, 2000);
+                });
             } else {
-                alert('Error: ' + response.message);
+                // Validation failed, show error in modal
+                var errorHtml = '<div class="alert alert-warning mb-0">';
+                errorHtml += '<strong><i class="bi bi-exclamation-triangle me-2"></i>' + response.message + '</strong>';
+                
+                if (response.errorDetails) {
+                    errorHtml += '<div class="mt-3">' + response.errorDetails + '</div>';
+                }
+                
+                errorHtml += '</div>';
+                
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Cannot Submit',
+                    html: errorHtml,
+                    confirmButtonText: 'OK, I\'ll Add Items',
+                    confirmButtonColor: '#ffc107',
+                    width: '600px'
+                });
+                
+                // Re-enable submit button
                 $('#submitLocationBtn').prop('disabled', false).html('<i class="bi bi-check-circle me-2"></i>Submit & Mark as Completed');
             }
         },
         error: function(xhr, status, error) {
-            alert('Failed to submit. Please try again.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Submission Failed',
+                text: 'Unable to submit. Please try again.',
+                confirmButtonColor: '#dc3545'
+            });
             $('#submitLocationBtn').prop('disabled', false).html('<i class="bi bi-check-circle me-2"></i>Submit & Mark as Completed');
         }
     });
@@ -112,28 +133,62 @@ function submitLocationCompletion() {
  * @param {number} locId - Location ID
  */
 function unlockLocationForEditing(surveyId, locId) {
-    if (!confirm('Are you sure you want to unlock this location for editing? This will change the status back to In Progress.')) {
-        return;
-    }
-    
-    $.ajax({
-        url: window.surveyDetailsConfig.unlockUrl,
-        type: 'POST',
-        data: {
-            surveyId: surveyId,
-            locId: locId
+    Swal.fire({
+        title: 'Unlock Location?',
+        html: 'Are you sure you want to unlock this location for editing?<br><small class="text-muted">This will change the status back to In Progress.</small>',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ffc107',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="bi bi-unlock me-2"></i>Yes, Unlock',
+        cancelButtonText: '<i class="bi bi-x-circle me-2"></i>Cancel',
+        customClass: {
+            confirmButton: 'btn btn-warning',
+            cancelButton: 'btn btn-secondary'
         },
-        success: function(response) {
-            if (response.success) {
-                alert('Success: ' + response.message);
-                location.reload();
-            } else {
-                alert('Error: ' + response.message);
-            }
-        },
-        error: function(xhr, status, error) {
-            alert('Network error: ' + error);
+        buttonsStyling: false
+    }).then((result) => {
+        if (!result.isConfirmed) {
+            return;
         }
+        
+        $.ajax({
+            url: window.surveyDetailsConfig.unlockUrl,
+            type: 'POST',
+            data: {
+                surveyId: surveyId,
+                locId: locId
+            },
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Unlocked!',
+                        text: response.message,
+                        confirmButtonColor: '#28a745',
+                        timer: 2000,
+                        timerProgressBar: true
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message,
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Network Error',
+                    text: 'Failed to unlock. Please try again.',
+                    confirmButtonColor: '#dc3545'
+                });
+            }
+        });
     });
 }
 
@@ -147,50 +202,95 @@ function handleStatusUpdate(surveyId, locId, status) {
     const statusActions = {
         'InProgress': {
             url: '/SurveyCreation/MarkLocationAsInProgress',
-            message: 'Mark this location as In Progress?'
+            message: 'Mark this location as In Progress?',
+            icon: 'info',
+            color: '#17a2b8'
         },
         'Completed': {
             url: '/SurveyCreation/MarkLocationAsCompleted',
-            message: 'Mark this location as Completed?'
+            message: 'Mark this location as Completed?',
+            icon: 'success',
+            color: '#28a745'
         },
         'Verified': {
             url: '/SurveyCreation/MarkLocationAsVerified',
-            message: 'Mark this location as Verified?'
+            message: 'Mark this location as Verified?',
+            icon: 'success',
+            color: '#28a745'
         }
     };
     
     const action = statusActions[status];
     if (!action) {
-        alert('Invalid status action');
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Action',
+            text: 'Invalid status action',
+            confirmButtonColor: '#dc3545'
+        });
         return;
     }
     
-    if (!confirm(action.message)) {
-        return;
-    }
-    
-    $.ajax({
-        url: action.url,
-        type: 'POST',
-        data: {
-            surveyId: surveyId,
-            locId: locId,
-            remarks: ''
+    Swal.fire({
+        title: 'Update Status?',
+        text: action.message,
+        icon: action.icon,
+        showCancelButton: true,
+        confirmButtonColor: action.color,
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="bi bi-check-circle me-2"></i>Yes, Update',
+        cancelButtonText: '<i class="bi bi-x-circle me-2"></i>Cancel',
+        customClass: {
+            confirmButton: 'btn btn-primary',
+            cancelButton: 'btn btn-secondary'
         },
-        success: function(response) {
-            if (response.success) {
-                alert('Success: ' + response.message);
-                location.reload();
-            } else {
-                alert('Error: ' + response.message);
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('AJAX Error:', error);
-            console.error('Status:', status);
-            console.error('Response:', xhr.responseText);
-            alert('Network error: Failed to update status. Please check console for details.');
+        buttonsStyling: false
+    }).then((result) => {
+        if (!result.isConfirmed) {
+            return;
         }
+        
+        $.ajax({
+            url: action.url,
+            type: 'POST',
+            data: {
+                surveyId: surveyId,
+                locId: locId,
+                remarks: ''
+            },
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: response.message,
+                        confirmButtonColor: '#28a745',
+                        timer: 2000,
+                        timerProgressBar: true
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message,
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+                console.error('Status:', status);
+                console.error('Response:', xhr.responseText);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Network Error',
+                    text: 'Failed to update status. Please check console for details.',
+                    confirmButtonColor: '#dc3545'
+                });
+            }
+        });
     });
 }
 

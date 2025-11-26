@@ -1,0 +1,290 @@
+@model List<SurveyApp.Models.SurveySubmissionModel>
+@{
+    ViewData["Title"] = "Survey Submissions";
+}
+
+@section VendorStyles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-purple py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="text-white mb-0">
+                            <i class="bi bi-file-earmark-check me-2"></i>Survey Submissions
+                        </h4>
+                        <a asp-controller="SurveyCreation" asp-action="Index" class="btn btn-sm btn-outline-light">
+                            <i class="bi bi-arrow-left me-1"></i>Back to Surveys
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (TempData["ResultMessage"] != null)
+                    {
+                        <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show" role="alert">
+                            @Html.Raw(TempData["ResultMessage"])
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover datatables-basic">
+                                <thead>
+                                    <tr>
+                                        <th>Survey Name</th>
+                                        <th>Status</th>
+                                        <th>Submitted By</th>
+                                        <th>Submission Date</th>
+                                        <th>Reviewed By</th>
+                                        <th>Review Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var submission in Model)
+                                    {
+                                        var statusClass = submission.SubmissionStatus switch
+                                        {
+                                            "Submitted" => "bg-warning",
+                                            "Approved" => "bg-success",
+                                            "Rejected" => "bg-danger",
+                                            "Draft" => "bg-secondary",
+                                            _ => "bg-info"
+                                        };
+
+                                        <tr>
+                                            <td>
+                                                <strong>@submission.SurveyName</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge @statusClass">
+                                                    <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>
+                                                    @submission.SubmissionStatus
+                                                </span>
+                                            </td>
+                                            <td>@(submission.SubmittedByName ?? "-")</td>
+                                            <td>@(submission.SubmissionDate?.ToString("dd-MMM-yyyy hh:mm tt") ?? "-")</td>
+                                            <td>@(submission.ReviewedByName ?? "-")</td>
+                                            <td>@(submission.ReviewDate?.ToString("dd-MMM-yyyy hh:mm tt") ?? "-")</td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a asp-controller="SurveyCreation" 
+                                                       asp-action="ViewDetails" 
+                                                       asp-route-id="@submission.SurveyId" 
+                                                       class="btn btn-info"
+                                                       title="View Survey">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    @if (submission.SubmissionStatus == "Submitted")
+                                                    {
+                                                        <button type="button" 
+                                                                class="btn btn-success" 
+                                                                onclick="updateStatus(@submission.SubmissionId, 'Approved', '@submission.SurveyName')"
+                                                                title="Approve">
+                                                            <i class="bi bi-check-circle"></i>
+                                                        </button>
+                                                        <button type="button" 
+                                                                class="btn btn-danger" 
+                                                                onclick="updateStatus(@submission.SubmissionId, 'Rejected', '@submission.SurveyName')"
+                                                                title="Reject">
+                                                            <i class="bi bi-x-circle"></i>
+                                                        </button>
+                                                    }
+                                                    @if (submission.SubmissionStatus == "Submitted" || submission.SubmissionStatus == "Draft")
+                                                    {
+                                                        <button type="button" 
+                                                                class="btn btn-warning" 
+                                                                onclick="withdrawSubmission(@submission.SurveyId, '@submission.SurveyName')"
+                                                                title="Withdraw">
+                                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        @if (!string.IsNullOrWhiteSpace(submission.ReviewComments))
+                                        {
+                                            <tr class="table-light">
+                                                <td colspan="7">
+                                                    <small>
+                                                        <strong>Review Comments:</strong> @submission.ReviewComments
+                                                    </small>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+                            <p class="text-muted fs-5">No submissions found.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function updateStatus(submissionId, status, surveyName) {
+            var action = status === 'Approved' ? 'approve' : 'reject';
+            var icon = status === 'Approved' ? 'success' : 'warning';
+            var title = status === 'Approved' ? 'Approve Survey' : 'Reject Survey';
+            
+            Swal.fire({
+                icon: icon,
+                title: title,
+                html: `<p>Are you sure you want to ${action} <strong>"${surveyName}"</strong>?</p>`,
+                input: 'textarea',
+                inputLabel: 'Review Comments',
+                inputPlaceholder: 'Enter your review comments here...',
+                inputAttributes: {
+                    'aria-label': 'Review comments'
+                },
+                showCancelButton: true,
+                confirmButtonText: status === 'Approved' ? 'Approve' : 'Reject',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: status === 'Approved' ? '#28a745' : '#dc3545',
+                cancelButtonColor: '#6c757d',
+                reverseButtons: true,
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'Please enter review comments'
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var comments = result.value;
+                    var token = $('input[name="__RequestVerificationToken"]').val();
+                    
+                    Swal.fire({
+                        title: 'Processing...',
+                        text: 'Please wait',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    $.ajax({
+                        url: '@Url.Action("UpdateSubmissionStatus", "SurveyCreation")',
+                        type: 'POST',
+                        data: {
+                            submissionId: submissionId,
+                            status: status,
+                            comments: comments,
+                            __RequestVerificationToken: token
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success!',
+                                    text: response.message,
+                                    confirmButtonColor: '#28a745'
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: response.message,
+                                    confirmButtonColor: '#dc3545'
+                                });
+                            }
+                        },
+                        error: function() {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'An error occurred while updating the status.',
+                                confirmButtonColor: '#dc3545'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+        
+        function withdrawSubmission(surveyId, surveyName) {
+            Swal.fire({
+                icon: 'question',
+                title: 'Withdraw Submission?',
+                html: `<p>Are you sure you want to withdraw the submission for:</p>
+                       <p><strong>"${surveyName}"</strong>?</p>
+                       <p class="text-info mt-3">
+                           <i class="bi bi-info-circle me-1"></i>
+                           The survey will return to Draft status and can be edited.
+                       </p>`,
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Withdraw',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#ffc107',
+                cancelButtonColor: '#6c757d',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var token = $('input[name="__RequestVerificationToken"]').val();
+                    
+                    Swal.fire({
+                        title: 'Withdrawing...',
+                        text: 'Please wait',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    $.ajax({
+                        url: '@Url.Action("WithdrawSubmission", "SurveyCreation")',
+                        type: 'POST',
+                        data: {
+                            surveyId: surveyId,
+                            __RequestVerificationToken: token
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Withdrawn!',
+                                    text: response.message,
+                                    confirmButtonColor: '#28a745'
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: response.message,
+                                    confirmButtonColor: '#dc3545'
+                                });
+                            }
+                        },
+                        error: function() {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'An error occurred while withdrawing the submission.',
+                                confirmButtonColor: '#dc3545'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

@@ -18,6 +18,23 @@
                 margin: 0 !important;
             }
         }
+
+        /* Section styling */
+        .border-purple {
+            border-color: #6f42c1 !important;
+        }
+
+        .bg-purple {
+            background-color: #6f42c1 !important;
+        }
+
+        .text-purple {
+            color: #6f42c1 !important;
+        }
+
+        .card-header {
+            font-weight: 600;
+        }
     </style>
 }
 
@@ -52,15 +69,8 @@
                                 }
                             </div>
 
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input asp-for="SurveyName" type="text" class="form-control" placeholder=" " required>
-                                    <label asp-for="SurveyName"></label>
-                                    <span asp-validation-for="SurveyName" class="text-danger"></span>
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
+                            <!-- Client Selection -->
+                            <div class="col-12">
                                 <div class="form-custom-floating">
                                     <select asp-for="ClientID" id="clientDropdown" asp-items="@(ViewBag.Clients as SelectList)" class="form-select" placeholder=" ">
                                         <option value=""> </option>
@@ -70,64 +80,60 @@
                                 </div>
                             </div>
 
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <select asp-for="RegionID" asp-items="@(ViewBag.Regions as SelectList)" class="form-select" placeholder=" ">
-                                        <option value=""> </option>
-                                    </select>
-                                    <label asp-for="RegionID"></label>
-                                    <span asp-validation-for="RegionID" class="text-danger"></span>
-                                </div>
-                            </div>
+                            <!-- Client Information Section (Auto-filled) -->
+                            <div class="col-12">
+                                <div class="card border-info mt-1">
+                                    <div class="card-header bg-info bg-opacity-10 border-bottom border-info mb-3"
+                                            style="padding-top: 10px; padding-bottom: 10px;">
+                                            <h6 class="mb-0 text-info">
+                                                <i class="bi bi-building me-2"></i>Client Information
+                                            </h6>
+                                        </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input asp-for="AgencyName" type="text" class="form-control" placeholder=" " id="agencyNameInput" readonly>
+                                                    <label asp-for="AgencyName"></label>
+                                                </div>
+                                            </div>
 
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <select asp-for="ImplementationType" asp-items="Model.ImplementationTypeOptions" class="form-select" placeholder=" ">
-                                        <option value=""> </option>
-                                    </select>
-                                    <label asp-for="ImplementationType"></label>
-                                </div>
-                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input asp-for="LocationSiteName" type="text" class="form-control" placeholder=" " id="addressInput" readonly>
+                                                    <label asp-for="LocationSiteName"></label>
+                                                </div>
+                                            </div>
 
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input asp-for="SurveyDate" type="date" class="form-control" placeholder=" ">
-                                    <label asp-for="SurveyDate"></label>
-                                </div>
-                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input type="text" class="form-control" placeholder=" " id="contactPersonInput" readonly>
+                                                    <label>Contact Person</label>
+                                                </div>
+                                            </div>
 
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input asp-for="SurveyTeamName" type="text" class="form-control" placeholder=" ">
-                                    <label asp-for="SurveyTeamName"></label>
-                                </div>
-                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input type="text" class="form-control" placeholder=" " id="contactNumberInput" readonly>
+                                                    <label>Contact Number</label>
+                                                </div>
+                                            </div>
 
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input asp-for="SurveyTeamContact" type="text" class="form-control" placeholder=" " maxlength="15">
-                                    <label asp-for="SurveyTeamContact"></label>
-                                </div>
-                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input type="text" class="form-control" placeholder=" " id="stateInput" readonly>
+                                                    <label>State</label>
+                                                </div>
+                                            </div>
 
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input asp-for="AgencyName" type="text" class="form-control" placeholder=" " id="agencyNameInput" readonly>
-                                    <label asp-for="AgencyName"></label>
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input type="text" class="form-control" placeholder=" " id="stateInput" readonly>
-                                    <label>State</label>
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input type="text" class="form-control" placeholder=" " id="cityInput" readonly>
-                                    <label>City</label>
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input type="text" class="form-control" placeholder=" " id="cityInput" readonly>
+                                                    <label>City</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -137,46 +143,88 @@
                             <input type="hidden" asp-for="CityId" id="cityIdHidden" />
                             <input type="hidden" asp-for="CityDistrict" id="cityNameHidden" />
 
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input asp-for="LocationSiteName" type="text" class="form-control" placeholder=" " id="addressInput" readonly>
-                                    <label asp-for="LocationSiteName"></label>
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input type="text" class="form-control" placeholder=" " id="contactPersonInput" readonly>
-                                    <label>Contact Person</label>
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input type="text" class="form-control" placeholder=" " id="contactNumberInput" readonly>
-                                    <label>Contact Number</label>
-                                </div>
-                            </div>
-
-
+                            <!-- Survey Details Section -->
                             <div class="col-12">
-                                <div class="form-custom-floating">
-                                    <textarea asp-for="ScopeOfWork" class="form-control" placeholder=" " rows="3" style="min-height: 100px;"></textarea>
-                                    <label asp-for="ScopeOfWork"></label>
-                                </div>
-                            </div>
+                                <div class="card border-purple mt-1">
+                                    <div class="card-header bg-purple border-bottom border-purple mb-2"
+                                        style="padding-top: 10px; padding-bottom: 10px;">
+                                        <h6 class="mb-0 text-white">
+                                            <i class="bi bi-clipboard-data me-2"></i>Survey Details
+                                        </h6>
+                                    </div>
 
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input asp-for="Latitude" type="number" step="any" class="form-control" placeholder=" ">
-                                    <label asp-for="Latitude"></label>
-                                </div>
-                            </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input asp-for="SurveyName" type="text" class="form-control" placeholder=" " required>
+                                                    <label asp-for="SurveyName"></label>
+                                                    <span asp-validation-for="SurveyName" class="text-danger"></span>
+                                                </div>
+                                            </div>
 
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input asp-for="Longitude" type="number" step="any" class="form-control" placeholder=" ">
-                                    <label asp-for="Longitude"></label>
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <select asp-for="RegionID" asp-items="@(ViewBag.Regions as SelectList)" class="form-select" placeholder=" ">
+                                                        <option value=""> </option>
+                                                    </select>
+                                                    <label asp-for="RegionID"></label>
+                                                    <span asp-validation-for="RegionID" class="text-danger"></span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <select asp-for="ImplementationType" asp-items="Model.ImplementationTypeOptions" class="form-select" placeholder=" ">
+                                                        <option value=""> </option>
+                                                    </select>
+                                                    <label asp-for="ImplementationType"></label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input asp-for="SurveyDate" type="date" class="form-control" placeholder=" ">
+                                                    <label asp-for="SurveyDate"></label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input asp-for="SurveyTeamName" type="text" class="form-control" placeholder=" ">
+                                                    <label asp-for="SurveyTeamName"></label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input asp-for="SurveyTeamContact" type="text" class="form-control" placeholder=" " maxlength="15">
+                                                    <label asp-for="SurveyTeamContact"></label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12">
+                                                <div class="form-custom-floating">
+                                                    <textarea asp-for="ScopeOfWork" class="form-control" placeholder=" " rows="3" style="min-height: 100px;"></textarea>
+                                                    <label asp-for="ScopeOfWork"></label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input asp-for="Latitude" type="number" step="any" class="form-control" placeholder=" ">
+                                                    <label asp-for="Latitude"></label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input asp-for="Longitude" type="number" step="any" class="form-control" placeholder=" ">
+                                                    <label asp-for="Longitude"></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

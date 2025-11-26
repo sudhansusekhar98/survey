@@ -1,445 +1,752 @@
-﻿@{
-
-    ViewData["Title"] = "Dashboard - Analytics";
+﻿@model SurveyApp.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Survey Dashboard";
 }
+
 @section VendorStyles {
     <link rel="stylesheet" href="~/vendor/libs/apex-charts/apex-charts.css" />
 }
-@section VendorScripts {
-    <script src="~/vendor/libs/apex-charts/apexcharts.js"></script>
-}
-@section PageScripts {
-    <script src="~/js/dashboards-analytics.js"></script>
-}
 
 @section PageStyles {
+    <link rel="stylesheet" href="~/css/dashboard.css" />
     <style>
-        /* Prevent horizontal overflow */
-        body {
-            overflow-x: hidden !important;
-        }
-        
-        /* Mobile full-screen layout */
-        @@media (max-width: 767.98px) {
-            .dashboard-row {
-                margin: 0 !important;
-            }
-            .dashboard-row .card {
-                border-radius: 0 !important;
-                margin-left: 0 !important;
-                margin-right: 0 !important;
-            }
+        .welcome-banner, .welcome-banner * {
+            color: #fff !important;
         }
     </style>
 }
 
-@* ************** Content ************** *@
-<div class="row dashboard-row">
-    <div class="col-xxl-8 mb-6 order-0">
-        <div class="card">
-            <div class="d-flex align-items-start row">
-                <div class="col-sm-7">
+<div class="container-fluid">
+    <!-- Date Time Widget -->
+    <div class="datetime-widget">
+        <div class="text-center">
+            <div class="day" id="currentDay">MONDAY</div>
+            <div class="time" id="currentTime">12:00:00</div>
+            <div class="date" id="currentDate">Nov 25, 2025</div>
+        </div>
+    </div>
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+        <div class="row align-items-center">
+            <div class="col-md-8 ">
+                <h3 class="mb-2 ">Welcome back, @Model.UserName! 👋</h3>
+                <p class="mb-0 opacity-75 ">Here's what's happening with your surveys today</p>
+            </div>
+            <div class="col-md-4 text-end">
+                @if (Model.CanCreate)
+                {
+                    <a asp-controller="SurveyCreation" asp-action="Create" class="btn btn-light quick-action-btn">
+                        <i class="bx bx-plus-circle me-2"></i>Create New Survey
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    @if (ViewBag.IsFiltered == true)
+    {
+        <div class="alert alert-info alert-dismissible fade show d-flex align-items-center" role="alert">
+            <i class="bx bx-filter-alt bx-lg me-2"></i>
+            <div class="flex-grow-1">
+                <strong>Filter Active:</strong> 
+                @if (ViewBag.CurrentFilter == "status")
+                {
+                    <span>Showing surveys with status: <strong>@ViewBag.CurrentValue</strong></span>
+                }
+                else if (ViewBag.CurrentFilter == "region")
+                {
+                    <span>Showing surveys in region: <strong>@ViewBag.CurrentValue</strong></span>
+                }
+                else if (ViewBag.CurrentFilter == "type")
+                {
+                    <span>Showing surveys of type: <strong>@ViewBag.CurrentValue</strong></span>
+                }
+                else if (ViewBag.CurrentFilter == "missed")
+                {
+                    <span>Showing surveys with <strong>Missed Deadline</strong></span>
+                }
+            </div>
+            <a asp-action="Index" class="btn btn-sm btn-outline-info ms-3">
+                <i class="bx bx-x me-1"></i>Clear Filter
+            </a>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Key Metrics Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <a asp-controller="SurveyCreation" asp-action="Index" class="text-decoration-none">
+                <div class="card stat-card h-100">
                     <div class="card-body">
-                        <h5 class="card-title text-primary mb-3">Survey Management Dashboard 📊</h5>
-                        <p class="mb-6">Monitor all your infrastructure surveys.<br>Track progress and manage assignments efficiently.</p>
-
-                        <a asp-controller="SurveyCreation" asp-action="Index" class="btn btn-sm btn-outline-primary">View All Surveys</a>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="metric-label mb-2">Total Surveys</p>
+                                <h2 class="metric-value text-primary mb-0">@Model.TotalSurveys</h2>
+                            </div>
+                            <div class="avatar avatar-lg">
+                                <div class="avatar-initial rounded-3 bg-label-primary">
+                                    <i class="bx bx-layer bx-lg"></i>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-sm-5 text-center text-sm-left">
-                    <div class="card-body pb-0 px-0 px-md-6">
-                        <img src="~/img/illustrations/man-with-laptop.png" height="175" alt="Survey Dashboard">
-                    </div>
-                </div>
-            </div>
+            </a>
         </div>
-    </div>
 
-    <div class="row">
-    <!-- Survey Completion Chart -->
-    <div class="col-12 col-xxl-8 order-2 order-md-3 order-xxl-2 mb-6">
-        <div class="card">
-            <div class="row row-bordered g-0">
-                <div class="col-lg-8">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        <div class="card-title mb-0">
-                            <h5 class="m-0 me-2">Survey Completion Timeline</h5>
-                            <small class="text-muted">Monthly completion rate</small>
-                        </div>
-                        <div class="dropdown">
-                            <button class="btn p-0" type="button" id="surveyTimeline" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="bx bx-dots-vertical-rounded bx-lg text-muted"></i>
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="surveyTimeline">
-                                <a class="dropdown-item" href="javascript:void(0);">Last 6 Months</a>
-                                <a class="dropdown-item" href="javascript:void(0);">Last Year</a>
-                                <a class="dropdown-item" href="javascript:void(0);">All Time</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="totalRevenueChart" class="px-3"></div>
-                </div>
-                <div class="col-lg-4 d-flex align-items-center">
-                    <div class="card-body px-xl-9">
-                        <div class="text-center mb-6">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-outline-primary">
-                                    <script>
-                                        document.write(new Date().getFullYear())
-                                    </script>
-                                </button>
-                                <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span class="visually-hidden">Toggle Dropdown</span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="javascript:void(0);">2025</a></li>
-                                    <li><a class="dropdown-item" href="javascript:void(0);">2024</a></li>
-                                    <li><a class="dropdown-item" href="javascript:void(0);">2023</a></li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div id="growthChart"></div>
-                        <div class="text-center fw-medium my-6">@ViewBag.CompletionRate% Completion Rate</div>
-
-                        <div class="d-flex gap-3 justify-content-between">
-                            <div class="d-flex">
-                                <div class="avatar me-2">
-                                    <span class="avatar-initial rounded-2 bg-label-success"><i class="bx bx-check-double bx-lg text-success"></i></span>
-                                </div>
-                                <div class="d-flex flex-column">
-                                    <small>Completed</small>
-                                    <h6 class="mb-0">@ViewBag.OnTimeSurveys</h6>
-                                </div>
-                            </div>
-                            <div class="d-flex">
-                                <div class="avatar me-2">
-                                    <span class="avatar-initial rounded-2 bg-label-danger"><i class="bx bx-error bx-lg text-danger"></i></span>
-                                </div>
-                                <div class="d-flex flex-column">
-                                    <small>On Hold</small>
-                                    <h6 class="mb-0">@ViewBag.DelayedSurveys</h6>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!--/ Survey Completion Chart -->
-    <div class="col-12 col-md-8 col-lg-12 col-xxl-4 order-3 order-md-2">
-        <div class="row">
-            <div class="col-12 mb-6">
-                <div class="card">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="Completed" class="text-decoration-none">
+                <div class="card stat-card h-100">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center flex-sm-row flex-column gap-10">
-                            <div class="d-flex flex-sm-column flex-row align-items-start justify-content-between">
-                                <div class="card-title mb-6">
-                                    <h5 class="text-nowrap mb-1">Completion Rate</h5>
-                                    <span class="badge bg-label-success">YEAR 2025</span>
-                                </div>
-                                <div class="mt-sm-auto">
-                                    <span class="text-success text-nowrap fw-medium"><i class='bx bx-up-arrow-alt'></i> @ViewBag.CompletionRate%</span>
-                                    <h4 class="mb-0">@ViewBag.CompletedSurveys Completed</h4>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="metric-label mb-2">Completed</p>
+                                <h2 class="metric-value text-success mb-0">@Model.CompletedSurveys</h2>
+                                <small class="text-success fw-semibold">@Model.CompletionRate%</small>
+                            </div>
+                            <div class="avatar avatar-lg">
+                                <div class="avatar-initial rounded-3 bg-label-success">
+                                    <i class="bx bx-check-circle bx-lg"></i>
                                 </div>
                             </div>
-                            <div id="profileReportChart"></div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="In Progress" class="text-decoration-none">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="metric-label mb-2">In Progress</p>
+                                <h2 class="metric-value text-warning mb-0">@Model.InProgressSurveys</h2>
+                            </div>
+                            <div class="avatar avatar-lg">
+                                <div class="avatar-initial rounded-3 bg-label-warning">
+                                    <i class="bx bx-time-five bx-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="Pending" class="text-decoration-none">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="metric-label mb-2">Pending</p>
+                                <h2 class="metric-value text-secondary mb-0">@Model.PendingSurveys</h2>
+                            </div>
+                            <div class="avatar avatar-lg">
+                                <div class="avatar-initial rounded-3 bg-label-secondary">
+                                    <i class="bx bx-pause-circle bx-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Additional Metrics Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-sm-6 col-xl-4">
+            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="On Hold" class="text-decoration-none">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="metric-label mb-2">On Hold</p>
+                                <h2 class="metric-value text-info mb-0">@Model.OnHoldSurveys</h2>
+                            </div>
+                            <div class="avatar avatar-lg">
+                                <div class="avatar-initial rounded-3 bg-label-info">
+                                    <i class="bx bx-error-circle bx-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="Assigned" class="text-decoration-none">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="metric-label mb-2">Assigned</p>
+                                <h2 class="metric-value text-primary mb-0">@Model.AssignedSurveys</h2>
+                            </div>
+                            <div class="avatar avatar-lg">
+                                <div class="avatar-initial rounded-3 bg-label-primary">
+                                    <i class="bx bx-user-check bx-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-missed="true" class="text-decoration-none">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="metric-label mb-2">Missed Deadline</p>
+                                <h2 class="metric-value text-danger mb-0">@Model.MissedDeadlineSurveys</h2>
+                                <small class="text-danger fw-semibold">
+                                    <i class="bx bx-error"></i> Overdue
+                                </small>
+                            </div>
+                            <div class="avatar avatar-lg">
+                                <div class="avatar-initial rounded-3 bg-label-danger">
+                                    <i class="bx bx-calendar-x bx-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-12 col-xl-6">
+            <div class="card stat-card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="flex-grow-1">
+                            <p class="metric-label mb-2">Completion Rate</p>
+                            <h2 class="metric-value text-primary mb-0">@Model.CompletionRate%</h2>
+                            <div class="progress mt-2" style="height: 8px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: @Model.CompletionRate%"></div>
+                            </div>
+                        </div>
+                        <div class="avatar avatar-lg">
+                            <div class="avatar-initial rounded-3 bg-label-primary">
+                                <i class="bx bx-pie-chart-alt-2 bx-lg"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-    
-
-</div>
-
-<div class="row">
-    <!-- Survey Statistics -->
-    <div class="col-md-6 col-lg-4 col-xl-4 order-0 mb-6">
-        <div class="card h-100">
-            <div class="card-header d-flex justify-content-between">
-                <div class="card-title mb-0">
-                    <h5 class="mb-1 me-2">Survey Statistics</h5>
-                    <p class="card-subtitle">Total @ViewBag.TotalSurveys Surveys</p>
-                </div>
-                <div class="dropdown">
-                    <button class="btn text-muted p-0" type="button" id="surveyStatistics" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="bx bx-dots-vertical-rounded bx-lg"></i>
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="surveyStatistics">
-                        <a class="dropdown-item" asp-controller="SurveyCreation" asp-action="Index">View All</a>
-                        <a class="dropdown-item" asp-controller="SurveyCreation" asp-action="Create">Create New</a>
+    <!-- Status Breakdown & Region Distribution -->
+    <div class="row g-4 mb-4">
+        <!-- Survey Status Breakdown -->
+        <div class="col-md-6 col-xl-4">
+            <div class="card h-100">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0">Survey Status</h5>
+                    <div class="dropdown">
+                        <button class="btn btn-text-secondary rounded-pill btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                            <i class="bx bx-dots-vertical-rounded bx-lg"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" asp-controller="SurveyCreation" asp-action="Index">View All</a></li>
+                        </ul>
                     </div>
                 </div>
-            </div>
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-6">
-                    <div class="d-flex flex-column align-items-center gap-1">
-                        <h3 class="mb-1">@ViewBag.TotalSurveys</h3>
-                        <small>Total Surveys</small>
-                    </div>
-                    <div id="orderStatisticsChart"></div>
-                </div>
-                <ul class="p-0 m-0">
-                    @{
-                        var statusSummary = ViewBag.SurveyStatusSummary as IDictionary<string, int>;
-                        var statusIcons = new Dictionary<string, string> {
-                            { "Completed", "bx-check-circle bg-label-success" },
-                            { "Pending", "bx-time bg-label-warning" },
-                            { "In Progress", "bx-loader bg-label-info" },
-                            { "On Hold", "bx-pause-circle bg-label-secondary" },
-                            { "Unknown", "bx-question-mark bg-label-dark" }
-                        };
-                        var statusLabels = new Dictionary<string, string> {
-                            { "Completed", "Finished surveys" },
-                            { "Pending", "Awaiting action" },
-                            { "In Progress", "Ongoing surveys" },
-                            { "On Hold", "Paused surveys" },
-                            { "Unknown", "Other/Unspecified" }
-                        };
-                        if (statusSummary != null)
-                        {
-                            foreach (var status in statusSummary.Keys)
+                <div class="card-body">
+                    @if (Model.SurveysByStatus.Any())
+                    {
+                        <ul class="list-unstyled mb-0">
+                            @foreach (var status in Model.SurveysByStatus.OrderByDescending(x => x.Value))
                             {
-                                <li class="d-flex align-items-center mb-5">
-                                    <div class="avatar flex-shrink-0 me-3">
-                                        <span class="avatar-initial rounded @statusIcons.GetValueOrDefault(status, "bg-label-dark")">
-                                            <i class='bx @(statusIcons.ContainsKey(status) ? statusIcons[status].Split(' ')[0] : "bx-question-mark")'></i>
-                                        </span>
-                                    </div>
-                                    <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                                        <div class="me-2">
-                                            <h6 class="mb-0">@status</h6>
-                                            <small>@statusLabels.GetValueOrDefault(status, "Other/Unspecified")</small>
+                                var percentage = Model.TotalSurveys > 0 ? (int)Math.Round((double)status.Value / Model.TotalSurveys * 100) : 0;
+                                var badgeClass = status.Key switch
+                                {
+                                    "Completed" => "success",
+                                    "In Progress" => "warning",
+                                    "Pending" => "secondary",
+                                    "On Hold" => "danger",
+                                    _ => "dark"
+                                };
+                                var iconClass = status.Key switch
+                                {
+                                    "Completed" => "bx-check-circle",
+                                    "In Progress" => "bx-time-five",
+                                    "Pending" => "bx-pause-circle",
+                                    "On Hold" => "bx-error-circle",
+                                    _ => "bx-info-circle"
+                                };
+
+                                <li class="mb-4">
+                                    <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="@status.Key" class="text-decoration-none text-dark">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="avatar avatar-sm me-3">
+                                                <span class="avatar-initial rounded-2 bg-label-@badgeClass">
+                                                    <i class="bx @iconClass"></i>
+                                                </span>
+                                            </div>
+                                            <div class="d-flex w-100 align-items-center justify-content-between">
+                                                <span class="fw-semibold">@status.Key</span>
+                                                <span class="badge bg-@badgeClass">@status.Value</span>
+                                            </div>
                                         </div>
-                                        <div class="user-progress">
-                                            <h6 class="mb-0">@statusSummary[status]</h6>
+                                        <div class="progress" style="height: 6px;">
+                                            <div class="progress-bar bg-@badgeClass" role="progressbar" style="width: @percentage%" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
-                                    </div>
+                                    </a>
                                 </li>
                             }
-                        }
+                        </ul>
                     }
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-warning"><i class='bx bx-time-five'></i></span>
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="bx bx-info-circle bx-lg text-muted"></i>
+                            <p class="text-muted mt-2">No surveys found</p>
                         </div>
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                            <div class="me-2">
-                                <h6 class="mb-0">In Progress</h6>
-                                <small>Currently ongoing</small>
-                            </div>
-                            <div class="user-progress">
-                                <h6 class="mb-0">15</h6>
-                            </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Region Distribution -->
+        <div class="col-md-6 col-xl-4">
+            <div class="card h-100">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0">Surveys by Region</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.SurveysByRegion.Any())
+                    {
+                        <ul class="list-unstyled mb-0">
+                            @foreach (var region in Model.SurveysByRegion.OrderByDescending(x => x.Value).Take(5))
+                            {
+                                var percentage = Model.TotalSurveys > 0 ? (int)Math.Round((double)region.Value / Model.TotalSurveys * 100) : 0;
+                                <li class="mb-4">
+                                    <a asp-controller="SurveyCreation" asp-action="Index" asp-route-region="@region.Key" class="text-decoration-none text-dark">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="avatar avatar-sm me-3">
+                                                <span class="avatar-initial rounded-2 bg-label-info">
+                                                    <i class="bx bx-map"></i>
+                                                </span>
+                                            </div>
+                                            <div class="d-flex w-100 align-items-center justify-content-between">
+                                                <span class="fw-semibold">@region.Key</span>
+                                                <span class="text-muted">@region.Value surveys</span>
+                                            </div>
+                                        </div>
+                                        <div class="progress" style="height: 6px;">
+                                            <div class="progress-bar bg-info" role="progressbar" style="width: @percentage%" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="bx bx-map bx-lg text-muted"></i>
+                            <p class="text-muted mt-2">No region data available</p>
                         </div>
-                    </li>
-                    <li class="d-flex align-items-center mb-5">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-secondary"><i class='bx bx-pause-circle'></i></span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Implementation Types -->
+        <div class="col-md-12 col-xl-4">
+            <div class="card h-100">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0">Implementation Types</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.SurveysByImplementationType.Any())
+                    {
+                        <ul class="list-unstyled mb-0">
+                            @foreach (var type in Model.SurveysByImplementationType.OrderByDescending(x => x.Value))
+                            {
+                                var iconClass = type.Key switch
+                                {
+                                    "New Project" => "bx-plus-circle",
+                                    "Upgradation" => "bx-trending-up",
+                                    "Extension" => "bx-expand",
+                                    "Restoration" => "bx-refresh",
+                                    "AMC" => "bx-wrench",
+                                    _ => "bx-cog"
+                                };
+                                <li class="d-flex align-items-center mb-4">
+                                    <a asp-controller="SurveyCreation" asp-action="Index" asp-route-type="@type.Key" class="text-decoration-none text-dark d-flex align-items-center w-100">
+                                        <div class="avatar avatar-sm me-3">
+                                            <span class="avatar-initial rounded-2 bg-label-primary">
+                                                <i class="bx @iconClass"></i>
+                                            </span>
+                                        </div>
+                                        <div class="d-flex w-100 align-items-center justify-content-between">
+                                            <span>@type.Key</span>
+                                            <span class="badge bg-label-primary">@type.Value</span>
+                                        </div>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="bx bx-cog bx-lg text-muted"></i>
+                            <p class="text-muted mt-2">No implementation data</p>
                         </div>
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                            <div class="me-2">
-                                <h6 class="mb-0">Pending</h6>
-                                <small>Not yet started</small>
-                            </div>
-                            <div class="user-progress">
-                                <h6 class="mb-0">8</h6>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="d-flex align-items-center">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-danger"><i class='bx bx-error-circle'></i></span>
-                        </div>
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                            <div class="me-2">
-                                <h6 class="mb-0">Overdue</h6>
-                                <small>Missed deadline</small>
-                            </div>
-                            <div class="user-progress">
-                                <h6 class="mb-0">5</h6>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
+                    }
+                </div>
             </div>
         </div>
     </div>
-    <!--/ Survey Statistics -->
-    <!-- Survey Overview -->
-    <div class="col-md-6 col-lg-4 order-1 mb-6">
-        <div class="card h-100">
-            <div class="card-header d-flex justify-content-between">
-                <div class="card-title mb-0">
-                    <h5 class="mb-1 me-2">Quick Stats</h5>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- Survey Trend Chart -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <div>
+                        <h5 class="card-title mb-1">Survey Trends</h5>
+                        <p class="card-subtitle text-muted mb-0">Monthly survey creation and completion</p>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-text-secondary rounded-pill btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                            <i class="bx bx-dots-vertical-rounded bx-lg"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="javascript:void(0);">Last 6 Months</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0);">Last Year</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="surveyTrendChart"></div>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="d-flex mb-6">
-                    <div class="avatar flex-shrink-0 me-3">
-                        <span class="avatar-initial rounded bg-label-primary"><i class='bx bx-map bx-lg'></i></span>
+        </div>
+
+        <!-- Status Donut Chart -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0">Status Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div id="statusDonutChart"></div>
+                    <div class="mt-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Overall Progress</span>
+                            <span class="fw-semibold">@Model.CompletionRate%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: @Model.CompletionRate%"></div>
+                        </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Implementation Type & Region Charts -->
+    <div class="row g-4 mb-4">
+        <!-- Implementation Type Bar Chart -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Implementation Type Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <div id="implementationTypeChart"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Region Distribution Chart -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Regional Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div id="regionChart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Surveys & Quick Stats -->
+    <div class="row g-4 mb-4">
+        <!-- Recent Surveys Table -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex align-items-center justify-content-between">
                     <div>
-                        <p class="mb-0">Total Locations</p>
-                        <div class="d-flex align-items-center">
-                            <h6 class="mb-0 me-1">127</h6>
-                            <small class="text-success fw-medium">
-                                <i class='bx bx-chevron-up bx-lg'></i>
-                                8.2%
+                        <h5 class="card-title mb-0">
+                            @if (ViewBag.IsFiltered == true)
+                            {
+                                <span>Filtered Surveys (@Model.RecentSurveys.Count)</span>
+                            }
+                            else
+                            {
+                                <span>Recent Surveys</span>
+                            }
+                        </h5>
+                        @if (ViewBag.IsFiltered == true)
+                        {
+                            <small class="text-muted">
+                                @if (ViewBag.CurrentFilter == "status")
+                                {
+                                    <span>Status: @ViewBag.CurrentValue</span>
+                                }
+                                else if (ViewBag.CurrentFilter == "region")
+                                {
+                                    <span>Region: @ViewBag.CurrentValue</span>
+                                }
+                                else if (ViewBag.CurrentFilter == "type")
+                                {
+                                    <span>Type: @ViewBag.CurrentValue</span>
+                                }
+                                else if (ViewBag.CurrentFilter == "missed")
+                                {
+                                    <span>Missed Deadline</span>
+                                }
                             </small>
-                        </div>
+                        }
+                    </div>
+                    @if (Model.CanView)
+                    {
+                        <a asp-controller="SurveyCreation" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                            View All <i class="bx bx-right-arrow-alt"></i>
+                        </a>
+                    }
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Survey Name</th>
+                                    <th>Region</th>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    @if (Model.CanUpdate)
+                                    {
+                                        <th>Actions</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.RecentSurveys.Any())
+                                {
+                                    foreach (var survey in Model.RecentSurveys.Take(8))
+                                    {
+                                        var statusClass = survey.SurveyStatus switch
+                                        {
+                                            "Completed" => "bg-success",
+                                            "In Progress" => "bg-warning",
+                                            "Pending" => "bg-secondary",
+                                            "On Hold" => "bg-danger",
+                                            _ => "bg-dark"
+                                        };
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bx bx-map-pin me-2 text-primary"></i>
+                                                    <span class="fw-semibold">@survey.SurveyName</span>
+                                                </div>
+                                            </td>
+                                            <td>@(survey.RegionName ?? "-")</td>
+                                            <td>@(survey.SurveyDate?.ToString("MMM dd, yyyy") ?? "-")</td>
+                                            <td>
+                                                <small class="text-muted">@(survey.ImplementationType ?? "-")</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge @statusClass status-badge">@survey.SurveyStatus</span>
+                                            </td>
+                                            @if (Model.CanUpdate)
+                                            {
+                                                <td>
+                                                    <a asp-controller="SurveyCreation" asp-action="Edit" asp-route-id="@survey.SurveyId" class="btn btn-sm btn-text-primary">
+                                                        <i class="bx bx-edit"></i>
+                                                    </a>
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4 text-muted">
+                                            <i class="bx bx-info-circle bx-lg"></i>
+                                            <p class="mt-2">No surveys found</p>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                <div class="d-flex mb-6">
-                    <div class="avatar flex-shrink-0 me-3">
-                        <span class="avatar-initial rounded bg-label-info"><i class='bx bx-user bx-lg'></i></span>
-                    </div>
-                    <div>
-                        <p class="mb-0">Team Members</p>
-                        <div class="d-flex align-items-center">
-                            <h6 class="mb-0 me-1">32</h6>
-                            <small class="text-muted fw-medium">Active</small>
+            </div>
+        </div>
+
+        <!-- Quick Stats & Alerts -->
+        <div class="col-lg-4">
+            <!-- Performance Summary -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Performance Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Completion Rate</span>
+                            <span class="fw-semibold">@Model.CompletionRate%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: @Model.CompletionRate%" aria-valuenow="@Model.CompletionRate" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                     </div>
-                </div>
-                <div class="d-flex mb-6">
-                    <div class="avatar flex-shrink-0 me-3">
-                        <span class="avatar-initial rounded bg-label-warning"><i class='bx bx-calendar bx-lg'></i></span>
-                    </div>
-                    <div>
-                        <p class="mb-0">This Month</p>
+
+                    <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom">
                         <div class="d-flex align-items-center">
-                            <h6 class="mb-0 me-1">12 Surveys</h6>
-                            <small class="text-success fw-medium">
-                                <i class='bx bx-trending-up'></i>
-                            </small>
+                            <div class="avatar avatar-sm me-2">
+                                <span class="avatar-initial rounded bg-label-info">
+                                    <i class="bx bx-map-alt"></i>
+                                </span>
+                            </div>
+                            <span>Total Locations</span>
                         </div>
+                        <span class="fw-semibold">@Model.TotalLocations</span>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-sm me-2">
+                                <span class="avatar-initial rounded bg-label-success">
+                                    <i class="bx bx-check-double"></i>
+                                </span>
+                            </div>
+                            <span>Completed Locations</span>
+                        </div>
+                        <span class="fw-semibold text-success">@Model.CompletedLocations</span>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-sm me-2">
+                                <span class="avatar-initial rounded bg-label-warning">
+                                    <i class="bx bx-time"></i>
+                                </span>
+                            </div>
+                            <span>Pending Locations</span>
+                        </div>
+                        <span class="fw-semibold text-warning">@Model.PendingLocations</span>
                     </div>
                 </div>
-                <div class="d-flex align-items-center">
-                    <div class="avatar flex-shrink-0 me-3">
-                        <span class="avatar-initial rounded bg-label-danger"><i class='bx bx-error-circle bx-lg'></i></span>
-                    </div>
-                    <div>
-                        <p class="mb-0">Overdue Surveys</p>
-                        <div class="d-flex align-items-center">
-                            <h6 class="mb-0 me-1 text-danger">5</h6>
-                            <small class="text-danger fw-medium">Needs attention!</small>
+            </div>
+
+            <!-- Alerts -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Alerts & Notifications</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.MissedDeadlineSurveys > 0)
+                    {
+                        <div class="alert alert-danger d-flex align-items-center mb-3" role="alert">
+                            <i class="bx bx-calendar-x bx-lg me-2"></i>
+                            <div class="flex-grow-1">
+                                <strong>@Model.MissedDeadlineSurveys</strong> survey(s) have missed their deadline
+                            </div>
+                            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-missed="true" class="btn btn-sm btn-danger">
+                                View
+                            </a>
+                        </div>
+                    }
+
+                    @if (Model.OverdueSurveys > 0 && Model.MissedDeadlineSurveys == 0)
+                    {
+                        <div class="alert alert-danger d-flex align-items-center mb-3" role="alert">
+                            <i class="bx bx-error-circle bx-lg me-2"></i>
+                            <div class="flex-grow-1">
+                                <strong>@Model.OverdueSurveys</strong> survey(s) on hold need attention
+                            </div>
+                            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="On Hold" class="btn btn-sm btn-danger">
+                                View
+                            </a>
+                        </div>
+                    }
+
+                    @if (Model.DueSoon > 0)
+                    {
+                        <div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
+                            <i class="bx bx-time-five bx-lg me-2"></i>
+                            <div class="flex-grow-1">
+                                <strong>@Model.DueSoon</strong> survey(s) currently in progress
+                            </div>
+                            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="In Progress" class="btn btn-sm btn-warning">
+                                View
+                            </a>
+                        </div>
+                    }
+
+                    @if (Model.MissedDeadlineSurveys == 0 && Model.OverdueSurveys == 0 && Model.DueSoon == 0)
+                    {
+                        <div class="alert alert-success d-flex align-items-center" role="alert">
+                            <i class="bx bx-check-circle bx-lg me-2"></i>
+                            <div>
+                                All surveys are on track! 🎉
+                            </div>
+                        </div>
+                    }
+
+                    <div class="mt-3 pt-3 border-top">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted">Active Team Members</span>
+                            <span class="badge bg-label-primary">@Model.ActiveTeamMembers</span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span class="text-muted">Total Assignments</span>
+                            <span class="badge bg-label-info">@Model.TotalAssignments</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!--/ Survey Overview -->
-    <!-- Recent Surveys -->
-    <div class="col-md-6 col-lg-4 order-2 mb-6">
-        <div class="card h-100">
-            <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="card-title m-0 me-2">Recent Surveys</h5>
-                <div class="dropdown">
-                    <button class="btn text-muted p-0" type="button" id="recentSurveys" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="bx bx-dots-vertical-rounded bx-lg"></i>
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="recentSurveys">
-                        <a class="dropdown-item" asp-controller="SurveyCreation" asp-action="Index">View All</a>
-                        <a class="dropdown-item" asp-controller="SurveyCreation" asp-action="Create">Create New</a>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body pt-4">
-                <ul class="p-0 m-0">
-                    <li class="d-flex align-items-center mb-6">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-success"><i class='bx bx-check'></i></span>
-                        </div>
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                            <div class="me-2">
-                                <small class="d-block text-muted">City Surveillance</small>
-                                <h6 class="fw-normal mb-0">North Zone Survey</h6>
-                            </div>
-                            <div class="user-progress">
-                                <span class="badge bg-success">Completed</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="d-flex align-items-center mb-6">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-warning"><i class='bx bx-time'></i></span>
-                        </div>
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                            <div class="me-2">
-                                <small class="d-block text-muted">New Installation</small>
-                                <h6 class="fw-normal mb-0">Smart City Project</h6>
-                            </div>
-                            <div class="user-progress">
-                                <span class="badge bg-warning">In Progress</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="d-flex align-items-center mb-6">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-info"><i class='bx bx-wrench'></i></span>
-                        </div>
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                            <div class="me-2">
-                                <small class="d-block text-muted">Upgrade</small>
-                                <h6 class="fw-normal mb-0">Traffic System</h6>
-                            </div>
-                            <div class="user-progress">
-                                <span class="badge bg-info">In Progress</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="d-flex align-items-center mb-6">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-danger"><i class='bx bx-error'></i></span>
-                        </div>
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                            <div class="me-2">
-                                <small class="d-block text-muted">City Surveillance</small>
-                                <h6 class="fw-normal mb-0">East Zone Survey</h6>
-                            </div>
-                            <div class="user-progress">
-                                <span class="badge bg-danger">Overdue</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="d-flex align-items-center mb-6">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-secondary"><i class='bx bx-pause'></i></span>
-                        </div>
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                            <div class="me-2">
-                                <small class="d-block text-muted">Replacement</small>
-                                <h6 class="fw-normal mb-0">Old Infrastructure</h6>
-                            </div>
-                            <div class="user-progress">
-                                <span class="badge bg-secondary">Pending</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="d-flex align-items-center">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-success"><i class='bx bx-check-double'></i></span>
-                        </div>
-                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                            <div class="me-2">
-                                <small class="d-block text-muted">New Installation</small>
-                                <h6 class="fw-normal mb-0">West Zone CCTV</h6>
-                            </div>
-                            <div class="user-progress">
-                                <span class="badge bg-success">Completed</span>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    <!--/ Recent Surveys -->
 </div>
+
+@section VendorScripts {
+    <script src="~/vendor/libs/apex-charts/apexcharts.js"></script>
+}
+
+@section Scripts {
+    <script src="~/js/dashboard.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialize dashboard with data from model
+            DashboardModule.init({
+                surveyStatusData: @Html.Raw(Json.Serialize(Model.SurveysByStatus)),
+                regionData: @Html.Raw(Json.Serialize(Model.SurveysByRegion)),
+                implementationData: @Html.Raw(Json.Serialize(Model.SurveysByImplementationType)),
+                monthlyData: @Html.Raw(Json.Serialize(Model.MonthlySurveyCount)),
+                monthlyCompletionData: @Html.Raw(Json.Serialize(Model.MonthlyCompletionCount))
+            });
+        });
+    </script>
+}
+

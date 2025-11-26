@@ -40,6 +40,7 @@ builder.Services.AddScoped<ISurvey, SurveyRepo>();
 builder.Services.AddScoped<ISurveyLocation, SurveyLocationRepo>();
 builder.Services.AddScoped<ISurveyLocationStatus, SurveyLocationStatusRepo>();
 builder.Services.AddScoped<IClientMaster, ClientMasterRepo>();
+builder.Services.AddScoped<IEmpMaster, EmpMasterRepo>();
 
 // Register new EF Core repositories
 builder.Services.AddScoped<IItemTypeRepository, ItemTypeRepository>();
