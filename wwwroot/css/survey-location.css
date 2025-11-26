@@ -1,0 +1,98 @@
+/* Survey Location Page Styles */
+
+/* Prevent horizontal overflow */
+body {
+    overflow-x: hidden !important;
+}
+
+/* Mobile full-screen card */
+@media (max-width: 767.98px) {
+    .full-screen-card {
+        min-height: 100vh;
+        border-radius: 0 !important;
+        margin: 0 !important;
+    }
+}
+
+/* MapBox Container */
+#mapContainer {
+    height: 300px;
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 2px solid #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.mapboxgl-ctrl-attrib {
+    font-size: 10px;
+}
+
+.mapboxgl-ctrl-geocoder {
+    min-width: 100%;
+    max-width: 100%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.mapboxgl-ctrl-top-right {
+    width: 100%;
+    max-width: 400px;
+    margin: 10px;
+}
+
+@media (max-width: 768px) {
+    .mapboxgl-ctrl-top-right {
+        max-width: calc(100% - 20px);
+    }
+}
+
+.map-instructions {
+    background: #f8f9fa;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    border-left: 4px solid #667eea;
+    margin-bottom: 1rem;
+}
+
+/* Ensure alerts and modals appear above map */
+.alert {
+    position: relative;
+    z-index: 9999 !important;
+}
+
+.swal2-container {
+    z-index: 99999 !important;
+}
+
+.modal {
+    z-index: 99999 !important;
+}
+
+.modal-backdrop {
+    z-index: 99998 !important;
+}
+
+/* Ensure Bootstrap alerts are visible */
+.alert-dismissible {
+    z-index: 9999 !important;
+}
+
+.hover-lift {
+        transition: all 0.3s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+    .card-title {
+        min-height: 48px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .card-h {
+        --bs-bg-opacity: 1;
+        background-color: rgb(159 139 233 / 78%) !important;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }

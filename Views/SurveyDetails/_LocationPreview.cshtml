@@ -34,6 +34,21 @@
         overflow: hidden;
         border-radius: 6px;
     }
+
+    /* Ensure SweetAlert2 appears above modal */
+    .swal2-container {
+        z-index: 999999 !important;
+    }
+    
+    .swal2-popup {
+        z-index: 999999 !important;
+    }
+
+    /* Ensure any alerts in this view appear above modal */
+    .alert {
+        position: relative;
+        z-index: 999998 !important;
+    }
 </style>
 
 @if (Model != null && Model.Any())

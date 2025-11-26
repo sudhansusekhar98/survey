@@ -2,13 +2,13 @@
 
 function checkAndEdit(surveyId) {
     $.ajax({
-        url: '/SurveyCreation/GetSubmissionStatus',
+        url: surveyUrls.getSubmissionStatus,
         type: 'GET',
         data: { surveyId: surveyId },
         success: function(response) {
             if (response.success) {
                 if (response.canEdit) {
-                    window.location.href = '/SurveyCreation/Edit/' + surveyId;
+                    window.location.href = surveyUrls.edit + '/' + surveyId;
                 } else {
                     var status = response.submission?.submissionStatus || 'Submitted';
                     Swal.fire({
@@ -21,11 +21,11 @@ function checkAndEdit(surveyId) {
                     });
                 }
             } else {
-                window.location.href = '/SurveyCreation/Edit/' + surveyId;
+                window.location.href = surveyUrls.edit + '/' + surveyId;
             }
         },
         error: function() {
-            window.location.href = '/SurveyCreation/Edit/' + surveyId;
+            window.location.href = surveyUrls.edit + '/' + surveyId;
         }
     });
 }
@@ -33,7 +33,7 @@ function checkAndEdit(surveyId) {
 function submitSurvey(surveyId, surveyName) {
     // First check survey completion status
     $.ajax({
-        url: '/SurveyCreation/CheckSurveyCompletion',
+        url: surveyUrls.checkCompletion,
         type: 'GET',
         data: { surveyId: surveyId },
         success: function(checkResponse) {
@@ -123,7 +123,7 @@ function performSubmission(surveyId, surveyName) {
     });
     
     $.ajax({
-        url: '/SurveyCreation/SubmitSurvey',
+        url: surveyUrls.submitSurvey,
         type: 'POST',
         data: {
             surveyId: surveyId,
@@ -160,7 +160,7 @@ function performSubmission(surveyId, surveyName) {
 }
 
 function openEditModal(id) {
-    var url = '/SurveyCreation/Edit/' + id;
+    var url = surveyUrls.edit + '/' + id;
     $.ajax({
         url: url,
         type: 'GET',
@@ -178,7 +178,7 @@ function openEditModal(id) {
 }
 
 function openSurveyDetailsModal(id) {
-    var url = '/SurveyCreation/ViewDetails/' + id;
+    var url = surveyUrls.viewDetails + '/' + id;
     $.ajax({
         url: url,
         type: 'GET',
@@ -226,7 +226,7 @@ function confirmDelete(surveyId, surveyName) {
             
             $.ajax({
                 type: 'POST',
-                url: '/SurveyCreation/Delete',
+                url: surveyUrls.deleteSurvey,
                 data: {
                     id: surveyId,
                     __RequestVerificationToken: token
@@ -294,7 +294,7 @@ function confirmUnlockSurvey(surveyId, surveyName) {
             
             $.ajax({
                 type: 'POST',
-                url: '/SurveyCreation/UnlockSurvey',
+                url: surveyUrls.unlockSurvey,
                 data: {
                     surveyId: surveyId,
                     __RequestVerificationToken: token

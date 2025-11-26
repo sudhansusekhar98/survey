@@ -25,10 +25,21 @@ namespace SurveyApp.Models
         [Display(Name = "Location Type")]
         public string? LocationType { get; set; }
 
+        [Display(Name = "Way Type")]
+        public string? WayType { get; set; }
+
         public static List<SelectListItem> LocationTypeOptions => new List<SelectListItem>
         {
             new SelectListItem { Text = "Traffic", Value = "Traffic" },
             new SelectListItem { Text = "Non-Traffic", Value = "Non-Traffic" }
+        };
+
+        public static List<SelectListItem> WayTypeOptions => new List<SelectListItem>
+        {
+            new SelectListItem { Text = "One Way", Value = "One Way" },
+            new SelectListItem { Text = "Two Way", Value = "Two Way" },
+            new SelectListItem { Text = "Three Way", Value = "Three Way" },
+            new SelectListItem { Text = "Four Way", Value = "Four Way" }
         };
     }
 }

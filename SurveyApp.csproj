@@ -87,6 +87,7 @@
 
   <ItemGroup>
     <Content Remove="Views\SurveyCreation\Camera.cshtml" />
+    <Content Remove="Views\SurveyCreation\ImplementationType.cshtml" />
   </ItemGroup>
 
   <ItemGroup>

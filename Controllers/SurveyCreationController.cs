@@ -566,6 +566,7 @@ namespace SurveyApp.Controllers
             ViewBag.SelectedSurveyId = surveyId;
             ViewBag.SelectedSurveyName = SurveyName;
             ViewBag.LocationTypeOptions = SurveyLocationModel.LocationTypeOptions;
+            ViewBag.WayTypeOptions = SurveyLocationModel.WayTypeOptions;
             return View("SurveyLocation", locations);
         }
 

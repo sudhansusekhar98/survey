@@ -146,17 +146,9 @@
                                                 </a>
                                             }
                                             <div class="ms-auto d-flex align-items-center">
-                                                <span class="badge bg-purple text-white border px-3 py-2" style="border-radius: 8px;">
+                                                <span class="badge bg-purple text-white border px-2 px-md-3 py-2" style="border-radius: 8px; font-size: 0.875rem;">
                                                     <i class="bi bi-list-check me-1"></i>
-                                                    <strong>@ViewBag.FilteredCount</strong> 
-                                                    @if (ViewBag.IsFiltered == true)
-                                                    {
-                                                        <span>of @ViewBag.TotalCount surveys</span>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span>total surveys</span>
-                                                    }
+                                                    <strong>@ViewBag.FilteredCount</strong> surveys
                                                 </span>
                                             </div>
                                         </div>
@@ -378,6 +370,18 @@
     @Html.AntiForgeryToken()
     <link rel="stylesheet" href="~/css/survey-index.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Define URLs for JavaScript to use
+        var surveyUrls = {
+            getSubmissionStatus: '@Url.Action("GetSubmissionStatus", "SurveyCreation")',
+            checkCompletion: '@Url.Action("CheckSurveyCompletion", "SurveyCreation")',
+            submitSurvey: '@Url.Action("SubmitSurvey", "SurveyCreation")',
+            edit: '@Url.Action("Edit", "SurveyCreation")',
+            viewDetails: '@Url.Action("ViewDetails", "SurveyCreation")',
+            deleteSurvey: '@Url.Action("Delete", "SurveyCreation")',
+            unlockSurvey: '@Url.Action("UnlockSurvey", "SurveyCreation")'
+        };
+    </script>
     <script src="~/js/survey-index.js"></script>
 }
 

@@ -5,6 +5,7 @@ wwwroot\css\demo.css
 wwwroot\css\floadingforms.css
 wwwroot\css\site.css
 wwwroot\css\survey-index.css
+wwwroot\css\survey-location.css
 wwwroot\favicon.ico
 wwwroot\flatpickr\esm\l10n\ar-dz.js
 wwwroot\flatpickr\esm\l10n\ar-dz.min.js
@@ -392,6 +393,7 @@ wwwroot\img\icons\unicons\paypal.png
 wwwroot\img\icons\unicons\wallet-info.png
 wwwroot\img\icons\unicons\wallet.png
 wwwroot\img\icons\vlaccess_logo.png
+wwwroot\img\icons\vlaccess_logo_short.png
 wwwroot\img\illustrations\girl-doing-yoga-light.png
 wwwroot\img\illustrations\man-with-laptop.png
 wwwroot\img\illustrations\page-misc-error-light.png
@@ -427,6 +429,7 @@ wwwroot\js\site.js
 wwwroot\js\survey-details.js
 wwwroot\js\survey-index.js
 wwwroot\js\survey-location-status.js
+wwwroot\js\survey-location.js
 wwwroot\js\ui-modals.js
 wwwroot\js\ui-popover.js
 wwwroot\js\ui-toasts.js

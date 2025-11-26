@@ -241,6 +241,7 @@ namespace SurveyApp.Repo
                 cmd.Parameters.AddWithValue("@LocLog", location.LocLog ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@CreatedBy", location.CreateBy ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@LocationType", location.LocationType ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@WayType", location.WayType ?? (object)DBNull.Value);
                 
                 conn.Open();
                 int rowsAffected = cmd.ExecuteNonQuery();
@@ -319,6 +320,7 @@ namespace SurveyApp.Repo
                 cmd.Parameters.AddWithValue("@LocLog", location.LocLog ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@Isactive", location.Isactive ? "Y" : "N");
                 cmd.Parameters.AddWithValue("@LocationType", location.LocationType ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@WayType", location.WayType ?? (object)DBNull.Value);
 
                 conn.Open();
                 int rowsAffected = cmd.ExecuteNonQuery();
