@@ -132,12 +132,28 @@
     </div>
 </div>
 <div class="modal-footer">
-    <a asp-controller="SurveyCreation" 
-       asp-action="Edit" 
-       asp-route-id="@Model.SurveyId" 
-       class="btn btn-primary">
-        <i class="bi bi-pencil me-2"></i>Edit Survey
-    </a>
+    @{
+        var isSubmitted = ViewBag.IsSubmitted as bool? ?? false;
+    }
+    @if (isSubmitted)
+    {
+        <div class="alert alert-warning mb-0 flex-grow-1 py-2">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <strong>Survey Submitted:</strong> This survey has been submitted and cannot be edited.
+        </div>
+        <button type="button" class="btn btn-secondary" disabled title="Cannot edit submitted survey">
+            <i class="bi bi-pencil me-2"></i>Edit Survey
+        </button>
+    }
+    else
+    {
+        <a asp-controller="SurveyCreation" 
+           asp-action="Edit" 
+           asp-route-id="@Model.SurveyId" 
+           class="btn btn-primary">
+            <i class="bi bi-pencil me-2"></i>Edit Survey
+        </a>
+    }
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
         <i class="bi bi-x-circle me-2"></i>Close
     </button>

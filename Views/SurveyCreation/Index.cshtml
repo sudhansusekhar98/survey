@@ -277,13 +277,25 @@
                                                     var isSubmitted = ViewData[$"IsSubmitted_{survey.SurveyId}"] as bool? ?? false;
                                                     var isLocked = ViewData[$"IsLocked_{survey.SurveyId}"] as bool? ?? false;
                                                 }
-                                                <button type="button"
-                                                        class="btn btn-sm btn-warning btn-edit"
-                                                        data-survey-id="@survey.SurveyId"
-                                                        title="Edit Survey"
-                                                        onclick="checkAndEdit(@survey.SurveyId)">
-                                                    <i class="bi bi-pencil me-1"></i><span class="d-none d-sm-inline">Edit</span>
-                                                </button>
+                                                @if (isSubmitted)
+                                                {
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-secondary"
+                                                            disabled
+                                                            title="Cannot edit submitted survey">
+                                                        <i class="bi bi-pencil me-1"></i><span class="d-none d-sm-inline">Edit</span>
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-warning btn-edit"
+                                                            data-survey-id="@survey.SurveyId"
+                                                            title="Edit Survey"
+                                                            onclick="checkAndEdit(@survey.SurveyId)">
+                                                        <i class="bi bi-pencil me-1"></i><span class="d-none d-sm-inline">Edit</span>
+                                                    </button>
+                                                }
                                                 @if (isLocked)
                                                 {
                                                     <button type="button"
@@ -311,14 +323,26 @@
                                                         onclick="openSurveyDetailsModal(@survey.SurveyId)">
                                                     <i class="bi bi-file-earmark-spreadsheet me-1"></i><span class="d-none d-sm-inline">Details</span>
                                                 </button>
-                                                <a asp-controller="SurveyCreation"
-                                                   asp-action="SurveyAssignment"
-                                                   asp-route-surveyId="@survey.SurveyId"
-                                                   asp-route-SurveyName="@survey.SurveyName"
-                                                   class="btn btn-sm btn-primary"
-                                                   title="Assign Team">
-                                                    <i class="bi bi-people-fill me-1"></i><span class="d-none d-sm-inline">Team</span>
-                                                </a>
+                                                @if (isSubmitted)
+                                                {
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-secondary"
+                                                            disabled
+                                                            title="Cannot modify team for submitted survey">
+                                                        <i class="bi bi-people-fill me-1"></i><span class="d-none d-sm-inline">Team</span>
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <a asp-controller="SurveyCreation"
+                                                       asp-action="SurveyAssignment"
+                                                       asp-route-surveyId="@survey.SurveyId"
+                                                       asp-route-SurveyName="@survey.SurveyName"
+                                                       class="btn btn-sm btn-primary"
+                                                       title="Assign Team">
+                                                        <i class="bi bi-people-fill me-1"></i><span class="d-none d-sm-inline">Team</span>
+                                                    </a>
+                                                }
                                                 @if (isSubmitted)
                                                 {
                                                     <button type="button"

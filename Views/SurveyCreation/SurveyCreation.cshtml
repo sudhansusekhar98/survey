@@ -89,7 +89,7 @@
                                                 <i class="bi bi-building me-2"></i>Client Information
                                             </h6>
                                         </div>
-                                    <div class="card-body">
+                                    <div class="card-body mt-1">
                                         <div class="row g-3">
                                             <div class="col-12 col-md-6">
                                                 <div class="form-custom-floating">
@@ -154,7 +154,7 @@
                                     </div>
 
                                     <div class="card-body">
-                                        <div class="row g-3">
+                                        <div class="row g-3 mt-1">
                                             <div class="col-12 col-md-6">
                                                 <div class="form-custom-floating">
                                                     <input asp-for="SurveyName" type="text" class="form-control" placeholder=" " required>
@@ -247,6 +247,7 @@
 </form>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
             // Handle client selection
@@ -254,19 +255,42 @@
                 var clientId = $(this).val();
                 
                 if (clientId) {
+                    // Show loading popup
+                    Swal.fire({
+                        title: 'Loading Client Details...',
+                        text: 'Please wait while we fetch the client information',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
                     $.ajax({
                         url: '@Url.Action("GetClientDetails", "SurveyCreation")',
                         type: 'GET',
                         data: { clientId: clientId },
                         success: function(response) {
+                            // Close loading popup
+                            Swal.close();
+                            
                             if (response.success) {
                                 applyClientDetails(response.data);
                             } else {
-                                alert('Error loading client details: ' + response.message);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'Error loading client details: ' + response.message
+                                });
                             }
                         },
                         error: function() {
-                            alert('Failed to load client details. Please try again.');
+                            // Close loading popup and show error
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Failed',
+                                text: 'Failed to load client details. Please try again.'
+                            });
                         }
                     });
                 } else {

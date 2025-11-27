@@ -108,18 +108,24 @@ namespace SurveyApp.Repo
             try
             {
                 using var con = new SqlConnection(DBConnection.ConnectionString);
-                using var cmd = new SqlCommand(@"
-                    SELECT s.*, r.RegionName,
-                           (SELECT MIN(DueDate) FROM SurveyAssignment WHERE SurveyID = s.SurveyId) AS DueDate
-                    FROM Survey s
-                    LEFT JOIN RegionMaster r ON s.RegionID = r.RegionID
-                    WHERE (@CreatedBy IS NULL OR s.CreatedBy = @CreatedBy)
-                    ORDER BY s.SurveyId DESC", con);
+                using var cmd = new SqlCommand("dbo.SpSurvey", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@SpType", 2);
+                cmd.Parameters.AddWithValue("@CreatedBy", UserId);
+
+                //using var con = new SqlConnection(DBConnection.ConnectionString);
+                //using var cmd = new SqlCommand(@"
+                //    SELECT s.*, r.RegionName,
+                //           (SELECT MIN(DueDate) FROM SurveyAssignment WHERE SurveyID = s.SurveyId) AS DueDate
+                //    FROM Survey s
+                //    LEFT JOIN RegionMaster r ON s.RegionID = r.RegionID
+                //    WHERE (@CreatedBy IS NULL OR s.CreatedBy = @CreatedBy)
+                //    ORDER BY s.SurveyId DESC", con);
                 
-                if (UserId == 0)
-                    cmd.Parameters.AddWithValue("@CreatedBy", DBNull.Value);
-                else
-                    cmd.Parameters.AddWithValue("@CreatedBy", UserId);
+                //if (UserId == 0)
+                //    cmd.Parameters.AddWithValue("@CreatedBy", DBNull.Value);
+                //else
+                //    cmd.Parameters.AddWithValue("@CreatedBy", UserId);
 
                 con.Open();
 
@@ -788,14 +794,14 @@ namespace SurveyApp.Repo
             try
             {
                 // Validate that all items have quantities selected (at least one qty must be > 0)
-                foreach (var items in model.ItemLists)
-                {
-                    if (items.ItemQtyExist == 0 && items.ItemQtyReq == 0)
-                    {
-                        transaction.Rollback();
-                        throw new InvalidOperationException($"Please enter quantity for item: {items.ItemName}. Both Existing and Required quantities cannot be zero.");
-                    }
-                }
+                //foreach (var items in model.ItemLists)
+                //{
+                //    if (items.ItemQtyExist == 0 && items.ItemQtyReq == 0)
+                //    {
+                //        transaction.Rollback();
+                //        throw new InvalidOperationException($"Please enter quantity for item: {items.ItemName}. Both Existing and Required quantities cannot be zero.");
+                //    }
+                //}
 
                 foreach (var items in model.ItemLists)
                 {

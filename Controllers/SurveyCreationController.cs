@@ -323,6 +323,10 @@ namespace SurveyApp.Controllers
                     return NotFound();
                 }
                 
+                // Check if survey is submitted
+                var submission = _surveyRepository.GetSubmissionBySurveyId(id);
+                ViewBag.IsSubmitted = submission != null;
+                
                 return PartialView("_SurveyDetailModal", survey);
             }
             catch (Exception ex)

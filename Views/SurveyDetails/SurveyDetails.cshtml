@@ -38,10 +38,12 @@
         .swal2-container {
             z-index: 999999 !important;
         }
-
-        .alert {
+        
+        /* Ensure all message boxes stay below modals */
+        .card-body > div[class*="border-start"],
+        .accordion-body > div[class*="border-start"] {
+            z-index: 1 !important;
             position: relative;
-            z-index: 9999 !important;
         }
     </style>
 }
@@ -80,9 +82,38 @@
                 <div class="card-body">
                     @if (TempData["ResultMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
                     {
-                        <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show" role="alert">
-                            @Html.Raw(TempData["ResultMessage"])
-                            <button type="button" class="btn-close btn-sm align-top" data-bs-dismiss="alert" aria-label="Close"></button>
+                        var resultType = TempData["ResultType"]?.ToString() ?? "info";
+                        var borderColor = resultType switch
+                        {
+                            "success" => "border-success",
+                            "danger" => "border-danger",
+                            "warning" => "border-warning",
+                            "info" => "border-info",
+                            _ => "border-info"
+                        };
+                        var bgColor = resultType switch
+                        {
+                            "success" => "bg-success-subtle",
+                            "danger" => "bg-danger-subtle",
+                            "warning" => "bg-warning-subtle",
+                            "info" => "bg-info-subtle",
+                            _ => "bg-light"
+                        };
+                        var textColor = resultType switch
+                        {
+                            "success" => "text-success",
+                            "danger" => "text-danger",
+                            "warning" => "text-warning",
+                            "info" => "text-info",
+                            _ => "text-dark"
+                        };
+                        <div class="mb-3 p-3 @bgColor rounded border-start border-4 @borderColor position-relative">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1 @textColor">
+                                    @Html.Raw(TempData["ResultMessage"])
+                                </div>
+                                <button type="button" class="btn-close btn-sm ms-2" onclick="this.parentElement.parentElement.style.display='none'" aria-label="Close"></button>
+                            </div>
                         </div>
                     }
 
@@ -135,9 +166,11 @@
                         @* Show warning if completed *@
                         @if (ViewBag.IsCompleted == true)
                         {
-                            <div class="alert alert-warning mt-3 mb-0">
-                                <i class="bi bi-exclamation-triangle me-2"></i>
-                                <strong>Location is @status!</strong> Items cannot be modified. Click "Unlock for Editing" to make changes.
+                            <div class="w-100 mt-3 mb-0 p-3 bg-warning-subtle rounded border-start border-4 border-warning">
+                                <p class="mb-0 text-warning-emphasis">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    <strong>Location is @status!</strong> Items cannot be modified. Click "Unlock for Editing" to make changes.
+                                </p>
                             </div>
                         }
                     </div>
@@ -174,8 +207,10 @@
                                     <div class="accordion-body">
                                         @if (!string.IsNullOrWhiteSpace(gridData.TypeDesc))
                                         {
-                                            <div class="alert alert-info mb-2 mt-2">
-                                                <i class="bi bi-info-circle me-2"></i><strong>Description:</strong> @gridData.TypeDesc
+                                            <div class="mb-3 mt-3 p-3 bg-light rounded border-start border-4 border-info">
+                                                <p class="mb-0 text-dark">
+                                                    <i class="bi bi-info-circle text-info me-2"></i><strong>Description:</strong> @gridData.TypeDesc
+                                                </p>
                                             </div>
                                         }
 
@@ -335,6 +370,12 @@
     .accordion-button:focus {
         box-shadow: none;
         border-color: rgba(0,0,0,.125);
+    }
+    
+    /* Ensure alerts in accordion don't overlap modals */
+    .accordion-body .alert {
+        position: relative;
+        z-index: 1 !important;
     }
 </style>
 

@@ -991,10 +991,10 @@ D:\VL Access\Survey\AS.NET SURVEY\Survey-App-v2.0-main\obj\Debug\net8.0\staticwe
 D:\VL Access\Survey\AS.NET SURVEY\Survey-App-v2.0-main\obj\Debug\net8.0\staticwebassets.build.json.cache
 D:\VL Access\Survey\AS.NET SURVEY\Survey-App-v2.0-main\obj\Debug\net8.0\staticwebassets.development.json
 D:\VL Access\Survey\AS.NET SURVEY\Survey-App-v2.0-main\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-D:\VL Access\Survey\AS.NET SURVEY\Survey-App-v2.0-main\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 D:\VL Access\Survey\AS.NET SURVEY\Survey-App-v2.0-main\obj\Debug\net8.0\SurveyApp.csproj.Up2Date
 D:\VL Access\Survey\AS.NET SURVEY\Survey-App-v2.0-main\obj\Debug\net8.0\SurveyApp.dll
 D:\VL Access\Survey\AS.NET SURVEY\Survey-App-v2.0-main\obj\Debug\net8.0\refint\SurveyApp.dll
 D:\VL Access\Survey\AS.NET SURVEY\Survey-App-v2.0-main\obj\Debug\net8.0\SurveyApp.pdb
 D:\VL Access\Survey\AS.NET SURVEY\Survey-App-v2.0-main\obj\Debug\net8.0\SurveyApp.genruntimeconfig.cache
 D:\VL Access\Survey\AS.NET SURVEY\Survey-App-v2.0-main\obj\Debug\net8.0\ref\SurveyApp.dll
+D:\VL Access\Survey\AS.NET SURVEY\Survey-App-v2.0-main\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

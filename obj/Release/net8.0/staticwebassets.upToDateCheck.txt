@@ -457,3 +457,14 @@ wwwroot\vendor\libs\masonry\masonry.js
 wwwroot\vendor\libs\perfect-scrollbar\perfect-scrollbar.css
 wwwroot\vendor\libs\perfect-scrollbar\perfect-scrollbar.js
 wwwroot\vendor\libs\popper\popper.js
+wwwroot\css\dashboard.css
+wwwroot\css\survey-index.css
+wwwroot\css\survey-location.css
+wwwroot\img\elements\Noimage.png
+wwwroot\img\icons\vlaccess_logo_short.png
+wwwroot\js\dashboard.js
+wwwroot\js\item-master-selection.js
+wwwroot\js\survey-details.js
+wwwroot\js\survey-index.js
+wwwroot\js\survey-location-status.js
+wwwroot\js\survey-location.js
