@@ -72,5 +72,11 @@ namespace AnalyticaDocs.Models
         [Required]
         public string EmailID { get; set; } = null!;
         public int Srno { get; set; }
+
+        [DisplayName("Profile Picture URL")]
+        public string? ProfilePictureUrl { get; set; }
+
+        [DisplayName("Profile Picture Public ID")]
+        public string? ProfilePicturePublicId { get; set; }
     }
 }

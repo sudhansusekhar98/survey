@@ -23,6 +23,10 @@ namespace AnalyticaDocs.Models
 
         public string ISActive { get; set; } = null!;
 
+        public string? ProfilePictureUrl { get; set; }
+
+        public string? ProfilePicturePublicId { get; set; }
+
         
     }
 }

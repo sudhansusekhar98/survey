@@ -72,6 +72,29 @@ namespace AnalyticaDocs.Repo
             }
         }
 
+        public bool UpdateProfilePicture(int userId, string profilePictureUrl, string profilePicturePublicId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpUsers", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@SpType", 7); // SpType 7 for profile picture update only
+                cmd.Parameters.AddWithValue("@UserID", userId);
+                cmd.Parameters.AddWithValue("@ProfilePictureUrl", (object)profilePictureUrl ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@ProfilePicturePublicId", (object)profilePicturePublicId ?? DBNull.Value);
+
+                con.Open();
+                int result = cmd.ExecuteNonQuery();
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                // log ex.ToString()
+                throw;
+            }
+        }
+
         public bool ChangePassword(int userId, string currentPassword, string newPassword)
         {
             try

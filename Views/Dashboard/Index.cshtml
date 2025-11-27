@@ -49,7 +49,7 @@
         <div class="alert alert-info alert-dismissible fade show d-flex align-items-center" role="alert">
             <i class="bx bx-filter-alt bx-lg me-2"></i>
             <div class="flex-grow-1">
-                <strong>Filter Active:</strong> 
+                <strong>Filter Active:</strong>
                 @if (ViewBag.CurrentFilter == "status")
                 {
                     <span>Showing surveys with status: <strong>@ViewBag.CurrentValue</strong></span>
@@ -138,6 +138,29 @@
         </div>
 
         <div class="col-12 col-sm-6 col-xl-3">
+            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-missed="true" class="text-decoration-none">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="metric-label mb-2">Missed Deadline</p>
+                                <h2 class="metric-value text-danger mb-0">@Model.MissedDeadlineSurveys</h2>
+                                <small class="text-danger fw-semibold">
+                                    <i class="bx bx-error"></i> Overdue
+                                </small>
+                            </div>
+                            <div class="avatar avatar-lg">
+                                <div class="avatar-initial rounded-3 bg-label-danger">
+                                    <i class="bx bx-calendar-x bx-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        @*  <div class="col-12 col-sm-6 col-xl-3">
             <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="Pending" class="text-decoration-none">
                 <div class="card stat-card h-100">
                     <div class="card-body">
@@ -155,11 +178,11 @@
                     </div>
                 </div>
             </a>
-        </div>
+        </div> *@
     </div>
 
     <!-- Additional Metrics Row -->
-    <div class="row g-4 mb-4">
+    @*   <div class="row g-4 mb-4">
         <div class="col-12 col-sm-6 col-xl-4">
             <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="On Hold" class="text-decoration-none">
                 <div class="card stat-card h-100">
@@ -200,28 +223,7 @@
             </a>
         </div>
 
-        <div class="col-12 col-sm-6 col-xl-3">
-            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-missed="true" class="text-decoration-none">
-                <div class="card stat-card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <p class="metric-label mb-2">Missed Deadline</p>
-                                <h2 class="metric-value text-danger mb-0">@Model.MissedDeadlineSurveys</h2>
-                                <small class="text-danger fw-semibold">
-                                    <i class="bx bx-error"></i> Overdue
-                                </small>
-                            </div>
-                            <div class="avatar avatar-lg">
-                                <div class="avatar-initial rounded-3 bg-label-danger">
-                                    <i class="bx bx-calendar-x bx-lg"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
+       
 
         <div class="col-12 col-sm-12 col-xl-6">
             <div class="card stat-card h-100">
@@ -243,7 +245,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> *@
 
     <!-- Status Breakdown & Region Distribution -->
     <div class="row g-4 mb-4">

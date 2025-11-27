@@ -10795,11 +10795,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\VL Access\\Survey\\AS.NET SURVEY\\Survey-App-v2.0-main\\SurveyApp.csproj",
+      "projectUniqueName": "D:\\VL Access\\Survey\\AS.NET SURVEY\\survey\\SurveyApp.csproj",
       "projectName": "SurveyApp",
-      "projectPath": "D:\\VL Access\\Survey\\AS.NET SURVEY\\Survey-App-v2.0-main\\SurveyApp.csproj",
+      "projectPath": "D:\\VL Access\\Survey\\AS.NET SURVEY\\survey\\SurveyApp.csproj",
       "packagesPath": "C:\\Users\\sudha\\.nuget\\packages\\",
-      "outputPath": "D:\\VL Access\\Survey\\AS.NET SURVEY\\Survey-App-v2.0-main\\obj\\",
+      "outputPath": "D:\\VL Access\\Survey\\AS.NET SURVEY\\survey\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

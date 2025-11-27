@@ -11,6 +11,8 @@ namespace AnalyticaDocs.Repo
         UserModel? GetUserById(int id);
         bool UpdateUser(UserModel user);
 
+        bool UpdateProfilePicture(int userId, string profilePictureUrl, string profilePicturePublicId);
+
         bool ChangePassword(int userId, string currentPassword, string newPassword);
 
         List<UsersRightsModel> GetUserRights(int RecordID);

@@ -1,0 +1,192 @@
+@model AnalyticaDocs.Models.UserModel
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true" />
+}
+
+<div class="container-fluid p-0 m-0">
+    <div class="row g-0">
+        <div class="col-12">
+            <div class="card shadow mt-0 rounded-0 full-screen-card">
+                <!-- Profile Header -->
+                <div class="profile-header">
+                    <div class="profile-avatar" id="profileAvatarContainer">
+                        @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+                        {
+                            <img src="@Model.ProfilePictureUrl" alt="Profile Picture" id="profileAvatarImg" />
+                            <button class="delete-avatar-btn" id="deleteAvatarBtn" type="button" title="Delete profile picture">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        }
+                        else
+                        {
+                            <i class="bi bi-person-circle" id="profileAvatarIcon"></i>
+                        }
+                        <div class="avatar-upload-overlay" id="avatarUploadOverlay">
+                            <i class="bi bi-camera-fill"></i>
+                            <span>Change Photo</span>
+                        </div>
+                        <input type="file" id="profilePictureInput" accept="image/*" style="display: none;" />
+                    </div>
+                    <button type="button" class="btn upload-photo-btn" id="uploadPhotoBtn">
+                        <i class="bi bi-camera-fill me-2"></i>Upload Profile Picture
+                    </button>
+                    <h3 class="mb-1 mt-3">@Model.LoginName</h3>
+                    <p class="mb-0 opacity-75">@Model.RoleName</p>
+                </div>
+
+                <div class="card-body p-4">
+                    @if (TempData["ResultMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
+                    {
+                        <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show mb-4" role="alert">
+                            @Html.Raw(TempData["ResultMessage"])
+                            <button type="button" class="btn-close btn-sm align-top" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="row g-4">
+                        <!-- Account Information -->
+                        <div class="col-12">
+                            <h5 class="mb-3 text-purple">
+                                <i class="bi bi-person-badge me-2"></i>Account Information
+                            </h5>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="card profile-info-card h-100">
+                                <div class="card-body">
+                                    <div class="info-label">
+                                        <i class="bi bi-key-fill me-2"></i>User ID
+                                    </div>
+                                    <div class="info-value">@Model.UserId</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="card profile-info-card h-100">
+                                <div class="card-body">
+                                    <div class="info-label">
+                                        <i class="bi bi-person-fill me-2"></i>Login ID
+                                    </div>
+                                    <div class="info-value">@Model.LoginId</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="card profile-info-card h-100">
+                                <div class="card-body">
+                                    <div class="info-label">
+                                        <i class="bi bi-person-badge-fill me-2"></i>Display Name
+                                    </div>
+                                    <div class="info-value">@Model.LoginName</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="card profile-info-card h-100">
+                                <div class="card-body">
+                                    <div class="info-label">
+                                        <i class="bi bi-shield-check me-2"></i>Role
+                                    </div>
+                                    <div class="info-value">@Model.RoleName</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="card profile-info-card h-100">
+                                <div class="card-body">
+                                    <div class="info-label">
+                                        <i class="bi bi-activity me-2"></i>Account Status
+                                    </div>
+                                    <div class="info-value">
+                                        @if (Model.ISActive == "Y")
+                                        {
+                                            <span class="status-badge status-active">
+                                                <i class="bi bi-check-circle-fill me-1"></i>Active
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-badge status-inactive">
+                                                <i class="bi bi-x-circle-fill me-1"></i>Inactive
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="card profile-info-card h-100">
+                                <div class="card-body">
+                                    <div class="info-label">
+                                        <i class="bi bi-briefcase-fill me-2"></i>Employee ID
+                                    </div>
+                                    <div class="info-value">@Model.EmpID</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="col-12 mt-5">
+                            <h5 class="mb-3 text-purple">
+                                <i class="bi bi-envelope-fill me-2"></i>Contact Information
+                            </h5>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="card profile-info-card h-100">
+                                <div class="card-body">
+                                    <div class="info-label">
+                                        <i class="bi bi-telephone-fill me-2"></i>Mobile Number
+                                    </div>
+                                    <div class="info-value">
+                                        <a href="tel:@Model.MobileNo" class="text-decoration-none text-dark">
+                                            @Model.MobileNo
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="card profile-info-card h-100">
+                                <div class="card-body">
+                                    <div class="info-label">
+                                        <i class="bi bi-envelope-at-fill me-2"></i>Email Address
+                                    </div>
+                                    <div class="info-value">
+                                        <a href="mailto:@Model.EmailID" class="text-decoration-none text-dark">
+                                            @Model.EmailID
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-light">
+                    <div class="row">
+                        <div class="col text-end mt-5">
+                            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-house-door-fill me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/profile.js" asp-append-version="true"></script>
+}

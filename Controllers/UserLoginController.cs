@@ -43,7 +43,13 @@ namespace AnalyticaDocs.Controllers
                 HttpContext.Session.SetString("UserName", user.LoginName.ToString());
                 HttpContext.Session.SetString("RoleId", value: user.RoleId.ToString());
 
-                return RedirectToAction("Index", "Home");
+                // Store profile picture URL in session if available
+                if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+                {
+                    HttpContext.Session.SetString("ProfilePictureUrl", user.ProfilePictureUrl);
+                }
+
+                return RedirectToAction("Index", "Dashboard");
             }
             else
             {

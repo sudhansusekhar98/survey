@@ -3,6 +3,7 @@ wwwroot\css\customControl.css
 wwwroot\css\dashboard.css
 wwwroot\css\demo.css
 wwwroot\css\floadingforms.css
+wwwroot\css\profile.css
 wwwroot\css\site.css
 wwwroot\css\survey-index.css
 wwwroot\css\survey-location.css
@@ -424,6 +425,7 @@ wwwroot\js\item-master-selection.js
 wwwroot\js\main.js
 wwwroot\js\pages-account-settings-account.js
 wwwroot\js\poleInfrastructure.js
+wwwroot\js\profile.js
 wwwroot\js\reportCharts.js
 wwwroot\js\site.js
 wwwroot\js\survey-details.js
