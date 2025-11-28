@@ -156,37 +156,54 @@
         $(document).ready(function () {
             var stateSelect = $('#stateSelect');
             var citySelect = $('#citySelect');
+            var savedCity = '@Model.City'; // Store the saved city value
 
-            // Load cities when state is selected
+            // Function to load cities for a given state
+            function loadCities(stateId, selectCity) {
+                if (!stateId) {
+                    citySelect.empty().append('<option value="">-- Select City --</option>');
+                    return;
+                }
+
+                citySelect.empty().append('<option value="">-- Loading Cities --</option>');
+
+                $.ajax({
+                    url: '/api/Location/cities/' + stateId,
+                    type: 'GET',
+                    success: function (cities) {
+                        citySelect.empty().append('<option value="">-- Select City --</option>');
+                        $.each(cities, function (index, city) {
+                            var option = $('<option></option>')
+                                .val(city.name)
+                                .text(city.name)
+                                .attr('data-id', city.id);
+                            
+                            // Pre-select if this is the saved city
+                            if (selectCity && city.name === selectCity) {
+                                option.attr('selected', 'selected');
+                            }
+                            
+                            citySelect.append(option);
+                        });
+                    },
+                    error: function () {
+                        citySelect.empty().append('<option value="">-- Error loading cities --</option>');
+                        alert('Error loading cities. Please try again.');
+                    }
+                });
+            }
+
+            // Load cities on page load if state is already selected
+            var selectedStateId = stateSelect.find('option:selected').data('id');
+            if (selectedStateId && savedCity) {
+                loadCities(selectedStateId, savedCity);
+            }
+
+            // Load cities when state is changed
             stateSelect.on('change', function () {
                 var selectedOption = $(this).find('option:selected');
                 var stateId = selectedOption.data('id');
-
-                // Clear existing cities
-                citySelect.empty().append('<option value="">-- Loading Cities --</option>');
-
-                if (stateId) {
-                    $.ajax({
-                        url: '/api/Location/cities/' + stateId,
-                        type: 'GET',
-                        success: function (cities) {
-                            citySelect.empty().append('<option value="">-- Select City --</option>');
-                            $.each(cities, function (index, city) {
-                                citySelect.append($('<option>', {
-                                    value: city.name,
-                                    text: city.name,
-                                    'data-id': city.id
-                                }));
-                            });
-                        },
-                        error: function () {
-                            citySelect.empty().append('<option value="">-- Error loading cities --</option>');
-                            alert('Error loading cities. Please try again.');
-                        }
-                    });
-                } else {
-                    citySelect.empty().append('<option value="">-- Select City --</option>');
-                }
+                loadCities(stateId, null); // Don't pre-select when changing state
             });
         });
     </script>

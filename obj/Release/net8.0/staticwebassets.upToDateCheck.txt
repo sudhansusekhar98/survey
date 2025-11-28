@@ -415,7 +415,7 @@ wwwroot\js\chartRMReport.js
 wwwroot\js\chartTest.js
 wwwroot\js\cloudinary-examples.js
 wwwroot\js\config.js
-wwwroot\js\dashboard.js
+wwwroot\css\profile.css
 wwwroot\js\dashboards-analytics.js
 wwwroot\js\DBChart.js
 wwwroot\js\extended-ui-perfect-scrollbar.js
@@ -468,3 +468,5 @@ wwwroot\vendor\libs\masonry\masonry.js
 wwwroot\vendor\libs\perfect-scrollbar\perfect-scrollbar.css
 wwwroot\vendor\libs\perfect-scrollbar\perfect-scrollbar.js
 wwwroot\vendor\libs\popper\popper.js
+wwwroot\js\dashboard.js
+wwwroot\js\profile.js

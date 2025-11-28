@@ -155,12 +155,57 @@ document.addEventListener('click', function (e) {
             let canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            const ctx = canvas.getContext('2d');
+            
+            // Draw video frame
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Add watermark if text is provided
+            const watermarkText = document.getElementById('camWatermarkText').value.trim();
+            if (watermarkText) {
+                // Calculate font size based on canvas width (responsive sizing)
+                const fontSize = Math.max(20, canvas.width * 0.025);
+                ctx.font = `bold ${fontSize}px Arial`;
+                
+                // Measure text width
+                const textMetrics = ctx.measureText(watermarkText);
+                const textWidth = textMetrics.width;
+                const textHeight = fontSize;
+                
+                // Position at bottom center with padding
+                const x = (canvas.width - textWidth) / 2;
+                const y = canvas.height - 30;
+                const padding = 15;
+                
+                // Draw semi-transparent background for text
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(
+                    x - padding, 
+                    y - textHeight - padding/2, 
+                    textWidth + (padding * 2), 
+                    textHeight + padding
+                );
+                
+                // Draw white text
+                ctx.fillStyle = '#FFFFFF';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(watermarkText, canvas.width / 2, canvas.height - 20);
+                
+                // Add border to text for better visibility
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 2;
+                ctx.strokeText(watermarkText, canvas.width / 2, canvas.height - 20);
+            }
             
             // Upload to Cloudinary with folder structure
             const itemIndex = preview.dataset.itemIndex;
-            const itemId = document.querySelector(`input.item-id-field[data-index="${itemIndex}"]`)?.value || '0';
+            const itemId = document.querySelector(`input.item-id-field[data-index=\"${itemIndex}\"]`)?.value || '0';
             uploadToCloudinary(canvas.toDataURL('image/png'), preview, itemId);
+            
+            // Clear watermark input for next capture
+            document.getElementById('camWatermarkText').value = '';
+            
             modal.hide();
             if (stream) stream.getTracks().forEach(track => track.stop());
         };
@@ -180,16 +225,29 @@ document.addEventListener('click', function (e) {
         uploadInput.onchange = function () {
             const itemIndex = preview.dataset.itemIndex;
             const itemId = document.querySelector(`input.item-id-field[data-index="${itemIndex}"]`)?.value || '0';
-            Array.from(uploadInput.files).forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    let reader = new FileReader();
-                    reader.onload = function (e) {
-                        // Upload to Cloudinary with folder structure
-                        uploadToCloudinary(e.target.result, preview, itemId);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
+            
+            // Ask for watermark once for all images
+            const watermarkText = prompt('Enter watermark text for all selected images (optional, leave empty for no watermark):');
+            
+            if (watermarkText !== null) { // User didn't cancel
+                Array.from(uploadInput.files).forEach(file => {
+                    if (file.type.startsWith('image/')) {
+                        let reader = new FileReader();
+                        reader.onload = function (e) {
+                            if (watermarkText.trim()) {
+                                // Add watermark to gallery image
+                                addWatermarkToImage(e.target.result, watermarkText.trim(), function(watermarkedImage) {
+                                    uploadToCloudinary(watermarkedImage, preview, itemId);
+                                });
+                            } else {
+                                // No watermark, upload as-is
+                                uploadToCloudinary(e.target.result, preview, itemId);
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
             uploadInput.value = ''; // Clear input for next use
         };
     }
@@ -247,6 +305,8 @@ function createImagePreview(imageUrl, publicId, previewContainer) {
     let img = document.createElement('img');
     img.src = imageUrl;
     img.className = 'cam-preview-img';
+    img.style.objectFit = 'contain'; // Ensure full image is visible
+    img.style.background = '#f8f9fa';
     wrapper.appendChild(img);
     
     // Add hidden input to store URL for form submission with proper naming
@@ -322,3 +382,55 @@ document.addEventListener('click', function(e) {
         }
     }
 });
+
+// Helper function to add watermark to an image from gallery
+function addWatermarkToImage(base64Image, watermarkText, callback) {
+    const img = new Image();
+    img.onload = function() {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        
+        // Draw original image
+        ctx.drawImage(img, 0, 0);
+        
+        // Calculate font size based on canvas width (responsive sizing)
+        const fontSize = Math.max(20, canvas.width * 0.025);
+        ctx.font = `bold ${fontSize}px Arial`;
+        
+        // Measure text width
+        const textMetrics = ctx.measureText(watermarkText);
+        const textWidth = textMetrics.width;
+        const textHeight = fontSize;
+        
+        // Position at bottom center with padding
+        const x = (canvas.width - textWidth) / 2;
+        const y = canvas.height - 30;
+        const padding = 15;
+        
+        // Draw semi-transparent background for text
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(
+            x - padding, 
+            y - textHeight - padding/2, 
+            textWidth + (padding * 2), 
+            textHeight + padding
+        );
+        
+        // Draw white text
+        ctx.fillStyle = '#FFFFFF';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(watermarkText, canvas.width / 2, canvas.height - 20);
+        
+        // Add border to text for better visibility
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 2;
+        ctx.strokeText(watermarkText, canvas.width / 2, canvas.height - 20);
+        
+        // Return watermarked image as base64
+        callback(canvas.toDataURL('image/png'));
+    };
+    img.src = base64Image;
+}

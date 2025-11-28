@@ -45,6 +45,57 @@
             z-index: 1 !important;
             position: relative;
         }
+
+        /* Selected accordion item styling */
+        .accordion-item.has-items {
+            border-left: 4px solid #28a745 !important;
+            background-color: #f0f9f4 !important;
+        }
+
+        .accordion-item.has-items .accordion-button {
+            background-color: #e8f5e9 !important;
+            border-left: 4px solid #28a745;
+        }
+
+        .accordion-item.has-items .accordion-button:not(.collapsed) {
+            background-color: #d4edda !important;
+            color: #155724;
+        }
+
+        .accordion-item.has-items .accordion-button .item-type-icon {
+            color: #28a745 !important;
+        }
+
+        /* Item count badge styling */
+        .item-count-badge {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            font-weight: 600;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @@keyframes pulse {
+            0%, 100% { box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3); }
+            50% { box-shadow: 0 4px 8px rgba(40, 167, 69, 0.5); }
+        }
+
+        /* Checkmark icon for completed items */
+        .completed-check {
+            color: #28a745;
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+            animation: checkmark 0.5s ease-in-out;
+        }
+
+        @@keyframes checkmark {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
     </style>
 }
 
@@ -182,7 +233,12 @@
                         {
                             var headingId = $"heading_{index}";
                             var collapseId = $"collapse_{index}";
-                            <div class="card accordion-item shadow-sm mb-2">
+                            var hasItems = gridData.ItemLists != null && gridData.ItemLists.Any();
+                            var itemCount = hasItems && gridData.ItemLists != null ? gridData.ItemLists.Count : 0;
+                            var totalQtyReq = hasItems && gridData.ItemLists != null ? gridData.ItemLists.Sum(x => x.ItemQtyReq) : 0;
+                            var accordionClass = hasItems ? "card accordion-item shadow-sm mb-2 has-items" : "card accordion-item shadow-sm mb-2";
+                            
+                            <div class="@accordionClass">
                                 <h2 class="accordion-header" id="@headingId">
                                     <button type="button"
                                             class="accordion-button collapsed"
@@ -192,10 +248,25 @@
                                             aria-controls="@collapseId">
 
                                         <div class="d-flex align-items-center w-100">
-                                            <i class="bi bi-cpu fs-2 text-primary me-3"></i>
+                                            @if (hasItems)
+                                            {
+                                                <i class="bi bi-check-circle-fill completed-check"></i>
+                                            }
+                                            <i class="bi bi-cpu fs-2 item-type-icon me-3" style="@(hasItems ? "color: #28a745;" : "color: #6c757d;")"></i>
                                             <span class="fw-semibold fs-5">
                                                 @gridData.TypeName
                                             </span>
+                                            @if (hasItems)
+                                            {
+                                                <span class="item-count-badge ms-3">
+                                                    <i class="bi bi-check2-all me-1"></i>
+                                                    @itemCount item@(itemCount != 1 ? "s" : "") selected
+                                                    @if (totalQtyReq > 0)
+                                                    {
+                                                        <span class="ms-1">(Qty: @totalQtyReq)</span>
+                                                    }
+                                                </span>
+                                            }
                                             <span class="badge bg-info ms-auto me-3">ID: @gridData.ItemTypeID</span>
                                         </div>
                                     </button>

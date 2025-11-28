@@ -209,20 +209,6 @@
                                                     <label asp-for="ScopeOfWork"></label>
                                                 </div>
                                             </div>
-
-                                            <div class="col-12 col-md-6">
-                                                <div class="form-custom-floating">
-                                                    <input asp-for="Latitude" type="number" step="any" class="form-control" placeholder=" ">
-                                                    <label asp-for="Latitude"></label>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-12 col-md-6">
-                                                <div class="form-custom-floating">
-                                                    <input asp-for="Longitude" type="number" step="any" class="form-control" placeholder=" ">
-                                                    <label asp-for="Longitude"></label>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -300,6 +286,11 @@
         });
 
         function applyClientDetails(client) {
+            // Log the client details for debugging
+            console.log('Client Details Received:', client);
+            console.log('State ID:', client.stateId, 'State Name:', client.stateName);
+            console.log('City ID:', client.cityId, 'City Name:', client.cityName);
+            
             // Populate readonly fields
             $('#agencyNameInput').val(client.clientName || '');
             $('#addressInput').val(client.address || '');
@@ -313,6 +304,13 @@
             $('#stateNameHidden').val(client.stateName || '');
             $('#cityIdHidden').val(client.cityId || '');
             $('#cityNameHidden').val(client.cityName || '');
+            
+            // Log what was actually set
+            console.log('Hidden Fields Set:');
+            console.log('StateId:', $('#stateIdHidden').val());
+            console.log('MapMarking (State Name):', $('#stateNameHidden').val());
+            console.log('CityId:', $('#cityIdHidden').val());
+            console.log('CityDistrict (City Name):', $('#cityNameHidden').val());
         }
 
         function clearClientFields() {

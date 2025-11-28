@@ -158,7 +158,7 @@ var DashboardModule = (function() {
         var options = {
             series: statusValues,
             chart: {
-                height: 250,
+                height: 310,
                 type: 'donut'
             },
             labels: statusLabels,
