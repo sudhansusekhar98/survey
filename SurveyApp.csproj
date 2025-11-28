@@ -62,6 +62,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\AdminItemMasterController.cs" />
+    <Compile Remove="Controllers\AdminItemTypeMasterController.cs" />
     <Compile Remove="Controllers\DashboardsController.cs" />
     <Compile Remove="Controllers\FeedingReportController.cs" />
     <Compile Remove="Controllers\PoleInfrastructureController.cs" />
@@ -79,8 +81,16 @@
     <Compile Remove="Models\StoreConsumption.cs" />
     <Compile Remove="Models\StoreRMReportViewModel.cs" />
     <Compile Remove="Models\StoreViewModel.cs" />
+    <Compile Remove="Repo\IItemMasterRepo.cs" />
+    <Compile Remove="Repo\IItemRepository.cs" />
+    <Compile Remove="Repo\IItemTypeMasterRepo.cs" />
+    <Compile Remove="Repo\IItemTypeRepository.cs" />
     <Compile Remove="Repo\IPower.cs" />
     <Compile Remove="Repo\IStore.cs" />
+    <Compile Remove="Repo\ItemMasterRepo.cs" />
+    <Compile Remove="Repo\ItemRepository.cs" />
+    <Compile Remove="Repo\ItemTypeMasterRepo.cs" />
+    <Compile Remove="Repo\ItemTypeRepository.cs" />
     <Compile Remove="Repo\PowerRepo.cs" />
     <Compile Remove="Repo\StoreRepo.cs" />
   </ItemGroup>

@@ -1,6 +1,43 @@
 // Item Master Selection - Quantity and Image Management
 // This script handles quantity increment/decrement, camera capture, and image upload functionality
 
+function applyWatermark(ctx, watermarkText) {
+    const canvas = ctx.canvas;
+    // Calculate font size based on canvas width (responsive sizing)
+    const fontSize = Math.max(20, canvas.width * 0.025);
+    ctx.font = `bold ${fontSize}px Arial`;
+    
+    // Measure text width
+    const textMetrics = ctx.measureText(watermarkText);
+    const textWidth = textMetrics.width;
+    const textHeight = fontSize;
+    
+    // Position at bottom center with padding
+    const x = (canvas.width - textWidth) / 2;
+    const y = canvas.height - 30;
+    const padding = 15;
+    
+    // Draw semi-transparent background for text
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(
+        x - padding, 
+        y - textHeight - padding/2, 
+        textWidth + (padding * 2), 
+        textHeight + padding
+    );
+    
+    // Draw white text
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(watermarkText, canvas.width / 2, canvas.height - 20);
+    
+    // Add a thin black stroke for better visibility
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1;
+    ctx.strokeText(watermarkText, canvas.width / 2, canvas.height - 20);
+}
+
 // Global variables for Cloudinary URLs (will be set from view)
 let cloudinaryUploadUrl = '';
 let cloudinaryDeleteUrl = '';
@@ -163,39 +200,7 @@ document.addEventListener('click', function (e) {
             // Add watermark if text is provided
             const watermarkText = document.getElementById('camWatermarkText').value.trim();
             if (watermarkText) {
-                // Calculate font size based on canvas width (responsive sizing)
-                const fontSize = Math.max(20, canvas.width * 0.025);
-                ctx.font = `bold ${fontSize}px Arial`;
-                
-                // Measure text width
-                const textMetrics = ctx.measureText(watermarkText);
-                const textWidth = textMetrics.width;
-                const textHeight = fontSize;
-                
-                // Position at bottom center with padding
-                const x = (canvas.width - textWidth) / 2;
-                const y = canvas.height - 30;
-                const padding = 15;
-                
-                // Draw semi-transparent background for text
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-                ctx.fillRect(
-                    x - padding, 
-                    y - textHeight - padding/2, 
-                    textWidth + (padding * 2), 
-                    textHeight + padding
-                );
-                
-                // Draw white text
-                ctx.fillStyle = '#FFFFFF';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
-                ctx.fillText(watermarkText, canvas.width / 2, canvas.height - 20);
-                
-                // Add border to text for better visibility
-                ctx.strokeStyle = '#000000';
-                ctx.lineWidth = 2;
-                ctx.strokeText(watermarkText, canvas.width / 2, canvas.height - 20);
+                applyWatermark(ctx, watermarkText);
             }
             
             // Upload to Cloudinary with folder structure
@@ -322,6 +327,15 @@ function createImagePreview(imageUrl, publicId, previewContainer) {
     hiddenPublicId.value = publicId;
     wrapper.appendChild(hiddenPublicId);
     
+    let previewBtn = document.createElement('button');
+    previewBtn.type = 'button';
+    previewBtn.className = 'btn btn-sm btn-info position-absolute cam-preview-btn';
+    previewBtn.innerHTML = '<i class="bi bi-eye"></i>';
+    previewBtn.style.top = '2px';
+    previewBtn.style.right = '42px';
+    previewBtn.dataset.url = imageUrl;
+    wrapper.appendChild(previewBtn);
+
     let cancelBtn = document.createElement('button');
     cancelBtn.className = 'btn btn-sm btn-danger position-absolute';
     cancelBtn.innerHTML = '<i class="bi bi-x"></i>';
@@ -395,42 +409,64 @@ function addWatermarkToImage(base64Image, watermarkText, callback) {
         // Draw original image
         ctx.drawImage(img, 0, 0);
         
-        // Calculate font size based on canvas width (responsive sizing)
-        const fontSize = Math.max(20, canvas.width * 0.025);
-        ctx.font = `bold ${fontSize}px Arial`;
-        
-        // Measure text width
-        const textMetrics = ctx.measureText(watermarkText);
-        const textWidth = textMetrics.width;
-        const textHeight = fontSize;
-        
-        // Position at bottom center with padding
-        const x = (canvas.width - textWidth) / 2;
-        const y = canvas.height - 30;
-        const padding = 15;
-        
-        // Draw semi-transparent background for text
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(
-            x - padding, 
-            y - textHeight - padding/2, 
-            textWidth + (padding * 2), 
-            textHeight + padding
-        );
-        
-        // Draw white text
-        ctx.fillStyle = '#FFFFFF';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom';
-        ctx.fillText(watermarkText, canvas.width / 2, canvas.height - 20);
-        
-        // Add border to text for better visibility
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 2;
-        ctx.strokeText(watermarkText, canvas.width / 2, canvas.height - 20);
+        // Apply the watermark
+        if (watermarkText) {
+            applyWatermark(ctx, watermarkText);
+        }
         
         // Return watermarked image as base64
         callback(canvas.toDataURL('image/png'));
     };
     img.src = base64Image;
 }
+
+// Handle preview button click
+document.addEventListener('click', function(e) {
+    const previewBtn = e.target.closest('.cam-preview-btn');
+    if (previewBtn) {
+        const imageUrl = previewBtn.dataset.url;
+        const modal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+        const previewImage = document.getElementById('previewImage');
+        
+        if (imageUrl && previewImage) {
+            previewImage.src = imageUrl;
+            modal.show();
+        }
+    }
+});
+
+// Add styles for preview button hover effect
+const style = document.createElement('style');
+style.innerHTML = `
+    .cam-preview-wrapper:hover .cam-preview-btn {
+        display: block !important;
+    }
+    .cam-preview-btn {
+        display: none;
+    }
+`;
+document.head.appendChild(style);
+
+document.getElementById('cameraDevicesForm').addEventListener('submit', function(e) {
+    let warningMessage = '';
+    const items = document.querySelectorAll('.card.shadow-sm'); // Each item is in a card
+
+    items.forEach((item, index) => {
+        const urlInputs = item.querySelectorAll(`input[name="ItemLists[${index}].CloudinaryUrls"]`);
+        if (urlInputs.length > 0) {
+            const urls = Array.from(urlInputs).map(input => input.value);
+            const urlString = urls.join(',');
+            
+            // Check length against a reasonable threshold
+            if (urlString.length > 1000) {
+                const itemName = item.querySelector('h6.fw-bold').textContent || `Item #${index + 1}`;
+                warningMessage += `Warning: Item "${itemName}" has ${urlInputs.length} images, and the total URL length (${urlString.length} characters) is very long. This may cause data to be truncated when saving. Please consider reducing the number of images or contacting your system administrator to increase the database field size.\n\n`;
+            }
+        }
+    });
+
+    if (warningMessage) {
+        alert("Potential Data Length Issue\n--------------------------------\n" + warningMessage);
+    }
+});
+

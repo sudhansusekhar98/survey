@@ -39,6 +39,17 @@ namespace SurveyApp.Controllers
                 var allSurveys = _surveyRepo.GetAllSurveys(userId) ?? new List<SurveyModel>();
                 var today = DateTime.Now.Date;
 
+                // Fetch submission dates for all surveys
+                var allSubmissions = _surveyRepo.GetAllSubmissions();
+                foreach (var survey in allSurveys)
+                {
+                    var submission = allSubmissions.FirstOrDefault(s => s.SurveyId == survey.SurveyId);
+                    if (submission != null)
+                    {
+                        survey.SubmittedDate = submission.SubmissionDate;
+                    }
+                }
+
                 // Apply date filters
                 if (fromDate.HasValue)
                 {
@@ -163,6 +174,10 @@ namespace SurveyApp.Controllers
                     return RedirectToAction("SummaryReport");
                 }
 
+                // Fetch CreatedBy user name
+                var createdByUser = _adminRepo.GetUserById(survey.CreatedBy);
+                ViewBag.CreatedByName = createdByUser?.LoginName ?? "Unknown";
+
                 var locations = _surveyRepo.GetSurveyLocationById(surveyId) ?? new List<SurveyLocationModel>();
                 var assignments = _surveyRepo.GetSurveyAssignments(surveyId) ?? new List<SurveyAssignmentModel>();
                 var submission = _surveyRepo.GetSubmissionBySurveyId(surveyId);
@@ -282,7 +297,7 @@ namespace SurveyApp.Controllers
                         worksheet.Cells[row, 4].Value = survey.RegionName;
                         worksheet.Cells[row, 5].Value = survey.ImplementationType;
                         worksheet.Cells[row, 6].Value = survey.SurveyDate?.ToString("dd-MMM-yyyy");
-                        worksheet.Cells[row, 7].Value = survey.DueDate?.ToString("dd-MMM-yyyy");
+                        worksheet.Cells[row, 7].Value = survey.DueDate?.ToString("dd-Mmm-yyyy");
                         worksheet.Cells[row, 8].Value = survey.LocationSiteName;
                         worksheet.Cells[row, 9].Value = survey.CityDistrict;
                         worksheet.Cells[row, 10].Value = survey.SurveyTeamName;

@@ -168,6 +168,9 @@
 																<img src="@imgUrl" class="cam-preview-img" alt="Survey image" />
 																<input type="hidden" name="ItemLists[@i].CloudinaryUrls" value="@imgUrl" />
 																<input type="hidden" name="ItemLists[@i].CloudinaryPublicIds" value="@publicId" />
+																<button type="button" class="btn btn-sm btn-info position-absolute cam-preview-btn" data-url="@imgUrl" style="top: 2px; right: 42px;">
+																	<i class="bi bi-eye"></i>
+																</button>
 																<button type="button" class="btn btn-sm btn-danger position-absolute cam-delete-existing" data-public-id="@publicId">
 																	<i class="bi bi-x"></i>
 																</button>
@@ -247,6 +250,21 @@
 			</div>
 		</div>
 	</div>
+</div>
+
+<!-- Image Preview Modal -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imagePreviewModalLabel">Image Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="" id="previewImage" class="img-fluid rounded" alt="Image Preview" />
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {

@@ -65,6 +65,9 @@ namespace SurveyApp.Models
         public int? ClientID { get; set; }
         public string? ClientName { get; set; }
 
+        [Display(Name = "Submitted Date")]
+        public DateTime? SubmittedDate { get; set; }
+
         // Options for dropdowns - populated from API
         public List<SelectListItem> StateOptions { get; set; } = new();
         public List<SelectListItem> CityOptions { get; set; } = new();

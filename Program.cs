@@ -42,9 +42,6 @@ builder.Services.AddScoped<ISurveyLocationStatus, SurveyLocationStatusRepo>();
 builder.Services.AddScoped<IClientMaster, ClientMasterRepo>();
 builder.Services.AddScoped<IEmpMaster, EmpMasterRepo>();
 
-// Register new EF Core repositories
-builder.Services.AddScoped<IItemTypeRepository, ItemTypeRepository>();
-builder.Services.AddScoped<IItemRepository, ItemRepository>();
 
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 ExcelPackage.License.SetNonCommercialOrganization("ABTMS");

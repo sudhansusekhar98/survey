@@ -63,7 +63,6 @@
                     "On Hold" => "danger",
                     _ => "dark"
                 };
-                var isOverdue = survey.DueDate.HasValue && survey.DueDate.Value < DateTime.Now && survey.SurveyStatus != "Completed";
 
                 <!-- Survey Overview -->
                 <div class="card mb-4 shadow-sm border-0">
@@ -105,11 +104,15 @@
                                     <tr>
                                         <td class="text-muted fw-semibold">Due Date:</td>
                                         <td>
-                                            @if (survey.DueDate.HasValue)
+                                            @{
+                                                var assignmentDueDate = Model.Assignments.FirstOrDefault()?.DueDate;
+                                                var isAssignmentOverdue = assignmentDueDate.HasValue && assignmentDueDate.Value < DateTime.Now && survey.SurveyStatus != "Completed";
+                                            }
+                                            @if (assignmentDueDate.HasValue)
                                             {
-                                                <span class="@(isOverdue ? "text-danger fw-bold" : "")">
-                                                    @survey.DueDate.Value.ToString("dd-MMM-yyyy")
-                                                    @if (isOverdue)
+                                                <span class="@(isAssignmentOverdue ? "text-danger fw-bold" : "")">
+                                                    @assignmentDueDate.Value.ToString("dd-MMM-yyyy")
+                                                    @if (isAssignmentOverdue)
                                                     {
                                                         <i class="bi bi-exclamation-triangle ms-1"></i>
                                                         <span class="badge bg-danger ms-2">Overdue</span>
@@ -128,7 +131,7 @@
                                     </tr>
                                     <tr>
                                         <td class="text-muted fw-semibold">Created By:</td>
-                                        <td>@survey.CreatedBy</td>
+                                        <td>@ViewBag.CreatedByName</td>
                                     </tr>
                                 </table>
                             </div>
@@ -358,11 +361,19 @@
                                                                         </td>
                                                                         <td><small class="text-muted">@(item.Remarks ?? "-")</small></td>
                                                                         <td class="text-center">
-                                                                            @if (!string.IsNullOrEmpty(item.ImgPath))
+                                                                            @{
+                                                                                var imageUrls = !string.IsNullOrEmpty(item.ImgPath) 
+                                                                                    ? item.ImgPath.Split(',', StringSplitOptions.RemoveEmptyEntries) 
+                                                                                    : Array.Empty<string>();
+                                                                            }
+                                                                            @if (imageUrls.Length > 0)
                                                                             {
-                                                                                <a href="@item.ImgPath" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                                                    <i class="bi bi-image"></i> View
-                                                                                </a>
+                                                                                <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                                                        data-bs-toggle="modal" 
+                                                                                        data-bs-target="#imageGalleryModal"
+                                                                                        onclick="showImageGallery('@Html.Raw(string.Join("|", imageUrls))', '@Html.Raw(item.ItemName)')">
+                                                                                    <i class="bi bi-images"></i> View (@imageUrls.Length)
+                                                                                </button>
                                                                             }
                                                                             else
                                                                             {
@@ -488,4 +499,217 @@
             display: none;
         }
     }
+
+    /* Image Gallery Styles */
+    .image-gallery-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 15px;
+    }
+    
+    .gallery-thumbnail {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 2px solid transparent;
+    }
+    
+    .gallery-thumbnail:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        border-color: #667eea;
+    }
+    
+    .gallery-thumbnail.active {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+    }
+    
+    .main-image-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 400px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+    
+    .main-image {
+        max-width: 100%;
+        max-height: 500px;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+    
+    .image-nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(102, 126, 234, 0.9);
+        border: none;
+        color: white;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1.2rem;
+        transition: background 0.2s;
+    }
+    
+    .image-nav-btn:hover {
+        background: rgba(118, 75, 162, 0.9);
+    }
+    
+    .image-nav-btn.prev {
+        left: 10px;
+    }
+    
+    .image-nav-btn.next {
+        right: 10px;
+    }
+    
+    .image-counter {
+        text-align: center;
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-top: 10px;
+    }
 </style>
+
+<!-- Image Gallery Modal -->
+<div class="modal fade" id="imageGalleryModal" tabindex="-1" aria-labelledby="imageGalleryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);">
+                <h5 class="modal-title text-white" id="imageGalleryModalLabel">
+                    <i class="bi bi-images me-2"></i>Item Images - <span id="galleryItemName"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Main Image Display -->
+                <div class="main-image-container position-relative">
+                    <button type="button" class="image-nav-btn prev" onclick="navigateGallery(-1)" title="Previous">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <img id="galleryMainImage" src="" alt="Main Image" class="main-image">
+                    <button type="button" class="image-nav-btn next" onclick="navigateGallery(1)" title="Next">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="image-counter">
+                    <span id="currentImageIndex">1</span> of <span id="totalImages">1</span>
+                </div>
+                <!-- Thumbnail Gallery -->
+                <div class="image-gallery-container justify-content-center" id="thumbnailGallery">
+                    <!-- Thumbnails will be dynamically populated -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="downloadCurrentImage" class="btn btn-outline-primary" target="_blank">
+                    <i class="bi bi-download me-1"></i>Download Image
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let galleryImages = [];
+    let currentIndex = 0;
+
+    function showImageGallery(imageUrlsString, itemName) {
+        // Parse the pipe-separated image URLs
+        galleryImages = imageUrlsString.split('|').filter(url => url.trim() !== '');
+        currentIndex = 0;
+
+        // Set item name in modal header
+        document.getElementById('galleryItemName').textContent = itemName;
+
+        // Update counter
+        document.getElementById('totalImages').textContent = galleryImages.length;
+        
+        // Generate thumbnails
+        const thumbnailContainer = document.getElementById('thumbnailGallery');
+        thumbnailContainer.innerHTML = '';
+        
+        galleryImages.forEach((url, index) => {
+            const img = document.createElement('img');
+            img.src = url.trim();
+            img.alt = `Image ${index + 1}`;
+            img.className = 'gallery-thumbnail' + (index === 0 ? ' active' : '');
+            img.onclick = () => selectImage(index);
+            img.onerror = () => {
+                img.src = '/img/no-image-placeholder.png'; // Fallback image
+                img.alt = 'Image not available';
+            };
+            thumbnailContainer.appendChild(img);
+        });
+
+        // Show first image
+        selectImage(0);
+
+        // Show/hide navigation buttons based on image count
+        const prevBtn = document.querySelector('.image-nav-btn.prev');
+        const nextBtn = document.querySelector('.image-nav-btn.next');
+        if (galleryImages.length <= 1) {
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+        } else {
+            prevBtn.style.display = 'block';
+            nextBtn.style.display = 'block';
+        }
+    }
+
+    function selectImage(index) {
+        if (index < 0 || index >= galleryImages.length) return;
+        
+        currentIndex = index;
+        const mainImage = document.getElementById('galleryMainImage');
+        mainImage.src = galleryImages[index].trim();
+        
+        // Update counter
+        document.getElementById('currentImageIndex').textContent = index + 1;
+        
+        // Update download link
+        document.getElementById('downloadCurrentImage').href = galleryImages[index].trim();
+        
+        // Update active thumbnail
+        const thumbnails = document.querySelectorAll('.gallery-thumbnail');
+        thumbnails.forEach((thumb, i) => {
+            thumb.classList.toggle('active', i === index);
+        });
+        
+        // Scroll thumbnail into view
+        if (thumbnails[index]) {
+            thumbnails[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+    }
+
+    function navigateGallery(direction) {
+        let newIndex = currentIndex + direction;
+        
+        // Loop around
+        if (newIndex < 0) newIndex = galleryImages.length - 1;
+        if (newIndex >= galleryImages.length) newIndex = 0;
+        
+        selectImage(newIndex);
+    }
+
+    // Keyboard navigation when modal is open
+    document.getElementById('imageGalleryModal').addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft') {
+            navigateGallery(-1);
+        } else if (e.key === 'ArrowRight') {
+            navigateGallery(1);
+        }
+    });
+</script>
+}

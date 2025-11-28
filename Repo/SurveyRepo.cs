@@ -808,19 +808,15 @@ namespace SurveyApp.Repo
                     using var cmd = new SqlCommand("dbo.SpSurveyDetails", con, transaction);
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    // Convert Cloudinary lists to comma-separated strings
-                    string imgPath = items.ImgPath ?? "";
-                    string imgID = items.ImgID ?? "";
-                    
-                    if (items.CloudinaryUrls != null && items.CloudinaryUrls.Count > 0)
-                    {
-                        imgPath = string.Join(",", items.CloudinaryUrls);
-                    }
-                    
-                    if (items.CloudinaryPublicIds != null && items.CloudinaryPublicIds.Count > 0)
-                    {
-                        imgID = string.Join(",", items.CloudinaryPublicIds);
-                    }
+                    // The client sends the complete list of URLs and Public IDs.
+                    // Join them into a comma-separated string to store in the database.
+                    string imgPath = (items.CloudinaryUrls != null && items.CloudinaryUrls.Any())
+                        ? string.Join(",", items.CloudinaryUrls.Distinct())
+                        : "";
+
+                    string imgID = (items.CloudinaryPublicIds != null && items.CloudinaryPublicIds.Any())
+                        ? string.Join(",", items.CloudinaryPublicIds.Distinct())
+                        : "";
 
                     cmd.Parameters.AddWithValue("@SpType", 1);
                     cmd.Parameters.AddWithValue("@SurveyID", model.SurveyID);

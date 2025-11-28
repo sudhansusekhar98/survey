@@ -351,6 +351,7 @@
                             <th class="fw-semibold">Region</th>
                             <th class="fw-semibold">Type</th>
                             <th class="fw-semibold">Date</th>
+                            <th class="fw-semibold">Submitted Date</th>
                             <th class="fw-semibold">Due Date</th>
                             <th class="fw-semibold no-print">Actions</th>
                         </tr>
@@ -381,6 +382,18 @@
                                 </td>
                                 <td>@survey.ImplementationType</td>
                                 <td>@(survey.SurveyDate?.ToString("dd-MMM-yyyy") ?? "-")</td>
+                                <td>
+                                    @if (survey.SubmittedDate.HasValue)
+                                    {
+                                        <span class="text-success">
+                                            <i class="bi bi-check-circle me-1"></i>@survey.SubmittedDate.Value.ToString("dd-MMM-yyyy HH:mm")
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
                                 <td>
                                     @if (survey.DueDate.HasValue)
                                     {
