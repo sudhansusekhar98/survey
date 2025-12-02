@@ -36,86 +36,7 @@
         </div>
     </div>
 
-    <!-- Filter Section -->
-    @* <div class="card mb-3 border-0.5 shadow-sm no-print" style="border-radius: 10px; overflow: hidden; margin-top: 0.25rem;">
-        <div class="card-body" style="background-color: #f8f9fa; padding: 1.5rem;">
-            <form asp-action="SummaryReport" method="get">
-                <div class="row g-3">
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <label class="form-label fw-semibold small text-secondary mb-2">
-                            <i class="bi bi-calendar-event me-1 text-primary"></i>From Date
-                        </label>
-                        <input type="date" name="fromDate" class="form-control shadow-sm" value="@Model.FromDate?.ToString("yyyy-MM-dd")" style="border-radius: 8px; border: 1px solid #dee2e6;">
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <label class="form-label fw-semibold small text-secondary mb-2">
-                            <i class="bi bi-calendar-check me-1 text-success"></i>To Date
-                        </label>
-                        <input type="date" name="toDate" class="form-control shadow-sm" value="@Model.ToDate?.ToString("yyyy-MM-dd")" style="border-radius: 8px; border: 1px solid #dee2e6;">
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-2">
-                        <label class="form-label fw-semibold small text-secondary mb-2">
-                            <i class="bi bi-funnel me-1 text-primary"></i>Status
-                        </label>
-                        <select name="status" class="form-select shadow-sm" style="border-radius: 8px; border: 1px solid #dee2e6;">
-                            <option value="">All Statuses</option>
-                            @if (ViewBag.StatusOptions != null)
-                            {
-                                foreach (var status in ViewBag.StatusOptions)
-                                {
-                                    <option value="@status" selected="@(Model.Status == status)">@status</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-2">
-                        <label class="form-label fw-semibold small text-secondary mb-2">
-                            <i class="bi bi-map me-1 text-success"></i>Region
-                        </label>
-                        <select name="region" class="form-select shadow-sm" style="border-radius: 8px; border: 1px solid #dee2e6;">
-                            <option value="">All Regions</option>
-                            @if (ViewBag.RegionOptions != null)
-                            {
-                                foreach (var region in ViewBag.RegionOptions)
-                                {
-                                    <option value="@region" selected="@(Model.Region == region)">@region</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-2">
-                        <label class="form-label fw-semibold small text-secondary mb-2">
-                            <i class="bi bi-building me-1 text-warning"></i>Implementation Type
-                        </label>
-                        <select name="type" class="form-select shadow-sm" style="border-radius: 8px; border: 1px solid #dee2e6;">
-                            <option value="">All Types</option>
-                            @if (ViewBag.TypeOptions != null)
-                            {
-                                foreach (var type in ViewBag.TypeOptions)
-                                {
-                                    <option value="@type" selected="@(Model.ImplementationType == type)">@type</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="d-flex gap-2 flex-wrap">
-                            <button type="submit" class="btn btn-purple shadow-sm px-4" style="border-radius: 8px;">
-                                <i class="bi bi-funnel-fill me-2"></i>Apply Filters
-                            </button>
-                            <a asp-action="SummaryReport" class="btn btn-outline-secondary shadow-sm px-4" style="border-radius: 8px;">
-                                <i class="bi bi-x-circle me-2"></i>Clear All Filters
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div> *@
-
+    <!-- Filter Card -->
  <div class="card mb-3 border-0.5 shadow-sm no-print" style="border-radius: 10px; overflow: hidden; margin-top: 0.25rem;">
                 <div class="card-body" style="background-color: #f8f9fa; padding: 1.5rem;">
                     <form asp-action="SummaryReport" method="get">
@@ -203,7 +124,7 @@
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="text-white">
                             <div class="opacity-75 small mb-1">Total Surveys</div>
-                            <h2 class="mb-0 fw-bold">@Model.TotalSurveys</h2>
+                            <h2 class="mb-0 fw-bold" style="color: white; !important">@Model.TotalSurveys</h2>
                         </div>
                         <div class="p-3 rounded-circle" style="background-color: rgba(118, 75, 162, 0.3);">
                             <i class="bi bi-clipboard-data text-white" style="font-size: 1.5rem;"></i>
@@ -218,7 +139,7 @@
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="text-white">
                             <div class="opacity-75 small mb-1">Completed</div>
-                            <h2 class="mb-0 fw-bold">@Model.CompletedSurveys</h2>
+                            <h2 class="mb-0 fw-bold" style="color: white; !important">@Model.CompletedSurveys</h2>
                             <div class="small mt-1">
                                 <i class="bi bi-graph-up-arrow me-1"></i>@Model.CompletionRate% completion
                             </div>
@@ -236,7 +157,7 @@
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="text-white">
                             <div class="opacity-75 small mb-1">In Progress</div>
-                            <h2 class="mb-0 fw-bold">@Model.InProgressSurveys</h2>
+                            <h2 class="mb-0 fw-bold" style="color: white; !important">@Model.InProgressSurveys</h2>
                         </div>
                         <div class="p-3 rounded-circle" style="background-color: rgba(255, 154, 60, 0.3);">
                             <i class="bi bi-hourglass-split text-white" style="font-size: 1.5rem;"></i>
@@ -250,8 +171,8 @@
                 <div class="card-body p-4" style="background: linear-gradient(135deg, #ff6b6b 0%, #c92a2a 100%);">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="text-white">
-                            <div class="opacity-75 small mb-1">Missed Deadline</div>
-                            <h2 class="mb-0 fw-bold">@Model.MissedDeadlineSurveys</h2>
+                            <div class="opacity-100 small mb-1">Missed Deadline</div>
+                            <h2 class="mb-0 fw-bold" style="color: white; !important">@Model.MissedDeadlineSurveys</h2>
                         </div>
                         <div class="p-3 rounded-circle" style="background-color: rgba(201, 42, 42, 0.3);">
                             <i class="bi bi-calendar-x-fill text-white" style="font-size: 1.5rem;"></i>

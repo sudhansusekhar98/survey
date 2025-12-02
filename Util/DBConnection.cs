@@ -8,6 +8,3 @@
         public static string ConnectionString => cs;
     }
 }
-
-
-

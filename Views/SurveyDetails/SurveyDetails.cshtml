@@ -122,9 +122,9 @@
                                     </button>
                                 }
                             }
-                            <a asp-controller="SurveyCreation" asp-action="SurveyLocation" class="btn btn-sm btn-outline-light">
+                            <a asp-controller="SurveyCreation" asp-action="SurveyLocation" asp-route-surveyId="@(Model?.FirstOrDefault()?.SurveyID)" class="btn btn-sm btn-outline-light">
                                 <i class="bi bi-arrow-left-circle"></i>
-                                <span class="d-none d-sm-inline ms-1">Back</span>
+                                <span class="d-none d-sm-inline ms-1">Back to Locations</span>
                             </a>
                         </div>
                     </div>
@@ -415,6 +415,9 @@
                 </button>
                 <button type="button" class="btn btn-success" id="submitLocationBtn" onclick="submitLocationCompletion()">
                     <i class="bi bi-check-circle me-2"></i>Submit & Mark as Completed
+                </button>
+                <button type="button" class="btn btn-primary" id="submitSurveyBtn" onclick="submitSurveyForApproval()">
+                    <i class="bi bi-send-check me-2"></i>Submit Survey for Approval
                 </button>
             </div>
         </div>

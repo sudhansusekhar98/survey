@@ -1,5 +1,6 @@
 using SurveyApp.Models;
 using System.Security.Cryptography.Xml;
+using System.Data;
 
 namespace SurveyApp.Repo
 {
@@ -28,6 +29,7 @@ namespace SurveyApp.Repo
         List<SurveyAssignmentModel>? GetSurveyAssignments(Int64 surveyId);
         bool AddSurveyAssignment(SurveyAssignmentModel assignment);
         bool UpdateSurveyAssignment(SurveyAssignmentModel assignment);
+        bool UpdateAllSurveyAssignmentsDueDate(Int64 SurveyID, DateTime DueDate);
         bool DeleteSurveyAssignment(int transId);
         List<SurveyAssignmentModel> GetAllSurveyAssignments(int userId);
 
@@ -52,6 +54,8 @@ namespace SurveyApp.Repo
         bool UpdateSubmissionStatus(Int64 submissionId, string status, int reviewedBy, string? comments = null);
         bool CanEditSurvey(Int64 surveyId);
         SurveyCompletionStatus CheckSurveyCompletionStatus(Int64 surveyId);
+
+        DataTable GetSurveyDetails(long surveyId, int spType);
     }
 }
 

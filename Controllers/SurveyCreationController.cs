@@ -27,6 +27,10 @@ namespace SurveyApp.Controllers
             _clientRepository = clientRepository;
             _locationService = locationService;
         }
+    // ...existing code...
+    // ...existing code...
+
+    // ...existing code...
 
             // GET: SurveyCreation/CameraDevices 
             public IActionResult CameraDevices()
@@ -234,6 +238,7 @@ namespace SurveyApp.Controllers
                 return RedirectToAction("Index"); // Render full page for normal navigation
             }
             ViewBag.Regions = new SelectList(_adminRepository.GetRegionMaster(), "RegionID", "RegionDesc", survey.RegionID);
+            ViewBag.Clients = new SelectList(_clientRepository.GetAllClients(), "ClientID", "ClientName", survey.ClientID);
             return View("SurveyEdit", survey); // Render full page for normal navigation
         }
 
@@ -253,11 +258,19 @@ namespace SurveyApp.Controllers
                     TempData["ResultMessage"] = "<strong>Validation Error!</strong> Please check all required fields.";
                     TempData["ResultType"] = "warning";
                     ViewBag.Regions = new SelectList(_adminRepository.GetRegionMaster(), "RegionID", "RegionDesc", model.RegionID);
+                    ViewBag.Clients = new SelectList(_clientRepository.GetAllClients(), "ClientID", "ClientName", model.ClientID);
                     return View("SurveyEdit", model);
                 }
 
                 // Set CreatedBy from session
                 model.CreatedBy = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
+
+                // Preserve original status
+                var originalSurvey = _surveyRepository.GetSurveyById(model.SurveyId);
+                if (originalSurvey != null)
+                {
+                    model.SurveyStatus = originalSurvey.SurveyStatus;
+                }
 
                 bool isSaved = _surveyRepository.UpdateSurvey(model);
 
@@ -272,6 +285,7 @@ namespace SurveyApp.Controllers
                     TempData["ResultMessage"] = "<strong>Error!</strong> Failed to update survey.";
                     TempData["ResultType"] = "danger";
                     ViewBag.Regions = new SelectList(_adminRepository.GetRegionMaster(), "RegionID", "RegionDesc", model.RegionID);
+                    ViewBag.Clients = new SelectList(_clientRepository.GetAllClients(), "ClientID", "ClientName", model.ClientID);
                     return View("SurveyEdit", model);
                 }
             }
@@ -280,6 +294,7 @@ namespace SurveyApp.Controllers
                 TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
                 TempData["ResultType"] = "danger";
                 ViewBag.Regions = new SelectList(_adminRepository.GetRegionMaster(), "RegionID", "RegionDesc", model.RegionID);
+                ViewBag.Clients = new SelectList(_clientRepository.GetAllClients(), "ClientID", "ClientName", model.ClientID);
                 return View("SurveyEdit", model);
             }
         }
@@ -364,6 +379,14 @@ namespace SurveyApp.Controllers
             if (result != null) return result;
 
             var model = new SurveyAssignmentModel { SurveyID = surveyId };
+            
+            // Pre-populate DueDate from existing assignments
+            var existingAssignments = _surveyRepository.GetSurveyAssignments(surveyId);
+            if (existingAssignments != null && existingAssignments.Count > 0)
+            {
+                model.DueDate = existingAssignments[0].DueDate;
+            }
+            
             ViewBag.SurveyID = surveyId;
             
             // TODO: Populate employee dropdown
@@ -489,16 +512,17 @@ namespace SurveyApp.Controllers
                     return View("CreateSurveyAssignment", model);
                 }
 
-                bool isUpdated = _surveyRepository.UpdateSurveyAssignment(model);
+                // Update due date for all assignments of this survey
+                bool isUpdated = _surveyRepository.UpdateAllSurveyAssignmentsDueDate(model.SurveyID, model.DueDate);
 
                 if (isUpdated)
                 {
-                    TempData["ResultMessage"] = "<strong>Success!</strong> Assignment updated successfully.";
+                    TempData["ResultMessage"] = "<strong>Success!</strong> Due date updated for all assignments.";
                     TempData["ResultType"] = "success";
                 }
                 else
                 {
-                    TempData["ResultMessage"] = "<strong>Error!</strong> Failed to update assignment.";
+                    TempData["ResultMessage"] = "<strong>Error!</strong> Failed to update due date for assignments.";
                     TempData["ResultType"] = "danger";
                 }
                 return RedirectToAction("SurveyAssignment", new { surveyId = model.SurveyID });
@@ -1086,104 +1110,11 @@ namespace SurveyApp.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = $"Error: {ex.Message}" });
-            }
-        }
-        
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult UnlockSurvey(long surveyId)
-        {
-            try
-            {
-                bool result = _surveyRepository.WithdrawSubmission(surveyId);
-                
-                if (result)
-                {
-                    return Json(new { success = true, message = "Survey unlocked successfully. You can now edit locations." });
-                }
-                else
-                {
-                    return Json(new { success = false, message = "Failed to unlock survey." });
-                }
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = $"Error: {ex.Message}" });
-            }
-        }
-
-        [HttpGet]
-        public IActionResult GetSubmissionStatus(long surveyId)
-        {
-            try
-            {
-                var submission = _surveyRepository.GetSubmissionBySurveyId(surveyId);
-                var canEdit = _surveyRepository.CanEditSurvey(surveyId);
-                
-                return Json(new 
-                { 
-                    success = true, 
-                    submission = submission,
-                    canEdit = canEdit
-                });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = $"Error: {ex.Message}" });
-            }
-        }
-
-        [HttpGet]
-        public IActionResult SubmissionsList()
-        {
-            try
-            {
-                int userId = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
-                int roleId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "0");
-                
-                // If admin/manager (roleId 1 or 2), show all submissions, otherwise show only user's submissions
-                var submissions = roleId <= 2 
-                    ? _surveyRepository.GetAllSubmissions() 
-                    : _surveyRepository.GetAllSubmissions(userId);
-                
-                return View(submissions);
-            }
-            catch (Exception ex)
-            {
-                TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
+                TempData["ResultMessage"] = "<strong>Error!</strong> " + ex.Message;
                 TempData["ResultType"] = "danger";
-                return View(new List<SurveySubmissionModel>());
+                return Json(new { success = false, message = "An error occurred while withdrawing submission." });
             }
         }
 
-        [HttpPost]
-        public IActionResult UpdateSubmissionStatus(long submissionId, string status, string? comments)
-        {
-            try
-            {
-                int userId = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
-                
-                if (userId == 0)
-                {
-                    return Json(new { success = false, message = "User not logged in." });
-                }
-                
-                bool result = _surveyRepository.UpdateSubmissionStatus(submissionId, status, userId, comments);
-                
-                if (result)
-                {
-                    return Json(new { success = true, message = "Submission status updated successfully." });
-                }
-                else
-                {
-                    return Json(new { success = false, message = "Failed to update submission status." });
-                }
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = $"Error: {ex.Message}" });
-            }
-        }
-    }
+}
 }

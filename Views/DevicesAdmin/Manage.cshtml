@@ -1,0 +1,128 @@
+@using SurveyApp.Models
+@{
+    ViewData["Title"] = "Manage Device Modules";
+    var deviceModules = ViewBag.DeviceModules as List<DeviceModuleViewModel> ?? new List<DeviceModuleViewModel>();
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+            <div class="card-header bg-purple custom-header mb-3 d-flex align-items-center">
+                <h6 class="text-white mb-0 flex-grow-1">
+                    Manage Device Modules
+                </h6>
+            </div>
+                <div class="card-body">
+                    @if (TempData["ResultMessage"] != null)
+                    {
+                        <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show" role="alert">
+                            @Html.Raw(TempData["ResultMessage"])
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    @* <div class="mb-3">
+                        <a href="@Url.Action("CreateModule")" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Add Device Module
+                        </a>
+                    </div> *@
+
+                    <div class="col-md-12">
+                        <div class="nav-align-top">
+                            <ul class="nav nav-pills flex-column flex-md-row mb-6">
+                                <li class="nav-item me-4">
+                                    <a href="@Url.Action("CreateModule")" class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i> Add Device Module
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered datatables-basic" id="modulesTable">
+                            <thead class="bg-purple text-white">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Group Name</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (deviceModules != null && deviceModules.Count > 0)
+                                {
+                                    foreach (var module in deviceModules)
+                                    {
+                                        <tr>
+                                            <td>@module.Id</td>
+                                            <td>@module.Name</td>
+                                            <td>@module.Description</td>
+                                            <td>@module.GroupName</td>
+                                            <td>
+                                                @if (module.IsActive)
+                                                {
+                                                    <span class="badge bg-success">Active</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Inactive</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-2 justify-content-center">
+                                                    <a href="@Url.Action("ModuleDevices", new { id = module.Id })" class="btn btn-sm btn-info" title="View Devices">
+                                                        <i class="bi bi-cpu"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("EditModule", new { id = module.Id })" class="btn btn-sm btn-primary" title="Edit Module">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteModule(@module.Id, '@module.Name')" title="Delete Module">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center">No Device Modules found.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Module Form -->
+<form id="deleteModuleForm" method="post" asp-action="DeleteModule" style="display:none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" id="deleteModuleId" />
+</form>
+
+@section Scripts {
+    <script>
+        function deleteModule(id, name) {
+            if (confirm('Are you sure you want to delete the Device Module "' + name + '"?')) {
+                document.getElementById('deleteModuleId').value = id;
+                document.getElementById('deleteModuleForm').submit();
+            }
+        }
+
+        $(document).ready(function() {
+            $('#modulesTable').DataTable({
+                pageLength: 10,
+                order: [[0, 'asc']]
+            });
+        });
+    </script>
+}

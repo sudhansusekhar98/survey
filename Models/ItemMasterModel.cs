@@ -30,6 +30,11 @@ namespace SurveyApp.Models
         [Column("ItemCode")]
         public string ItemCode { get; set; } = string.Empty;
 
+        [MaxLength(50)]
+        [Display(Name = "Unit of Measurement")]
+        [Column("ItemUOM")]
+        public string ItemUOM { get; set; } = string.Empty;
+
         [MaxLength(300)]
         [Display(Name = "Item Description")]
         [Column("ItemDesc")]

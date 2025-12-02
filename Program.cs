@@ -39,6 +39,7 @@ builder.Services.AddScoped<IAdmin, AdminRepo>();
 builder.Services.AddScoped<ISurvey, SurveyRepo>();
 builder.Services.AddScoped<ISurveyLocation, SurveyLocationRepo>();
 builder.Services.AddScoped<ISurveyLocationStatus, SurveyLocationStatusRepo>();
+builder.Services.AddScoped<ISurveySubmission, SurveySubmissionRepo>();
 builder.Services.AddScoped<IClientMaster, ClientMasterRepo>();
 builder.Services.AddScoped<IEmpMaster, EmpMasterRepo>();
 

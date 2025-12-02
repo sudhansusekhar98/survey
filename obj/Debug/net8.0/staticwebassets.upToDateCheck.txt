@@ -3,6 +3,8 @@ wwwroot\css\customControl.css
 wwwroot\css\dashboard.css
 wwwroot\css\demo.css
 wwwroot\css\floadingforms.css
+wwwroot\css\profile.css
+wwwroot\css\report.css
 wwwroot\css\site.css
 wwwroot\css\survey-index.css
 wwwroot\css\survey-location.css
@@ -342,6 +344,7 @@ wwwroot\flatpickr\themes\material_orange.min.css
 wwwroot\flatpickr\themes\material_purple.css
 wwwroot\flatpickr\themes\material_red.css
 wwwroot\flatpickr\themes\material_red.min.css
+wwwroot\generate-pwa-icons.html
 wwwroot\img\avatars\1.png
 wwwroot\img\avatars\5.png
 wwwroot\img\avatars\6.png
@@ -380,6 +383,14 @@ wwwroot\img\icons\brands\slack.png
 wwwroot\img\icons\brands\twitter.png
 wwwroot\img\icons\diag.png
 wwwroot\img\icons\fi.psd
+wwwroot\img\icons\icon-128x128.png
+wwwroot\img\icons\icon-144x144.png
+wwwroot\img\icons\icon-152x152.png
+wwwroot\img\icons\icon-192x192.png
+wwwroot\img\icons\icon-384x384.png
+wwwroot\img\icons\icon-512x512.png
+wwwroot\img\icons\icon-72x72.png
+wwwroot\img\icons\icon-96x96.png
 wwwroot\img\icons\logo.png
 wwwroot\img\icons\projectname.png
 wwwroot\img\icons\Surveylogo.png
@@ -424,6 +435,7 @@ wwwroot\js\item-master-selection.js
 wwwroot\js\main.js
 wwwroot\js\pages-account-settings-account.js
 wwwroot\js\poleInfrastructure.js
+wwwroot\js\profile.js
 wwwroot\js\reportCharts.js
 wwwroot\js\site.js
 wwwroot\js\survey-details.js
@@ -433,6 +445,10 @@ wwwroot\js\survey-location.js
 wwwroot\js\ui-modals.js
 wwwroot\js\ui-popover.js
 wwwroot\js\ui-toasts.js
+wwwroot\manifest.json
+wwwroot\offline.html
+wwwroot\pwa-install.js
+wwwroot\service-worker.js
 wwwroot\vendor\css\core.css
 wwwroot\vendor\css\pages\page-account-settings.css
 wwwroot\vendor\css\pages\page-auth.css
@@ -468,5 +484,3 @@ wwwroot\vendor\libs\masonry\masonry.js
 wwwroot\vendor\libs\perfect-scrollbar\perfect-scrollbar.css
 wwwroot\vendor\libs\perfect-scrollbar\perfect-scrollbar.js
 wwwroot\vendor\libs\popper\popper.js
-wwwroot\js\profile.js
-wwwroot\css\profile.css

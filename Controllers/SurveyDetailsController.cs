@@ -12,12 +12,14 @@ namespace SurveyApp.Controllers
         private readonly ISurvey _repository;
         private readonly ICommonUtil _util;
         private readonly ISurveyLocationStatus _statusRepo;
+        private readonly ISurveySubmission _submissionRepo;
 
-        public SurveyDetailsController(ISurvey repository, ICommonUtil util, ISurveyLocationStatus statusRepo)
+        public SurveyDetailsController(ISurvey repository, ICommonUtil util, ISurveyLocationStatus statusRepo, ISurveySubmission submissionRepo)
         {
             _repository = repository;
             _util = util;
             _statusRepo = statusRepo;
+            _submissionRepo = submissionRepo;
         }
 
         public IActionResult Index(long? surveyId, int? locId)
@@ -343,6 +345,67 @@ namespace SurveyApp.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        /// <summary>
+        /// Submit survey for approval - checks if survey can be submitted
+        /// </summary>
+        [HttpPost]
+        public IActionResult SubmitSurveyForApproval(Int64 surveyId)
+        {
+            try
+            {
+                var userId = HttpContext.Session.GetString("UserID");
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Json(new { success = false, message = "User not logged in" });
+                }
+
+                // Check if survey can be edited (not already locked)
+                bool canEdit = _submissionRepo.CanEditSurvey(surveyId);
+                if (!canEdit)
+                {
+                    return Json(new { success = false, message = "Survey is already submitted and locked" });
+                }
+
+                // Redirect to submission controller which handles email notifications
+                return Json(new 
+                { 
+                    success = true, 
+                    redirectUrl = Url.Action("SubmitForApproval", "SurveySubmission", new { surveyId })
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        /// <summary>
+        /// Check if survey can be edited based on submission status
+        /// </summary>
+        [HttpGet]
+        public IActionResult CheckSurveyEditStatus(Int64 surveyId)
+        {
+            try
+            {
+                bool canEdit = _submissionRepo.CanEditSurvey(surveyId);
+                var submission = _submissionRepo.GetSubmissionBySurveyId(surveyId);
+
+                return Json(new 
+                { 
+                    success = true,
+                    canEdit = canEdit,
+                    status = submission?.SubmissionStatus ?? "Draft",
+                    isLocked = submission?.IsLockedForEditing ?? false,
+                    submittedBy = submission?.SubmittedByName,
+                    submissionDate = submission?.SubmissionDate?.ToString("dd-MMM-yyyy hh:mm tt")
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
             }
         }
 

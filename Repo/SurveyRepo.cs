@@ -1144,7 +1144,52 @@ namespace SurveyApp.Repo
             }
         }
 
+        public bool UpdateAllSurveyAssignmentsDueDate(long SurveyID, DateTime DueDate)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand(@"UPDATE SurveyAssignment SET DueDate = @DueDate WHERE SurveyID = @SurveyID", con);
+                cmd.Parameters.AddWithValue("@SurveyID", SurveyID);
+                cmd.Parameters.AddWithValue("@DueDate", DueDate);
+                con.Open();
+                int rowsAffected = cmd.ExecuteNonQuery();
+                return rowsAffected > 0;
+            }
+            catch (Exception ex)
+            {
+                // log ex.ToString()
+                throw;
+            }
+        }
+
+        public DataTable GetSurveyDetails(long surveyId, int spType)
+{
+    try
+    {
+        using var con = new SqlConnection(DBConnection.ConnectionString);
+        using var cmd = new SqlCommand("dbo.SpReports", con);
+        cmd.CommandType = CommandType.StoredProcedure;
+
+        cmd.Parameters.AddWithValue("@SpType", spType);
+        cmd.Parameters.AddWithValue("@SurveyID", surveyId);
+
+        con.Open();
+
+        using var adapter = new SqlDataAdapter(cmd);
+        var dt = new DataTable();
+        adapter.Fill(dt);
+
+        return dt;
+    }
+    catch (Exception ex)
+    {
+        // log ex.ToString()
+        throw;
     }
 }
+    }
+}
+
 
 

@@ -6,6 +6,14 @@
     <title>Survey - @ViewData["Title"]</title>
 
     <link rel="icon" type="image/x-icon" href="~/img/favicon/favicon.png" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="~/manifest.json" />
+    <meta name="theme-color" content="#667eea" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Survey App" />
+    <link rel="apple-touch-icon" href="~/img/icons/icon-192x192.png" />
 
     <!-- Core Styles -->
     @await Html.PartialAsync("Sections/_Styles")
@@ -42,6 +50,9 @@
 
     <!-- Page Scripts-->
     @RenderSection("PageScripts", required: false)
+
+    <!-- Custom Scripts Section -->
+    @RenderSection("Scripts", required: false)
 
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>

@@ -3,18 +3,18 @@
     ViewData["Title"] = "Edit Survey";
 }
 
-<form asp-controller="SurveyCreation" asp-action="Edit" method="post">
+<form asp-controller="SurveyCreation" asp-action="Edit" method="post" class="full-screen-card">
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="SurveyId" />
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10">
                 <div class="card shadow mt-6">
-                    <div class="card-header bg-purple mb-8 py-2">
+                    <div class="card-header bg-purple py-2">
                         <div class="row">
                             <div class="col-6">
                                 <h6 class="text-white fs-4 pt-1">
-                                    Edit Survey - @Model.SurveyName
+                                    Edit Survey - @(Model?.SurveyName ?? "...")
                                 </h6>
                             </div>
                             <div class="col-6 text-end">
@@ -38,122 +38,153 @@
                                 }
                             </div>
 
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input asp-for="SurveyId" type="number" class="form-control" placeholder=" " readonly>
-                                    <label asp-for="SurveyId"></label>
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input asp-for="SurveyName" type="text" class="form-control" placeholder=" " required>
-                                    <label asp-for="SurveyName"></label>
-                                    <span asp-validation-for="SurveyName" class="text-danger"></span>
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <select asp-for="RegionID" asp-items="@(ViewBag.Regions as SelectList)" class="form-select" placeholder=" ">
-                                        <option value="">--Select Region--</option>
-                                    </select>
-                                    <label asp-for="RegionID"></label>
-                                    <span asp-validation-for="RegionID" class="text-danger"></span>
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <select asp-for="ImplementationType" asp-items="Model.ImplementationTypeOptions" class="form-select" placeholder=" ">
-                                        <option value="">--Select--</option>
-                                    </select>
-                                    <label asp-for="ImplementationType"></label>
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input asp-for="SurveyDate" type="date" class="form-control" placeholder=" ">
-                                    <label asp-for="SurveyDate"></label>
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input asp-for="SurveyTeamName" type="text" class="form-control" placeholder=" ">
-                                    <label asp-for="SurveyTeamName"></label>
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input asp-for="SurveyTeamContact" type="text" class="form-control" placeholder=" " maxlength="15">
-                                    <label asp-for="SurveyTeamContact"></label>
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input asp-for="AgencyName" type="text" class="form-control" placeholder=" ">
-                                    <label>Client Name</label>
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <select asp-for="StateId" id="stateDropdown" class="form-select" placeholder=" ">
-                                        <option value="">--Select State--</option>
-                                    </select>
-                                    <label asp-for="StateId"></label>
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <select asp-for="CityId" id="cityDropdown" class="form-select" placeholder=" " disabled>
-                                        <option value="">--Select City--</option>
-                                    </select>
-                                    <label asp-for="CityId"></label>
-                                </div>
-                            </div>
-
-                            <!-- Hidden fields to store state and city names -->
-                            <input type="hidden" asp-for="MapMarking" id="stateNameHidden" />
-                            <input type="hidden" asp-for="CityDistrict" id="cityNameHidden" />
-
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input asp-for="LocationSiteName" type="text" class="form-control" placeholder=" ">
-                                    <label asp-for="LocationSiteName"></label>
-                                </div>
-                            </div>
-
-
+                            <!-- Client Selection -->
                             <div class="col-12">
                                 <div class="form-custom-floating">
-                                    <textarea asp-for="ScopeOfWork" class="form-control" placeholder=" " rows="3" style="min-height: 100px;"></textarea>
-                                    <label asp-for="ScopeOfWork"></label>
+                                    <select asp-for="ClientID" id="clientDropdown" asp-items="@(ViewBag.Clients != null ? new SelectList(ViewBag.Clients, "Value", "Text", Model.ClientID) : new SelectList(Enumerable.Empty<SelectListItem>()))" class="form-select" placeholder=" ">
+                                        <option value=""> </option>
+                                    </select>
+                                    <label asp-for="ClientID"></label>
+                                    <span asp-validation-for="ClientID" class="text-danger"></span>
                                 </div>
                             </div>
 
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input asp-for="Latitude" type="number" step="any" class="form-control" placeholder=" ">
-                                    <label asp-for="Latitude"></label>
+                            <!-- Client Information Section (Auto-filled) -->
+                            <div class="col-12">
+                                <div class="card border-info mt-1">
+                                    <div class="card-header bg-info bg-opacity-10 border-bottom border-info mb-3"
+                                         style="padding-top: 10px; padding-bottom: 10px;">
+                                        <h6 class="mb-0 text-info">
+                                            <i class="bi bi-building me-2"></i>Client Information
+                                        </h6>
+                                    </div>
+                                    <div class="card-body mt-1">
+                                        <div class="row g-3">
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input asp-for="AgencyName" type="text" class="form-control" placeholder=" " id="agencyNameInput" readonly>
+                                                    <label asp-for="AgencyName"></label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input asp-for="LocationSiteName" type="text" class="form-control" placeholder=" " id="addressInput" readonly>
+                                                    <label asp-for="LocationSiteName"></label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input asp-for="SurveyTeamName" type="text" class="form-control" placeholder=" " id="contactPersonInput" readonly>
+                                                    <label asp-for="SurveyTeamName">Contact Person</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input asp-for="SurveyTeamContact" type="text" class="form-control" placeholder=" " id="contactNumberInput" readonly>
+                                                    <label asp-for="SurveyTeamContact">Contact Number</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input type="text" class="form-control" placeholder=" " id="stateInput" readonly>
+                                                    <label>State</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input type="text" class="form-control" placeholder=" " id="cityInput" readonly>
+                                                    <label>City</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="col-12 col-md-6">
-                                <div class="form-custom-floating">
-                                    <input asp-for="Longitude" type="number" step="any" class="form-control" placeholder=" ">
-                                    <label asp-for="Longitude"></label>
+                            <!-- Survey Details Section -->
+                            <div class="col-12">
+                                <div class="card border-purple mt-1">
+                                    <div class="card-header bg-purple border-bottom border-purple mb-2"
+                                        style="padding-top: 10px; padding-bottom: 10px;">
+                                        <h6 class="mb-0 text-white">
+                                            <i class="bi bi-clipboard-data me-2"></i>Survey Details
+                                        </h6>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <div class="row g-3 mt-1">
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input asp-for="SurveyName" type="text" class="form-control" placeholder=" " required>
+                                                    <label asp-for="SurveyName"></label>
+                                                    <span asp-validation-for="SurveyName" class="text-danger"></span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <select asp-for="RegionID" asp-items="@(ViewBag.Regions as SelectList)" class="form-select" placeholder=" ">
+                                                        <option value=""> </option>
+                                                    </select>
+                                                    <label asp-for="RegionID"></label>
+                                                    <span asp-validation-for="RegionID" class="text-danger"></span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <select asp-for="ImplementationType" asp-items="Model.ImplementationTypeOptions" class="form-select" placeholder=" ">
+                                                        <option value=""> </option>
+                                                    </select>
+                                                    <label asp-for="ImplementationType"></label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input asp-for="SurveyDate" type="date" class="form-control" placeholder=" ">
+                                                    <label asp-for="SurveyDate"></label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input asp-for="SurveyTeamName" type="text" class="form-control" placeholder=" ">
+                                                    <label asp-for="SurveyTeamName"></label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-custom-floating">
+                                                    <input asp-for="SurveyTeamContact" type="text" class="form-control" placeholder=" " maxlength="15">
+                                                    <label asp-for="SurveyTeamContact"></label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12">
+                                                <div class="form-custom-floating">
+                                                    <textarea asp-for="ScopeOfWork" class="form-control" placeholder=" " rows="3" style="min-height: 100px;"></textarea>
+                                                    <label asp-for="ScopeOfWork"></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                     </div>
+                            
+                            <input type="hidden" asp-for="StateId" id="stateIdHidden" />
+                            <input type="hidden" asp-for="MapMarking" id="stateNameHidden" />
+                            <input type="hidden" asp-for="CityId" id="cityIdHidden" />
+                            <input type="hidden" asp-for="CityDistrict" id="cityNameHidden" />
                         </div>
                     </div>
 
-                    <div class="card-footer mt-12">
+                    <div class="card-footer mt-4">
                         <div class="row">
                             <div class="col text-end">
                                 <button type="submit" class="btn btn-primary me-2"><i class="bi bi-check2-circle me-2"></i> Update</button>
@@ -170,113 +201,72 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
-            var initialStateId = @(Model.StateId ?? 0);
-            var initialCityId = @(Model.CityId ?? 0);
-            
-            // Load states on page load
-            loadStates(initialStateId, initialCityId);
-        });
-
-        function loadStates(selectedStateId, selectedCityId) {
-            $.ajax({
-                url: '@Url.Content("~/api/Location/states")',
-                type: 'GET',
-                success: function(states) {
-                    var stateDropdown = $('#stateDropdown');
-                    stateDropdown.empty();
-                    stateDropdown.append('<option value="">--Select State--</option>');
-                    
-                    var selectedStateName = '';
-                    $.each(states, function(index, state) {
-                        var option = $('<option></option>').val(state.id).text(state.name);
-                        if (state.id == selectedStateId) {
-                            option.attr('selected', 'selected');
-                            selectedStateName = state.name;
+            // Handle client selection
+            $('#clientDropdown').change(function() {
+                var clientId = $(this).val();
+                
+                if (clientId) {
+                    $.ajax({
+                        url: '@Url.Action("GetClientDetails", "SurveyCreation")',
+                        type: 'GET',
+                        data: { clientId: clientId },
+                        success: function(response) {
+                            if (response.success) {
+                                applyClientDetails(response.data);
+                            } else {
+                                alert('Error loading client details: ' + response.message);
+                            }
+                        },
+                        error: function() {
+                            alert('Failed to load client details. Please try again.');
                         }
-                        stateDropdown.append(option);
                     });
-                    
-                    // Update hidden field if state was pre-selected
-                    if (selectedStateName) {
-                        $('#stateNameHidden').val(selectedStateName);
-                    }
-                    
-                    // Load cities if state was selected
-                    if (selectedStateId > 0) {
-                        loadCities(selectedStateId, selectedCityId);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error loading states:', error);
-                    console.error('XHR:', xhr);
-                    alert('Failed to load states. Please refresh the page.');
+                } else {
+                    clearClientFields();
                 }
             });
-        }
 
-        function loadCities(stateId, selectedCityId) {
-            var cityDropdown = $('#cityDropdown');
-            cityDropdown.prop('disabled', true);
-            cityDropdown.empty();
-            cityDropdown.append('<option value="">Loading cities...</option>');
-            
-            $.ajax({
-                url: '@Url.Content("~/api/Location/cities/")' + stateId,
-                type: 'GET',
-                success: function(cities) {
-                    cityDropdown.empty();
-                    cityDropdown.append('<option value="">--Select City--</option>');
-                    
-                    var selectedCityName = '';
-                    $.each(cities, function(index, city) {
-                        var option = $('<option></option>').val(city.id).text(city.name);
-                        if (city.id == selectedCityId) {
-                            option.attr('selected', 'selected');
-                            selectedCityName = city.name;
-                        }
-                        cityDropdown.append(option);
-                    });
-                    
-                    // Update hidden field if city was pre-selected
-                    if (selectedCityName) {
-                        $('#cityNameHidden').val(selectedCityName);
-                    }
-                    
-                    cityDropdown.prop('disabled', false);
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error loading cities:', error);
-                    console.error('XHR:', xhr);
-                    cityDropdown.empty();
-                    cityDropdown.append('<option value="">Error loading cities</option>');
-                }
-            });
-        }
-
-        // When state changes, load cities
-        $('#stateDropdown').change(function() {
-            var stateId = $(this).val();
-            var stateName = $('#stateDropdown option:selected').text();
-            var cityDropdown = $('#cityDropdown');
-            
-            // Update hidden field with state name
-            $('#stateNameHidden').val(stateName !== '--Select State--' ? stateName : '');
-            
-            if (stateId) {
-                loadCities(stateId, 0);
-            } else {
-                cityDropdown.empty();
-                cityDropdown.append('<option value="">--Select City--</option>');
-                cityDropdown.prop('disabled', true);
-                $('#cityNameHidden').val('');
+            // If a client is already associated, populate the fields on load.
+            var initialClientId = @(Model.ClientID ?? 0);
+            if (initialClientId > 0) {
+                // Set the dropdown value
+                $('#clientDropdown').val(initialClientId);
+                
+                // Populate the readonly fields with the model's current data
+                var initialClientData = {
+                    clientName: '@Model.AgencyName',
+                    address: '@Model.LocationSiteName',
+                    contactPerson: '@Model.SurveyTeamName',
+                    contactNumber: '@Model.SurveyTeamContact',
+                    stateId: @(Model.StateId.HasValue ? Model.StateId.Value.ToString() : "null"),
+                    stateName: '@Model.MapMarking',
+                    cityId: @(Model.CityId.HasValue ? Model.CityId.Value.ToString() : "null"),
+                    cityName: '@Model.CityDistrict'
+                };
+                applyClientDetails(initialClientData);
             }
         });
 
-        // When city changes, update hidden field
-        $('#cityDropdown').change(function() {
-            var cityName = $('#cityDropdown option:selected').text();
-            $('#cityNameHidden').val(cityName !== '--Select City--' ? cityName : '');
-        });
+        function applyClientDetails(client) {
+            // Populate readonly fields
+            $('#agencyNameInput').val(client.clientName || '');
+            $('#addressInput').val(client.address || '');
+            $('#contactPersonInput').val(client.contactPerson || '');
+            $('#contactNumberInput').val(client.contactNumber || '');
+            $('#stateInput').val(client.stateName || '');
+            $('#cityInput').val(client.cityName || '');
+            
+            // Populate hidden fields for form submission
+            $('#stateIdHidden').val(client.stateId || '');
+            $('#stateNameHidden').val(client.stateName || '');
+            $('#cityIdHidden').val(client.cityId || '');
+            $('#cityNameHidden').val(client.cityName || '');
+        }
+
+        function clearClientFields() {
+            $('#agencyNameInput, #addressInput, #contactPersonInput, #contactNumberInput, #stateInput, #cityInput').val('');
+            $('#stateIdHidden, #stateNameHidden, #cityIdHidden, #cityNameHidden').val('');
+        }
 
         function showBackConfirmModal(url, message) {
             let modal = document.getElementById("backConfirmModal");

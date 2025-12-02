@@ -1,0 +1,41 @@
+/* Fix image zoom for modal gallery */
+.main-image {
+    max-width: 100%;
+    max-height: 400px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    background: #f8f9fa;
+    margin: 0 auto;
+    display: block;
+}
+
+.gallery-thumbnail {
+    max-width: 80px;
+    max-height: 80px;
+    width: auto;
+    height: auto;
+    object-fit: cover;
+    margin: 0 4px;
+    border-radius: 4px;
+    border: 2px solid #eee;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+.gallery-thumbnail.active {
+    border-color: #764ba2;
+}
+.image-gallery-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 12px;
+}
+.image-counter {
+    text-align: center;
+    margin: 8px 0;
+    color: #555;
+    font-size: 1rem;
+}

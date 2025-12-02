@@ -1,0 +1,154 @@
+@using SurveyApp.Models
+@{
+    var module = ViewBag.Module as DeviceModuleViewModel;
+    ViewData["Title"] = $"Devices - {module?.Name ?? "Module"}";
+    var devices = ViewBag.Devices as List<DeviceViewModel> ?? new List<DeviceViewModel>();
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-purple custom-header mb-3 d-flex align-items-center justify-content-between">
+                <h4 class="mb-0" style="color:white;">Devices - @(module?.Name ?? "Unknown Module")</h4>
+                    <a href="@Url.Action("Manage")" class="btn btn-light btn-sm">
+                        <i class="bi bi-arrow-left"></i> Back to Modules
+                    </a>
+                </div>
+
+                <div class="card-body">
+                    @if (TempData["ResultMessage"] != null)
+                    {
+                        <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show" role="alert">
+                            @Html.Raw(TempData["ResultMessage"])
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <!-- Module Info -->
+                    <div class="mb-4 p-3 bg-light rounded">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Module Name:</strong> @(module?.Name ?? "N/A")
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Group:</strong> @(module?.GroupName ?? "N/A")
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Status:</strong>
+                                @if (module?.IsActive == true)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Inactive</span>
+                                }
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(module?.Description))
+                        {
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <strong>Description:</strong> @module.Description
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mb-3">
+                        <a asp-action="CreateDevice"
+                        asp-route-moduleId="@(module?.Id)"
+                        class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>
+                            Add Device
+                        </a>
+                    </div>
+
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered datatables-basic" id="devicesTable">
+                            <thead class="bg-purple text-white">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Code</th>
+                                    <th>UOM</th>
+                                    <th>Description</th>
+                                    <th>Sequence</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (devices != null && devices.Count > 0)
+                                {
+                                    foreach (var device in devices)
+                                    {
+                                        <tr>
+                                            <td>@device.ItemId</td>
+                                            <td>@device.Name</td>
+                                            <td>@device.Code</td>
+                                            <td>@device.UOM</td>
+                                            <td>@device.Description</td>
+                                            <td>@device.SequenceNo</td>
+                                            <td>
+                                                @if (device.IsActive)
+                                                {
+                                                    <span class="badge bg-success">Active</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Inactive</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Action("EditDevice", new { id = device.ItemId })" class="btn btn-sm btn-primary" title="Edit Device">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-danger" onclick="deleteDevice(@device.ItemId, '@device.Name')" title="Delete Device">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="8" class="text-center">No Devices found in this module.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Device Form -->
+<form id="deleteDeviceForm" method="post" asp-action="DeleteDevice" style="display:none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" id="deleteDeviceId" />
+    <input type="hidden" name="moduleId" value="@module?.Id" />
+</form>
+
+@section Scripts {
+    <script>
+        function deleteDevice(id, name) {
+            if (confirm('Are you sure you want to delete the Device "' + name + '"?')) {
+                document.getElementById('deleteDeviceId').value = id;
+                document.getElementById('deleteDeviceForm').submit();
+            }
+        }
+
+        $(document).ready(function() {
+            $('#devicesTable').DataTable({
+                pageLength: 10,
+                order: [[0, 'asc']]
+            });
+        });
+    </script>
+}

@@ -342,6 +342,326 @@ namespace AnalyticaDocs.Repo
                 throw;
             }
         }
+
+        #region Device Modules (ItemTypeMaster) Methods
+
+        // SpType = 5: Get all Device Modules
+        public List<DeviceModuleViewModel> GetAllDeviceModules(bool activeOnly = false)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpAdminItemMasterType", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@SpType", 5);
+
+                con.Open();
+                using var adapter = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                adapter.Fill(dt);
+
+                var modules = new List<DeviceModuleViewModel>();
+                foreach (DataRow row in dt.Rows)
+                {
+                    var module = new DeviceModuleViewModel
+                    {
+                        Id = dt.Columns.Contains("Id") && row["Id"] != DBNull.Value ? Convert.ToInt32(row["Id"]) : 0,
+                        Name = dt.Columns.Contains("TypeName") && row["TypeName"] != DBNull.Value ? Convert.ToString(row["TypeName"]) ?? string.Empty : string.Empty,
+                        Description = dt.Columns.Contains("TypeDesc") && row["TypeDesc"] != DBNull.Value ? Convert.ToString(row["TypeDesc"]) : null,
+                        GroupName = dt.Columns.Contains("GroupName") && row["GroupName"] != DBNull.Value ? Convert.ToString(row["GroupName"]) : null,
+                        IsActive = dt.Columns.Contains("IsActive") && row["IsActive"] != DBNull.Value && Convert.ToString(row["IsActive"]) == "1"
+                    };
+                    
+                    if (!activeOnly || module.IsActive)
+                    {
+                        modules.Add(module);
+                    }
+                }
+                return modules;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        // SpType = 4: Get single Device Module by Id
+        public DeviceModuleViewModel? GetDeviceModuleById(int id)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpAdminItemMasterType", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@SpType", 4);
+                cmd.Parameters.AddWithValue("@Id", id);
+
+                con.Open();
+                using var adapter = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                adapter.Fill(dt);
+
+                if (dt.Rows.Count == 0) return null;
+
+                var row = dt.Rows[0];
+                return new DeviceModuleViewModel
+                {
+                    Id = dt.Columns.Contains("Id") && row["Id"] != DBNull.Value ? Convert.ToInt32(row["Id"]) : 0,
+                    Name = dt.Columns.Contains("TypeName") && row["TypeName"] != DBNull.Value ? Convert.ToString(row["TypeName"]) ?? string.Empty : string.Empty,
+                    Description = dt.Columns.Contains("TypeDesc") && row["TypeDesc"] != DBNull.Value ? Convert.ToString(row["TypeDesc"]) : null,
+                    GroupName = dt.Columns.Contains("GroupName") && row["GroupName"] != DBNull.Value ? Convert.ToString(row["GroupName"]) : null,
+                    IsActive = dt.Columns.Contains("IsActive") && row["IsActive"] != DBNull.Value && Convert.ToString(row["IsActive"]) == "1"
+                };
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        // SpType = 1: Insert Device Module
+        public bool CreateDeviceModule(DeviceModuleViewModel model, int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpAdminItemMasterType", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@SpType", 1);
+                cmd.Parameters.AddWithValue("@TypeName", model.Name);
+                cmd.Parameters.AddWithValue("@TypeDesc", (object?)model.Description ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@GroupName", (object?)model.GroupName ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@IsActive", model.IsActive ? "1" : "0");
+                cmd.Parameters.AddWithValue("@UserId", userId);
+
+                con.Open();
+                using var reader = cmd.ExecuteReader();
+                return reader.HasRows;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        // SpType = 2: Update Device Module
+        public bool UpdateDeviceModule(DeviceModuleViewModel model, int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpAdminItemMasterType", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@SpType", 2);
+                cmd.Parameters.AddWithValue("@Id", model.Id);
+                cmd.Parameters.AddWithValue("@TypeName", model.Name);
+                cmd.Parameters.AddWithValue("@TypeDesc", (object?)model.Description ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@GroupName", (object?)model.GroupName ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@IsActive", model.IsActive ? "1" : "0");
+                cmd.Parameters.AddWithValue("@UserId", userId);
+
+                con.Open();
+                using var reader = cmd.ExecuteReader();
+                return reader.HasRows;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        // SpType = 3: Soft Delete Device Module
+        public bool DeleteDeviceModule(int id, int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpAdminItemMasterType", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@SpType", 3);
+                cmd.Parameters.AddWithValue("@Id", id);
+                cmd.Parameters.AddWithValue("@UserId", userId);
+
+                con.Open();
+                using var reader = cmd.ExecuteReader();
+                return reader.HasRows;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        #endregion
+
+        #region Devices (ItemMaster) Methods
+
+        // SpType = 10: Get all Devices
+        public List<DeviceViewModel> GetAllDevices(int? moduleId = null, bool activeOnly = false)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpAdminItemMasterType", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@SpType", 10);
+                if (moduleId.HasValue)
+                {
+                    cmd.Parameters.AddWithValue("@TypeId", moduleId.Value);
+                }
+
+                con.Open();
+                using var adapter = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                adapter.Fill(dt);
+
+                var devices = new List<DeviceViewModel>();
+                foreach (DataRow row in dt.Rows)
+                {
+                    var device = new DeviceViewModel
+                    {
+                        ItemId = dt.Columns.Contains("ItemId") && row["ItemId"] != DBNull.Value ? Convert.ToInt32(row["ItemId"]) : 0,
+                        ModuleId = dt.Columns.Contains("TypeId") && row["TypeId"] != DBNull.Value ? Convert.ToInt32(row["TypeId"]) : 0,
+                        Name = dt.Columns.Contains("ItemName") && row["ItemName"] != DBNull.Value ? Convert.ToString(row["ItemName"]) ?? string.Empty : string.Empty,
+                        Code = dt.Columns.Contains("ItemCode") && row["ItemCode"] != DBNull.Value ? Convert.ToString(row["ItemCode"]) ?? string.Empty : string.Empty,
+                        UOM = dt.Columns.Contains("ItemUOM") && row["ItemUOM"] != DBNull.Value ? Convert.ToString(row["ItemUOM"]) ?? string.Empty : string.Empty,
+                        Description = dt.Columns.Contains("ItemDesc") && row["ItemDesc"] != DBNull.Value ? Convert.ToString(row["ItemDesc"]) : null,
+                        SequenceNo = dt.Columns.Contains("SqNo") && row["SqNo"] != DBNull.Value ? Convert.ToInt32(row["SqNo"]) : (int?)null,
+                        IsActive = dt.Columns.Contains("IsActive") && row["IsActive"] != DBNull.Value && Convert.ToString(row["IsActive"]) == "1",
+                        ModuleName = dt.Columns.Contains("TypeName") && row["TypeName"] != DBNull.Value ? Convert.ToString(row["TypeName"]) : null
+                    };
+                    
+                    if (!activeOnly || device.IsActive)
+                    {
+                        devices.Add(device);
+                    }
+                }
+                return devices;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        // SpType = 9: Get single Device by ItemId
+        public DeviceViewModel? GetDeviceById(int itemId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpAdminItemMasterType", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@SpType", 9);
+                cmd.Parameters.AddWithValue("@ItemId", itemId);
+
+                con.Open();
+                using var adapter = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                adapter.Fill(dt);
+
+                if (dt.Rows.Count == 0) return null;
+
+                var row = dt.Rows[0];
+                return new DeviceViewModel
+                {
+                    ItemId = dt.Columns.Contains("ItemId") && row["ItemId"] != DBNull.Value ? Convert.ToInt32(row["ItemId"]) : 0,
+                    ModuleId = dt.Columns.Contains("TypeId") && row["TypeId"] != DBNull.Value ? Convert.ToInt32(row["TypeId"]) : 0,
+                    Name = dt.Columns.Contains("ItemName") && row["ItemName"] != DBNull.Value ? Convert.ToString(row["ItemName"]) ?? string.Empty : string.Empty,
+                    Code = dt.Columns.Contains("ItemCode") && row["ItemCode"] != DBNull.Value ? Convert.ToString(row["ItemCode"]) ?? string.Empty : string.Empty,
+                    UOM = dt.Columns.Contains("ItemUOM") && row["ItemUOM"] != DBNull.Value ? Convert.ToString(row["ItemUOM"]) ?? string.Empty : string.Empty,
+                    Description = dt.Columns.Contains("ItemDesc") && row["ItemDesc"] != DBNull.Value ? Convert.ToString(row["ItemDesc"]) : null,
+                    SequenceNo = dt.Columns.Contains("SqNo") && row["SqNo"] != DBNull.Value ? Convert.ToInt32(row["SqNo"]) : (int?)null,
+                    IsActive = dt.Columns.Contains("IsActive") && row["IsActive"] != DBNull.Value && Convert.ToString(row["IsActive"]) == "1",
+                    ModuleName = dt.Columns.Contains("TypeName") && row["TypeName"] != DBNull.Value ? Convert.ToString(row["TypeName"]) : null
+                };
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        // SpType = 6: Insert Device
+        public bool CreateDevice(DeviceViewModel model, int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpAdminItemMasterType", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@SpType", 6);
+                cmd.Parameters.AddWithValue("@TypeId", model.ModuleId);
+                cmd.Parameters.AddWithValue("@ItemName", model.Name);
+                cmd.Parameters.AddWithValue("@ItemCode", model.Code);
+                cmd.Parameters.AddWithValue("@ItemUOM", model.UOM);
+                cmd.Parameters.AddWithValue("@ItemDesc", (object?)model.Description ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@SqNo", (object?)model.SequenceNo ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@IsActive", model.IsActive ? "1" : "0");
+                cmd.Parameters.AddWithValue("@UserId", userId);
+
+                con.Open();
+                 using var reader = cmd.ExecuteReader();
+                return reader.HasRows;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        // SpType = 7: Update Device
+        public bool UpdateDevice(DeviceViewModel model, int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpAdminItemMasterType", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@SpType", 7);
+                cmd.Parameters.AddWithValue("@ItemId", model.ItemId);
+                cmd.Parameters.AddWithValue("@TypeId", model.ModuleId);
+                cmd.Parameters.AddWithValue("@ItemName", model.Name);
+                cmd.Parameters.AddWithValue("@ItemCode", model.Code);
+                cmd.Parameters.AddWithValue("@ItemUOM", model.UOM);
+                cmd.Parameters.AddWithValue("@ItemDesc", (object?)model.Description ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@SqNo", (object?)model.SequenceNo ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@IsActive", model.IsActive ? "1" : "0");
+                cmd.Parameters.AddWithValue("@UserId", userId);
+
+                con.Open();
+                using var reader = cmd.ExecuteReader();
+                return reader.HasRows;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        // SpType = 8: Soft Delete Device
+        public bool DeleteDevice(int itemId, int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpAdminItemMasterType", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@SpType", 8);
+                cmd.Parameters.AddWithValue("@ItemId", itemId);
+                cmd.Parameters.AddWithValue("@UserId", userId);
+
+                con.Open();
+                 using var reader = cmd.ExecuteReader();
+                return reader.HasRows;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        #endregion
     }
 
 }
