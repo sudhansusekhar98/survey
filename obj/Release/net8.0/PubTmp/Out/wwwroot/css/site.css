@@ -1,3 +1,13 @@
+/* Custom header for device management */
+.custom-header {
+    min-height: 40px !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    color: #fff !important;
+    margin-bottom: 1rem !important;
+    font-size: 1.25rem !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
 /* Custom styles goes here */
 .nav-glow {
     text-shadow: 0 2px 3px rgba(0, 0, 0, 0.075);

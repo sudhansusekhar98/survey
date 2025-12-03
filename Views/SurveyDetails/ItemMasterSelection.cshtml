@@ -28,40 +28,198 @@
                 border-radius: 0 !important;
                 margin: 0 !important;
             }
+            
+            /* Reduce header padding on mobile */
+            .card-header.bg-purple {
+                padding: 0.75rem 0.5rem !important;
+            }
+            
+            .card-header h6 {
+                font-size: 1rem !important;
+            }
+            
+            /* Stack header elements on mobile */
+            .header-row-mobile {
+                flex-direction: column;
+                align-items: flex-start !important;
+            }
+            
+            .header-col-mobile {
+                width: 100%;
+                text-align: left !important;
+                margin-bottom: 0.5rem;
+            }
+            
+            .header-col-mobile:last-child {
+                margin-bottom: 0;
+            }
+            
+            /* Reduce card body padding */
+            .card-body {
+                padding: 1rem !important;
+            }
+            
+            /* Optimize device selection cards */
+            .device-card-mobile {
+                margin-bottom: 1rem !important;
+            }
+            
+            .device-card-mobile .card-header {
+                padding: 0.75rem !important;
+            }
+            
+            .device-card-mobile .card-body {
+                padding: 0.75rem !important;
+            }
+            
+            /* Stack quantity controls on mobile */
+            .quantity-control-mobile {
+                margin-bottom: 1rem !important;
+            }
+            
+            /* Optimize camera preview wrapper */
+            .cam-preview-wrapper {
+                width: 100px !important;
+                height: 80px !important;
+                margin: 0.25rem !important;
+            }
+            
+            /* Reduce gap between elements */
+            .g-3 {
+                gap: 0.75rem !important;
+            }
+            
+            /* Optimize buttons for mobile */
+            .btn-mobile-stack {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            
+            .btn-mobile-stack:last-child {
+                margin-bottom: 0;
+            }
+            
+            /* Reduce form control height on mobile */
+            .form-control, .form-select {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.9rem;
+            }
+            
+            /* Optimize modal for mobile */
+            .modal-dialog {
+                margin: 0.5rem;
+            }
+            
+            #camDeviceCaptureVideo {
+                height: 250px !important;
+            }
         }
         
         /* Camera preview styles */
-        .cam-preview-wrapper{width:150px;height:120px;overflow:hidden;border:1px solid #dee2e6;border-radius:4px;padding:4px;background:#fff;position:relative;display:inline-block;}
-        .cam-preview-img{width:100%;height:100%;object-fit:contain;background:#f8f9fa;}
-        .cam-preview-wrapper .btn-danger.position-absolute{display:none;top:2px;right:2px;z-index:2}
-        .cam-preview-wrapper:hover .btn-danger.position-absolute{display:block}
+        .cam-preview-wrapper {
+            width: 150px;
+            height: 120px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 4px;
+            background: #fff;
+            position: relative;
+            display: inline-block;
+            margin: 0.25rem;
+        }
+        
+        .cam-preview-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #f8f9fa;
+        }
+        
+        .cam-preview-wrapper .btn-danger.position-absolute,
+        .cam-preview-wrapper .btn-info.position-absolute {
+            display: none;
+        }
+        
+        .cam-preview-wrapper:hover .btn-danger.position-absolute,
+        .cam-preview-wrapper:hover .btn-info.position-absolute {
+            display: block;
+        }
+        
+        /* Always show buttons on mobile (no hover) */
+        @@media (max-width: 767.98px) {
+            .cam-preview-wrapper .btn-danger.position-absolute,
+            .cam-preview-wrapper .btn-info.position-absolute {
+                display: block !important;
+                padding: 0.25rem 0.5rem;
+                font-size: 0.75rem;
+            }
+        }
         
         /* Watermark input in modal */
-        .watermark-input-container{
-            margin-top:15px;
-            padding:15px;
-            background:#f8f9fa;
-            border-radius:8px;
-            border:1px solid #dee2e6;
+        .watermark-input-container {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
         }
-        .watermark-input-container label{
-            font-weight:600;
-            color:#495057;
-            margin-bottom:8px;
-            display:block;
+        
+        .watermark-input-container label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            display: block;
         }
-        .watermark-input-container input{
-            width:100%;
-            padding:8px 12px;
-            border:1px solid #ced4da;
-            border-radius:4px;
-            font-size:14px;
+        
+        .watermark-input-container input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
         }
-        .watermark-input-container input:focus{
-            outline:none;
-            border-color:#667eea;
-            box-shadow:0 0 0 0.2rem rgba(102,126,234,0.25);
+        
+        .watermark-input-container input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
+        
+        /* Device card gradient header */
+        .device-card-header-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        /* Quantity control buttons */
+        .cam-qty-minus, .cam-qty-plus {
+            min-width: 36px;
+            height: 36px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cam-qty-input {
+            width: 70px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        @@media (max-width: 767.98px) {
+            .cam-qty-input {
+                width: 60px;
+            }
+        }
+
+		#previewImage {
+		max-width: 400px;   /* fixed maximum width */
+		max-height: 400px;  /* fixed maximum height */
+		width: auto;        /* maintain aspect ratio */
+		height: auto;       /* maintain aspect ratio */
+		object-fit: contain; /* ensures full image fits without cropping */
+		}
     </style>
 }
 
@@ -75,85 +233,115 @@
 	<div class="row g-0">
 		<div class="col-12">
 			<div class="card shadow mt-0 rounded-0 full-screen-card">
-<div class="container-fluid py-4">
-	<div class="card-header bg-purple py-2">
-		<div class="row">
-			<div class="col-6"><h6 class="text-white fs-4 pt-1">@pageTitle</h6></div>
-			<div class="col-6 text-end">
-				<a href="@Url.Action("Index", "SurveyDetails", new { surveyId = (Model?.SurveyID ?? 0), locId = (Model?.LocID ?? 0) })" class="btn btn-sm btn-outline-light me-2">
-					<i class="bi bi-arrow-left me-1"></i> Back to Survey
-				</a>
-				<span class="text-white">@surveyName - @locName</span>
-			</div>
-		</div>
-	</div>
-      </div>
-	<!-- Device Selection Section -->
-	<div class="card mb-4">
-		<div class="card-body">
-			<h6 class="mb-3">Select Device Quantities <span class="text-danger">*</span></h6>
-			<p class="text-muted small mb-3">For each item, specify the quantity of existing devices and new devices to be deployed.</p>
-				<div class="row g-3 align-items-center">
-					@if (existingItems != null && existingItems.Any())
-					{
-						@for (int i = 0; i < existingItems.Count; i++)
+				<div class="card-header bg-purple py-2 py-md-3">
+					<div class="row header-row-mobile align-items-center position-relative">
+						<div class="col-12">
+							<h6 class="text-white fs-5 fs-md-4 mb-0">
+								<i class="bi bi-collection me-2 d-none d-md-inline"></i>@pageTitle
+							</h6>
+							<a href="@Url.Action("Index", "SurveyDetails", new { surveyId = (Model?.SurveyID ?? 0), locId = (Model?.LocID ?? 0) })"
+							   class="btn btn-sm btn-outline-light position-absolute top-0 end-0 m-2 ms-2"
+							   style="z-index: 10;">
+								Back
+							</a>
+						</div>
+					</div>
+					<div>
+						<span class="text-white d-block d-md-inline mt-2 mt-md-0">
+							<small>@surveyName - @locName</small>
+						</span>
+					</div>
+				</div>
+
+				
+				<!-- Device Selection Section -->
+				<div class="card-body p-2 p-md-3 p-lg-4">
+					<div class="mb-3 mb-md-4">
+						<h6 class="mb-2 mb-md-3">
+							<i class="bi bi-gear-fill me-2"></i>Select Device Quantities 
+							<span class="text-danger">*</span>
+						</h6>
+						<p class="text-muted small mb-0">
+							For each item, specify the quantity of existing devices and new devices to be deployed.
+						</p>
+					</div>
+					<div class="row g-2 g-md-3">
+						@if (existingItems != null && existingItems.Any())
 						{
-							var item = existingItems[i];
-							
-							<div class="col-md-12 mb-3">
-								<input type="hidden" name="ItemLists[@i].ItemID" value="@item.ItemID" />
-								<input type="hidden" name="ItemLists[@i].ItemName" value="@item.ItemName" />
-								<input type="hidden" name="ItemLists[@i].ItemCode" value="@item.ItemCode" />
-								<input type="hidden" class="item-id-field" data-index="@i" value="@item.ItemID" />
+							@for (int i = 0; i < existingItems.Count; i++)
+							{
+								var item = existingItems[i];
 								
-								<div class="card shadow-sm">
-									<div class="card-header py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-										<div class="d-flex align-items-center">
-											<i class="bi bi-cpu-fill text-white fs-4 me-3"></i>
-											<div>
-												<h6 class="mb-0 fw-bold text-white">@(item.ItemName ?? "Unknown Item")</h6>
-												@if (!string.IsNullOrEmpty(item.ItemDesc))
-												{
-													<small class="text-white" style="opacity: 0.8;">@item.ItemDesc</small>
-												}
+								<div class="col-12">
+									<input type="hidden" name="ItemLists[@i].ItemID" value="@item.ItemID" />
+									<input type="hidden" name="ItemLists[@i].ItemName" value="@item.ItemName" />
+									<input type="hidden" name="ItemLists[@i].ItemCode" value="@item.ItemCode" />
+									<input type="hidden" class="item-id-field" data-index="@i" value="@item.ItemID" />
+									
+									<div class="card shadow-sm device-card-mobile mb-2 mb-md-3">
+										<div class="card-header device-card-header-gradient py-2 py-md-3">
+											<div class="d-flex align-items-center">
+												<i class="bi bi-cpu-fill text-white fs-5 me-2 me-md-3"></i>
+												<div>
+													<h6 class="mb-0 fw-bold text-white fs-6">@(item.ItemName ?? "Unknown Item")</h6>
+													@if (!string.IsNullOrEmpty(item.ItemDesc))
+													{
+														<small class="text-white d-block" style="opacity: 0.8;">@item.ItemDesc</small>
+													}
+												</div>
 											</div>
 										</div>
-									</div>
-									<div class="card-body">
-										<div class="row g-3">
-											<!-- Existing Devices Column -->
-											<div class="col-md-6">
-												<label class="form-label fw-semibold text-primary">
-													<i class="bi bi-box-seam me-1"></i>Existing Devices
-												</label>
-												<div class="d-flex align-items-center mb-2 cam-device-row">
-													<button type="button" class="btn btn-danger btn-sm me-2 cam-qty-minus" data-target="exist"><i class="bi bi-dash"></i></button>
-													<input type="number" name="ItemLists[@i].ItemQtyExist" class="form-control text-center mx-1 cam-qty-input cam-qty-exist" value="@item.ItemQtyExist" min="0" style="width:70px;" data-index="@i" data-type="exist" />
-													<button type="button" class="btn btn-success btn-sm ms-2 cam-qty-plus" data-target="exist"><i class="bi bi-plus"></i></button>
+										<div class="card-body p-2 p-md-3">
+											<div class="row g-2 g-md-3">
+												<!-- Existing Devices Column -->
+												<div class="col-12 col-md-6 quantity-control-mobile">
+													<label class="form-label fw-semibold text-primary mb-2">
+														<i class="bi bi-box-seam me-1"></i>Existing Devices
+													</label>
+													<div class="d-flex align-items-center justify-content-start cam-device-row">
+														<button type="button" class="btn btn-danger btn-sm me-2 cam-qty-minus" data-target="exist">
+															<i class="bi bi-dash"></i>
+														</button>
+														<input type="number" name="ItemLists[@i].ItemQtyExist" class="form-control text-center cam-qty-input cam-qty-exist" value="@item.ItemQtyExist" min="0" data-index="@i" data-type="exist" />
+														<button type="button" class="btn btn-success btn-sm ms-2 cam-qty-plus" data-target="exist">
+															<i class="bi bi-plus"></i>
+														</button>
+													</div>
+												</div>
+												
+												<!-- New Devices Column -->
+												<div class="col-12 col-md-6 quantity-control-mobile">
+													<label class="form-label fw-semibold text-success mb-2">
+														<i class="bi bi-plus-circle me-1"></i>New Devices (To Deploy)
+													</label>
+													<div class="d-flex align-items-center justify-content-start cam-device-row">
+														<button type="button" class="btn btn-danger btn-sm me-2 cam-qty-minus" data-target="req">
+															<i class="bi bi-dash"></i>
+														</button>
+														<input type="number" name="ItemLists[@i].ItemQtyReq" class="form-control text-center cam-qty-input cam-qty-req" value="@item.ItemQtyReq" min="0" data-index="@i" data-type="req" />
+														<button type="button" class="btn btn-success btn-sm ms-2 cam-qty-plus" data-target="req">
+															<i class="bi bi-plus"></i>
+														</button>
+													</div>
 												</div>
 											</div>
 											
-											<!-- New Devices Column -->
-											<div class="col-md-6">
-												<label class="form-label fw-semibold text-success">
-													<i class="bi bi-plus-circle me-1"></i>New Devices (To Deploy)
-												</label>
-												<div class="d-flex align-items-center mb-2 cam-device-row">
-													<button type="button" class="btn btn-danger btn-sm me-2 cam-qty-minus" data-target="req"><i class="bi bi-dash"></i></button>
-													<input type="number" name="ItemLists[@i].ItemQtyReq" class="form-control text-center mx-1 cam-qty-input cam-qty-req" value="@item.ItemQtyReq" min="0" style="width:70px;" data-index="@i" data-type="req" />
-													<button type="button" class="btn btn-success btn-sm ms-2 cam-qty-plus" data-target="req"><i class="bi bi-plus"></i></button>
-												</div>
-											</div>
-										</div>
-										
-										<!-- Expandable section shown when either quantity > 0 -->
-										<div class="cam-extra-section mt-3 p-3 border-top" style="display:@((item.ItemQtyExist > 0 || item.ItemQtyReq > 0) ? "block" : "none");">
-											<div class="mb-3">
-												<label class="form-label fw-semibold">Images</label>
-												<input type="file" class="form-control mb-2 cam-upload-input" multiple accept="image/*" style="display:none;" />
-												<button type="button" class="btn btn-primary btn-sm me-2 cam-take-photo-btn"><i class="bi bi-camera me-1"></i> Take Photo</button>
-												<button type="button" class="btn btn-secondary btn-sm cam-gallery-btn"><i class="bi bi-images me-1"></i> Gallery</button>
-												<div class="cam-preview mt-2 d-flex flex-wrap gap-2" data-item-index="@i">
+											<!-- Expandable section shown when either quantity > 0 -->
+											<div class="cam-extra-section mt-2 mt-md-3 pt-2 pt-md-3 border-top" style="display:@((item.ItemQtyExist > 0 || item.ItemQtyReq > 0) ? "block" : "none");">
+												<div class="mb-3">
+													<label class="form-label fw-semibold">
+														<i class="bi bi-camera me-1"></i>Images
+													</label>
+													<input type="file" class="form-control mb-2 cam-upload-input" multiple accept="image/*" style="display:none;" />
+													<div class="d-flex flex-column flex-sm-row gap-2 mb-2">
+														<button type="button" class="btn btn-primary btn-sm cam-take-photo-btn">
+															<i class="bi bi-camera me-1"></i> Take Photo
+														</button>
+														<button type="button" class="btn btn-secondary btn-sm cam-gallery-btn">
+															<i class="bi bi-images me-1"></i> Gallery
+														</button>
+													</div>
+													<div class="cam-preview mt-2 d-flex flex-wrap" data-item-index="@i">
 													@if (!string.IsNullOrEmpty(item.ImgPath))
 													{
 														var imageUrls = item.ImgPath.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -164,15 +352,39 @@
 															var imgUrl = imageUrls[imgIdx].Trim();
 															var publicId = imgIdx < publicIds.Length ? publicIds[imgIdx].Trim() : "";
 															
-															<div class="cam-preview-wrapper position-relative d-inline-block" data-public-id="@publicId">
+															@* <div class="cam-preview-wrapper position-relative d-inline-block" data-public-id="@publicId">
 																<img src="@imgUrl" class="cam-preview-img" alt="Survey image" />
 																<input type="hidden" name="ItemLists[@i].CloudinaryUrls" value="@imgUrl" />
 																<input type="hidden" name="ItemLists[@i].CloudinaryPublicIds" value="@publicId" />
-																<button type="button" class="btn btn-sm btn-info position-absolute cam-preview-btn" data-url="@imgUrl" style="top: 2px; right: 42px;">
+																<button type="button" class="btn btn-sm btn-info position-absolute cam-preview-btn" data-url="@imgUrl" style="top: 1px; right: 10px;">
 																	<i class="bi bi-eye"></i>
 																</button>
 																<button type="button" class="btn btn-sm btn-danger position-absolute cam-delete-existing" data-public-id="@publicId">
 																	<i class="bi bi-x"></i>
+																</button>
+															</div> *@
+
+															<div class="cam-preview-wrapper position-relative d-inline-block" data-public-id="@publicId">
+																<img src="@imgUrl" class="cam-preview-img" alt="Survey image" />
+																<input type="hidden" name="ItemLists[@i].CloudinaryUrls" value="@imgUrl" />
+																<input type="hidden" name="ItemLists[@i].CloudinaryPublicIds" value="@publicId" />
+
+																<!-- Preview Button -->
+																<button type="button" 
+																		class="btn btn-sm btn-info position-absolute cam-preview-btn" 
+																		data-url="@imgUrl" 
+																		style="top: 1px; right: 50px;" 
+																		aria-label="Preview image">
+																	<i class="bi bi-eye"></i> 
+																</button>
+
+																<!-- Delete Button -->
+																<button type="button" 
+																		class="btn btn-sm btn-outline-danger position-absolute cam-delete-existing" 
+																		data-public-id="@publicId" 
+																		style="top: 1px; right: 10px;" 
+																		aria-label="Delete image">
+																	<i class="bi bi-trash"></i> 
 																</button>
 															</div>
 														}
@@ -254,17 +466,17 @@
 
 <!-- Image Preview Modal -->
 <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="imagePreviewModalLabel">Image Preview</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center">
-                <img src="" id="previewImage" class="img-fluid rounded" alt="Image Preview" />
-            </div>
-        </div>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="imagePreviewModalLabel">Image Preview</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img src="" id="previewImage" class="rounded" alt="Image Preview" />
+      </div>
     </div>
+  </div>
 </div>
 
 @section Scripts {

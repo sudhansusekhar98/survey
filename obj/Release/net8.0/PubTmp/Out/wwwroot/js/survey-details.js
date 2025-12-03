@@ -294,6 +294,84 @@ function handleStatusUpdate(surveyId, locId, status) {
     });
 }
 
+/**
+ * Submit the entire survey for approval to supervisor
+ */
+function submitSurveyForApproval() {
+    Swal.fire({
+        title: 'Submit Survey for Approval?',
+        html: '<p>You are about to submit this survey for supervisor approval.</p>' +
+              '<p class="text-warning mb-0"><i class="bi bi-exclamation-triangle"></i> ' +
+              '<strong>Note:</strong> Once submitted, the survey will be locked and cannot be edited until reviewed.</p>',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#6f42c1',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="bi bi-send-check me-2"></i>Yes, Submit for Approval',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading
+            Swal.fire({
+                title: 'Submitting Survey...',
+                html: 'Please wait while we process your submission.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Submit via AJAX
+            $.ajax({
+                url: '/SurveySubmission/SubmitForApproval',
+                type: 'POST',
+                data: {
+                    surveyId: currentSurveyId,
+                    __RequestVerificationToken: window.surveyDetailsConfig.antiForgeryToken
+                },
+                success: function(response) {
+                    Swal.close();
+                    
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Survey Submitted!',
+                            html: '<p>' + response.message + '</p>' +
+                                  '<p class="text-muted mb-0">Your supervisor will be notified via email.</p>',
+                            confirmButtonColor: '#28a745',
+                            timer: 3000,
+                            timerProgressBar: true
+                        }).then(() => {
+                            // Close modal and redirect to dashboard or submissions page
+                            var modal = bootstrap.Modal.getInstance(document.getElementById('previewModal'));
+                            if (modal) modal.hide();
+                            window.location.href = '/SurveySubmission/MySubmissions';
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Submission Failed',
+                            text: response.message,
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.close();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Network Error',
+                        text: 'Failed to submit survey. Please try again.',
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            });
+        }
+    });
+}
+
 // Initialize when document is ready
 $(document).ready(function() {
     // Any additional initialization can go here

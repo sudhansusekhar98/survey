@@ -1,6 +1,43 @@
 // Item Master Selection - Quantity and Image Management
 // This script handles quantity increment/decrement, camera capture, and image upload functionality
 
+function applyWatermark(ctx, watermarkText) {
+    const canvas = ctx.canvas;
+    // Calculate font size based on canvas width (responsive sizing)
+    const fontSize = Math.max(20, canvas.width * 0.025);
+    ctx.font = `bold ${fontSize}px Arial`;
+    
+    // Measure text width
+    const textMetrics = ctx.measureText(watermarkText);
+    const textWidth = textMetrics.width;
+    const textHeight = fontSize;
+    
+    // Position at bottom center with padding
+    const x = (canvas.width - textWidth) / 2;
+    const y = canvas.height - 30;
+    const padding = 15;
+    
+    // Draw semi-transparent background for text
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(
+        x - padding, 
+        y - textHeight - padding/2, 
+        textWidth + (padding * 2), 
+        textHeight + padding
+    );
+    
+    // Draw white text
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(watermarkText, canvas.width / 2, canvas.height - 20);
+    
+    // Add a thin black stroke for better visibility
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1;
+    ctx.strokeText(watermarkText, canvas.width / 2, canvas.height - 20);
+}
+
 // Global variables for Cloudinary URLs (will be set from view)
 let cloudinaryUploadUrl = '';
 let cloudinaryDeleteUrl = '';
@@ -155,12 +192,25 @@ document.addEventListener('click', function (e) {
             let canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            const ctx = canvas.getContext('2d');
+            
+            // Draw video frame
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Add watermark if text is provided
+            const watermarkText = document.getElementById('camWatermarkText').value.trim();
+            if (watermarkText) {
+                applyWatermark(ctx, watermarkText);
+            }
             
             // Upload to Cloudinary with folder structure
             const itemIndex = preview.dataset.itemIndex;
-            const itemId = document.querySelector(`input.item-id-field[data-index="${itemIndex}"]`)?.value || '0';
+            const itemId = document.querySelector(`input.item-id-field[data-index=\"${itemIndex}\"]`)?.value || '0';
             uploadToCloudinary(canvas.toDataURL('image/png'), preview, itemId);
+            
+            // Clear watermark input for next capture
+            document.getElementById('camWatermarkText').value = '';
+            
             modal.hide();
             if (stream) stream.getTracks().forEach(track => track.stop());
         };
@@ -180,16 +230,29 @@ document.addEventListener('click', function (e) {
         uploadInput.onchange = function () {
             const itemIndex = preview.dataset.itemIndex;
             const itemId = document.querySelector(`input.item-id-field[data-index="${itemIndex}"]`)?.value || '0';
-            Array.from(uploadInput.files).forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    let reader = new FileReader();
-                    reader.onload = function (e) {
-                        // Upload to Cloudinary with folder structure
-                        uploadToCloudinary(e.target.result, preview, itemId);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
+            
+            // Ask for watermark once for all images
+            const watermarkText = prompt('Enter watermark text for all selected images (optional, leave empty for no watermark):');
+            
+            if (watermarkText !== null) { // User didn't cancel
+                Array.from(uploadInput.files).forEach(file => {
+                    if (file.type.startsWith('image/')) {
+                        let reader = new FileReader();
+                        reader.onload = function (e) {
+                            if (watermarkText.trim()) {
+                                // Add watermark to gallery image
+                                addWatermarkToImage(e.target.result, watermarkText.trim(), function(watermarkedImage) {
+                                    uploadToCloudinary(watermarkedImage, preview, itemId);
+                                });
+                            } else {
+                                // No watermark, upload as-is
+                                uploadToCloudinary(e.target.result, preview, itemId);
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
             uploadInput.value = ''; // Clear input for next use
         };
     }
@@ -247,6 +310,8 @@ function createImagePreview(imageUrl, publicId, previewContainer) {
     let img = document.createElement('img');
     img.src = imageUrl;
     img.className = 'cam-preview-img';
+    img.style.objectFit = 'contain'; // Ensure full image is visible
+    img.style.background = '#f8f9fa';
     wrapper.appendChild(img);
     
     // Add hidden input to store URL for form submission with proper naming
@@ -262,6 +327,15 @@ function createImagePreview(imageUrl, publicId, previewContainer) {
     hiddenPublicId.value = publicId;
     wrapper.appendChild(hiddenPublicId);
     
+    let previewBtn = document.createElement('button');
+    previewBtn.type = 'button';
+    previewBtn.className = 'btn btn-sm btn-info position-absolute cam-preview-btn';
+    previewBtn.innerHTML = '<i class="bi bi-eye"></i>';
+    previewBtn.style.top = '2px';
+    previewBtn.style.right = '42px';
+    previewBtn.dataset.url = imageUrl;
+    wrapper.appendChild(previewBtn);
+
     let cancelBtn = document.createElement('button');
     cancelBtn.className = 'btn btn-sm btn-danger position-absolute';
     cancelBtn.innerHTML = '<i class="bi bi-x"></i>';
@@ -322,3 +396,77 @@ document.addEventListener('click', function(e) {
         }
     }
 });
+
+// Helper function to add watermark to an image from gallery
+function addWatermarkToImage(base64Image, watermarkText, callback) {
+    const img = new Image();
+    img.onload = function() {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        
+        // Draw original image
+        ctx.drawImage(img, 0, 0);
+        
+        // Apply the watermark
+        if (watermarkText) {
+            applyWatermark(ctx, watermarkText);
+        }
+        
+        // Return watermarked image as base64
+        callback(canvas.toDataURL('image/png'));
+    };
+    img.src = base64Image;
+}
+
+// Handle preview button click
+document.addEventListener('click', function(e) {
+    const previewBtn = e.target.closest('.cam-preview-btn');
+    if (previewBtn) {
+        const imageUrl = previewBtn.dataset.url;
+        const modal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+        const previewImage = document.getElementById('previewImage');
+        
+        if (imageUrl && previewImage) {
+            previewImage.src = imageUrl;
+            modal.show();
+        }
+    }
+});
+
+// Add styles for preview button hover effect
+const style = document.createElement('style');
+style.innerHTML = `
+    .cam-preview-wrapper:hover .cam-preview-btn {
+        display: block !important;
+    }
+    .cam-preview-btn {
+        display: none;
+    }
+`;
+document.head.appendChild(style);
+
+document.getElementById('cameraDevicesForm').addEventListener('submit', function(e) {
+    let warningMessage = '';
+    const items = document.querySelectorAll('.card.shadow-sm'); // Each item is in a card
+
+    items.forEach((item, index) => {
+        const urlInputs = item.querySelectorAll(`input[name="ItemLists[${index}].CloudinaryUrls"]`);
+        if (urlInputs.length > 0) {
+            const urls = Array.from(urlInputs).map(input => input.value);
+            const urlString = urls.join(',');
+            
+            // Check length against a reasonable threshold
+            if (urlString.length > 1000) {
+                const itemName = item.querySelector('h6.fw-bold').textContent || `Item #${index + 1}`;
+                warningMessage += `Warning: Item "${itemName}" has ${urlInputs.length} images, and the total URL length (${urlString.length} characters) is very long. This may cause data to be truncated when saving. Please consider reducing the number of images or contacting your system administrator to increase the database field size.\n\n`;
+            }
+        }
+    });
+
+    if (warningMessage) {
+        alert("Potential Data Length Issue\n--------------------------------\n" + warningMessage);
+    }
+});
+

@@ -164,11 +164,11 @@
                                 </span>
                             }
                         </li>
-                        @* <li class="nav-item">
-                            <button id="pwa-install-btn" class="btn btn-sm btn-outline-primary me-2">
+                        <li class="nav-item">
+                            <button id="pwa-install-btn" class="btn btn-sm btn-outline-primary me-2" style="display: none;">
                                 <i class="bi bi-download me-1"></i>Install App
                             </button>
-                        </li> *@
+                        </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link text-dark dropdown-toggle" href="#" id="navbardropSettings"
                                data-bs-toggle="dropdown" aria-expanded="false">
@@ -177,6 +177,8 @@
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbardropSettings">
                                 <li><a class="dropdown-item text-primary" asp-controller="Profile" asp-action="Index"><i class="bi bi-person-fill me-2"></i> Profile</a></li>
                                 <li><a class="dropdown-item text-primary" href="javascript:void(0)" onclick="showPasswordModal();"><i class="bi bi-key-fill me-2"></i> Change Password</a></li>
+                                <li id="pwa-install-menu-item" style="display: none;"><a class="dropdown-item text-success" href="javascript:void(0)" id="pwa-install-menu-link"><i class="bi bi-download me-2"></i> Install App</a></li>
+                                <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger" asp-controller="UserLogin" asp-action="Index"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
                             </ul>
                         </li>

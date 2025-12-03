@@ -447,6 +447,7 @@ wwwroot\js\ui-popover.js
 wwwroot\js\ui-toasts.js
 wwwroot\manifest.json
 wwwroot\offline.html
+wwwroot\pwa-diagnostic.html
 wwwroot\pwa-install.js
 wwwroot\service-worker.js
 wwwroot\vendor\css\core.css

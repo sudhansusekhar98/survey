@@ -247,27 +247,40 @@
                                             aria-expanded="false"
                                             aria-controls="@collapseId">
 
-                                        <div class="d-flex align-items-center w-100">
-                                            @if (hasItems)
-                                            {
-                                                <i class="bi bi-check-circle-fill completed-check"></i>
-                                            }
-                                            <i class="bi bi-cpu fs-2 item-type-icon me-3" style="@(hasItems ? "color: #28a745;" : "color: #6c757d;")"></i>
-                                            <span class="fw-semibold fs-5">
-                                                @gridData.TypeName
-                                            </span>
-                                            @if (hasItems)
-                                            {
-                                                <span class="item-count-badge ms-3">
-                                                    <i class="bi bi-check2-all me-1"></i>
-                                                    @itemCount item@(itemCount != 1 ? "s" : "") selected
-                                                    @if (totalQtyReq > 0)
-                                                    {
-                                                        <span class="ms-1">(Qty: @totalQtyReq)</span>
-                                                    }
+                                        <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center w-100 gap-2">
+                                            <div class="d-flex align-items-center">
+                                                @if (hasItems)
+                                                {
+                                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                                }
+
+                                                <i class="bi bi-cpu item-type-icon fs-5 fs-sm-2 me-2"
+                                                style="@(hasItems ? "color: #28a745;" : "color: #6c757d;")"></i>
+
+                                                <span class="fw-semibold fs-6 fs-sm-5">
+                                                    @gridData.TypeName
                                                 </span>
+                                            </div>
+
+                                            @if (hasItems)
+                                            {
+                                                <div class="d-flex flex-wrap align-items-center">
+                                                    <span class="badge bg-success text-white me-2">
+                                                        <i class="bi bi-check2-all me-1"></i>
+                                                        @itemCount item@(itemCount != 1 ? "s" : "") selected
+                                                        @if (totalQtyReq > 0)
+                                                        {
+                                                            <span class="ms-1">(Qty: @totalQtyReq)</span>
+                                                        }
+                                                    </span>
+                                                </div>
                                             }
-                                            <span class="badge bg-info ms-auto me-3">ID: @gridData.ItemTypeID</span>
+
+                                            <div class="mt-1 mt-sm-0 ms-sm-auto">
+                                                <span class="badge bg-info text-dark">
+                                                    ID: @gridData.ItemTypeID
+                                                </span>
+                                            </div>
                                         </div>
                                     </button>
                                 </h2>
@@ -409,16 +422,19 @@
                     <p class="mt-3 text-muted">Loading preview...</p>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+
+            <div class="modal-footer text-center text-md-end">
+                <button type="button" class="btn btn-secondary ms-2 mb-2" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle me-2"></i>Close
                 </button>
-                <button type="button" class="btn btn-success" id="submitLocationBtn" onclick="submitLocationCompletion()">
+
+                <button type="button" class="btn btn-success ms-2 mb-2" id="submitLocationBtn" onclick="submitLocationCompletion()">
                     <i class="bi bi-check-circle me-2"></i>Submit & Mark as Completed
                 </button>
-                <button type="button" class="btn btn-primary" id="submitSurveyBtn" onclick="submitSurveyForApproval()">
+
+                @* <button type="button" class="btn btn-primary ms-2" id="submitSurveyBtn" onclick="submitSurveyForApproval()">
                     <i class="bi bi-send-check me-2"></i>Submit Survey for Approval
-                </button>
+                </button> *@
             </div>
         </div>
     </div>

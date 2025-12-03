@@ -113,11 +113,24 @@ namespace SurveyApp.Controllers
                     return RedirectToAction("Index", new { surveyId, locId });
                 }
 
-                // Auto-mark as In Progress when user starts selecting items
+                // Check if survey submission was rejected and change it back to In Progress
                 var userId = HttpContext.Session.GetString("UserID");
-                if (!string.IsNullOrEmpty(userId) && currentStatus == "Pending")
+                if (!string.IsNullOrEmpty(userId))
                 {
-                    _statusRepo.MarkLocationAsInProgress(surveyId, locId, Convert.ToInt32(userId), "Auto-marked when item selection started");
+                    var submission = _submissionRepo.GetSubmissionBySurveyId(surveyId);
+                    
+                    // If submission was rejected, change back to In Progress when user starts editing
+                    if (submission != null && submission.SubmissionStatus == "Rejected")
+                    {
+                        _submissionRepo.SubmitSurvey(surveyId, Convert.ToInt32(userId), "In Progress");
+                        TempData["ResultMessage"] = "<div class='alert alert-info'><i class='bi bi-info-circle'></i> Survey status changed from <strong>Rejected</strong> to <strong>In Progress</strong>. You can now make changes and resubmit.</div>";
+                    }
+                    
+                    // Auto-mark location as In Progress when user starts selecting items
+                    if (currentStatus == "Pending")
+                    {
+                        _statusRepo.MarkLocationAsInProgress(surveyId, locId, Convert.ToInt32(userId), "Auto-marked when item selection started");
+                    }
                 }
             }
             catch (Exception ex)
