@@ -90,15 +90,21 @@
 
                                             <div class="col-12 col-md-6">
                                                 <div class="form-custom-floating">
-                                                    <input type="text" class="form-control" placeholder=" " id="stateInput" readonly>
-                                                    <label>State</label>
+                                                    @* <input type="text" class="form-control" placeholder=" " id="stateInput" readonly>
+                                                    <label>State</label> *@
+
+                                                    <input asp-for="MapMarking" type="text" class="form-control" placeholder=" " id="State" readonly>
+                                                    <label asp-for="MapMarking">State</label>
                                                 </div>
                                             </div>
 
                                             <div class="col-12 col-md-6">
                                                 <div class="form-custom-floating">
-                                                    <input type="text" class="form-control" placeholder=" " id="cityInput" readonly>
-                                                    <label>City</label>
+                                                    @* <input type="text" class="form-control" placeholder=" " id="cityInput" readonly>
+                                                    <label>City</label> *@
+
+                                                    <input asp-for="CityDistrict" type="text" class="form-control" placeholder=" " id="City" readonly>
+                                                    <label asp-for="CityDistrict">City</label>
                                                 </div>
                                             </div>
                                         </div>
@@ -175,8 +181,7 @@
                                         </div>
                                     </div>
                                 </div>
-                     </div>
-                            
+                            </div>
                             <input type="hidden" asp-for="StateId" id="stateIdHidden" />
                             <input type="hidden" asp-for="MapMarking" id="stateNameHidden" />
                             <input type="hidden" asp-for="CityId" id="cityIdHidden" />
