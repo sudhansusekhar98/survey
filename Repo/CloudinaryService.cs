@@ -41,9 +41,10 @@ namespace SurveyApp.Repo
                 {
                     File = new FileDescription($"survey_{Guid.NewGuid()}", stream),
                     Folder = folder,
-                    Transformation = new Transformation()
-                        .Quality("auto")
-                        .FetchFormat("auto")
+                    // Removed auto transformations - images are pre-compressed on client side
+                    Overwrite = false,
+                    UseFilename = false,
+                    UniqueFilename = true
                 };
 
                 var result = await _cloudinary.UploadAsync(uploadParams);
@@ -73,9 +74,10 @@ namespace SurveyApp.Repo
                 {
                     File = new FileDescription(fileName, fileStream),
                     Folder = folder,
-                    Transformation = new Transformation()
-                        .Quality("auto")
-                        .FetchFormat("auto")
+                    // Removed auto transformations for faster uploads
+                    Overwrite = false,
+                    UseFilename = false,
+                    UniqueFilename = true
                 };
 
                 var result = await _cloudinary.UploadAsync(uploadParams);

@@ -431,7 +431,6 @@ wwwroot\js\dashboards-analytics.js
 wwwroot\js\DBChart.js
 wwwroot\js\extended-ui-perfect-scrollbar.js
 wwwroot\js\form-basic-inputs.js
-wwwroot\js\item-master-selection.js
 wwwroot\js\main.js
 wwwroot\js\pages-account-settings-account.js
 wwwroot\js\poleInfrastructure.js
@@ -485,3 +484,4 @@ wwwroot\vendor\libs\masonry\masonry.js
 wwwroot\vendor\libs\perfect-scrollbar\perfect-scrollbar.css
 wwwroot\vendor\libs\perfect-scrollbar\perfect-scrollbar.js
 wwwroot\vendor\libs\popper\popper.js
+wwwroot\js\item-master-selection.js
