@@ -9,7 +9,7 @@
         body {
             overflow-x: hidden !important;
         }
-        
+
         /* Mobile full-screen card */
         @@media (max-width: 767.98px) {
             .full-screen-card {
@@ -18,19 +18,20 @@
                 margin: 0 !important;
             }
         }
-        
+
         .bg-purple {
             background-color: #6f42c1 !important;
         }
+
         .text-white-50 {
             opacity: 0.8;
         }
-        
+
         /* Add margin to DataTable controls */
         #assignmentsTable_wrapper .row:first-child {
             margin-top: 1.5rem;
         }
-        
+
         #assignmentsTable_length,
         #assignmentsTable_filter {
             margin-bottom: 1rem;
@@ -53,16 +54,12 @@
                             </small>
                         </div>
                         <div class="d-flex gap-2 flex-nowrap">
-                            <a asp-controller="SurveyCreation" 
-                               asp-action="Index"
-                               class="btn btn-sm btn-outline-light">
+                            <a asp-controller="SurveyCreation" asp-action="Index" class="btn btn-sm btn-outline-light">
                                 <i class="bi bi-arrow-left"></i>
                                 <span class="d-none d-sm-inline ms-1">Back</span>
                             </a>
-                            <a asp-controller="SurveyCreation" 
-                               asp-action="CreateSurveyAssignment" 
-                               asp-route-surveyId="@ViewBag.SurveyID"
-                               class="btn btn-sm btn-light">
+                            <a asp-controller="SurveyCreation" asp-action="CreateSurveyAssignment"
+                                asp-route-surveyId="@ViewBag.SurveyID" class="btn btn-sm btn-light">
                                 <i class="bi bi-plus-circle"></i>
                                 <span class="d-none d-sm-inline ms-1">Add Assignment</span>
                             </a>
@@ -94,7 +91,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @{ int counter = 1; }
+                                    @{
+                                        int counter = 1;
+                                    }
                                     @foreach (var assignment in Model)
                                     {
                                         <tr>
@@ -104,26 +103,21 @@
                                             <td>@assignment.EmpName</td>
                                             <td>
                                                 <span class="badge bg-info">
-                                                    <i class="bi bi-calendar-event me-1"></i>@assignment.DueDate.ToString("dd MMM yyyy")
+                                                    <i class="bi bi-calendar-event me-1"></i>@assignment.DueDate.ToString("dd                           MMM yyyy")
                                                 </span>
                                             </td>
                                             <td>@assignment.CreateBy</td>
                                             <td class="text-center">
                                                 <div class="btn-group btn-group-sm" role="group">
-                                                    <a asp-controller="SurveyCreation" 
-                                                       asp-action="EditSurveyAssignment" 
-                                                       asp-route-transId="@assignment.TransID"
-                                                       asp-route-surveyId="@ViewBag.SurveyID"
-                                                       class="btn btn-outline-primary"
-                                                       title="Edit">
+                                                    <a asp-controller="SurveyCreation" asp-action="EditSurveyAssignment"
+                                                        asp-route-transId="@assignment.TransID"
+                                                        asp-route-surveyId="@ViewBag.SurveyID" class="btn btn-outline-primary"
+                                                        title="Edit">
                                                         <i class="bi bi-pencil"></i>
                                                     </a>
-                                                    <button type="button" 
-                                                            class="btn btn-outline-danger delete-assignment"
-                                                            data-trans-id="@assignment.TransID"
-                                                            data-survey-id="@ViewBag.SurveyID"
-                                                            data-emp-name="@assignment.EmpName"
-                                                            title="Delete">
+                                                    <button type="button" class="btn btn-outline-danger delete-assignment"
+                                                        data-trans-id="@assignment.TransID" data-survey-id="@ViewBag.SurveyID"
+                                                        data-emp-name="@assignment.EmpName" title="Delete">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
                                                 </div>
@@ -141,10 +135,8 @@
                             <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
                             <h5 class="text-muted mb-3">No Assignments Found</h5>
                             <p class="text-muted mb-4">Start by assigning employees to this survey.</p>
-                            <a asp-controller="SurveyCreation" 
-                               asp-action="CreateSurveyAssignment" 
-                               asp-route-surveyId="@ViewBag.SurveyID"
-                               class="btn btn-primary">
+                            <a asp-controller="SurveyCreation" asp-action="CreateSurveyAssignment"
+                                asp-route-surveyId="@ViewBag.SurveyID" class="btn btn-primary">
                                 <i class="bi bi-plus-circle me-2"></i>Add First Assignment
                             </a>
                         </div>
@@ -186,7 +178,7 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             // Initialize DataTable
             if ($('#assignmentsTable').length) {
                 $('#assignmentsTable').DataTable({
@@ -201,15 +193,15 @@
             }
 
             // Delete button handler
-            $('.delete-assignment').on('click', function() {
+            $('.delete-assignment').on('click', function () {
                 const transId = $(this).data('trans-id');
                 const surveyId = $(this).data('survey-id');
                 const empName = $(this).data('emp-name');
-                
+
                 $('#deleteTransId').val(transId);
                 $('#deleteSurveyId').val(surveyId);
                 $('#empNameDisplay').text(empName);
-                
+
                 new bootstrap.Modal(document.getElementById('deleteModal')).show();
             });
         });
