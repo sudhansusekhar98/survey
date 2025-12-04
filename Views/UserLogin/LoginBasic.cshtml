@@ -212,7 +212,7 @@
             .logo-container img { height: 50px; } /* Slightly larger logo */
 
             /* Install App Banner (Purple Style) */
-            #pwa-install-banner {
+            @* #pwa-install-banner {
                 background-color: #6d28d9 !important;
                 color: white !important;
                 border: none;
@@ -223,7 +223,7 @@
                 color: #6d28d9;
                 font-weight: 600;
             }
-            #pwa-install-banner i { color: white; }
+            #pwa-install-banner i { color: white; } *@
 
             /* Inputs (Contrast for White Background) */
             .modern-input {
@@ -262,13 +262,13 @@
                 <p class="login-subtitle">Sign in to your account</p>
             </div>
 
-            <div id="pwa-install-banner" class="alert alert-info d-flex align-items-center mb-4" style="display: none !important;">
+            @* <div id="pwa-install-banner" class="alert alert-info d-flex align-items-center mb-4" style="display: none !important;">
                 <i class="bi bi-download me-3 fs-5"></i>
-                @* <div class="flex-grow-1 text-start">
+                <div class="flex-grow-1 text-start">
                     <strong>Install App</strong>
-                </div> *@
-                @* <button id="pwa-install-btn" class="btn btn-sm btn-primary px-3">Install</button> *@
-            </div>
+                </div>
+                <button id="pwa-install-btn" class="btn btn-sm btn-primary px-3">Install</button>
+            </div> *@
 
             <form asp-controller="UserLogin" asp-action="Index" method="post">
                 @Html.AntiForgeryToken()
