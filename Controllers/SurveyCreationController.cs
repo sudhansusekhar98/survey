@@ -186,6 +186,7 @@ namespace SurveyApp.Controllers
                     TempData["ResultMessage"] = "<strong>Validation Error!</strong> Please check all required fields.";
                     TempData["ResultType"] = "warning";
                     ViewBag.Regions = new SelectList(_adminRepository.GetRegionMaster(), "RegionID", "RegionDesc", model.RegionID);
+                    ViewBag.Clients = new SelectList(_clientRepository.GetAllClients(), "ClientID", "ClientName", model.ClientID);
                     return View("SurveyCreation", model);
                 }
                 
@@ -205,6 +206,7 @@ namespace SurveyApp.Controllers
                     TempData["ResultMessage"] = "<strong>Error!</strong> Failed to create survey.";
                     TempData["ResultType"] = "danger";
                     ViewBag.Regions = new SelectList(_adminRepository.GetRegionMaster(), "RegionID", "RegionDesc", model.RegionID);
+                    ViewBag.Clients = new SelectList(_clientRepository.GetAllClients(), "ClientID", "ClientName", model.ClientID);
                     return View("SurveyCreation", model);
                 }
             }
@@ -213,6 +215,7 @@ namespace SurveyApp.Controllers
                 TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
                 TempData["ResultType"] = "danger";
                 ViewBag.Regions = new SelectList(_adminRepository.GetRegionMaster(), "RegionID", "RegionDesc", model.RegionID);
+                ViewBag.Clients = new SelectList(_clientRepository.GetAllClients(), "ClientID", "ClientName", model.ClientID);
                 return View("SurveyCreation", model);
             }
         }

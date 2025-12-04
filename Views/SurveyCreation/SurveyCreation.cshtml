@@ -73,7 +73,7 @@
                             <div class="col-12">
                                 <div class="form-custom-floating">
                                     <select asp-for="ClientID" id="clientDropdown" asp-items="@(ViewBag.Clients as SelectList)" class="form-select" placeholder=" ">
-                                        <option value=""> </option>
+                                        <option value="">Select Client</option>
                                     </select>
                                     <label asp-for="ClientID"></label>
                                     <span asp-validation-for="ClientID" class="text-danger"></span>

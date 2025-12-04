@@ -20,15 +20,15 @@
         /* --- THE CENTERING WRAPPER --- */
         .centering-wrapper {
             display: flex;
-            align-items: center;  /* Vertical Center */
-            justify-content: center; /* Horizontal Center */
-            min-height: 100vh;    /* Full Viewport Height */
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
             width: 100%;
             padding: 20px;
             box-sizing: border-box;
         }
 
-        /* --- Main Card Container --- */
+        /* --- Main Card Container (Desktop) --- */
         .modern-login-card {
             background: #fff;
             border-radius: 20px;
@@ -41,7 +41,7 @@
             overflow: hidden;
         }
 
-        /* --- Left Side (Form) --- */
+        /* --- Left Side (Form - Desktop) --- */
         .login-left {
             flex: 1.2;
             padding: 2.5rem 3rem;
@@ -53,7 +53,7 @@
             z-index: 2;
         }
 
-        /* --- Right Side (Welcome Gradient) --- */
+        /* --- Right Side (Welcome Gradient - Desktop) --- */
         .login-right {
             flex: 1;
             background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%);
@@ -61,7 +61,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
+            padding: 2rem 4rem 2rem 8rem;
             color: white;
             text-align: center;
         }
@@ -81,225 +81,162 @@
             pointer-events: none;
         }
 
-        /* --- Typography --- */
-        .login-header {
-            text-align: center;
-            margin-bottom: 1.5rem;
+        /* Target screens smaller than 768px (Tablets and Mobile Phones) */
+        @@media screen and (max-width: 768px) {
+            .welcome-title {
+                color: #6d28d9 !important; /* Or use a hex code like #800080 */
+            }
         }
 
-        .login-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 0.25rem;
-        }
-
-        .login-subtitle {
-            color: #64748b;
-            font-size: 0.9rem;
-        }
-
-        .welcome-title {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .welcome-text {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            opacity: 1;
-            font-weight: 400;
-        }
+        /* --- Typography (Desktop) --- */
+        .login-header { text-align: center; margin-bottom: 1.5rem; }
+        .login-title { font-size: 1.8rem; font-weight: 700; color: #1e293b; margin-bottom: 0.25rem; }
+        .login-subtitle { color: #64748b; font-size: 0.9rem; }
+        .welcome-title { font-size: 2rem; font-weight: 700; margin-bottom: 0.75rem; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .welcome-text { font-size: 0.95rem; line-height: 1.6; opacity: 1; font-weight: 400; }
 
         /* --- Inputs (Pill Shaped) --- */
-        .modern-input-group {
-            position: relative;
-            margin-bottom: 1rem;
-        }
-
+        .modern-input-group { position: relative; margin-bottom: 1rem; }
         .modern-input {
-            width: 100%;
-            padding: 12px 20px 12px 45px;
-            border: 1px solid #e2e8f0;
-            border-radius: 50px;
-            background: #f8fafc;
-            font-size: 0.9rem;
-            color: #334155;
-            transition: all 0.3s ease;
+            width: 100%; padding: 12px 20px 12px 45px; border: 1px solid #e2e8f0; border-radius: 50px;
+            background: #f8fafc; font-size: 0.9rem; color: #334155; transition: all 0.3s ease;
         }
-
-        .modern-input:focus {
-            outline: none;
-            background: #fff;
-            border-color: #7c3aed;
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #7c3aed;
-            font-size: 1.1rem;
-            z-index: 2;
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #64748b;
-            cursor: pointer;
-            font-size: 1.1rem;
-        }
+        .modern-input:focus { outline: none; background: #fff; border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+        .input-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #7c3aed; font-size: 1.1rem; z-index: 2; }
+        .password-toggle { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: #64748b; cursor: pointer; font-size: 1.1rem; }
 
         /* --- Button --- */
         .modern-btn {
-            width: 100%;
-            padding: 12px;
-            border-radius: 50px;
-            border: none;
-            background: linear-gradient(90deg, #7c3aed 0%, #6d28d9 100%);
-            color: white;
-            font-size: 0.95rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-            transition: all 0.3s ease;
-            margin-top: 0.5rem;
+            width: 100%; padding: 12px; border-radius: 50px; border: none;
+            background: linear-gradient(90deg, #7c3aed 0%, #6d28d9 100%); color: white; font-size: 0.95rem;
+            font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3); transition: all 0.3s ease; margin-top: 0.5rem;
         }
-
-        .modern-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 15px rgba(124, 58, 237, 0.4);
-        }
+        .modern-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(124, 58, 237, 0.4); }
 
         /* --- Links & Checkbox --- */
-        .actions-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding: 0 5px;
-        }
+        .actions-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0 5px; }
+        .modern-checkbox { display: flex; align-items: center; gap: 8px; color: #475569; font-size: 0.85rem; }
+        .modern-checkbox input { accent-color: #7c3aed; width: 16px; height: 16px; }
+        .forgot-password { color: #7c3aed; text-decoration: none; font-size: 0.85rem; font-weight: 500; }
+        .create-account { text-align: center; margin-top: 1.5rem; color: #64748b; font-size: 0.85rem; }
+        .create-account a { color: #7c3aed; text-decoration: none; font-weight: 600; }
+        .logo-container { margin-bottom: 1.5rem; display: flex; justify-content: center; }
+        .logo-container img { height: 35px; width: auto; }
+        .alert { border-radius: 15px; }
 
-        .modern-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #475569;
-            font-size: 0.85rem;
-        }
-        
-        .modern-checkbox input {
-            accent-color: #7c3aed;
-            width: 16px;
-            height: 16px;
-        }
 
-        .forgot-password {
-            color: #7c3aed;
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .create-account {
-            text-align: center;
-            margin-top: 1.5rem;
-            color: #64748b;
-            font-size: 0.85rem;
-        }
-
-        .create-account a {
-            color: #7c3aed;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .logo-container {
-            margin-bottom: 1.5rem;
-            display: flex;
-            justify-content: center;
-        }
-
-        .logo-container img {
-            height: 35px;
-            width: auto;
-        }
-
-        /* --- Mobile Responsive Enhancements --- */
+        /* =========================================
+           MOBILE RESPONSIVE DESIGN (New Design)
+        ========================================= */
         @@media (max-width: 991px) {
+            /* 1. Background & Wrapper */
+            body {
+                background-color: #6d28d9; /* Solid purple background */
+            }
             .centering-wrapper {
-                align-items: flex-start;
-                padding: 0; /* Remove padding to use full width on tiny screens */
+                padding: 60px 20px; /* Add vertical padding for the waves */
+                align-items: center;
             }
 
+            /* 2. Main Card - The White Wavy Box */
             .modern-login-card {
-                flex-direction: column-reverse;
-                max-width: 100%;
-                border-radius: 0; /* Square edges on mobile full width */
-                margin: 0;
-                box-shadow: none;
-                height: 100vh; /* Full height */
+                flex-direction: column;
+                background: #fff; /* White background */
+                border-radius: 0; /* Waves handled by pseudo-elements */
+                box-shadow: 0 20px 50px rgba(0,0,0,0.3); /* Strong shadow for floating effect */
+                max-width: 450px;
+                overflow: visible; /* Allow waves to extend outside */
+                text-align: center; /* Center all content */
+                padding: 3rem 2rem 2rem 2rem;
+                position: relative;
             }
 
-            /* HIDE CLOUDS ON DESKTOP */
-            .cloud-separator-desktop {
-                display: none;
-            }
-
-            /* Horizontal Cloud for Mobile */
-            .login-right::after {
+            /* 3. The Wavy Shapes (Top & Bottom) */
+            .modern-login-card::before,
+            .modern-login-card::after {
                 content: '';
                 position: absolute;
-                bottom: -1px;
                 left: 0;
                 width: 100%;
-                height: 30px; /* Shortened wave height */
-                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z' fill='white'/%3E%3C/svg%3E");
+                height: 60px; /* Height of the wave */
                 background-size: cover;
                 background-repeat: no-repeat;
-                z-index: 5;
+                z-index: 1;
             }
 
+            /* Top Wave (Rotated) */
+            .modern-login-card::before {
+                top: -59px; /* Overlap slightly to prevent lines */
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z' fill='white'/%3E%3C/svg%3E");
+                transform: rotate(180deg);
+            }
+            /* Bottom Wave */
+            .modern-login-card::after {
+                bottom: -59px;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z' fill='white'/%3E%3C/svg%3E");
+            }
+
+            /* 4. Hide Desktop Elements */
+            .cloud-separator-desktop { display: none; }
+            .login-header { display: none; } /* Hide "Hello!" */
+
+            /* 5. Content Reordering & Styling */
+            /* Welcome Section (Moved to Top) */
             .login-right {
-                /* Reduced padding significantly */
-                padding: 1.5rem 1rem 2.5rem 1rem;
-                flex: 0 0 auto;
-                min-height: 120px;
+                order: 1;
+                background: none;
+                padding: 0 0 1.5rem 0;
+                color: #333;
             }
-
-            /* HIDE THE TEXT PARAGRAPH ON MOBILE */
-            .welcome-text {
-                display: none;
-            }
-
-            /* SHORTEN THE HEADER */
             .welcome-title {
-                font-size: 1.5rem;
-                margin-bottom: 0; /* No margin needed since text is hidden */
+                color: #6d28d9; /* Purple title */
+                font-size: 1.8rem;
+                text-shadow: none;
+            }
+            .welcome-text {
+                display: block; /* Show paragraph */
+                color: #555;
+                font-size: 0.95rem;
+                margin-bottom: 1rem;
             }
 
+            /* Form Section (Moved Below) */
             .login-left {
-                padding: 1.5rem;
-                justify-content: flex-start; /* Align to top to prevent cut off */
-                flex: 1;
+                order: 2;
+                padding: 0;
             }
 
-            .logo-container {
-                margin-bottom: 1rem;
+            /* Logo */
+            .logo-container { margin-bottom: 2rem; }
+            .logo-container img { height: 50px; } /* Slightly larger logo */
+
+            /* Install App Banner (Purple Style) */
+            #pwa-install-banner {
+                background-color: #6d28d9 !important;
+                color: white !important;
+                border: none;
+                padding: 1rem;
             }
-            
-            .login-header {
-                margin-bottom: 1rem;
+            #pwa-install-banner .btn {
+                background-color: white;
+                color: #6d28d9;
+                font-weight: 600;
             }
+            #pwa-install-banner i { color: white; }
+
+            /* Inputs (Contrast for White Background) */
+            .modern-input {
+                background: #f3f4f6;
+                border-color: #e5e7eb;
+            }
+            .modern-input:focus {
+                background: #fff;
+                border-color: #6d28d9;
+            }
+
+            /* Links */
+            .forgot-password, .create-account a { color: #6d28d9; }
         }
     </style>
 }
@@ -325,12 +262,12 @@
                 <p class="login-subtitle">Sign in to your account</p>
             </div>
 
-            <div id="pwa-install-banner" class="alert alert-info d-flex align-items-center mb-3" style="display: none !important;">
-                <i class="bi bi-download me-2"></i>
-                <div class="flex-grow-1 small">
+            <div id="pwa-install-banner" class="alert alert-info d-flex align-items-center mb-4" style="display: none !important;">
+                <i class="bi bi-download me-3 fs-5"></i>
+                @* <div class="flex-grow-1 text-start">
                     <strong>Install App</strong>
-                </div>
-                <button id="pwa-install-btn" class="btn btn-sm btn-primary ms-2 py-0">Install</button>
+                </div> *@
+                @* <button id="pwa-install-btn" class="btn btn-sm btn-primary px-3">Install</button> *@
             </div>
 
             <form asp-controller="UserLogin" asp-action="Index" method="post">
@@ -379,20 +316,19 @@
             </form>
         </div>
 
-        <div class="login-right ms-4">
+        <div class="login-right margin-left-3 padding-left-4">
             <div class="cloud-separator-desktop"></div>
-            
-            <div class="login-right-content ms-2">
+            <div class="login-right-content">
                 <h2 class="welcome-title text-white">Welcome Back!</h2>
-                <p class="welcome-text ms-2">
+                <p class="welcome-text">
                     Access your infrastructure survey dashboard to manage locations, track device installations, 
                     and monitor survey progress.
                 </p>
             </div>
         </div>
     </div>
-</div> 
 
+</div> 
 @section Scripts {
     <script src="~/pwa-install.js"></script>
     <script>
