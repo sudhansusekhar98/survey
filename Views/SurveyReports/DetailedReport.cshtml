@@ -457,13 +457,10 @@
                 <table class="table table-sm table-bordered mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="py-1 px-2 fw-semibold text-center bg-primary text-white" style="width: 20%;">Location
-                            </th>
-                            <th class="py-1 px-2 fw-semibold text-center bg-info text-white" style="width: 25%;">Camera Type
-                            </th>
-                            <th class="py-1 px-2 fw-semibold text-center bg-success text-white" style="width: 10%;">Cam #</th>
-                            <th class="py-1 px-2 fw-semibold text-center bg-warning" style="width: 45%;">Installation Direction
-                                / Remarks</th>
+                            <th class="py-1 px-2 fw-semibold text-center bg-primary text-white">Location</th>
+                            <th class="py-1 px-2 fw-semibold text-center bg-info text-white">Camera Type</th>
+                            <th class="py-1 px-2 fw-semibold text-center bg-success text-white">Cam #</th>
+                            <th class="py-1 px-2 fw-semibold text-center bg-warning">Installation Direction / Remarks</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -518,10 +515,10 @@
                                             </td>
                                             isFirstItemRow = false;
                                         }
-                                        <td class="py-1 px-2 text-center">
+                                        <td class="py-1 px-1 text-center">
                                             <span class="badge bg-secondary">#Cam@(camNum++)</span>
                                         </td>
-                                        <td class="py-1 px-2">
+                                        <td class="py-1 px-1 text-start">
                                             <i class="bi bi-arrow-right-circle text-success me-1"></i>
                                             @(string.IsNullOrEmpty(remark.Remarks) ? "No remarks provided" : remark.Remarks)
                                         </td>
