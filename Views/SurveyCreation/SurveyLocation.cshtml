@@ -67,8 +67,8 @@
                                 <div class="col-md-4">
                                     <div class="form-custom-floating">
                                         <input type="number" name="SurveyID" class="form-control"
-                                            placeholder="Survey ID"
-                                            value="@(isEdit? editLocation?.SurveyID : surveyId)" readonly required />
+                                            placeholder="Survey ID" value="@(isEdit? editLocation?.SurveyID : surveyId)"
+                                            readonly required />
                                         <label>Survey ID</label>
                                     </div>
                                 </div>
@@ -338,3 +338,53 @@
 <script src='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js'></script>
 <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
 <script src="~/js/survey-location.js"></script>
+<!-- Assignment Prompt Modal -->
+@if (ViewBag.ShowAssignmentPrompt == true)
+{
+    <div class="modal fade" id="assignmentPromptModal" tabindex="-1" aria-labelledby="assignmentPromptLabel"
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="assignmentPromptLabel">
+                        <i class="bi bi-exclamation-triangle me-2"></i>No Team Assignment
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">This survey has no team members assigned yet.</p>
+                    <p class="fw-bold">Would you like to:</p>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-primary" onclick="proceedToStartSurvey()">
+                            <i class="bi bi-play-circle me-2"></i>Start Survey Myself
+                        </button>
+                        <a href="@Url.Action("CreateSurveyAssignment", "SurveyCreation", new { surveyId = ViewBag.SelectedSurveyId })"
+                            class="btn btn-success">
+                            <i class="bi bi-people me-2"></i>Assign Team Members
+                        </a>
+                        <a href="@Url.Action("Index", "SurveyCreation")" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Go Back to Survey List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (ViewBag.ShowAssignmentPrompt == true)
+{
+    <script>
+        // Show the assignment prompt modal on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            var assignmentModal = new bootstrap.Modal(document.getElementById('assignmentPromptModal'));
+            assignmentModal.show();
+        });
+
+        function proceedToStartSurvey() {
+            // Redirect to same page with autoAssignSelf parameter
+            var surveyId = '@ViewBag.SelectedSurveyId';
+            var surveyName = '@ViewBag.SelectedSurveyName';
+            window.location.href = '/SurveyCreation/SurveyLocation?surveyId=' + surveyId + '&SurveyName=' + encodeURIComponent(surveyName) + '&autoAssignSelf=true';
+        }
+    </script>
+}

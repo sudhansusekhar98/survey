@@ -23,7 +23,7 @@ namespace AnalyticaDocs.Repo
                 cmd.Parameters.AddWithValue("@IsActive", obj.ISActive);
                 cmd.Parameters.AddWithValue("@RoleID", obj.RoleId);
                 cmd.Parameters.AddWithValue("@CreateBy", obj.CreateBy);
-                //cmd.Parameters.AddWithValue("@EmpID", obj.EmpID);
+                cmd.Parameters.AddWithValue("@EmpID", obj.EmpID ?? (object)DBNull.Value);
 
                 con.Open();
                 int Resut = cmd.ExecuteNonQuery();
@@ -56,7 +56,7 @@ namespace AnalyticaDocs.Repo
                 cmd.Parameters.AddWithValue("@IsActive", obj.ISActive);
                 cmd.Parameters.AddWithValue("@RoleID", obj.RoleId);
                 cmd.Parameters.AddWithValue("@CreateBy", obj.CreateBy);
-                //cmd.Parameters.AddWithValue("@EmpID", obj.EmpID);
+                cmd.Parameters.AddWithValue("@EmpID", obj.EmpID ?? (object)DBNull.Value);
 
                 con.Open();
                 int result = cmd.ExecuteNonQuery();
@@ -297,7 +297,7 @@ namespace AnalyticaDocs.Repo
             try
             {
                 using var con = new SqlConnection(DBConnection.ConnectionString);
-                string query = "SELECT EmpID, EmpName, EmpCode, IsActive, CreatedOn, CreatedBy FROM EmpMaster";
+                string query = "SELECT EmpID, EmpName, EmpCode, Email, MobileNo, IsActive, CreatedOn, CreatedBy FROM EmpMaster";
                 using var cmd = new SqlCommand(query, con);
                 cmd.CommandType = CommandType.Text;
 
@@ -313,6 +313,94 @@ namespace AnalyticaDocs.Repo
             catch (Exception ex)
             {
                 // log ex.ToString()
+                throw;
+            }
+        }
+
+        public List<EmpMasterModel> GetAvailableEmployeesForUserCreation(int? currentUserId = null)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                string query = @"SELECT e.EmpID, e.EmpName, e.EmpCode, e.Email, e.MobileNo, e.IsActive, e.CreatedOn, e.CreatedBy 
+                                FROM EmpMaster e
+                                WHERE e.EmpID NOT IN (
+                                    SELECT EmpID FROM LoginMaster WHERE EmpID IS NOT NULL" +
+                                    (currentUserId.HasValue ? " AND UserID != @CurrentUserId" : "") + @"
+                                )";
+                using var cmd = new SqlCommand(query, con);
+                cmd.CommandType = CommandType.Text;
+                
+                if (currentUserId.HasValue)
+                {
+                    cmd.Parameters.AddWithValue("@CurrentUserId", currentUserId.Value);
+                }
+
+                con.Open();
+
+                using var adapter = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                adapter.Fill(dt);
+
+                List<EmpMasterModel> Employees = SqlDbHelper.DataTableToList<EmpMasterModel>(dt);
+                return Employees;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public EmpMasterModel GetEmployeeById(int empId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                string query = "SELECT EmpID, EmpName, EmpCode, Email, MobileNo, IsActive FROM EmpMaster WHERE EmpID = @EmpID";
+                using var cmd = new SqlCommand(query, con);
+                cmd.CommandType = CommandType.Text;
+                cmd.Parameters.AddWithValue("@EmpID", empId);
+
+                con.Open();
+
+                using var adapter = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                adapter.Fill(dt);
+
+                if (dt.Rows.Count > 0)
+                {
+                    List<EmpMasterModel> employees = SqlDbHelper.DataTableToList<EmpMasterModel>(dt);
+                    return employees.FirstOrDefault();
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public int? GetEmpIdByUserId(int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                string query = "SELECT EmpID FROM LoginMaster WHERE UserID = @UserID AND EmpID IS NOT NULL";
+                using var cmd = new SqlCommand(query, con);
+                cmd.CommandType = CommandType.Text;
+                cmd.Parameters.AddWithValue("@UserID", userId);
+
+                con.Open();
+                var result = cmd.ExecuteScalar();
+                
+                if (result != null && result != DBNull.Value)
+                {
+                    return Convert.ToInt32(result);
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
                 throw;
             }
         }

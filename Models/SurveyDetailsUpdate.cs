@@ -33,5 +33,8 @@
         // For Cloudinary - support multiple images per item
         public List<string>? CloudinaryUrls { get; set; }
         public List<string>? CloudinaryPublicIds { get; set; }
+        
+        // Camera remarks JSON (for ItemID = 100)
+        public string? CameraRemarksJson { get; set; }
     }
 }

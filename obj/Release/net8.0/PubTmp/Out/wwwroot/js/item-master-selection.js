@@ -227,7 +227,7 @@ document.addEventListener('click', function (e) {
         const uploadInput = section.querySelector('.cam-upload-input');
         const preview = section.querySelector('.cam-preview');
         uploadInput.click();
-        uploadInput.onchange = function () {
+        uploadInput.onchange = async function () {
             const itemIndex = preview.dataset.itemIndex;
             const itemId = document.querySelector(`input.item-id-field[data-index="${itemIndex}"]`)?.value || '0';
             
@@ -235,30 +235,95 @@ document.addEventListener('click', function (e) {
             const watermarkText = prompt('Enter watermark text for all selected images (optional, leave empty for no watermark):');
             
             if (watermarkText !== null) { // User didn't cancel
-                Array.from(uploadInput.files).forEach(file => {
-                    if (file.type.startsWith('image/')) {
-                        let reader = new FileReader();
-                        reader.onload = function (e) {
-                            if (watermarkText.trim()) {
-                                // Add watermark to gallery image
-                                addWatermarkToImage(e.target.result, watermarkText.trim(), function(watermarkedImage) {
-                                    uploadToCloudinary(watermarkedImage, preview, itemId);
-                                });
-                            } else {
-                                // No watermark, upload as-is
-                                uploadToCloudinary(e.target.result, preview, itemId);
-                            }
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
+                const files = Array.from(uploadInput.files).filter(file => file.type.startsWith('image/'));
+                
+                if (files.length === 0) return;
+                
+                // Show progress indicator
+                const progressWrapper = document.createElement('div');
+                progressWrapper.className = 'cam-preview-wrapper position-relative d-inline-block';
+                progressWrapper.innerHTML = `<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Processing...</span></div><div class="small text-center mt-2">Processing 0/${files.length}</div>`;
+                preview.appendChild(progressWrapper);
+                
+                let completedCount = 0;
+                const updateProgress = () => {
+                    completedCount++;
+                    progressWrapper.querySelector('div.small').textContent = `Uploading ${completedCount}/${files.length}`;
+                };
+                
+                // Process images in parallel batches of 3 for optimal performance
+                const batchSize = 3;
+                for (let i = 0; i < files.length; i += batchSize) {
+                    const batch = files.slice(i, i + batchSize);
+                    const uploadPromises = batch.map(file => {
+                        return new Promise((resolve) => {
+                            let reader = new FileReader();
+                            reader.onload = async function (e) {
+                                try {
+                                    if (watermarkText.trim()) {
+                                        // Add watermark to gallery image
+                                        addWatermarkToImage(e.target.result, watermarkText.trim(), async function(watermarkedImage) {
+                                            await uploadToCloudinary(watermarkedImage, preview, itemId);
+                                            updateProgress();
+                                            resolve();
+                                        });
+                                    } else {
+                                        // No watermark, upload as-is
+                                        await uploadToCloudinary(e.target.result, preview, itemId);
+                                        updateProgress();
+                                        resolve();
+                                    }
+                                } catch (error) {
+                                    console.error('Error processing image:', error);
+                                    updateProgress();
+                                    resolve();
+                                }
+                            };
+                            reader.readAsDataURL(file);
+                        });
+                    });
+                    
+                    // Wait for current batch to complete before processing next batch
+                    await Promise.all(uploadPromises);
+                }
+                
+                // Remove progress indicator
+                progressWrapper.remove();
             }
             uploadInput.value = ''; // Clear input for next use
         };
     }
 });
 
-// Function to upload image to Cloudinary
+// Function to compress image before upload
+function compressImage(base64Image, maxWidth = 1920, quality = 0.85) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            
+            // Resize if image is too large
+            if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Compress to JPEG for smaller file size
+            resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = base64Image;
+    });
+}
+
+// Function to upload image to Cloudinary with compression
 async function uploadToCloudinary(base64Image, previewContainer, itemId) {
     try {
         // Show loading indicator
@@ -266,6 +331,9 @@ async function uploadToCloudinary(base64Image, previewContainer, itemId) {
         loadingWrapper.className = 'cam-preview-wrapper position-relative d-inline-block';
         loadingWrapper.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Uploading...</span></div>';
         previewContainer.appendChild(loadingWrapper);
+
+        // Compress image before upload
+        const compressedImage = await compressImage(base64Image);
 
         // Create hierarchical folder structure: survey-{id}/location-{id}/item-{id}
         const folder = `survey-${surveyId}/location-${locId}/item-${itemId}`;
@@ -276,7 +344,7 @@ async function uploadToCloudinary(base64Image, previewContainer, itemId) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                base64Image: base64Image,
+                base64Image: compressedImage,
                 folder: folder
             })
         });
@@ -337,9 +405,15 @@ function createImagePreview(imageUrl, publicId, previewContainer) {
     wrapper.appendChild(previewBtn);
 
     let cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button'; // Prevent form submission
     cancelBtn.className = 'btn btn-sm btn-danger position-absolute';
     cancelBtn.innerHTML = '<i class="bi bi-x"></i>';
-    cancelBtn.onclick = async function () {
+    cancelBtn.style.top = '2px'; // Align with preview button
+    cancelBtn.style.right = '2px'; // Position at far right
+    cancelBtn.onclick = async function (e) {
+        e.preventDefault(); // Prevent any default behavior
+        e.stopPropagation(); // Stop event bubbling
+        
         // Delete from Cloudinary
         try {
             await fetch(cloudinaryDeleteUrl, {

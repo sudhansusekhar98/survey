@@ -1,0 +1,491 @@
+@{
+    ViewData["Title"] = "Survey Submission & Review Guide";
+}
+
+@section PageStyles {
+    <style>
+        .step-card {
+            border-left: 4px solid #17a2b8;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .step-card:hover {
+            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.15);
+            transform: translateX(5px);
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+        }
+
+        .screenshot-placeholder {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px dashed #17a2b8;
+            min-height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+        }
+
+        .tip-box {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            border-left: 5px solid #17a2b8;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(23, 162, 184, 0.1);
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border-left: 5px solid #dc3545;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.1);
+        }
+
+        .success-box {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-left: 5px solid #28a745;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.1);
+        }
+
+        .btn-help {
+            margin: 0.5rem;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .card-header-custom {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+        }
+
+        .status-badge-large {
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            margin: 0.25rem;
+        }
+    </style>
+}
+
+<div class="container-fluid px-4 py-3">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-light px-3 py-2 rounded">
+                    <li class="breadcrumb-item"><a asp-action="Index"><i class="bi bi-house-door me-1"></i>Help
+                            Center</a></li>
+                    <li class="breadcrumb-item active">Survey Submission & Review</li>
+                </ol>
+            </nav>
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-header-custom">
+                    <h2 class="mb-2">
+                        <i class="bi bi-send-fill me-3"></i>Survey Submission & Review Guide
+                    </h2>
+                    <p class="mb-0 lead">Submit completed surveys and review submissions for approval</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Navigation -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body bg-light">
+                    <h6 class="mb-3"><i class="bi bi-list-ul me-2"></i>Quick Navigation</h6>
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <a href="#submit" class="btn btn-outline-info btn-sm w-100">→ Submit Survey</a>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <a href="#review" class="btn btn-outline-info btn-sm w-100">→ Review Submissions</a>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <a href="#track" class="btn btn-outline-info btn-sm w-100">→ Track Status</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit Survey Section -->
+    <div id="submit" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4">1</span>
+                        <h4 class="mb-0">Submitting Survey for Approval</h4>
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-check-circle me-2"></i>Pre-Submission Checklist</h5>
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <p class="mb-3"><strong>Before submitting, ensure:</strong></p>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" disabled>
+                                <label class="form-check-label">All sub-locations have been surveyed</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" disabled>
+                                <label class="form-check-label">All required item quantities are entered</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" disabled>
+                                <label class="form-check-label">Photos are uploaded where required</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" disabled>
+                                <label class="form-check-label">Specifications and remarks are complete</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" disabled>
+                                <label class="form-check-label">All data has been reviewed for accuracy</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-list-ol me-2"></i>Submission Steps</h5>
+                    <ol class="ps-4">
+                        <li class="mb-3">
+                            <strong>Access Survey Details:</strong>
+                            <ul class="mt-2">
+                                <li>Navigate to the survey you've completed</li>
+                                <li>Click on any location to view survey details</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Find Submit Button:</strong>
+                            <ul class="mt-2">
+                                <li>Scroll to the bottom of the survey details page</li>
+                                <li>Look for <strong>Submit for Approval</strong> button</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Click Submit:</strong>
+                            <ul class="mt-2">
+                                <li>A confirmation dialog may appear</li>
+                                <li>Confirm you want to submit</li>
+                                <li>Wait for submission to process</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Confirmation:</strong>
+                            <ul class="mt-2">
+                                <li>Success message appears</li>
+                                <li>Survey status changes to <strong>"Submitted"</strong></li>
+                                <li>Email notification sent to survey creator</li>
+                                <li>You can no longer edit the survey</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="screenshot-placeholder">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-image" style="font-size: 4rem; color: #17a2b8;"></i>
+                            <p class="mt-3 mb-0"><strong>Screenshot: Submit for Approval Button</strong></p>
+                            <small>Submit button at the bottom of survey details page</small>
+                        </div>
+                    </div>
+
+                    <div class="warning-box">
+                        <h6 class="mb-2"><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>Important</h6>
+                        <p class="mb-0">Once submitted, you <strong>cannot edit</strong> the survey unless it's rejected
+                            by the reviewer. Make sure all data is complete and accurate before submitting.</p>
+                    </div>
+
+                    <div class="success-box">
+                        <h6 class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>After Submission</h6>
+                        <p class="mb-0">Track your submission status in <strong>Survey → My Submissions</strong>. You'll
+                            receive notification when the survey is approved or if changes are requested.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Submissions Section -->
+    <div id="review" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4">2</span>
+                        <h4 class="mb-0">Reviewing Submitted Surveys</h4>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Who Can Review:</strong> Only the survey creator and super administrators can review and
+                        approve/reject submissions.
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-list-ol me-2"></i>Review Process</h5>
+                    <ol class="ps-4">
+                        <li class="mb-3">
+                            <strong>Access Pending Reviews:</strong>
+                            <ul class="mt-2">
+                                <li>Go to <strong>Survey → Pending Reviews</strong></li>
+                                <li>You'll see surveys created by you that are submitted</li>
+                                <li>Super admins see all pending submissions</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>View Survey Report:</strong>
+                            <ul class="mt-2">
+                                <li>Click <strong>View Report</strong> button (eye icon)</li>
+                                <li>Opens detailed survey report in new tab/window</li>
+                                <li>Review all locations, items, and photos</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Verify Data:</strong>
+                            <ul class="mt-2">
+                                <li>Check quantities and specifications</li>
+                                <li>Review photos for clarity and relevance</li>
+                                <li>Verify all locations are complete</li>
+                                <li>Look for inconsistencies or errors</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Make Decision:</strong>
+                            <ul class="mt-2">
+                                <li>If data is satisfactory: Click <strong>Approve</strong> button (green checkmark)
+                                </li>
+                                <li>If corrections needed: Click <strong>Reject</strong> button (red X)</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="screenshot-placeholder">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-image" style="font-size: 4rem; color: #17a2b8;"></i>
+                            <p class="mt-3 mb-0"><strong>Screenshot: Pending Reviews Page</strong></p>
+                            <small>List of submitted surveys with Approve/Reject buttons</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approval Process -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card border-success h-100 shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-check-circle-fill me-2"></i>Approving a Survey</h5>
+                </div>
+                <div class="card-body p-4">
+                    <h6 class="mb-3">Steps:</h6>
+                    <ol class="ps-3">
+                        <li class="mb-2">Click <strong>Approve</strong> button (green checkmark)</li>
+                        <li class="mb-2">Modal dialog opens</li>
+                        <li class="mb-2">Add optional comments/feedback</li>
+                        <li class="mb-2">Click <strong>Approve</strong> to confirm</li>
+                    </ol>
+
+                    <h6 class="mt-4 mb-3">What Happens:</h6>
+                    <ul class="ps-3">
+                        <li class="mb-2">Survey status → <span
+                                class="badge bg-success status-badge-large">Completed</span></li>
+                        <li class="mb-2">Submitter receives approval notification</li>
+                        <li class="mb-2">Survey is locked (no further edits)</li>
+                        <li class="mb-2">Available in reports and analytics</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-danger h-100 shadow">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-x-circle-fill me-2"></i>Rejecting a Survey</h5>
+                </div>
+                <div class="card-body p-4">
+                    <h6 class="mb-3">Steps:</h6>
+                    <ol class="ps-3">
+                        <li class="mb-2">Click <strong>Reject</strong> button (red X)</li>
+                        <li class="mb-2">Modal dialog opens</li>
+                        <li class="mb-2"><strong class="text-danger">Enter rejection reason</strong> (required)</li>
+                        <li class="mb-2">Be specific about what needs correction</li>
+                        <li class="mb-2">Click <strong>Reject</strong> to confirm</li>
+                    </ol>
+
+                    <h6 class="mt-4 mb-3">What Happens:</h6>
+                    <ul class="ps-3">
+                        <li class="mb-2">Survey status → <span
+                                class="badge bg-danger status-badge-large">Rejected</span></li>
+                        <li class="mb-2">Submitter receives rejection with reason</li>
+                        <li class="mb-2">Survey unlocked for editing</li>
+                        <li class="mb-2">Submitter can make corrections and resubmit</li>
+                    </ul>
+
+                    <div class="alert alert-warning mt-3 mb-0">
+                        <small><i class="bi bi-exclamation-triangle me-1"></i> Always provide clear rejection reasons so
+                            submitter knows what to fix!</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Track Status Section -->
+    <div id="track" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4">3</span>
+                        <h4 class="mb-0">Tracking Submission Status</h4>
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-file-earmark-check me-2"></i>My Submissions Page</h5>
+                    <p>Go to <strong>Survey → My Submissions</strong> to view all your survey submissions and their
+                        current status.</p>
+
+                    <h6 class="mt-4 mb-3">Status Meanings:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-info">
+                                <tr>
+                                    <th style="width: 20%;">Status</th>
+                                    <th style="width: 40%;">Meaning</th>
+                                    <th style="width: 40%;">Your Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="badge bg-warning text-dark">Submitted</span></td>
+                                    <td>Awaiting review by survey creator</td>
+                                    <td>Wait for approval/rejection notification</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-success">Approved</span></td>
+                                    <td>Survey approved and completed</td>
+                                    <td>No action needed - Well done!</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-danger">Rejected</span></td>
+                                    <td>Changes required before approval</td>
+                                    <td>Review rejection reason, make corrections, resubmit</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="tip-box mt-4">
+                        <h6 class="mb-2"><i class="bi bi-lightbulb-fill text-info me-2"></i>Pro Tip</h6>
+                        <p class="mb-0">Check your email for notifications about approval/rejection. The system sends
+                            automatic notifications when your submission is reviewed.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Handling Rejection -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-warning shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-arrow-repeat me-2"></i>Handling Rejected Surveys</h5>
+                </div>
+                <div class="card-body p-4">
+                    <h6 class="mb-3">When your survey is rejected:</h6>
+                    <ol class="ps-4">
+                        <li class="mb-3">
+                            <strong>Read Rejection Reason Carefully:</strong>
+                            <ul class="mt-2">
+                                <li>View reason in "My Submissions" page</li>
+                                <li>Understand what needs to be corrected</li>
+                                <li>Contact reviewer if reason unclear</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Make Required Corrections:</strong>
+                            <ul class="mt-2">
+                                <li>Survey automatically unlocks when rejected</li>
+                                <li>Status changes to <span class="badge bg-primary">In Progress</span> when you start
+                                    editing</li>
+                                <li>Fix the issues mentioned in rejection reason</li>
+                                <li>Save changes frequently</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Resubmit:</strong>
+                            <ul class="mt-2">
+                                <li>Once corrections are complete</li>
+                                <li>Click <strong>Submit for Approval</strong> again</li>
+                                <li>Survey goes back to <span class="badge bg-warning text-dark">Submitted</span> status
+                                </li>
+                                <li>Reviewer is notified of resubmission</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="alert alert-info mt-4 mb-0">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Note:</strong> You can resubmit as many times as needed until the survey is approved.
+                        Each rejection-correction cycle helps improve data quality.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Topics -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-light shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="mb-4"><i class="bi bi-link-45deg me-2"></i>Related Topics</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a asp-action="SurveyExecution" class="btn btn-outline-info btn-help w-100">
+                                <i class="bi bi-list-check me-2"></i>Survey Execution
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-action="Reports" class="btn btn-outline-info btn-help w-100">
+                                <i class="bi bi-bar-chart me-2"></i>View Reports
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-action="SurveyCreation" class="btn btn-outline-info btn-help w-100">
+                                <i class="bi bi-plus-circle me-2"></i>Create Surveys
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-help w-100">
+                                <i class="bi bi-arrow-left me-2"></i>Help Center
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

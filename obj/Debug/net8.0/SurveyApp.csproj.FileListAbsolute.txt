@@ -1336,7 +1336,6 @@ D:\VL Access\Survey\AS.NET SURVEY\survey\obj\Debug\net8.0\staticwebassets.build.
 D:\VL Access\Survey\AS.NET SURVEY\survey\obj\Debug\net8.0\staticwebassets.build.json.cache
 D:\VL Access\Survey\AS.NET SURVEY\survey\obj\Debug\net8.0\staticwebassets.development.json
 D:\VL Access\Survey\AS.NET SURVEY\survey\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-D:\VL Access\Survey\AS.NET SURVEY\survey\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 D:\VL Access\Survey\AS.NET SURVEY\survey\obj\Debug\net8.0\SurveyApp.csproj.Up2Date
 D:\VL Access\Survey\AS.NET SURVEY\survey\obj\Debug\net8.0\SurveyApp.dll
 D:\VL Access\Survey\AS.NET SURVEY\survey\obj\Debug\net8.0\refint\SurveyApp.dll

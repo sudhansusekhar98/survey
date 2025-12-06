@@ -17,10 +17,12 @@
     .loc-bg-1 {
         background-color: #fff9e6;
     }
+
     /* light yellow */
     .loc-bg-2 {
         background-color: #e8f3ff;
     }
+
     /* light blue */
     .total-existing-bg {
         background-color: #fff9e6;
@@ -29,6 +31,7 @@
     .total-required-bg {
         background-color: #dff5dd;
     }
+
     /* light green */
 
     /* Image Gallery Styles */
@@ -38,7 +41,7 @@
         gap: 10px;
         padding: 15px;
     }
-    
+
     .gallery-thumbnail {
         width: 150px;
         height: 150px;
@@ -48,18 +51,18 @@
         transition: transform 0.2s, box-shadow 0.2s;
         border: 2px solid transparent;
     }
-    
+
     .gallery-thumbnail:hover {
         transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         border-color: #667eea;
     }
-    
+
     .gallery-thumbnail.active {
         border-color: #667eea;
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
     }
-    
+
     .main-image-container {
         display: flex;
         justify-content: center;
@@ -69,14 +72,14 @@
         border-radius: 8px;
         margin-bottom: 15px;
     }
-    
+
     .main-image {
         max-width: 100%;
         max-height: 500px;
         object-fit: contain;
         border-radius: 8px;
     }
-    
+
     .image-nav-btn {
         position: absolute;
         top: 50%;
@@ -91,41 +94,41 @@
         font-size: 1.2rem;
         transition: background 0.2s;
     }
-    
+
     .image-nav-btn:hover {
         background: rgba(118, 75, 162, 0.9);
     }
-    
+
     .image-nav-btn.prev {
         left: 10px;
     }
-    
+
     .image-nav-btn.next {
         right: 10px;
     }
-    
+
     .image-counter {
         text-align: center;
         color: #6c757d;
         font-size: 0.9rem;
         margin-top: 10px;
     }
-    
+
     .btn-gallery-icon {
         padding: 0.15rem 0.4rem;
         font-size: 0.75rem;
     }
-    
+
     .btn-gallery-icon:hover {
         transform: scale(1.1);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
-    
+
     .table thead th {
         font-weight: 600;
         vertical-align: middle;
     }
-    
+
     .table tbody td {
         vertical-align: middle;
     }
@@ -136,9 +139,7 @@
     <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <h3>Survey Detailed Report - @surveyId</h3>
-            <a asp-action="ExportDetailedReportNew"
-               asp-route-surveyId="@surveyId"
-               class="btn btn-success btn-sm">
+            <a asp-action="ExportDetailedReportNew" asp-route-surveyId="@surveyId" class="btn btn-success btn-sm">
                 <i class="bi bi-file-earmark-excel me-1"></i>Export to Excel
             </a>
         </div>
@@ -195,7 +196,7 @@
                             </div>
                         </div>
 
-                        
+
                     </div>
                 </div>
             </div>
@@ -227,11 +228,11 @@
                             <div class="card-body py-4">
                                 <div class="row mb-2">
                                     <div class="col-md-4">
-                                        <strong>Submitted By:</strong> 
+                                        <strong>Submitted By:</strong>
                                         <span class="text-primary">@(submission.SubmittedByName ?? "N/A")</span>
                                     </div>
                                     <div class="col-md-4">
-                                        <strong>Reviewed By:</strong> 
+                                        <strong>Reviewed By:</strong>
                                         <span class="text-info">@(submission.ReviewedByName ?? "Not Reviewed")</span>
                                     </div>
                                     <div class="col-md-4">
@@ -289,11 +290,12 @@
                 <table class="table table-sm table-bordered mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="py-1 px-2 fw-semibold text-center bg-primary" style="border-right:solid" colspan="4">Locations</th>
+                            <th class="py-1 px-2 fw-semibold text-center bg-primary" style="border-right:solid" colspan="4">
+                                Locations</th>
                             <th class="py-1 px-2 fw-semibold text-center bg-warning" colspan="3">Team</th>
                         </tr>
                         <tr>
-                            <th class="py-1 px-2" >ID</th>
+                            <th class="py-1 px-2">ID</th>
                             <th class="py-1 px-2">Location Name</th>
                             <th class="py-1 px-2">Location Type</th>
                             <th class="py-1 px-2" style="border-right:solid">Coordinates</th>
@@ -341,16 +343,16 @@
             {
                 // Count only the original columns (excluding _Photos columns we added)
                 var originalColumns = dtItems.Columns.Cast<DataColumn>()
-                    .Where(c => !c.ColumnName.EndsWith("_Photos"))
-                    .ToList();
+                .Where(c => !c.ColumnName.EndsWith("_Photos"))
+                .ToList();
                 var originalColCount = originalColumns.Count;
-                
+
                 // Original structure: 4 fixed + 2*locPairs + 2 totals + 1 remarks = 7 + 2*locPairs
                 int locationPairs = (originalColCount - 7) / 2;
 
-                int firstLocCol = 4;                // zero-based index in DataTable
-                // Total columns are at fixed positions from the end of original columns
-                int totalExistingCol = 4 + (locationPairs * 2);     // After all location pairs
+                int firstLocCol = 4; // zero-based index in DataTable
+                                     // Total columns are at fixed positions from the end of original columns
+                int totalExistingCol = 4 + (locationPairs * 2); // After all location pairs
                 int totalRequiredCol = totalExistingCol + 1;
                 int remarksCol = totalRequiredCol + 1;
 
@@ -412,10 +414,9 @@
                                         @if (!string.IsNullOrEmpty(imageUrls))
                                         {
                                             var imageArray = imageUrls.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                                            <button type="button" class="btn btn-sm btn-outline-success btn-gallery-icon" 
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#imageGalleryModal"
-                                                    onclick="showImageGallery('@Html.Raw(string.Join("|", imageArray))', '@Html.Raw(itemName)')">
+                                            <button type="button" class="btn btn-sm btn-outline-success btn-gallery-icon"
+                                                data-bs-toggle="modal" data-bs-target="#imageGalleryModal"
+                                                onclick="showImageGallery('@Html.Raw(string.Join("|", imageArray))', '@Html.Raw(itemName)')">
                                                 <i class="bi bi-images"></i> @imageArray.Length
                                             </button>
                                         }
@@ -441,15 +442,92 @@
     </div>
 </div>
 
+<!-- Camera Installation Remarks Section (shown only if camera devices exist) -->
+@if (ViewBag.HasCameraDevices == true)
+{
+    var cameraRemarks = ViewBag.CameraRemarks as Dictionary<string, List<SurveyApp.Models.SurveyCamRemarksModel>>;
+    if (cameraRemarks != null && cameraRemarks.Any())
+    {
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header py-3" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                        <h5 class="mb-0 text-white">
+                            <i class="bi bi-camera-video-fill me-2"></i>Camera Installation Remarks
+                        </h5>
+                        <small class="text-white-50">Direction/location details for newly deployed cameras</small>
+                    </div>
+                    <div class="card-body p-0">
+                        @foreach (var locationRemarks in cameraRemarks)
+                        {
+                            // Parse surveyId_locId
+                            var keyParts = locationRemarks.Key.Split('_');
+                            var locId = int.Parse(keyParts[1]);
+
+                            // Find location name
+                            string locName = "Unknown Location";
+                            if (dtLocEmp?.Rows != null)
+                            {
+                                foreach (DataRow locRow in dtLocEmp.Rows)
+                                {
+                                    if (Convert.ToInt32(locRow["LocID"]) == locId)
+                                    {
+                                        locName = locRow["LocName"]?.ToString() ?? "Unknown Location";
+                                        break;
+                                    }
+                                }
+                            }
+
+                            <div class="border-bottom">
+                                <div class="bg-light px-3 py-2">
+                                    <h6 class="mb-0 text-dark fw-bold">
+                                        <i class="bi bi-geo-alt-fill text-danger me-2"></i>@locName
+                                    </h6>
+                                </div>
+                                <div class="p-3">
+                                    <div class="row g-3">
+                                        @foreach (var remark in locationRemarks.Value)
+                                        {
+                                            var camIndex = locationRemarks.Value.IndexOf(remark) + 1;
+                                            <div class="col-12 col-md-6 col-lg-4">
+                                                <div class="card h-100 border-info">
+                                                    <div class="card-header bg-info bg-opacity-10 py-2">
+                                                        <span class="fw-bold text-info">
+                                                            <i class="bi bi-camera-fill me-1"></i>#Cam@(camIndex)
+                                                        </span>
+                                                    </div>
+                                                    <div class="card-body py-2">
+                                                        <p class="mb-0 text-dark">
+                                                            <i class="bi bi-arrow-right-circle text-success me-1"></i>
+                                                            @(string.IsNullOrEmpty(remark.Remarks) ? "No remarks provided" :
+                                                                                                        remark.Remarks)
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
 <!-- Image Gallery Modal -->
-<div class="modal fade" id="imageGalleryModal" tabindex="-1" aria-labelledby="imageGalleryModalLabel" aria-hidden="true">
+<div class="modal fade" id="imageGalleryModal" tabindex="-1" aria-labelledby="imageGalleryModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);">
                 <h5 class="modal-title text-white" id="imageGalleryModalLabel">
                     <i class="bi bi-images me-2"></i>Item Images - <span id="galleryItemName"></span>
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <!-- Main Image Display -->
@@ -481,95 +559,95 @@
 </div>
 
 @section Scripts {
-<script>
-    let galleryImages = [];
-    let currentIndex = 0;
+    <script>
+        let galleryImages = [];
+        let currentIndex = 0;
 
-    function showImageGallery(imageUrlsString, itemName) {
-        // Parse the pipe-separated image URLs
-        galleryImages = imageUrlsString.split('|').filter(url => url.trim() !== '');
-        currentIndex = 0;
+        function showImageGallery(imageUrlsString, itemName) {
+            // Parse the pipe-separated image URLs
+            galleryImages = imageUrlsString.split('|').filter(url => url.trim() !== '');
+            currentIndex = 0;
 
-        // Set item name in modal header
-        document.getElementById('galleryItemName').textContent = itemName;
+            // Set item name in modal header
+            document.getElementById('galleryItemName').textContent = itemName;
 
-        // Update counter
-        document.getElementById('totalImages').textContent = galleryImages.length;
-        
-        // Generate thumbnails
-        const thumbnailContainer = document.getElementById('thumbnailGallery');
-        thumbnailContainer.innerHTML = '';
-        
-        galleryImages.forEach((url, index) => {
-            const img = document.createElement('img');
-            img.src = url.trim();
-            img.alt = `Image ${index + 1}`;
-            img.className = 'gallery-thumbnail' + (index === 0 ? ' active' : '');
-            img.onclick = () => selectImage(index);
-            img.onerror = () => {
-                img.src = '/img/no-image-placeholder.png'; // Fallback image
-                img.alt = 'Image not available';
-            };
-            thumbnailContainer.appendChild(img);
+            // Update counter
+            document.getElementById('totalImages').textContent = galleryImages.length;
+
+            // Generate thumbnails
+            const thumbnailContainer = document.getElementById('thumbnailGallery');
+            thumbnailContainer.innerHTML = '';
+
+            galleryImages.forEach((url, index) => {
+                const img = document.createElement('img');
+                img.src = url.trim();
+                img.alt = `Image ${index + 1}`;
+                img.className = 'gallery-thumbnail' + (index === 0 ? ' active' : '');
+                img.onclick = () => selectImage(index);
+                img.onerror = () => {
+                    img.src = '/img/no-image-placeholder.png'; // Fallback image
+                    img.alt = 'Image not available';
+                };
+                thumbnailContainer.appendChild(img);
+            });
+
+            // Show first image
+            selectImage(0);
+
+            // Show/hide navigation buttons based on image count
+            const prevBtn = document.querySelector('.image-nav-btn.prev');
+            const nextBtn = document.querySelector('.image-nav-btn.next');
+            if (galleryImages.length <= 1) {
+                prevBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+            } else {
+                prevBtn.style.display = 'block';
+                nextBtn.style.display = 'block';
+            }
+        }
+
+        function selectImage(index) {
+            if (index < 0 || index >= galleryImages.length) return;
+
+            currentIndex = index;
+            const mainImage = document.getElementById('galleryMainImage');
+            mainImage.src = galleryImages[index].trim();
+
+            // Update counter
+            document.getElementById('currentImageIndex').textContent = index + 1;
+
+            // Update download link
+            document.getElementById('downloadCurrentImage').href = galleryImages[index].trim();
+
+            // Update active thumbnail
+            const thumbnails = document.querySelectorAll('.gallery-thumbnail');
+            thumbnails.forEach((thumb, i) => {
+                thumb.classList.toggle('active', i === index);
+            });
+
+            // Scroll thumbnail into view
+            if (thumbnails[index]) {
+                thumbnails[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        }
+
+        function navigateGallery(direction) {
+            let newIndex = currentIndex + direction;
+
+            // Loop around
+            if (newIndex < 0) newIndex = galleryImages.length - 1;
+            if (newIndex >= galleryImages.length) newIndex = 0;
+
+            selectImage(newIndex);
+        }
+
+        // Keyboard navigation when modal is open
+        document.getElementById('imageGalleryModal').addEventListener('keydown', function (e) {
+            if (e.key === 'ArrowLeft') {
+                navigateGallery(-1);
+            } else if (e.key === 'ArrowRight') {
+                navigateGallery(1);
+            }
         });
-
-        // Show first image
-        selectImage(0);
-
-        // Show/hide navigation buttons based on image count
-        const prevBtn = document.querySelector('.image-nav-btn.prev');
-        const nextBtn = document.querySelector('.image-nav-btn.next');
-        if (galleryImages.length <= 1) {
-            prevBtn.style.display = 'none';
-            nextBtn.style.display = 'none';
-        } else {
-            prevBtn.style.display = 'block';
-            nextBtn.style.display = 'block';
-        }
-    }
-
-    function selectImage(index) {
-        if (index < 0 || index >= galleryImages.length) return;
-        
-        currentIndex = index;
-        const mainImage = document.getElementById('galleryMainImage');
-        mainImage.src = galleryImages[index].trim();
-        
-        // Update counter
-        document.getElementById('currentImageIndex').textContent = index + 1;
-        
-        // Update download link
-        document.getElementById('downloadCurrentImage').href = galleryImages[index].trim();
-        
-        // Update active thumbnail
-        const thumbnails = document.querySelectorAll('.gallery-thumbnail');
-        thumbnails.forEach((thumb, i) => {
-            thumb.classList.toggle('active', i === index);
-        });
-        
-        // Scroll thumbnail into view
-        if (thumbnails[index]) {
-            thumbnails[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        }
-    }
-
-    function navigateGallery(direction) {
-        let newIndex = currentIndex + direction;
-        
-        // Loop around
-        if (newIndex < 0) newIndex = galleryImages.length - 1;
-        if (newIndex >= galleryImages.length) newIndex = 0;
-        
-        selectImage(newIndex);
-    }
-
-    // Keyboard navigation when modal is open
-    document.getElementById('imageGalleryModal').addEventListener('keydown', function(e) {
-        if (e.key === 'ArrowLeft') {
-            navigateGallery(-1);
-        } else if (e.key === 'ArrowRight') {
-            navigateGallery(1);
-        }
-    });
-</script>
+    </script>
 }

@@ -36,15 +36,21 @@ namespace SurveyApp.Controllers
             try
             {
                 var userId = HttpContext.Session.GetString("UserID");
+                var roleId = HttpContext.Session.GetString("RoleId");
+                
                 if (string.IsNullOrEmpty(userId))
                 {
                     return RedirectToAction("Index", "UserLogin");
                 }
 
                 int currentUserId = int.Parse(userId);
+                int currentRoleId = int.Parse(roleId ?? "101");
                 
+                // Only allow super admin (RoleId 100) or survey creators to access this page
                 // Get pending submissions for surveys created by this user
-                var submissions = _submissionRepo.GetPendingSubmissionsForReview(currentUserId);
+                var submissions = currentRoleId == 100 
+                    ? _submissionRepo.GetPendingSubmissionsForReview(null) // Super admin sees all
+                    : _submissionRepo.GetPendingSubmissionsForReview(currentUserId); // Creator sees only their surveys
 
                 return View(submissions);
             }
@@ -152,6 +158,7 @@ namespace SurveyApp.Controllers
             {
                 var userId = HttpContext.Session.GetString("UserID");
                 var userName = HttpContext.Session.GetString("UserName");
+                var roleId = HttpContext.Session.GetString("RoleId");
                 
                 if (string.IsNullOrEmpty(userId))
                 {
@@ -161,6 +168,24 @@ namespace SurveyApp.Controllers
                 }
 
                 int currentUserId = int.Parse(userId);
+                int currentRoleId = int.Parse(roleId ?? "101");
+                
+                // Verify authorization: get submission and check if user is survey creator or super admin
+                var submission = _submissionRepo.GetAllSubmissions()
+                    .FirstOrDefault(s => s.SubmissionId == submissionId);
+                    
+                if (submission != null)
+                {
+                    var surveyCreatorId = _submissionRepo.GetSurveyCreatorId(submission.SurveyId);
+                    
+                    // Check if user is authorized (super admin or survey creator)
+                    if (currentRoleId != 100 && (!surveyCreatorId.HasValue || surveyCreatorId.Value != currentUserId))
+                    {
+                        TempData["ResultType"] = "error";
+                        TempData["ResultMessage"] = "<div class='alert alert-danger'><i class='bi bi-shield-exclamation'></i> <strong>Unauthorized!</strong> You are not authorized to approve this survey.</div>";
+                        return RedirectToAction("Index");
+                    }
+                }
 
                 // Update review status to Approved
                 bool result = _submissionRepo.UpdateReviewStatus(submissionId, "Approved", currentUserId, reviewComments);
@@ -168,12 +193,12 @@ namespace SurveyApp.Controllers
                 if (result)
                 {
                     // Get submission details for email
-                    var submission = _submissionRepo.GetAllSubmissions()
+                    var approvedSubmission = _submissionRepo.GetAllSubmissions()
                         .FirstOrDefault(s => s.SubmissionId == submissionId);
 
-                    if (submission != null && submission.SubmittedBy.HasValue)
+                    if (approvedSubmission != null && approvedSubmission.SubmittedBy.HasValue)
                     {
-                        var submitterUser = _adminRepo.GetUserById(submission.SubmittedBy.Value);
+                        var submitterUser = _adminRepo.GetUserById(approvedSubmission.SubmittedBy.Value);
                         
                         if (submitterUser != null && !string.IsNullOrEmpty(submitterUser.EmailID))
                         {
@@ -181,7 +206,7 @@ namespace SurveyApp.Controllers
                             await _emailService.SendSurveyApprovalNotificationAsync(
                                 submitterUser.LoginName ?? "User",
                                 submitterUser.EmailID,
-                                submission.SurveyName ?? "Survey",
+                                approvedSubmission.SurveyName ?? "Survey",
                                 userName ?? "Supervisor",
                                 reviewComments ?? ""
                             );
@@ -211,18 +236,39 @@ namespace SurveyApp.Controllers
         /// Reject survey submission
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> Reject(Int64 submissionId, string rejectionReason)
+        public async Task<IActionResult> Reject(Int64 submissionId, string? rejectionReason)
         {
             try
             {
                 var userId = HttpContext.Session.GetString("UserID");
                 var userName = HttpContext.Session.GetString("UserName");
+                var roleId = HttpContext.Session.GetString("RoleId");
                 
                 if (string.IsNullOrEmpty(userId))
                 {
                     TempData["ResultType"] = "error";
                     TempData["ResultMessage"] = "<div class='alert alert-danger'>User not logged in</div>";
                     return RedirectToAction("Index");
+                }
+                
+                int currentUserId = int.Parse(userId);
+                int currentRoleId = int.Parse(roleId ?? "101");
+                
+                // Verify authorization: get submission and check if user is survey creator or super admin
+                var submission = _submissionRepo.GetAllSubmissions()
+                    .FirstOrDefault(s => s.SubmissionId == submissionId);
+                    
+                if (submission != null)
+                {
+                    var surveyCreatorId = _submissionRepo.GetSurveyCreatorId(submission.SurveyId);
+                    
+                    // Check if user is authorized (super admin or survey creator)
+                    if (currentRoleId != 100 && (!surveyCreatorId.HasValue || surveyCreatorId.Value != currentUserId))
+                    {
+                        TempData["ResultType"] = "error";
+                        TempData["ResultMessage"] = "<div class='alert alert-danger'><i class='bi bi-shield-exclamation'></i> <strong>Unauthorized!</strong> You are not authorized to reject this survey.</div>";
+                        return RedirectToAction("Index");
+                    }
                 }
 
                 if (string.IsNullOrEmpty(rejectionReason))
@@ -232,20 +278,18 @@ namespace SurveyApp.Controllers
                     return RedirectToAction("Index");
                 }
 
-                int currentUserId = int.Parse(userId);
-
                 // Update review status to Rejected
                 bool result = _submissionRepo.UpdateReviewStatus(submissionId, "Rejected", currentUserId, rejectionReason);
 
                 if (result)
                 {
                     // Get submission details for email
-                    var submission = _submissionRepo.GetAllSubmissions()
+                    var rejectedSubmission = _submissionRepo.GetAllSubmissions()
                         .FirstOrDefault(s => s.SubmissionId == submissionId);
 
-                    if (submission != null && submission.SubmittedBy.HasValue)
+                    if (rejectedSubmission != null && rejectedSubmission.SubmittedBy.HasValue)
                     {
-                        var submitterUser = _adminRepo.GetUserById(submission.SubmittedBy.Value);
+                        var submitterUser = _adminRepo.GetUserById(rejectedSubmission.SubmittedBy.Value);
                         
                         if (submitterUser != null && !string.IsNullOrEmpty(submitterUser.EmailID))
                         {
@@ -253,7 +297,7 @@ namespace SurveyApp.Controllers
                             await _emailService.SendSurveyRejectionNotificationAsync(
                                 submitterUser.LoginName ?? "User",
                                 submitterUser.EmailID,
-                                submission.SurveyName ?? "Survey",
+                                rejectedSubmission.SurveyName ?? "Survey",
                                 userName ?? "Supervisor",
                                 rejectionReason
                             );

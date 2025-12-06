@@ -1,0 +1,366 @@
+@{
+    ViewData["Title"] = "Survey Creation Guide";
+}
+
+@section PageStyles {
+    <style>
+        .step-card {
+            border-left: 4px solid #667eea;
+            margin-bottom: 2rem;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .screenshot-placeholder {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .tip-box {
+            background: #e7f3ff;
+            border-left: 4px solid #0d6efd;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+    </style>
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index">Help Center</a></li>
+                    <li class="breadcrumb-item active">Survey Creation</li>
+                </ol>
+            </nav>
+            <h2 class="mb-3">
+                <i class="bi bi-plus-circle-fill me-2" style="color: #667eea;"></i>Creating Surveys
+            </h2>
+            <p class="lead text-muted">Step-by-step guide to create and configure new surveys</p>
+        </div>
+    </div>
+
+    <!-- Quick Navigation -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="mb-3"><i class="bi bi-list-ul me-2"></i>On This Page</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <a href="#step1" class="text-decoration-none">→ Accessing Survey Creation</a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="#step2" class="text-decoration-none">→ Filling Survey Details</a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="#step3" class="text-decoration-none">→ Saving Your Survey</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 1 -->
+    <div id="step1" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="step-number me-3">1</span>
+                        <h4 class="mb-0">Accessing Survey Creation</h4>
+                    </div>
+
+                    <h5 class="mt-4">Navigation Menu</h5>
+                    <p>There are two ways to access the survey creation page:</p>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><strong>Method 1: Navigation Menu</strong></h6>
+                            <ol>
+                                <li>Click on <strong>Survey</strong> in the top navigation bar</li>
+                                <li>Select <strong>New Survey</strong> from the dropdown menu</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><strong>Method 2: Survey List</strong></h6>
+                            <ol>
+                                <li>Go to <strong>Survey → All Surveys</strong></li>
+                                <li>Click the <strong>+ New Survey</strong> button at the top</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="screenshot-placeholder">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-image" style="font-size: 3rem;"></i>
+                            <p class="mt-2">Screenshot: Navigation to Survey Creation</p>
+                        </div>
+                    </div>
+
+                    @* <div class="tip-box">
+                        <i class="bi bi-lightbulb-fill text-primary me-2"></i>
+                        <strong>Tip:</strong> You can also use the keyboard shortcut <kbd>Ctrl</kbd> + <kbd>N</kbd> from
+                        the survey list page.
+                    </div> *@
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="step2" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="step-number me-3">2</span>
+                        <h4 class="mb-0">Filling Survey Details</h4>
+                    </div>
+
+                    <p>Complete all required fields in the survey creation form:</p>
+
+                    <h5 class="mt-4">Required Fields</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 25%;">Field Name</th>
+                                    <th style="width: 50%;">Description</th>
+                                    <th style="width: 25%;">Example</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Survey Name</strong> <span class="text-danger">*</span></td>
+                                    <td>A unique, descriptive name for your survey</td>
+                                    <td>Infrastructure Survey 2025</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Client</strong> <span class="text-danger">*</span></td>
+                                    <td>Select the client organization for this survey</td>
+                                    <td>ABC Corporation</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Region</strong></td>
+                                    <td>Geographic region where survey will be conducted</td>
+                                    <td>North Zone</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Survey Date</strong></td>
+                                    <td>Actual date when survey will be/was conducted</td>
+                                    <td>12/15/2025</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h5 class="mt-4">Optional Fields</h5>
+                    <ul>
+                        <li><strong>Implementation Type:</strong> Type of implementation (e.g., New, Upgrade,
+                            Maintenance)</li>
+                        <li><strong>Survey Team Name:</strong> Name of the team conducting the survey</li>
+                        <li><strong>Survey Team Contact:</strong> Contact number for the survey team</li>
+                        <li><strong>Location Site Name:</strong> Primary site name</li>
+                        <li><strong>Scope of Work:</strong> Detailed description of survey scope</li>
+                        <li><strong>State/City:</strong> Geographic location details</li>
+                    </ul>
+
+                    <div class="screenshot-placeholder">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-image" style="font-size: 3rem;"></i>
+                            <p class="mt-2">Screenshot: Survey Creation Form</p>
+                        </div>
+                    </div>
+
+                    <div class="tip-box">
+                        <i class="bi bi-lightbulb-fill text-primary me-2"></i>
+                        <strong>Tip:</strong> Fields marked with <span class="text-danger">*</span> are required. The
+                        form will not submit without these fields.
+                    </div>
+
+                    <div class="warning-box">
+                        <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                        <strong>Important:</strong> Survey names must be unique. Choose a descriptive name that clearly
+                        identifies the survey purpose.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div id="step3" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="step-number me-3">3</span>
+                        <h4 class="mb-0">Saving Your Survey</h4>
+                    </div>
+
+                    <h5>Save Options</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6><i class="bi bi-check-circle-fill text-success me-2"></i>Save</h6>
+                                    <p class="mb-0">Creates the survey with status <strong>"Created"</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6><i class="bi bi-x-circle-fill text-danger me-2"></i>Cancel</h6>
+                                    <p class="mb-0">Discards all changes and returns to survey list</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="mt-4">After Saving</h5>
+                    <p>Once the survey is saved successfully:</p>
+                    <ol>
+                        <li>You'll see a success message confirming the survey creation</li>
+                        <li>The survey status will be set to <strong>"Created"</strong></li>
+                        <li>You'll be redirected to the survey list page</li>
+                        <li>You can now:
+                            <ul>
+                                <li><strong>Edit Survey:</strong> Click "Edit" to modify survey details</li>
+                                <li><strong>Assign Team:</strong> Click "Assign Team" to add team members</li>
+                                <li><strong>Add Sub-Locations:</strong> Click "Locations" to add survey sites</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="tip-box">
+                        <i class="bi bi-lightbulb-fill text-primary me-2"></i>
+                        <strong>Next Steps:</strong> After creating a survey, if you have access to create survey, you
+                        should either:
+                        <ul class="mb-0 mt-2">
+                            <li>Assign yourself (to work alone), OR</li>
+                            <li>Assign a team (to collaborate with others)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Common Issues -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-warning mb-3">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>Common Issues & Solutions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="issuesAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#issue1">
+                                    Survey name already exists
+                                </button>
+                            </h2>
+                            <div id="issue1" class="accordion-collapse collapse show" data-bs-parent="#issuesAccordion">
+                                <div class="accordion-body">
+                                    <strong>Solution:</strong> Each survey must have a unique name. Try adding a date,
+                                    location, or client name to make it unique.
+                                    <br>Example: "Infrastructure Survey - ABC Corp - Dec 2025"
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#issue2">
+                                    Cannot save - required fields missing
+                                </button>
+                            </h2>
+                            <div id="issue2" class="accordion-collapse collapse" data-bs-parent="#issuesAccordion">
+                                <div class="accordion-body">
+                                    <strong>Solution:</strong> Check that all fields marked with <span
+                                        class="text-danger">*</span> are filled in. The form will highlight missing
+                                    fields in red.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#issue3">
+                                    Date picker not working
+                                </button>
+                            </h2>
+                            <div id="issue3" class="accordion-collapse collapse" data-bs-parent="#issuesAccordion">
+                                <div class="accordion-body">
+                                    <strong>Solution:</strong> You can also type the date manually in the format
+                                    MM/DD/YYYY or DD-MM-YYYY depending on your system settings.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Topics -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="mb-3"><i class="bi bi-link-45deg me-2"></i>Related Topics</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <a asp-action="SurveyAssignment" class="btn btn-outline-primary w-100 mb-2">
+                                <i class="bi bi-people me-2"></i>Assigning Team Members
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a asp-action="SurveyExecution" class="btn btn-outline-primary w-100 mb-2">
+                                <i class="bi bi-list-check me-2"></i>Adding Sub-Locations
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary w-100 mb-2">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Help Center
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

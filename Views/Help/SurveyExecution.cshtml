@@ -1,0 +1,645 @@
+@{
+    ViewData["Title"] = "Survey Execution Guide";
+}
+
+@section PageStyles {
+<style>
+    .step-card {
+        border-left: 4px solid #667eea;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .step-card:hover {
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        transform: translateX(5px);
+    }
+
+    .step-number {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .screenshot-placeholder {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 2px dashed #667eea;
+        min-height: 350px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        margin: 1.5rem 0;
+    }
+
+    .tip-box {
+        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+        border-left: 5px solid #17a2b8;
+        padding: 1.25rem;
+        margin: 1.5rem 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(23, 162, 184, 0.1);
+    }
+
+    .warning-box {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        border-left: 5px solid #ffc107;
+        padding: 1.25rem;
+        margin: 1.5rem 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.1);
+    }
+
+    .success-box {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        border-left: 5px solid #28a745;
+        padding: 1.25rem;
+        margin: 1.5rem 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.1);
+    }
+
+    .btn-help {
+        margin: 0.5rem;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .card-header-custom {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+        color: #667eea;
+    }
+</style>
+}
+
+<div class="container-fluid px-4 py-3">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-light px-3 py-2 rounded">
+                    <li class="breadcrumb-item"><a asp-action="Index"><i class="bi bi-house-door me-1"></i>Help Center</a></li>
+                    <li class="breadcrumb-item active">Survey Execution</li>
+                </ol>
+            </nav>
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-header-custom">
+                    <h2 class="mb-2">
+                        <i class="bi bi-list-check me-3"></i>Survey Execution Guide
+                    </h2>
+                    <p class="mb-0 lead">Complete guide to adding locations, capturing data, and completing surveys</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Navigation -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body bg-light">
+                    <h6 class="mb-3"><i class="bi bi-list-ul me-2"></i>Quick Navigation</h6>
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="#step1" class="btn btn-outline-primary btn-sm w-100">→ Add Sub-Locations</a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="#step2" class="btn btn-outline-primary btn-sm w-100">→ Select Device Types</a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="#step3" class="btn btn-outline-primary btn-sm w-100">→ Capture Data</a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="#step4" class="btn btn-outline-primary btn-sm w-100">→ Upload Photos</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 1: Add Sub-Locations -->
+    <div id="step1" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4">1</span>
+                        <h4 class="mb-0">Adding Sub-Locations</h4>
+                    </div>
+                    
+                    <h5 class="mt-4 mb-3"><i class="bi bi-geo-alt me-2"></i>What are Sub-Locations?</h5>
+                    <p>Sub-locations are specific sites within a survey where you'll collect data. For example, if surveying a campus, sub-locations might be different buildings or floors.</p>
+                    
+                    <h5 class="mt-4 mb-3"><i class="bi bi-list-ol me-2"></i>Steps to Add Location</h5>
+                    <ol class="ps-4">
+                        <li class="mb-3">
+                            <strong>Access Locations Page:</strong>
+                            <ul class="mt-2">
+                                <li>From survey list, click <strong>Locations</strong> button next to your survey</li>
+                                <li>If prompted for assignment, choose your preferred option</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Click "Add Location":</strong>
+                            <ul class="mt-2">
+                                <li>Find the inline form at the top of the page</li>
+                                <li>Or click the <strong>+ Add Location</strong> button</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Fill Location Details:</strong>
+                            <ul class="mt-2">
+                                <li><strong>Location Name:</strong> Descriptive name (e.g., "Building A - Floor 2")</li>
+                                <li><strong>Location Type:</strong> Indoor/Outdoor/Mixed</li>
+                                <li><strong>Way Type:</strong> Aerial/Underground/Wall-mounted</li>
+                                <li><strong>Address:</strong> Full address of the location</li>
+                                <li><strong>GPS Coordinates:</strong> Use map picker or enter manually</li>
+                                <li><strong>Active:</strong> Check to make location active</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Use Map (Optional):</strong>
+                            <ul class="mt-2">
+                                <li>Click on the map to set location pin</li>
+                                <li>Coordinates auto-fill from map selection</li>
+                                <li>Zoom in/out for precise positioning</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Save Location:</strong>
+                            <ul class="mt-2">
+                                <li>Click <strong>Save</strong> button</li>
+                                <li>Success message confirms addition</li>
+                                <li>Survey status changes to <strong>"In Progress"</strong></li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="screenshot-placeholder">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-image" style="font-size: 4rem; color: #667eea;"></i>
+                            <p class="mt-3 mb-0"><strong>Screenshot: Add Sub-Location Form</strong></p>
+                            <small>Location form with map integration for GPS coordinates</small>
+                        </div>
+                    </div>
+
+                    <div class="success-box">
+                        <h6 class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Important Note</h6>
+                        <p class="mb-0">Adding the first sub-location automatically changes the survey status from <strong>"Assigned"</strong> to <strong>"In Progress"</strong>. This indicates work has officially begun.</p>
+                    </div>
+
+                    <div class="tip-box">
+                        <h6 class="mb-2"><i class="bi bi-lightbulb-fill text-info me-2"></i>Best Practices</h6>
+                        <ul class="mb-0">
+                            <li>Use clear, descriptive names for easy identification</li>
+                            <li>Add all planned locations before starting data collection</li>
+                            <li>Ensure GPS coordinates are accurate for field verification</li>
+                            <li>Mark locations as active only when ready to survey</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: Select Device Types -->
+    <div id="step2" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4">2</span>
+                        <h4 class="mb-0">Starting Survey - Select Device Types</h4>
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-play-circle me-2"></i>Begin Data Collection</h5>
+                    <p>After adding locations, you need to start the actual survey work for each location.</p>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-list-ol me-2"></i>Process</h5>
+                    <ol class="ps-4">
+                        <li class="mb-3">
+                            <strong>Select Location:</strong>
+                            <ul class="mt-2">
+                                <li>From the locations list, find the location you want to survey</li>
+                                <li>Click the <strong>Start Survey</strong> button next to the location</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>View Device Types:</strong>
+                            <ul class="mt-2">
+                                <li>You'll see a list of available device/item categories</li>
+                                <li>Categories might include: Cables, Switches, Routers, Access Points, etc.</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Select Relevant Types:</strong>
+                            <ul class="mt-2">
+                                <li>Click on device types that exist at this location</li>
+                                <li>Multiple selections are possible</li>
+                                <li>Only select types you'll actually document</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Begin Item Entry:</strong>
+                            <ul class="mt-2">
+                                <li>After selection, item entry forms will appear</li>
+                                <li>You can now start entering specific details</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="screenshot-placeholder">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-image" style="font-size: 4rem; color: #667eea;"></i>
+                            <p class="mt-3 mb-0"><strong>Screenshot: Device Type Selection</strong></p>
+                            <small>Survey details page showing available device types</small>
+                        </div>
+                    </div>
+
+                    <div class="warning-box">
+                        <h6 class="mb-2"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Important</h6>
+                        <p class="mb-0">Once you select device types and start entering data, the location status changes to <strong>"In Progress"</strong>. Make sure to save your work frequently.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3: Capture Survey Data -->
+    <div id="step3" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4">3</span>
+                        <h4 class="mb-0">Capturing Survey Data</h4>
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-pencil-square me-2"></i>Entering Item Details</h5>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-light h-100">
+                                <div class="card-body">
+                                    <div class="feature-icon mb-3">
+                                        <i class="bi bi-123"></i>
+                                    </div>
+                                    <h6>Quantities & Counts</h6>
+                                    <p class="mb-0">Enter accurate counts for each item type. Double-check numbers before saving.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light h-100">
+                                <div class="card-body">
+                                    <div class="feature-icon mb-3">
+                                        <i class="bi bi-card-text"></i>
+                                    </div>
+                                    <h6>Specifications</h6>
+                                    <p class="mb-0">Record detailed specifications like model numbers, capacities, and configurations.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-list-ol me-2"></i>Data Entry Steps</h5>
+                    <ol class="ps-4">
+                        <li class="mb-3">
+                            <strong>Item Selection:</strong>
+                            <ul class="mt-2">
+                                <li>Click <strong>Start Survey</strong> from the device selection page</li>
+                                <li>Select specific items from the list</li>
+                                <li>Check boxes for items present at location</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Enter Quantities:</strong>
+                            <ul class="mt-2">
+                                <li>For each selected item, enter the quantity found</li>
+                                <li>Use numeric keypad for faster entry</li>
+                                <li>Enter "0" if item is marked but not found</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Add Specifications:</strong>
+                            <ul class="mt-2">
+                                <li>Enter brand/manufacturer if available</li>
+                                <li>Record model numbers</li>
+                                <li>Note capacity or size specifications</li>
+                                <li>Add installation date if known</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Remarks & Notes:</strong>
+                            <ul class="mt-2">
+                                <li>Add any special observations</li>
+                                <li>Note condition (new/used/damaged)</li>
+                                <li>Include location-specific details</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Save Progress:</strong>
+                            <ul class="mt-2">
+                                <li>Click <strong>Save</strong> frequently (every 5-10 items)</li>
+                                <li>Don't wait until everything is complete</li>
+                                <li>Confirmation message shows successful save</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="screenshot-placeholder">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-image" style="font-size: 4rem; color: #667eea;"></i>
+                            <p class="mt-3 mb-0"><strong>Screenshot: Item Data Entry Form</strong></p>
+                            <small>Form showing item selection with quantity and specification fields</small>
+                        </div>
+                    </div>
+
+                    <div class="tip-box">
+                        <h6 class="mb-2"><i class="bi bi-lightbulb-fill text-info me-2"></i>Pro Tips</h6>
+                        <ul class="mb-0">
+                            <li><strong>Save Often:</strong> Press save every few minutes to prevent data loss</li>
+                            <li><strong>Use Tab Key:</strong> Navigate between fields quickly with Tab key</li>
+                            <li><strong>Be Consistent:</strong> Use consistent naming and notation throughout</li>
+                            <li><strong>Review Before Moving:</strong> Check your entries before moving to next item type</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 4: Upload Photos -->
+    <div id="step4" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4">4</span>
+                        <h4 class="mb-0">Uploading Photos & Documentation</h4>
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-camera me-2"></i>Photo Documentation</h5>
+                    <p>Visual documentation helps verify survey data and provides reference for future analysis.</p>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-list-ol me-2"></i>Upload Process</h5>
+                    <ol class="ps-4">
+                        <li class="mb-3">
+                            <strong>Camera Icon:</strong>
+                            <ul class="mt-2">
+                                <li>Look for camera icon next to items</li>
+                                <li>Add the comments/watermark in the images(mention the position of the image where the device will be installed)</li>
+                                <li>Click to open photo upload dialog</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Select Photos:</strong>
+                            <ul class="mt-2">
+                                <li>Choose from device gallery/camera</li>
+                                <li>Or use camera to take new photos</li>
+                                <li>Multiple photos can be uploaded per item</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Photo Guidelines:</strong>
+                            <ul class="mt-2">
+                                <li>Ensure good lighting and focus</li>
+                                <li>Capture label/nameplate clearly</li>
+                                <li>Include overall view and close-ups</li>
+                                <li>File size should be under 5MB each</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Upload & Save:</strong>
+                            <ul class="mt-2">
+                                <li>Wait for upload confirmation</li>
+                                <li>Photos are linked to specific items</li>
+                                <li>Can be viewed in reports later</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="screenshot-placeholder">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-image" style="font-size: 4rem; color: #667eea;"></i>
+                            <p class="mt-3 mb-0"><strong>Screenshot: Photo Upload Interface</strong></p>
+                            <small>Camera icon and photo upload dialog</small>
+                        </div>
+                    </div>
+
+                    <div class="success-box">
+                        <h6 class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Photo Best Practices</h6>
+                        <ul class="mb-0">
+                            <li>Take photos before and after installation (if applicable)</li>
+                            <li>Include serial number/model number plates</li>
+                            <li>Capture installation environment/context</li>
+                            <li>Use landscape orientation for wider coverage</li>
+                            <li>Avoid blurry or poorly lit images</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 5: Complete Location -->
+    <div id="step5" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4">5</span>
+                        <h4 class="mb-0">Completing & Submitting Survey</h4>
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-check-all me-2"></i>Final Steps</h5>
+                    
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <h6><i class="bi bi-1-circle me-2"></i>Review All Data</h6>
+                            <ul class="mb-0">
+                                <li>Check all quantities and specifications</li>
+                                <li>Verify photos are uploaded and clear</li>
+                                <li>Ensure all required fields are filled</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <h6><i class="bi bi-2-circle me-2"></i>Mark Location Complete</h6>
+                            <ul class="mb-0">
+                                <li>When all items are entered for a location</li>
+                                <li>Location status can be marked as "Completed"</li>
+                                <li>This helps track overall progress</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <h6><i class="bi bi-3-circle me-2"></i>Complete All Locations</h6>
+                            <ul class="mb-0">
+                                <li>Repeat process for each sub-location</li>
+                                <li>Track completion via Dashboard</li>
+                                <li>Ensure no locations are missed</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6><i class="bi bi-4-circle me-2"></i>Submit for Approval</h6>
+                            <ul class="mb-0">
+                                <li>When ALL locations are complete</li>
+                                <li>Click <strong>Submit for Approval</strong> button</li>
+                                <li>Survey status changes to <strong>"Submitted"</strong></li>
+                                <li>Creator receives notification for review</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="warning-box mt-4">
+                        <h6 class="mb-2"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Before Submission</h6>
+                        <p class="mb-2"><strong>Double-check these items:</strong></p>
+                        <ul class="mb-0">
+                            <li>All sub-locations have data entered</li>
+                            <li>Required photos are uploaded</li>
+                            <li>Quantities and specifications are accurate</li>
+                            <li>No placeholder or test data remains</li>
+                            <li>Remarks are meaningful and complete</li>
+                        </ul>
+                    </div>
+
+                    <div class="success-box mt-3">
+                        <h6 class="mb-2"><i class="bi bi-trophy-fill text-success me-2"></i>After Submission</h6>
+                        <p class="mb-0">You can track your submission status in <strong>Survey → My Submissions</strong>. The survey creator will review and either approve or request changes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Common Issues -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-warning shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>Common Issues & Solutions</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="accordion" id="issuesAccordion">
+                        <div class="accordion-item mb-2">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#issue1">
+                                    Data not saving
+                                </button>
+                            </h2>
+                            <div id="issue1" class="accordion-collapse collapse show" data-bs-parent="#issuesAccordion">
+                                <div class="accordion-body">
+                                    <strong>Solutions:</strong>
+                                    <ul class="mt-2 mb-0">
+                                        <li>Check internet connection</li>
+                                        <li>Ensure session hasn't timed out (refresh page if needed)</li>
+                                        <li>Verify all required fields are filled</li>
+                                        <li>Try saving smaller batches of data</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item mb-2">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#issue2">
+                                    Photo upload failing
+                                </button>
+                            </h2>
+                            <div id="issue2" class="accordion-collapse collapse" data-bs-parent="#issuesAccordion">
+                                <div class="accordion-body">
+                                    <strong>Solutions:</strong>
+                                    <ul class="mt-2 mb-0">
+                                        <li>Check file size (should be under 5MB)</li>
+                                        <li>Use JPG or PNG format</li>
+                                        <li>Ensure stable internet connection</li>
+                                        <li>Try uploading one photo at a time</li>
+                                        <li>Compress image if too large</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item mb-2">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#issue3">
+                                    Cannot find location to start survey
+                                </button>
+                            </h2>
+                            <div id="issue3" class="accordion-collapse collapse" data-bs-parent="#issuesAccordion">
+                                <div class="accordion-body">
+                                    <strong>Solution:</strong> Ensure you've been assigned to the survey. Check <strong>Survey → All Surveys</strong> to see your assigned surveys. If not assigned, contact the survey creator.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#issue4">
+                                    Accidentally deleted data
+                                </button>
+                            </h2>
+                            <div id="issue4" class="accordion-collapse collapse" data-bs-parent="#issuesAccordion">
+                                <div class="accordion-body">
+                                    <strong>Solution:</strong> Contact your administrator immediately. In some cases, data can be recovered from database backups. Always double-check before deleting.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Topics -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-light shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="mb-4"><i class="bi bi-link-45deg me-2"></i>Related Topics</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a asp-action="SurveyAssignment" class="btn btn-outline-primary btn-help w-100">
+                                <i class="bi bi-people me-2"></i>Team Assignment
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-action="SurveySubmission" class="btn btn-outline-primary btn-help w-100">
+                                <i class="bi bi-send me-2"></i>Survey Submission
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-action="Reports" class="btn btn-outline-primary btn-help w-100">
+                                <i class="bi bi-file-bar-graph me-2"></i>View Reports
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-help w-100">
+                                <i class="bi bi-arrow-left me-2"></i>Help Center
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -28,8 +28,7 @@ namespace AnalyticaDocs.Models
         public int RoleId { get; set; }
 
         [DisplayName("Employee ID")]
-        [Required]
-        public int EmpID { get; set; }
+        public int? EmpID { get; set; }
 
 
         [DisplayName("Status")]

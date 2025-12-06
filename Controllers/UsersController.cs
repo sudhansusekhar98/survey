@@ -43,7 +43,8 @@ namespace AnalyticaDocs.Controllers
             if (result != null) return result;
             
             var model = new UserModel();
-            var employees = _repository.GetEmpMaster();
+            // Get only employees who don't have user accounts yet
+            var employees = _repository.GetAvailableEmployeesForUserCreation();
             model.EmployeeOptions = employees.Select(e => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
             {
                 Value = e.EmpID.ToString(),
@@ -64,7 +65,8 @@ namespace AnalyticaDocs.Controllers
 
             if (!ModelState.IsValid)
             {
-                var employees = _repository.GetEmpMaster();
+                // Get only employees who don't have user accounts yet
+                var employees = _repository.GetAvailableEmployeesForUserCreation();
                 user.EmployeeOptions = employees.Select(e => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
                 {
                     Value = e.EmpID.ToString(),
@@ -80,8 +82,8 @@ namespace AnalyticaDocs.Controllers
             if (isSaved)
             {
                 TempData["ResultType"] = "success";
-                TempData["ResultMessage"] = "<strong>Success!</strong> Record Save successfully.";
-                return RedirectToAction("Create");
+                TempData["ResultMessage"] = "<strong>Success!</strong> User created successfully.";
+                return RedirectToAction("Index");
             }
             else
             {
@@ -108,7 +110,8 @@ namespace AnalyticaDocs.Controllers
                 return RedirectToAction("Index");
             }
             
-            var employees = _repository.GetEmpMaster();
+            // Get available employees (excluding current user to allow keeping the same employee)
+            var employees = _repository.GetAvailableEmployeesForUserCreation(user.UserId);
             user.EmployeeOptions = employees.Select(e => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
             {
                 Value = e.EmpID.ToString(),
@@ -136,6 +139,12 @@ namespace AnalyticaDocs.Controllers
             user.CreateBy = Convert.ToInt32(HttpContext.Session.GetString("UserID"));
             bool isSaved = _repository.UpdateUser(user);
 
+            if (isSaved)
+            {
+                TempData["ResultType"] = "success";
+                TempData["ResultMessage"] = "<strong>Success!</strong> User updated successfully.";
+            }
+
             return Json(isSaved ? "success" : "fail");
         }
 
@@ -145,6 +154,30 @@ namespace AnalyticaDocs.Controllers
         {
             // Optional: log confirmation, trigger workflow, etc.
             return Json("OK"); // Or "done", "ok", etc.
+        }
+
+        [HttpGet]
+        public IActionResult GetEmployeeDetails(int empId)
+        {
+            try
+            {
+                var employee = _repository.GetEmployeeById(empId);
+                if (employee != null)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        empName = employee.EmpName,
+                        email = employee.Email ?? "",
+                        mobileNo = employee.MobileNo ?? ""
+                    });
+                }
+                return Json(new { success = false, message = "Employee not found" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
 

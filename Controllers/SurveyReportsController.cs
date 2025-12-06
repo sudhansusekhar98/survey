@@ -20,12 +20,14 @@ namespace SurveyApp.Controllers
         private readonly ISurvey _surveyRepo;
         private readonly IAdmin _adminRepo;
         private readonly ISurveySubmission _submissionRepo;
+        private readonly ISurveyCamRemarks _camRemarksRepo;
 
-        public SurveyReportsController(ISurvey surveyRepo, IAdmin adminRepo, ISurveySubmission submissionRepo)
+        public SurveyReportsController(ISurvey surveyRepo, IAdmin adminRepo, ISurveySubmission submissionRepo, ISurveyCamRemarks camRemarksRepo)
         {
             _surveyRepo = surveyRepo;
             _adminRepo = adminRepo;
             _submissionRepo = submissionRepo;
+            _camRemarksRepo = camRemarksRepo;
         }
 
         // GET: SurveyReports/Index
@@ -258,11 +260,71 @@ namespace SurveyApp.Controllers
             // Get submission information
             var submission = _submissionRepo.GetSubmissionBySurveyId(surveyId);
 
+            // Get camera remarks if any camera devices exist in this survey
+            var cameraRemarks = new Dictionary<string, List<SurveyCamRemarksModel>>();
+            bool hasCameraDevices = false;
+            
+            // Determine the ItemCode column name - the pivot uses "Item Code" with space
+            string itemCodeColumnName = dtSurveyItems.Columns.Contains("Item Code") ? "Item Code" 
+                : dtSurveyItems.Columns.Contains("ItemCode") ? "ItemCode"
+                : dtSurveyItems.Columns.Count > 0 ? dtSurveyItems.Columns[0].ColumnName : "";
+            
+            // Check if survey has camera devices (ItemCode starts with "CAM")
+            if (!string.IsNullOrEmpty(itemCodeColumnName))
+            {
+                foreach (DataRow row in dtSurveyItems.Rows)
+                {
+                    var itemCode = row[itemCodeColumnName]?.ToString() ?? "";
+                    if (itemCode.StartsWith("CAM", StringComparison.OrdinalIgnoreCase))
+                    {
+                        hasCameraDevices = true;
+                        break;
+                    }
+                }
+            }
+
+            // If camera devices exist, fetch remarks for all locations
+            if (hasCameraDevices)
+            {
+                // Get all unique location IDs from the items table
+                var locationIds = new HashSet<int>();
+                for (int i = 4; i < dtSurveyItems.Columns.Count; i++)
+                {
+                    var colName = dtSurveyItems.Columns[i].ColumnName;
+                    if (colName.Contains("Existing") || colName.Contains("Required"))
+                    {
+                        // Extract location name from column name
+                        var locName = colName.Replace("Existing", "").Replace("Required", "").Trim();
+                        // Find location ID from dtSurveyLocEmp
+                        foreach (DataRow locRow in dtSurveyLocEmp.Rows)
+                        {
+                            if (locRow["LocName"]?.ToString() == locName)
+                            {
+                                int locId = Convert.ToInt32(locRow["LocID"]);
+                                locationIds.Add(locId);
+                            }
+                        }
+                    }
+                }
+
+                // Fetch camera remarks for each location (all camera items)
+                foreach (var locId in locationIds)
+                {
+                    var remarks = _camRemarksRepo.GetCameraRemarksByLocation(surveyId, locId);
+                    if (remarks != null && remarks.Count > 0)
+                    {
+                        cameraRemarks[$"{surveyId}_{locId}"] = remarks;
+                    }
+                }
+            }
+
             ViewBag.SurveyDetails = dtSurveyDetails;
             ViewBag.SurveyLocEmp = dtSurveyLocEmp;
             ViewBag.SurveyItems = dtSurveyItems;
             ViewBag.SurveyId = surveyId;
             ViewBag.Submission = submission;
+            ViewBag.CameraRemarks = cameraRemarks;
+            ViewBag.HasCameraDevices = hasCameraDevices;
 
             return View("DetailedReport");
         }

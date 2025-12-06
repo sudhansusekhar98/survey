@@ -19,6 +19,9 @@ namespace AnalyticaDocs.Repo
 
         bool UpdateRights(UsersRightsFormModel model);
         List<EmpMasterModel> GetEmpMaster();
+        List<EmpMasterModel> GetAvailableEmployeesForUserCreation(int? currentUserId = null);
+        EmpMasterModel GetEmployeeById(int empId);
+        int? GetEmpIdByUserId(int userId);
         List<RegionMasterModel> GetRegionMaster();
 
         // Device Modules (ItemTypeMaster) methods

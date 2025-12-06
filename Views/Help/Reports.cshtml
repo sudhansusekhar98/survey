@@ -1,0 +1,191 @@
+@{
+    ViewData["Title"] = "Reports & Analytics Guide";
+}
+
+@section PageStyles {
+    <style>
+        .report-card {
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .report-card:hover {
+            border-color: #ffc107;
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .report-icon {
+            font-size: 3rem;
+            color: #ffc107;
+        }
+
+        .btn-help {
+            margin: 0.5rem;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .card-header-custom {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+        }
+
+        .feature-box {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-left: 5px solid #ffc107;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+        }
+    </style>
+}
+
+<div class="container-fluid px-4 py-3">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-light px-3 py-2 rounded">
+                    <li class="breadcrumb-item"><a asp-action="Index"><i class="bi bi-house-door me-1"></i>Help
+                            Center</a></li>
+                    <li class="breadcrumb-item active">Reports & Analytics</li>
+                </ol>
+            </nav>
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-header-custom">
+                    <h2 class="mb-2">
+                        <i class="bi bi-bar-chart-fill me-3"></i>Reports & Analytics Guide
+                    </h2>
+                    <p class="mb-0 lead">Generate reports, export data, and analyze survey results</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card report-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="report-icon mb-3">
+                        <i class="bi bi-file-earmark-bar-graph-fill"></i>
+                    </div>
+                    <h5>Detailed Report</h5>
+                    <p class="text-muted">Comprehensive survey report with all locations and items</p>
+                    <ul class="list-unstyled text-start">
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>All survey details</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Location-wise breakdown
+                        </li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Photos included</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>PDF export</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card report-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="report-icon mb-3">
+                        <i class="bi bi-pie-chart-fill"></i>
+                    </div>
+                    <h5>Summary Report</h5>
+                    <p class="text-muted">High-level overview with totals and statistics</p>
+                    <ul class="list-unstyled text-start">
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Item totals</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Status overview</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Quick insights</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Charts & graphs</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card report-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="report-icon mb-3">
+                        <i class="bi bi-file-earmark-excel-fill"></i>
+                    </div>
+                    <h5>Excel Export</h5>
+                    <p class="text-muted">Export data for further analysis and reporting</p>
+                    <ul class="list-unstyled text-start">
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Structured data</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Multiple sheets</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Pivot-ready format</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Offline analysis</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <h4 class="mb-4"><i class="bi bi-book me-2"></i>How to Generate Reports</h4>
+
+                    <h5 class="mt-4 mb-3">1. Accessing Reports</h5>
+                    <ul class="ps-4">
+                        <li class="mb-2">Navigate to <strong>Reports</strong> in the main menu</li>
+                        <li class="mb-2">Or click <strong>View Report</strong> from survey list</li>
+                        <li class="mb-2">Or access from <strong>Pending Reviews</strong> page</li>
+                    </ul>
+
+                    <h5 class="mt-4 mb-3">2. Select Report Type</h5>
+                    <ul class="ps-4">
+                        <li class="mb-2"><strong>Detailed Report:</strong> For comprehensive documentation</li>
+                        <li class="mb-2"><strong>Summary Report:</strong> For quick overview and presentations</li>
+                        <li class="mb-2"><strong>Excel Export:</strong> For data analysis in Excel/spreadsheets</li>
+                    </ul>
+
+                    <h5 class="mt-4 mb-3">3. Generate & Download</h5>
+                    <ul class="ps-4">
+                        <li class="mb-2">Click the report type button</li>
+                        <li class="mb-2">Wait for report generation (may take a few seconds)</li>
+                        <li class="mb-2">PDF opens in new tab or downloads automatically</li>
+                        <li class="mb-2">Excel file downloads to your device</li>
+                    </ul>
+
+                    <div class="feature-box mt-4">
+                        <h6 class="mb-2"><i class="bi bi-lightbulb-fill text-warning me-2"></i>Pro Tips</h6>
+                        <ul class="mb-0">
+                            <li>Generate reports only after survey approval for final documentation</li>
+                            <li>Use Excel export for creating custom charts and pivot tables</li>
+                            <li>Save PDF reports for archiving and compliance</li>
+                            <li>Share summary reports with stakeholders for quick updates</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-light shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="mb-4"><i class="bi bi-link-45deg me-2"></i>Related Topics</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <a asp-action="SurveySubmission" class="btn btn-outline-warning btn-help w-100">
+                                <i class="bi bi-send me-2"></i>Survey Submission
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a asp-action="SurveyExecution" class="btn btn-outline-warning btn-help w-100">
+                                <i class="bi bi-list-check me-2"></i>Survey Execution
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-help w-100">
+                                <i class="bi bi-arrow-left me-2"></i>Help Center
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

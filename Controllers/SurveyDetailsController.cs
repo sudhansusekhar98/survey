@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using SurveyApp.Models;
 using SurveyApp.Repo;
 using System.Diagnostics;
+using System.Text.Json;
 
 namespace SurveyApp.Controllers
 {
@@ -13,13 +14,15 @@ namespace SurveyApp.Controllers
         private readonly ICommonUtil _util;
         private readonly ISurveyLocationStatus _statusRepo;
         private readonly ISurveySubmission _submissionRepo;
+        private readonly ISurveyCamRemarks _camRemarksRepo;
 
-        public SurveyDetailsController(ISurvey repository, ICommonUtil util, ISurveyLocationStatus statusRepo, ISurveySubmission submissionRepo)
+        public SurveyDetailsController(ISurvey repository, ICommonUtil util, ISurveyLocationStatus statusRepo, ISurveySubmission submissionRepo, ISurveyCamRemarks camRemarksRepo)
         {
             _repository = repository;
             _util = util;
             _statusRepo = statusRepo;
             _submissionRepo = submissionRepo;
+            _camRemarksRepo = camRemarksRepo;
         }
 
         public IActionResult Index(long? surveyId, int? locId)
@@ -147,6 +150,21 @@ namespace SurveyApp.Controllers
                 ItemLists = _repository.GetSurveyUpdateItemList(surveyId, locId, itemTypeID) ?? new List<SurveyDetailsUpdatelist>()
             };
 
+            // Load camera remarks for camera items (ItemCode starts with "CAM")
+            foreach (var item in formModel.ItemLists)
+            {
+                bool isCamera = item.ItemCode?.StartsWith("CAM", StringComparison.OrdinalIgnoreCase) == true;
+                if (isCamera)
+                {
+                    var remarks = _camRemarksRepo.GetCameraRemarks(surveyId, locId, item.ItemID);
+                    if (remarks != null && remarks.Count > 0)
+                    {
+                        // Convert remarks to JSON for the view
+                        item.CameraRemarksJson = JsonSerializer.Serialize(remarks.Select(r => r.Remarks).ToList());
+                    }
+                }
+            }
+
             // Get survey and location names for display
             var surveyInfo = _repository.GetAssignedTypeList(surveyId, locId)?.FirstOrDefault(x => x.ItemTypeID == itemTypeID);
             if (surveyInfo != null)
@@ -188,19 +206,73 @@ namespace SurveyApp.Controllers
 
             try
             {
+                // Process camera remarks (ItemCode starts with "CAM")
+                for (int i = 0; i < model.ItemLists.Count; i++)
+                {
+                    var item = model.ItemLists[i];
+                    // Check if it's a camera item by ItemCode prefix
+                    bool isCamera = item.ItemCode?.StartsWith("CAM", StringComparison.OrdinalIgnoreCase) == true;
+                    
+                    if (isCamera && !string.IsNullOrEmpty(item.CameraRemarksJson))
+                    {
+                        try
+                        {
+                            var remarks = JsonSerializer.Deserialize<List<string>>(item.CameraRemarksJson);
+                            
+                            if (remarks != null && remarks.Count > 0)
+                            {
+                                // Delete existing remarks for this camera item
+                                _camRemarksRepo.DeleteAllCameraRemarks(model.SurveyID, model.LocID, item.ItemID);
+                                
+                                // Save new remarks with sequence number
+                                int remarkNo = 1;
+                                foreach (var remark in remarks)
+                                {
+                                    if (!string.IsNullOrWhiteSpace(remark))
+                                    {
+                                        var camRemark = new SurveyCamRemarksModel
+                                        {
+                                            SurveyID = model.SurveyID,
+                                            LocID = model.LocID,
+                                            ItemID = item.ItemID,
+                                            RemarkNo = remarkNo,
+                                            Remarks = remark.Trim(),
+                                            CreatedBy = model.CreateBy
+                                        };
+                                        _camRemarksRepo.SaveCameraRemarks(camRemark);
+                                        remarkNo++;
+                                    }
+                                }
+                            }
+                        }
+                        catch (JsonException jsonEx)
+                        {
+                            Console.WriteLine($"JSON parsing error for camera remarks: {jsonEx.Message}");
+                            // Continue processing, don't fail the entire update
+                        }
+                    }
+                }
+
                 bool isSaved = _repository.UpdateSurveyDetails(model);
 
                 if (isSaved)
                 {
                     TempData["ResultMessage"] = "<strong>Success!</strong> Survey details updated successfully.";
                     TempData["ResultType"] = "success";
-                    return RedirectToAction("Index", new { surveyId = model.SurveyID, locId = model.LocID });
+                    // Redirect to Survey Details Index page
+                    return RedirectToAction("Index", new { 
+                        surveyId = model.SurveyID, 
+                        locId = model.LocID 
+                    });
                 }
                 else
                 {
                     TempData["ResultMessage"] = "<strong>Error!</strong> Failed to update survey details.";
                     TempData["ResultType"] = "danger";
-                    return RedirectToAction("UpdateItem", new { surveyId = model.SurveyID, locId = model.LocID, itemTypeID = model.ItemTypeID, itemId = 0 });
+                    return RedirectToAction("Index", new { 
+                        surveyId = model.SurveyID, 
+                        locId = model.LocID 
+                    });
                 }
             }
             catch (InvalidOperationException ex)

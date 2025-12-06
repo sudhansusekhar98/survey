@@ -360,7 +360,7 @@ wwwroot\img\elements\4.jpg
 wwwroot\img\elements\5.jpg
 wwwroot\img\elements\7.jpg
 wwwroot\img\elements\Noimage.png
-wwwroot\img\favicon\favicon.png
+wwwroot\img\icons\icon-96x96.png
 wwwroot\img\favicon\favicon1.ico
 wwwroot\img\favicon\favicon2.png
 wwwroot\img\icons\AetherLogo.png
@@ -379,7 +379,7 @@ wwwroot\img\icons\brands\slack.png
 wwwroot\img\icons\brands\twitter.png
 wwwroot\img\icons\diag.png
 wwwroot\img\icons\fi.psd
-wwwroot\img\icons\icon-128x128.png
+wwwroot\img\icons\icon-72x72.png
 wwwroot\img\icons\projectname.png
 wwwroot\img\icons\Surveylogo.png
 wwwroot\img\icons\Surveylogo.psd
@@ -470,13 +470,13 @@ wwwroot\vendor\libs\perfect-scrollbar\perfect-scrollbar.js
 wwwroot\vendor\libs\popper\popper.js
 wwwroot\js\dashboards-analytics.js
 wwwroot\js\reportCharts.js
-wwwroot\img\icons\icon-144x144.png
-wwwroot\img\icons\icon-152x152.png
-wwwroot\img\icons\icon-192x192.png
-wwwroot\img\icons\icon-384x384.png
 wwwroot\img\icons\icon-512x512.png
-wwwroot\img\icons\icon-72x72.png
-wwwroot\img\icons\icon-96x96.png
+wwwroot\img\icons\icon-384x384.png
+wwwroot\img\icons\icon-192x192.png
+wwwroot\img\icons\icon-152x152.png
+wwwroot\img\icons\icon-144x144.png
+wwwroot\img\icons\icon-128x128.png
+wwwroot\img\favicon\favicon.png
 wwwroot\img\icons\logo.png
 wwwroot\js\main.js
 wwwroot\js\survey-index.js

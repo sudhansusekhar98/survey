@@ -1,0 +1,397 @@
+@{
+    ViewData["Title"] = "Frequently Asked Questions";
+}
+
+@section PageStyles {
+    <style>
+        .faq-category {
+            margin-bottom: 2rem;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .accordion-button:focus {
+            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+        }
+
+        .btn-help {
+            margin: 0.5rem;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .card-header-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+        }
+
+        .category-icon {
+            font-size: 2rem;
+            color: #667eea;
+        }
+    </style>
+}
+
+<div class="container-fluid px-4 py-3">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-light px-3 py-2 rounded">
+                    <li class="breadcrumb-item"><a asp-action="Index"><i class="bi bi-house-door me-1"></i>Help
+                            Center</a></li>
+                    <li class="breadcrumb-item active">FAQ</li>
+                </ol>
+            </nav>
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-header-custom">
+                    <h2 class="mb-2">
+                        <i class="bi bi-question-circle-fill me-3"></i>Frequently Asked Questions
+                    </h2>
+                    <p class="mb-0 lead">Common questions and answers about the Survey Application</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- General Questions -->
+    <div class="faq-category">
+        <h4 class="mb-3">
+            <i class="bi bi-info-circle-fill category-icon me-2"></i>General Questions
+        </h4>
+        <div class="accordion" id="generalFAQ">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#g1">
+                        What is the Survey Application used for?
+                    </button>
+                </h2>
+                <div id="g1" class="accordion-collapse collapse show" data-bs-parent="#generalFAQ">
+                    <div class="accordion-body">
+                        The Survey Application is used to conduct infrastructure surveys, collect field data, manage
+                        survey teams, and generate comprehensive reports for various types of site assessments and
+                        installations.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#g2">
+                        How do I access the system?
+                    </button>
+                </h2>
+                <div id="g2" class="accordion-collapse collapse" data-bs-parent="#generalFAQ">
+                    <div class="accordion-body">
+                        You need login credentials (username and password) provided by your administrator. Navigate to
+                        the login page and enter your credentials to access the system.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#g3">
+                        What happens if I forget my password?
+                    </button>
+                </h2>
+                <div id="g3" class="accordion-collapse collapse" data-bs-parent="#generalFAQ">
+                    <div class="accordion-body">
+                        Contact your system administrator to reset your password. They can generate a new password for
+                        your account.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Survey Creation -->
+    <div class="faq-category">
+        <h4 class="mb-3">
+            <i class="bi bi-plus-circle-fill category-icon me-2"></i>Survey Creation
+        </h4>
+        <div class="accordion" id="creationFAQ">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#c1">
+                        Can I edit a survey after creating it?
+                    </button>
+                </h2>
+                <div id="c1" class="accordion-collapse collapse" data-bs-parent="#creationFAQ">
+                    <div class="accordion-body">
+                        Yes, you can edit survey details as long as the survey status is "Created" or "Assigned". Click
+                        the Edit button next to the survey name to modify details.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#c2">
+                        Why do I get "survey name already exists" error?
+                    </button>
+                </h2>
+                <div id="c2" class="accordion-collapse collapse" data-bs-parent="#creationFAQ">
+                    <div class="accordion-body">
+                        Each survey must have a unique name. Try adding a date, location, or client name to make it
+                        unique (e.g., "Infrastructure Survey - ABC Corp - Dec 2025").
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#c3">
+                        Can I delete a survey?
+                    </button>
+                </h2>
+                <div id="c3" class="accordion-collapse collapse" data-bs-parent="#creationFAQ">
+                    <div class="accordion-body">
+                        Yes, but only if the survey hasn't been submitted. Click the Delete button next to the survey.
+                        Be careful as this action cannot be undone.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Assignment -->
+    <div class="faq-category">
+        <h4 class="mb-3">
+            <i class="bi bi-people-fill category-icon me-2"></i>Team Assignment
+        </h4>
+        <div class="accordion" id="teamFAQ">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#t1">
+                        Can I assign myself to a survey?
+                    </button>
+                </h2>
+                <div id="t1" class="accordion-collapse collapse" data-bs-parent="#teamFAQ">
+                    <div class="accordion-body">
+                        Yes! When you click "Locations" on an unassigned survey, choose "Start Survey Myself" to
+                        self-assign and begin work immediately.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#t2">
+                        Can I add more team members after initial assignment?
+                    </button>
+                </h2>
+                <div id="t2" class="accordion-collapse collapse" data-bs-parent="#teamFAQ">
+                    <div class="accordion-body">
+                        Yes, go to the survey list, click "Assign Team", check additional employees, and save. New
+                        members will be added to the existing team.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#t3">
+                        How do I remove a team member?
+                    </button>
+                </h2>
+                <div id="t3" class="accordion-collapse collapse" data-bs-parent="#teamFAQ">
+                    <div class="accordion-body">
+                        Go to "Assign Team" page, uncheck the employee you want to remove, and save. Their work remains
+                        but they can no longer access the survey.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Survey Execution -->
+    <div class="faq-category">
+        <h4 class="mb-3">
+            <i class="bi bi-list-check category-icon me-2"></i>Survey Execution
+        </h4>
+        <div class="accordion" id="executionFAQ">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#e1">
+                        My data is not saving. What should I do?
+                    </button>
+                </h2>
+                <div id="e1" class="accordion-collapse collapse" data-bs-parent="#executionFAQ">
+                    <div class="accordion-body">
+                        Check your internet connection, ensure all required fields are filled, and verify your session
+                        hasn't timed out. Try refreshing the page and logging in again if needed.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#e2">
+                        Can I upload photos from my phone?
+                    </button>
+                </h2>
+                <div id="e2" class="accordion-collapse collapse" data-bs-parent="#executionFAQ">
+                    <div class="accordion-body">
+                        Yes! Click the camera icon, and you can either take a new photo with your camera or select from
+                        your phone's gallery. Photos should be under 5MB.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#e3">
+                        What if I accidentally delete a location?
+                    </button>
+                </h2>
+                <div id="e3" class="accordion-collapse collapse" data-bs-parent="#executionFAQ">
+                    <div class="accordion-body">
+                        Contact your administrator immediately. Deleted data might be recoverable from database backups.
+                        Always double-check before deleting.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submission & Review -->
+    <div class="faq-category">
+        <h4 class="mb-3">
+            <i class="bi bi-send-fill category-icon me-2"></i>Submission & Review
+        </h4>
+        <div class="accordion" id="submissionFAQ">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#s1">
+                        Can I edit after submitting?
+                    </button>
+                </h2>
+                <div id="s1" class="accordion-collapse collapse" data-bs-parent="#submissionFAQ">
+                    <div class="accordion-body">
+                        No, once submitted you cannot edit unless the survey is rejected. The survey will be unlocked if
+                        rejected, allowing you to make corrections and resubmit.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#s2">
+                        Who can approve my survey?
+                    </button>
+                </h2>
+                <div id="s2" class="accordion-collapse collapse" data-bs-parent="#submissionFAQ">
+                    <div class="accordion-body">
+                        Only the person who created the survey or a super administrator can approve/reject submissions.
+                        This ensures proper oversight and quality control.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#s3">
+                        How will I know if my survey is approved?
+                    </button>
+                </h2>
+                <div id="s3" class="accordion-collapse collapse" data-bs-parent="#submissionFAQ">
+                    <div class="accordion-body">
+                        You'll receive an email notification. You can also check status in "Survey → My Submissions"
+                        page.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technical Issues -->
+    <div class="faq-category">
+        <h4 class="mb-3">
+            <i class="bi bi-gear-fill category-icon me-2"></i>Technical Issues
+        </h4>
+        <div class="accordion" id="technicalFAQ">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#tech1">
+                        The page is not loading. What should I do?
+                    </button>
+                </h2>
+                <div id="tech1" class="accordion-collapse collapse" data-bs-parent="#technicalFAQ">
+                    <div class="accordion-body">
+                        Try refreshing the page (F5), clearing your browser cache, or trying a different browser. If
+                        problem persists, contact IT support.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#tech2">
+                        Which browsers are supported?
+                    </button>
+                </h2>
+                <div id="tech2" class="accordion-collapse collapse" data-bs-parent="#technicalFAQ">
+                    <div class="accordion-body">
+                        The application works best on modern browsers: Chrome (recommended), Firefox, Safari, and Edge.
+                        Internet Explorer is not supported.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#tech3">
+                        Can I use this on my mobile device?
+                    </button>
+                </h2>
+                <div id="tech3" class="accordion-collapse collapse" data-bs-parent="#technicalFAQ">
+                    <div class="accordion-body">
+                        Yes! The application is mobile-responsive and works on smartphones and tablets. For best
+                        experience, use in landscape mode for data entry.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Support -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card bg-light border-0">
+                <div class="card-body text-center py-4">
+                    <h4 class="mb-3">
+                        <i class="bi bi-headset me-2"></i>Still Need Help?
+                    </h4>
+                    <p class="text-muted mb-4">Can't find the answer you're looking for? Our support team is ready to
+                        assist you.</p>
+                    <a href="mailto:support@vlaccess.com" class="btn btn-primary btn-lg me-2">
+                        <i class="bi bi-envelope me-2"></i>Email Support
+                    </a>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Help Center
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

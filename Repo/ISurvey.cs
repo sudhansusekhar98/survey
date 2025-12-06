@@ -10,6 +10,7 @@ namespace SurveyApp.Repo
         SurveyModel? GetSurveyById(Int64 surveyId);
         bool AddSurvey(SurveyModel survey);
         bool UpdateSurvey(SurveyModel survey);
+        bool UpdateSurveyStatus(Int64 surveyId, string status);
         bool DeleteSurvey(Int64 surveyId);
         List<SurveyLocationModel> GetSurveyLocationById(Int64 surveyId);
         SurveyLocationModel? GetSurveyLocationByLocId(int locId);

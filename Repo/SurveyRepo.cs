@@ -165,6 +165,26 @@ namespace SurveyApp.Repo
             }
         }
 
+        public bool UpdateSurveyStatus(Int64 surveyId, string status)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("UPDATE Survey SET SurveyStatus = @Status WHERE SurveyId = @SurveyId", con);
+                cmd.CommandType = CommandType.Text;
+                cmd.Parameters.AddWithValue("@SurveyId", surveyId);
+                cmd.Parameters.AddWithValue("@Status", status);
+                
+                con.Open();
+                int result = cmd.ExecuteNonQuery();
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         public List<SurveyModel> GetAllSurveys(int UserId)
         {
             try
@@ -954,8 +974,8 @@ namespace SurveyApp.Repo
                 con.Open();
                 cmd.ExecuteNonQuery();
                 
-                // Update survey status to Completed
-                using var updateCmd = new SqlCommand("UPDATE Survey SET SurveyStatus = 'Completed' WHERE SurveyId = @SurveyId", con);
+                // Update survey status to Submitted (not Completed - completion happens on approval)
+                using var updateCmd = new SqlCommand("UPDATE Survey SET SurveyStatus = 'Submitted' WHERE SurveyId = @SurveyId", con);
                 updateCmd.Parameters.AddWithValue("@SurveyId", surveyId);
                 updateCmd.ExecuteNonQuery();
                 

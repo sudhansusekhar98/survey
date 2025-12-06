@@ -1,0 +1,209 @@
+@{
+    ViewData["Title"] = "Admin Functions Guide";
+}
+
+@section PageStyles {
+    <style>
+        .admin-card {
+            border-left: 4px solid #dc3545;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .admin-card:hover {
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.15);
+            transform: translateX(5px);
+        }
+
+        .admin-icon {
+            font-size: 2.5rem;
+            color: #dc3545;
+        }
+
+        .btn-help {
+            margin: 0.5rem;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .card-header-custom {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+        }
+
+        .feature-box {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border-left: 5px solid #dc3545;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+        }
+    </style>
+}
+
+<div class="container-fluid px-4 py-3">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-light px-3 py-2 rounded">
+                    <li class="breadcrumb-item"><a asp-action="Index"><i class="bi bi-house-door me-1"></i>Help
+                            Center</a></li>
+                    <li class="breadcrumb-item active">Admin Functions</li>
+                </ol>
+            </nav>
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-header-custom">
+                    <h2 class="mb-2">
+                        <i class="bi bi-shield-lock-fill me-3"></i>Admin Functions Guide
+                    </h2>
+                    <p class="mb-0 lead">User management, permissions, and system configuration</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card admin-card h-100 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="admin-icon mb-3">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <h5>User Management</h5>
+                    <p class="text-muted">Create and manage user accounts</p>
+                    <ul class="ps-4">
+                        <li class="mb-2">Add new users with login credentials</li>
+                        <li class="mb-2">Assign roles and permissions</li>
+                        <li class="mb-2">Activate/deactivate accounts</li>
+                        <li class="mb-2">Reset passwords</li>
+                    </ul>
+                    <p class="mb-0"><strong>Access:</strong> Admin → Users</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card admin-card h-100 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="admin-icon mb-3">
+                        <i class="bi bi-shield-check-fill"></i>
+                    </div>
+                    <h5>User Rights</h5>
+                    <p class="text-muted">Configure role-based permissions</p>
+                    <ul class="ps-4">
+                        <li class="mb-2">Define user roles and access levels</li>
+                        <li class="mb-2">Set regional access controls</li>
+                        <li class="mb-2">Configure feature permissions</li>
+                        <li class="mb-2">Manage CRUD operations rights</li>
+                    </ul>
+                    <p class="mb-0"><strong>Access:</strong> Admin → User Rights</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card admin-card h-100 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="admin-icon mb-3">
+                        <i class="bi bi-person-vcard-fill"></i>
+                    </div>
+                    <h5>Employee Master</h5>
+                    <p class="text-muted">Manage employee records</p>
+                    <ul class="ps-4">
+                        <li class="mb-2">Add/update employee information</li>
+                        <li class="mb-2">Link employees to user accounts</li>
+                        <li class="mb-2">Maintain contact details</li>
+                        <li class="mb-2">Assign to regions and departments</li>
+                    </ul>
+                    <p class="mb-0"><strong>Access:</strong> Admin → Employee Master</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card admin-card h-100 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="admin-icon mb-3">
+                        <i class="bi bi-building-fill"></i>
+                    </div>
+                    <h5>Client Master</h5>
+                    <p class="text-muted">Manage client organizations</p>
+                    <ul class="ps-4">
+                        <li class="mb-2">Add new client organizations</li>
+                        <li class="mb-2">Update client details and contacts</li>
+                        <li class="mb-2">Manage client addresses</li>
+                        <li class="mb-2">Link clients to surveys</li>
+                    </ul>
+                    <p class="mb-0"><strong>Access:</strong> Admin → Client Master</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="card admin-card shadow-sm">
+                <div class="card-body p-4">
+                    <div class="admin-icon mb-3">
+                        <i class="bi bi-gear-fill"></i>
+                    </div>
+                    <h5>Manage Devices</h5>
+                    <p class="text-muted">Configure device types and item masters</p>
+                    <ul class="ps-4">
+                        <li class="mb-2">Add/edit device types and categories</li>
+                        <li class="mb-2">Manage item masters and specifications</li>
+                        <li class="mb-2">Configure survey templates</li>
+                        <li class="mb-2">Set system preferences</li>
+                    </ul>
+                    <p class="mb-0"><strong>Access:</strong> Admin → Manage Devices</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-danger shadow">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>Important Security Guidelines
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <ul class="ps-4 mb-0">
+                        <li class="mb-2">Only grant admin access to trusted personnel</li>
+                        <li class="mb-2">Use strong passwords for admin accounts</li>
+                        <li class="mb-2">Regularly review user permissions</li>
+                        <li class="mb-2">Deactivate accounts for terminated employees immediately</li>
+                        <li class="mb-2">Keep audit logs of admin actions</li>
+                        <li class="mb-2">Never share admin credentials</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-light shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="mb-4"><i class="bi bi-link-45deg me-2"></i>Related Topics</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <a asp-action="SurveyAssignment" class="btn btn-outline-danger btn-help w-100">
+                                <i class="bi bi-people me-2"></i>Team Assignment
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a asp-action="SurveyCreation" class="btn btn-outline-danger btn-help w-100">
+                                <i class="bi bi-plus-circle me-2"></i>Creating Surveys
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-help w-100">
+                                <i class="bi bi-arrow-left me-2"></i>Help Center
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

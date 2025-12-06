@@ -20,8 +20,8 @@ var DashboardModule = (function() {
         chartData.monthlyCompletion = data.monthlyCompletionData || {};
 
         // Initialize date/time widget
-        updateDateTime();
-        setInterval(updateDateTime, 1000);
+        //updateDateTime();
+        //setInterval(updateDateTime, 1000);
 
         // Animate numbers on load
         animateMetrics();
@@ -34,7 +34,7 @@ var DashboardModule = (function() {
     }
 
     // Update Date and Time
-    function updateDateTime() {
+    /*function updateDateTime() {
         var now = new Date();
         
         // Format time (HH:MM:SS)
@@ -55,7 +55,7 @@ var DashboardModule = (function() {
         $('#currentTime').text(timeString);
         $('#currentDate').text(dateString);
         $('#currentDay').text(dayString);
-    }
+    }*/
 
     // Animate metric values
     function animateMetrics() {

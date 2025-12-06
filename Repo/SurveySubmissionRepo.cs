@@ -36,18 +36,50 @@ namespace SurveyApp.Repo
             try
             {
                 using var con = new SqlConnection(DBConnection.ConnectionString);
-                using var cmd = new SqlCommand("dbo.SpSurveySubmission", con);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@SpType", 2);
-                cmd.Parameters.AddWithValue("@SubmissionId", submissionId);
-                cmd.Parameters.AddWithValue("@SubmissionStatus", status);
-                cmd.Parameters.AddWithValue("@ReviewedBy", reviewedBy);
-                cmd.Parameters.AddWithValue("@ReviewDate", DateTime.Now);
-                cmd.Parameters.AddWithValue("@ReviewComments", string.IsNullOrEmpty(reviewComments) ? DBNull.Value : reviewComments);
-
                 con.Open();
-                int result = cmd.ExecuteNonQuery();
-                return result > 0;
+                
+                using var transaction = con.BeginTransaction();
+                
+                try
+                {
+                    // Update submission status
+                    using var cmd = new SqlCommand("dbo.SpSurveySubmission", con, transaction);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@SpType", 2);
+                    cmd.Parameters.AddWithValue("@SubmissionId", submissionId);
+                    cmd.Parameters.AddWithValue("@SubmissionStatus", status);
+                    cmd.Parameters.AddWithValue("@ReviewedBy", reviewedBy);
+                    cmd.Parameters.AddWithValue("@ReviewDate", DateTime.Now);
+                    cmd.Parameters.AddWithValue("@ReviewComments", string.IsNullOrEmpty(reviewComments) ? DBNull.Value : reviewComments);
+                    
+                    int result = cmd.ExecuteNonQuery();
+                    
+                    if (result > 0)
+                    {
+                        // Get SurveyId from submission
+                        using var getSurveyCmd = new SqlCommand("SELECT SurveyId FROM SurveySubmission WHERE SubmissionId = @SubmissionId", con, transaction);
+                        getSurveyCmd.Parameters.AddWithValue("@SubmissionId", submissionId);
+                        var surveyId = getSurveyCmd.ExecuteScalar();
+                        
+                        if (surveyId != null)
+                        {
+                            // Update Survey table status based on approval/rejection
+                            string surveyStatus = status == "Approved" ? "Completed" : "In Progress";
+                            using var updateSurveyCmd = new SqlCommand("UPDATE Survey SET SurveyStatus = @SurveyStatus WHERE SurveyId = @SurveyId", con, transaction);
+                            updateSurveyCmd.Parameters.AddWithValue("@SurveyStatus", surveyStatus);
+                            updateSurveyCmd.Parameters.AddWithValue("@SurveyId", surveyId);
+                            updateSurveyCmd.ExecuteNonQuery();
+                        }
+                    }
+                    
+                    transaction.Commit();
+                    return result > 0;
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
             }
             catch (Exception ex)
             {
