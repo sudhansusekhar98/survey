@@ -74,11 +74,15 @@ document.addEventListener('click', function (e) {
         current++;
         input.value = current;
         updateExtraSection(input);
+        // Dispatch input event for camera remarks to detect
+        input.dispatchEvent(new Event('input', { bubbles: true }));
     }
     if (minusBtn) {
         if (current > 0) current--;
         input.value = current;
         updateExtraSection(input);
+        // Dispatch input event for camera remarks to detect
+        input.dispatchEvent(new Event('input', { bubbles: true }));
     }
 });
 

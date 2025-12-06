@@ -84,8 +84,8 @@
 }
 .custom-hover tbody tr:hover {
     background: linear-gradient(90deg, rgb(0, 123, 255, 0.2), rgb(235, 241, 247, 0.05));
+    -webkit-backdrop-filter: blur(4px) !important;
     backdrop-filter: blur(4px) !important;
-   
 }
 
     .custom-hover tbody tr:hover td {
@@ -109,6 +109,7 @@
 
 .custom-focus tbody tr:has(:focus) {
     background: linear-gradient(90deg, rgb(0, 123, 255, 0.2), rgb(235, 241, 247, 0.05));
+    -webkit-backdrop-filter: blur(4px) !important;
     backdrop-filter: blur(4px) !important;
 }
 

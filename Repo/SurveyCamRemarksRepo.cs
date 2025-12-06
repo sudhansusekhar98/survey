@@ -8,14 +8,14 @@ namespace SurveyApp.Repo
 {
     public class SurveyCamRemarksRepo : ISurveyCamRemarks
     {
-        private static readonly string cs = 
-            "Server=10.0.32.135;Database=VLDev;UID=adminrole;Password=@dminr0le;Connect Timeout=360000;TrustServerCertificate=True";
+        //private static readonly string cs = 
+        //    "Server=10.0.32.135;Database=VLDev;UID=adminrole;Password=@dminr0le;Connect Timeout=360000;TrustServerCertificate=True";
 
         public bool SaveCameraRemarks(SurveyCamRemarksModel model)
         {
             try
             {
-                using var con = new SqlConnection(cs);
+                using var con = new SqlConnection(DBConnection.ConnectionString);
                 using var cmd = new SqlCommand();
                 cmd.Connection = con;
                 cmd.CommandType = CommandType.Text;
@@ -63,7 +63,7 @@ namespace SurveyApp.Repo
         {
             try
             {
-                using var con = new SqlConnection(cs);
+                using var con = new SqlConnection(DBConnection.ConnectionString);
                 using var cmd = new SqlCommand(@"
                     SELECT TransID, SurveyID, LocID, ItemID, RemarkNo, Remarks, CreatedBy, CreatedOn
                     FROM SurveyCamRemarks
@@ -99,7 +99,7 @@ namespace SurveyApp.Repo
         {
             try
             {
-                using var con = new SqlConnection(cs);
+                using var con = new SqlConnection(DBConnection.ConnectionString);
                 using var cmd = new SqlCommand(@"
                     SELECT TransID, SurveyID, LocID, ItemID, RemarkNo, Remarks, CreatedBy, CreatedOn
                     FROM SurveyCamRemarks
@@ -125,7 +125,7 @@ namespace SurveyApp.Repo
         {
             try
             {
-                using var con = new SqlConnection(cs);
+                using var con = new SqlConnection(DBConnection.ConnectionString);
                 using var cmd = new SqlCommand(@"
                     DELETE FROM SurveyCamRemarks WHERE TransID = @TransID", con);
 
@@ -146,7 +146,7 @@ namespace SurveyApp.Repo
         {
             try
             {
-                using var con = new SqlConnection(cs);
+                using var con = new SqlConnection(DBConnection.ConnectionString);
                 using var cmd = new SqlCommand(@"
                     DELETE FROM SurveyCamRemarks 
                     WHERE SurveyID = @SurveyID AND LocID = @LocID AND ItemID = @ItemID", con);
@@ -188,7 +188,7 @@ namespace SurveyApp.Repo
         {
             try
             {
-                using var con = new SqlConnection(cs);
+                using var con = new SqlConnection(DBConnection.ConnectionString);
                 using var cmd = new SqlCommand(@"
                     SELECT TransID, SurveyID, LocID, ItemID, RemarkNo, Remarks, CreatedBy, CreatedOn
                     FROM SurveyCamRemarks
@@ -223,7 +223,7 @@ namespace SurveyApp.Repo
         {
             try
             {
-                using var con = new SqlConnection(cs);
+                using var con = new SqlConnection(DBConnection.ConnectionString);
                 using var cmd = new SqlCommand(@"
                     SELECT TransID, SurveyID, LocID, ItemID, RemarkNo, Remarks, CreatedBy, CreatedOn
                     FROM SurveyCamRemarks

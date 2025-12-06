@@ -84,6 +84,42 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVNYXN0ZXJcX0VtcGxveWVlRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/VL Access/Survey/AS.NET SURVEY/survey/Views/Help/AdminFunctions.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVscFxBZG1pbkZ1bmN0aW9ucy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/AS.NET SURVEY/survey/Views/Help/FAQ.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVscFxGQVEuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/AS.NET SURVEY/survey/Views/Help/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVscFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/AS.NET SURVEY/survey/Views/Help/QuickStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVscFxRdWlja1N0YXJ0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/AS.NET SURVEY/survey/Views/Help/Reports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVscFxSZXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/AS.NET SURVEY/survey/Views/Help/SurveyAssignment.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVscFxTdXJ2ZXlBc3NpZ25tZW50LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/AS.NET SURVEY/survey/Views/Help/SurveyCreation.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVscFxTdXJ2ZXlDcmVhdGlvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/AS.NET SURVEY/survey/Views/Help/SurveyExecution.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVscFxTdXJ2ZXlFeGVjdXRpb24uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/AS.NET SURVEY/survey/Views/Help/SurveySubmission.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGVscFxTdXJ2ZXlTdWJtaXNzaW9uLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/VL Access/Survey/AS.NET SURVEY/survey/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -230,10 +266,6 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/VL Access/Survey/AS.NET SURVEY/survey/Views/SurveyReports/DetailedReport.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5UmVwb3J0c1xEZXRhaWxlZFJlcG9ydC5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/VL Access/Survey/AS.NET SURVEY/survey/Views/SurveyReports/DetailedReportold.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5UmVwb3J0c1xEZXRhaWxlZFJlcG9ydG9sZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/VL Access/Survey/AS.NET SURVEY/survey/Views/SurveyReports/Index.cshtml]
