@@ -218,5 +218,44 @@ namespace SurveyApp.Repo
                 return new List<SurveyCamRemarksModel>();
             }
         }
+
+        public List<SurveyCamRemarksModel> GetAllCameraRemarksBySurvey(Int64 surveyId)
+        {
+            try
+            {
+                using var con = new SqlConnection(cs);
+                using var cmd = new SqlCommand(@"
+                    SELECT TransID, SurveyID, LocID, ItemID, RemarkNo, Remarks, CreatedBy, CreatedOn
+                    FROM SurveyCamRemarks
+                    WHERE SurveyID = @SurveyID
+                    ORDER BY LocID, ItemID, RemarkNo", con);
+
+                cmd.Parameters.AddWithValue("@SurveyID", surveyId);
+
+                con.Open();
+                var dt = new DataTable();
+                dt.Load(cmd.ExecuteReader());
+
+                var remarks = SqlDbHelper.DataTableToList<SurveyCamRemarksModel>(dt);
+                
+                // Assign camera numbers per location
+                var grouped = remarks.GroupBy(r => r.LocID).ToList();
+                foreach (var group in grouped)
+                {
+                    int camNum = 1;
+                    foreach (var remark in group)
+                    {
+                        remark.CameraNumber = camNum++;
+                    }
+                }
+
+                return remarks;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting all camera remarks by survey: {ex.Message}");
+                return new List<SurveyCamRemarksModel>();
+            }
+        }
     }
 }

@@ -260,60 +260,38 @@ namespace SurveyApp.Controllers
             // Get submission information
             var submission = _submissionRepo.GetSubmissionBySurveyId(surveyId);
 
-            // Get camera remarks if any camera devices exist in this survey
+            // Get all camera remarks for this survey directly from the database
+            var allCameraRemarks = _camRemarksRepo.GetAllCameraRemarksBySurvey(surveyId);
+            bool hasCameraRemarks = allCameraRemarks != null && allCameraRemarks.Count > 0;
+            
+            // Group remarks by location, then by ItemID
             var cameraRemarks = new Dictionary<string, List<SurveyCamRemarksModel>>();
-            bool hasCameraDevices = false;
+            var cameraItemNames = new Dictionary<int, string>();
             
-            // Determine the ItemCode column name - the pivot uses "Item Code" with space
-            string itemCodeColumnName = dtSurveyItems.Columns.Contains("Item Code") ? "Item Code" 
-                : dtSurveyItems.Columns.Contains("ItemCode") ? "ItemCode"
-                : dtSurveyItems.Columns.Count > 0 ? dtSurveyItems.Columns[0].ColumnName : "";
-            
-            // Check if survey has camera devices (ItemCode starts with "CAM")
-            if (!string.IsNullOrEmpty(itemCodeColumnName))
+            if (hasCameraRemarks)
             {
-                foreach (DataRow row in dtSurveyItems.Rows)
+                var groupedByLocation = allCameraRemarks.GroupBy(r => r.LocID);
+                foreach (var group in groupedByLocation)
                 {
-                    var itemCode = row[itemCodeColumnName]?.ToString() ?? "";
-                    if (itemCode.StartsWith("CAM", StringComparison.OrdinalIgnoreCase))
-                    {
-                        hasCameraDevices = true;
-                        break;
-                    }
+                    cameraRemarks[$"{surveyId}_{group.Key}"] = group.ToList();
                 }
-            }
-
-            // If camera devices exist, fetch remarks for all locations
-            if (hasCameraDevices)
-            {
-                // Get all unique location IDs from the items table
-                var locationIds = new HashSet<int>();
-                for (int i = 4; i < dtSurveyItems.Columns.Count; i++)
+                
+                // Get unique ItemIDs and fetch their names from the database
+                var uniqueItemIds = allCameraRemarks.Select(r => r.ItemID).Distinct().ToList();
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                con.Open();
+                foreach (var itemId in uniqueItemIds)
                 {
-                    var colName = dtSurveyItems.Columns[i].ColumnName;
-                    if (colName.Contains("Existing") || colName.Contains("Required"))
+                    using var cmd = new SqlCommand("SELECT ItemName FROM ItemMaster WHERE ItemID = @ItemID", con);
+                    cmd.Parameters.AddWithValue("@ItemID", itemId);
+                    var itemName = cmd.ExecuteScalar()?.ToString();
+                    if (!string.IsNullOrEmpty(itemName))
                     {
-                        // Extract location name from column name
-                        var locName = colName.Replace("Existing", "").Replace("Required", "").Trim();
-                        // Find location ID from dtSurveyLocEmp
-                        foreach (DataRow locRow in dtSurveyLocEmp.Rows)
-                        {
-                            if (locRow["LocName"]?.ToString() == locName)
-                            {
-                                int locId = Convert.ToInt32(locRow["LocID"]);
-                                locationIds.Add(locId);
-                            }
-                        }
+                        cameraItemNames[itemId] = itemName;
                     }
-                }
-
-                // Fetch camera remarks for each location (all camera items)
-                foreach (var locId in locationIds)
-                {
-                    var remarks = _camRemarksRepo.GetCameraRemarksByLocation(surveyId, locId);
-                    if (remarks != null && remarks.Count > 0)
+                    else
                     {
-                        cameraRemarks[$"{surveyId}_{locId}"] = remarks;
+                        cameraItemNames[itemId] = $"Camera Item #{itemId}";
                     }
                 }
             }
@@ -324,7 +302,8 @@ namespace SurveyApp.Controllers
             ViewBag.SurveyId = surveyId;
             ViewBag.Submission = submission;
             ViewBag.CameraRemarks = cameraRemarks;
-            ViewBag.HasCameraDevices = hasCameraDevices;
+            ViewBag.CameraItemNames = cameraItemNames;
+            ViewBag.HasCameraDevices = hasCameraRemarks;
 
             return View("DetailedReport");
         }

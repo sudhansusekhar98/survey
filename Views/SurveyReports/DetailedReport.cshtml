@@ -442,22 +442,31 @@
     </div>
 </div>
 
-<!-- Camera Installation Remarks Section (shown only if camera devices exist) -->
+<!-- Camera Installation Remarks Section (shown only if camera remarks exist) -->
 @if (ViewBag.HasCameraDevices == true)
 {
     var cameraRemarks = ViewBag.CameraRemarks as Dictionary<string, List<SurveyApp.Models.SurveyCamRemarksModel>>;
+    var cameraItemNames = ViewBag.CameraItemNames as Dictionary<int, string>;
     if (cameraRemarks != null && cameraRemarks.Any())
     {
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header py-3" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
-                        <h5 class="mb-0 text-white">
-                            <i class="bi bi-camera-video-fill me-2"></i>Camera Installation Remarks
-                        </h5>
-                        <small class="text-white-50">Direction/location details for newly deployed cameras</small>
-                    </div>
-                    <div class="card-body p-0">
+        <div class="card mb-3">
+            <div class="card-header py-2">
+                <strong><i class="bi bi-camera-video-fill me-2"></i>Camera Installation Remarks</strong>
+            </div>
+            <div class="card-body table-responsive small">
+                <table class="table table-sm table-bordered mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="py-1 px-2 fw-semibold text-center bg-primary text-white" style="width: 20%;">Location
+                            </th>
+                            <th class="py-1 px-2 fw-semibold text-center bg-info text-white" style="width: 25%;">Camera Type
+                            </th>
+                            <th class="py-1 px-2 fw-semibold text-center bg-success text-white" style="width: 10%;">Cam #</th>
+                            <th class="py-1 px-2 fw-semibold text-center bg-warning" style="width: 45%;">Installation Direction
+                                / Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         @foreach (var locationRemarks in cameraRemarks)
                         {
                             // Parse surveyId_locId
@@ -478,40 +487,50 @@
                                 }
                             }
 
-                            <div class="border-bottom">
-                                <div class="bg-light px-3 py-2">
-                                    <h6 class="mb-0 text-dark fw-bold">
-                                        <i class="bi bi-geo-alt-fill text-danger me-2"></i>@locName
-                                    </h6>
-                                </div>
-                                <div class="p-3">
-                                    <div class="row g-3">
-                                        @foreach (var remark in locationRemarks.Value)
+                            // Group remarks by ItemID for this location
+                            var remarksByItem = locationRemarks.Value.GroupBy(r => r.ItemID).ToList();
+                            int locationRowSpan = locationRemarks.Value.Count;
+                            bool isFirstLocationRow = true;
+
+                            foreach (var itemGroup in remarksByItem)
+                            {
+                                int itemRowSpan = itemGroup.Count();
+                                bool isFirstItemRow = true;
+                                string itemName = cameraItemNames != null && cameraItemNames.ContainsKey(itemGroup.Key)
+                                ? cameraItemNames[itemGroup.Key]
+                                : $"Camera #{itemGroup.Key}";
+                                int camNum = 1;
+
+                                foreach (var remark in itemGroup)
+                                {
+                                    <tr>
+                                        @if (isFirstLocationRow)
                                         {
-                                            var camIndex = locationRemarks.Value.IndexOf(remark) + 1;
-                                            <div class="col-12 col-md-6 col-lg-4">
-                                                <div class="card h-100 border-info">
-                                                    <div class="card-header bg-info bg-opacity-10 py-2">
-                                                        <span class="fw-bold text-info">
-                                                            <i class="bi bi-camera-fill me-1"></i>#Cam@(camIndex)
-                                                        </span>
-                                                    </div>
-                                                    <div class="card-body py-2">
-                                                        <p class="mb-0 text-dark">
-                                                            <i class="bi bi-arrow-right-circle text-success me-1"></i>
-                                                            @(string.IsNullOrEmpty(remark.Remarks) ? "No remarks provided" :
-                                                                                                        remark.Remarks)
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <td class="py-1 px-2 align-middle text-center fw-bold" rowspan="@locationRowSpan">
+                                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>@locName
+                                            </td>
+                                            isFirstLocationRow = false;
                                         }
-                                    </div>
-                                </div>
-                            </div>
+                                        @if (isFirstItemRow)
+                                        {
+                                            <td class="py-1 px-2 align-middle text-center" rowspan="@itemRowSpan">
+                                                <i class="bi bi-camera-fill text-info me-1"></i>@itemName
+                                            </td>
+                                            isFirstItemRow = false;
+                                        }
+                                        <td class="py-1 px-2 text-center">
+                                            <span class="badge bg-secondary">#Cam@(camNum++)</span>
+                                        </td>
+                                        <td class="py-1 px-2">
+                                            <i class="bi bi-arrow-right-circle text-success me-1"></i>
+                                            @(string.IsNullOrEmpty(remark.Remarks) ? "No remarks provided" : remark.Remarks)
+                                        </td>
+                                    </tr>
+                                }
+                            }
                         }
-                    </div>
-                </div>
+                    </tbody>
+                </table>
             </div>
         </div>
     }

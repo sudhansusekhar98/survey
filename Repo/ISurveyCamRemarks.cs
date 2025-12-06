@@ -38,5 +38,10 @@ namespace SurveyApp.Repo
         /// Get all camera remarks for a survey location (all items)
         /// </summary>
         List<SurveyCamRemarksModel> GetCameraRemarksByLocation(Int64 surveyId, int locId);
+        
+        /// <summary>
+        /// Get all camera remarks for a survey (all locations and items)
+        /// </summary>
+        List<SurveyCamRemarksModel> GetAllCameraRemarksBySurvey(Int64 surveyId);
     }
 }
