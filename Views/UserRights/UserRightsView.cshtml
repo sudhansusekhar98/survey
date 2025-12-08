@@ -89,6 +89,7 @@
                                                 <th class="px-2 py-3" style="width:80px">View</th>
                                                 <th class="px-2 py-3" style="width:80px">Create</th>
                                                 <th class="px-2 py-3" style="width:80px">Update</th>
+                                                <th class="px-2 py-3" style="width:80px">Delete</th>
                                             </tr>
                                         </thead>
                                         <tbody class="table-border-bottom-0">
@@ -125,6 +126,13 @@
                                                                     <span data-on="Yes" data-off="NO" class="switch-label"></span><span class="switch-handle"></span>
                                                                 </label>
                                                             </td>
+                                                        <td class="px-2 py-1">
+
+                                                            <label class="switch switch-text switch-primary switch-pill">
+                                                                <input type="checkbox" class="switch-input" asp-for="RightsList[i].IsDelete">
+                                                                <span data-on="Yes" data-off="NO" class="switch-label"></span><span class="switch-handle"></span>
+                                                            </label>
+                                                        </td>
                                                         </tr>
                                                 
                                                 }

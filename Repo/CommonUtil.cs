@@ -19,13 +19,14 @@ namespace AnalyticaDocs.Repository
             // ⏱️ Session Timeout Check
             if (string.IsNullOrEmpty(sessionUserId) || string.IsNullOrEmpty(sessionRoleId))
             {
-                return controller.View("~/Views/Shared/SessionTimeout.cshtml");
+                return controller.RedirectToAction("Index", "UserLogin");
             }
 
             // 🔐 Role Authorization Check
             if (sessionRoleId != requiredRole)
             {
-                return controller.View("~/Views/Shared/Unauthorized.cshtml");
+                controller.TempData["AccessDeniedMessage"] = "You don't have the required permission to access this page.";
+                return controller.RedirectToAction("Index", "Dashboard");
             }
 
             // Authorized
@@ -38,10 +39,13 @@ namespace AnalyticaDocs.Repository
             var sessionRoleId = controller.HttpContext.Session.GetString("RoleId");
 
             if (string.IsNullOrEmpty(sessionUserId) || string.IsNullOrEmpty(sessionRoleId))
-                return controller.View("~/Views/Shared/SessionTimeout.cshtml");
+                return controller.RedirectToAction("Index", "UserLogin");
 
             if (!allowedRoles.Contains(sessionRoleId))
-                return controller.View("~/Views/Shared/Unauthorized.cshtml");
+            {
+                controller.TempData["AccessDeniedMessage"] = "You don't have the required permission to access this page.";
+                return controller.RedirectToAction("Index", "Dashboard");
+            }
 
             return null;
         }
@@ -54,7 +58,7 @@ namespace AnalyticaDocs.Repository
             // ⏱️ Session Timeout Check
             if (string.IsNullOrEmpty(sessionUserId) || string.IsNullOrEmpty(sessionRoleId))
             {
-                return controller.View("~/Views/Shared/SessionTimeout.cshtml");
+                return controller.RedirectToAction("Index", "UserLogin");
             }
 
             bool IsAuthorized = CheckUserRightsScalar(Convert.ToInt32(sessionUserId), RightsId, RegionId, SurveyId, Type);
@@ -62,7 +66,8 @@ namespace AnalyticaDocs.Repository
             // 🔐 Role Authorization Check
             if (!IsAuthorized)
             {
-                return controller.View("~/Views/Shared/Unauthorized.cshtml");
+                controller.TempData["AccessDeniedMessage"] = "You don't have the required permission to perform this action.";
+                return controller.RedirectToAction("Index", "Dashboard");
             }
 
             // Authorized
@@ -104,6 +109,15 @@ namespace AnalyticaDocs.Repository
                 throw;
             }
         }
+
+        /// <summary>
+        /// Check if a user has authorization for a specific action without redirecting
+        /// </summary>
+        public bool IsAuthorizedWithAction(int userId, int rightsId, string actionType)
+        {
+            return CheckUserRightsScalar(userId, rightsId, null, null, actionType);
+        }
+
         public List<DepartmentList> GetDepartment()
         {
             try

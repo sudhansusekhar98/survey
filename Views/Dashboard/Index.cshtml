@@ -10,7 +10,8 @@
 @section PageStyles {
     <link rel="stylesheet" href="~/css/dashboard.css" />
     <style>
-        .welcome-banner, .welcome-banner * {
+        .welcome-banner,
+        .welcome-banner * {
             color: #fff !important;
         }
     </style>
@@ -30,7 +31,11 @@
     <div class="welcome-banner">
         <div class="row align-items-center">
             <div class="col-md-8 ">
-                <h3 class="mb-2 ">Welcome back, @Model.UserName!</h3>
+                @{
+                    var hour = DateTime.Now.Hour;
+                    var greeting = hour < 12 ? "Good Morning" : (hour < 17 ? "Good Afternoon" : "Good Evening");
+                }
+                <h3 class="mb-2 ">@greeting, @Model.UserName!</h3>
                 <p class="mb-0 opacity-75 ">Here's what's happening with your surveys today</p>
             </div>
             <div class="col-md-4 text-end">
@@ -97,7 +102,8 @@
         </div>
 
         <div class="col-12 col-sm-6 col-xl-3">
-            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="Completed" class="text-decoration-none">
+            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="Completed"
+                class="text-decoration-none">
                 <div class="card stat-card h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
@@ -118,7 +124,8 @@
         </div>
 
         <div class="col-12 col-sm-6 col-xl-3">
-            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="In Progress" class="text-decoration-none">
+            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="In Progress"
+                class="text-decoration-none">
                 <div class="card stat-card h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
@@ -255,11 +262,13 @@
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <h5 class="card-title mb-0">Survey Status</h5>
                     <div class="dropdown">
-                        <button class="btn btn-text-secondary rounded-pill btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                        <button class="btn btn-text-secondary rounded-pill btn-icon dropdown-toggle hide-arrow"
+                            data-bs-toggle="dropdown">
                             <i class="bx bx-dots-vertical-rounded bx-lg"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" asp-controller="SurveyCreation" asp-action="Index">View All</a></li>
+                            <li><a class="dropdown-item" asp-controller="SurveyCreation" asp-action="Index">View All</a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -269,7 +278,8 @@
                         <ul class="list-unstyled mb-0">
                             @foreach (var status in Model.SurveysByStatus.OrderByDescending(x => x.Value))
                             {
-                                var percentage = Model.TotalSurveys > 0 ? (int)Math.Round((double)status.Value / Model.TotalSurveys * 100) : 0;
+                                var percentage = Model.TotalSurveys > 0 ? (int)Math.Round((double)status.Value /
+                                Model.TotalSurveys * 100) : 0;
                                 var badgeClass = status.Key switch
                                 {
                                     "Completed" => "success",
@@ -288,7 +298,8 @@
                                 };
 
                                 <li class="mb-4">
-                                    <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="@status.Key" class="text-decoration-none text-dark">
+                                    <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="@status.Key"
+                                        class="text-decoration-none text-dark">
                                         <div class="d-flex align-items-center mb-2">
                                             <div class="avatar avatar-sm me-3">
                                                 <span class="avatar-initial rounded-2 bg-label-@badgeClass">
@@ -301,7 +312,9 @@
                                             </div>
                                         </div>
                                         <div class="progress" style="height: 6px;">
-                                            <div class="progress-bar bg-@badgeClass" role="progressbar" style="width: @percentage%" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                            <div class="progress-bar bg-@badgeClass" role="progressbar"
+                                                style="width: @percentage%" aria-valuenow="@percentage" aria-valuemin="0"
+                                                aria-valuemax="100"></div>
                                         </div>
                                     </a>
                                 </li>
@@ -331,9 +344,11 @@
                         <ul class="list-unstyled mb-0">
                             @foreach (var region in Model.SurveysByRegion.OrderByDescending(x => x.Value).Take(5))
                             {
-                                var percentage = Model.TotalSurveys > 0 ? (int)Math.Round((double)region.Value / Model.TotalSurveys * 100) : 0;
+                                var percentage = Model.TotalSurveys > 0 ? (int)Math.Round((double)region.Value /
+                                Model.TotalSurveys * 100) : 0;
                                 <li class="mb-4">
-                                    <a asp-controller="SurveyCreation" asp-action="Index" asp-route-region="@region.Key" class="text-decoration-none text-dark">
+                                    <a asp-controller="SurveyCreation" asp-action="Index" asp-route-region="@region.Key"
+                                        class="text-decoration-none text-dark">
                                         <div class="d-flex align-items-center mb-2">
                                             <div class="avatar avatar-sm me-3">
                                                 <span class="avatar-initial rounded-2 bg-label-info">
@@ -346,7 +361,8 @@
                                             </div>
                                         </div>
                                         <div class="progress" style="height: 6px;">
-                                            <div class="progress-bar bg-info" role="progressbar" style="width: @percentage%" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                            <div class="progress-bar bg-info" role="progressbar" style="width: @percentage%"
+                                                aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
                                     </a>
                                 </li>
@@ -386,7 +402,8 @@
                                     _ => "bx-cog"
                                 };
                                 <li class="d-flex align-items-center mb-4">
-                                    <a asp-controller="SurveyCreation" asp-action="Index" asp-route-type="@type.Key" class="text-decoration-none text-dark d-flex align-items-center w-100">
+                                    <a asp-controller="SurveyCreation" asp-action="Index" asp-route-type="@type.Key"
+                                        class="text-decoration-none text-dark d-flex align-items-center w-100">
                                         <div class="avatar avatar-sm me-3">
                                             <span class="avatar-initial rounded-2 bg-label-primary">
                                                 <i class="bx @iconClass"></i>
@@ -424,7 +441,8 @@
                         <p class="card-subtitle text-muted mb-0">Monthly survey creation and completion</p>
                     </div>
                     <div class="dropdown">
-                        <button class="btn btn-text-secondary rounded-pill btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                        <button class="btn btn-text-secondary rounded-pill btn-icon dropdown-toggle hide-arrow"
+                            data-bs-toggle="dropdown">
                             <i class="bx bx-dots-vertical-rounded bx-lg"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
@@ -453,7 +471,8 @@
                             <span class="fw-semibold">@Model.CompletionRate%</span>
                         </div>
                         <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-success" role="progressbar" style="width: @Model.CompletionRate%"></div>
+                            <div class="progress-bar bg-success" role="progressbar"
+                                style="width: @Model.CompletionRate%"></div>
                         </div>
                     </div>
                 </div>
@@ -581,7 +600,8 @@
                                             @if (Model.CanUpdate)
                                             {
                                                 <td>
-                                                    <a asp-controller="SurveyCreation" asp-action="Edit" asp-route-id="@survey.SurveyId" class="btn btn-sm btn-text-primary">
+                                                    <a asp-controller="SurveyCreation" asp-action="Edit"
+                                                        asp-route-id="@survey.SurveyId" class="btn btn-sm btn-text-primary">
                                                         <i class="bx bx-edit"></i>
                                                     </a>
                                                 </td>
@@ -619,7 +639,9 @@
                             <span class="fw-semibold">@Model.CompletionRate%</span>
                         </div>
                         <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-success" role="progressbar" style="width: @Model.CompletionRate%" aria-valuenow="@Model.CompletionRate" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar bg-success" role="progressbar"
+                                style="width: @Model.CompletionRate%" aria-valuenow="@Model.CompletionRate"
+                                aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                     </div>
 
@@ -674,7 +696,8 @@
                             <div class="flex-grow-1">
                                 <strong>@Model.MissedDeadlineSurveys</strong> survey(s) have missed their deadline
                             </div>
-                            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-missed="true" class="btn btn-sm btn-danger">
+                            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-missed="true"
+                                class="btn btn-sm btn-danger">
                                 View
                             </a>
                         </div>
@@ -687,7 +710,8 @@
                             <div class="flex-grow-1">
                                 <strong>@Model.OverdueSurveys</strong> survey(s) on hold need attention
                             </div>
-                            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="On Hold" class="btn btn-sm btn-danger">
+                            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="On Hold"
+                                class="btn btn-sm btn-danger">
                                 View
                             </a>
                         </div>
@@ -700,7 +724,8 @@
                             <div class="flex-grow-1">
                                 <strong>@Model.DueSoon</strong> survey(s) currently in progress
                             </div>
-                            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="In Progress" class="btn btn-sm btn-warning">
+                            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="In Progress"
+                                class="btn btn-sm btn-warning">
                                 View
                             </a>
                         </div>
@@ -739,7 +764,7 @@
 @section Scripts {
     <script src="~/js/dashboard.js"></script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             // Initialize dashboard with data from model
             DashboardModule.init({
                 surveyStatusData: @Html.Raw(Json.Serialize(Model.SurveysByStatus)),
@@ -747,8 +772,7 @@
                 implementationData: @Html.Raw(Json.Serialize(Model.SurveysByImplementationType)),
                 monthlyData: @Html.Raw(Json.Serialize(Model.MonthlySurveyCount)),
                 monthlyCompletionData: @Html.Raw(Json.Serialize(Model.MonthlyCompletionCount))
-            });
+                });
         });
     </script>
 }
-

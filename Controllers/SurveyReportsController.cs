@@ -525,10 +525,8 @@ namespace SurveyApp.Controllers
                 // Log error - could add logging here for debugging
                 System.Diagnostics.Debug.WriteLine($"Error getting survey item images: {ex.Message}");
             }
-
             return imageList;
         }
-
 
         // GET: SurveyReports/ExportToExcel
         public IActionResult ExportToExcel(DateTime? fromDate = null, DateTime? toDate = null,

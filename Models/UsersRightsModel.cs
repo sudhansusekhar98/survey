@@ -18,6 +18,8 @@ namespace AnalyticaDocs.Models
         public bool IsView { get; set; } = false;
         public bool IsCreate { get; set; } = false;
         public bool IsUpdate { get; set; } = false;
+
+        public bool IsDelete { get; set; } = false;
         public string? DeptName { get; set; }
 
     }

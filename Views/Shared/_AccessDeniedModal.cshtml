@@ -1,0 +1,42 @@
+@*
+    Access Denied Modal - shown when user doesn't have permission
+*@
+
+<div class="modal fade" id="accessDeniedModal" tabindex="-1" aria-labelledby="accessDeniedModalLabel" aria-hidden="true"
+    data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-danger">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="accessDeniedModalLabel">
+                    <i class="bi bi-shield-exclamation me-2"></i>Access Denied
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="bi bi-shield-lock-fill text-danger" style="font-size: 4rem;"></i>
+                <h5 class="mt-3 mb-2">Permission Required</h5>
+                <p class="text-muted" id="accessDeniedMessage">
+                    You don't have the required permission to access this page or perform this action.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["AccessDeniedMessage"] != null)
+{
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var message = @Html.Raw(Json.Serialize(TempData["AccessDeniedMessage"].ToString()));
+            document.getElementById('accessDeniedMessage').textContent = message;
+            var modal = new bootstrap.Modal(document.getElementById('accessDeniedModal'));
+            modal.show();
+        });
+    </script>
+}

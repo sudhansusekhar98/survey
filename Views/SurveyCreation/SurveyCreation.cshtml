@@ -207,17 +207,22 @@
 
                                             <div class="col-12 col-md-6">
                                                 <div class="form-custom-floating">
-                                                    <input asp-for="SurveyTeamName" type="text" class="form-control"
-                                                        placeholder=" ">
-                                                    <label asp-for="SurveyTeamName"></label>
+                                                    <select asp-for="SurveyTeamId" id="teamDropdown"
+                                                        asp-items="@(ViewBag.Employees as SelectList)"
+                                                        class="form-select" placeholder=" ">
+                                                        <option value=""> </option>
+                                                    </select>
+                                                    <label asp-for="SurveyTeamId">Team Leader</label>
+                                                    <span asp-validation-for="SurveyTeamId" class="text-danger"></span>
                                                 </div>
+                                                <input type="hidden" asp-for="SurveyTeamName" id="teamNameHidden" />
                                             </div>
 
                                             <div class="col-12 col-md-6">
                                                 <div class="form-custom-floating">
-                                                    <input asp-for="SurveyTeamContact" type="number"
-                                                        class="form-control" placeholder=" " maxlength="15" required>
-                                                    <label asp-for="SurveyTeamContact"></label>
+                                                    <input asp-for="SurveyTeamContact" type="text" id="teamContactInput"
+                                                        class="form-control" placeholder=" " maxlength="15" readonly>
+                                                    <label asp-for="SurveyTeamContact">Contact Number</label>
                                                 </div>
                                             </div>
 
@@ -256,6 +261,35 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function () {
+            // Handle team member selection
+            $('#teamDropdown').change(function () {
+                var empId = $(this).val();
+                var selectedText = $(this).find('option:selected').text().trim();
+
+                // Store the selected employee name in the hidden field
+                $('#teamNameHidden').val(selectedText !== '' ? selectedText : '');
+
+                if (empId) {
+                    $.ajax({
+                        url: '@Url.Action("GetEmployeePhone", "SurveyCreation")',
+                        type: 'GET',
+                        data: { empId: empId },
+                        success: function (response) {
+                            if (response.success) {
+                                $('#teamContactInput').val(response.data.phoneNumber || '');
+                            } else {
+                                $('#teamContactInput').val('');
+                            }
+                        },
+                        error: function () {
+                            $('#teamContactInput').val('');
+                        }
+                    });
+                } else {
+                    $('#teamContactInput').val('');
+                }
+            });
+
             // Handle client selection
             $('#clientDropdown').change(function () {
                 var clientId = $(this).val();

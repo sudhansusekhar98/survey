@@ -19,8 +19,8 @@
                             </div>
                             <div class="col-6 text-end">
                                 <a href="javascript:void(0);"
-                                   class="btn btn-outline-danger text-white border-0 mx-0 my-0"
-                                   onclick="showBackConfirmModal('@Url.Action("Index", "SurveyCreation")','Unsaved changes will be lost. Do you want to continue?')">
+                                    class="btn btn-outline-danger text-white border-0 mx-0 my-0"
+                                    onclick="showBackConfirmModal('@Url.Action("Index", "SurveyCreation")','Unsaved changes will be lost. Do you want to continue?')">
                                     <i class="bi bi-arrow-left-circle me-2"></i> Back To List
                                 </a>
                             </div>
@@ -29,11 +29,14 @@
                     <div class="card-body">
                         <div class="row gx-4 gy-6">
                             <div class="col-12">
-                                @if (TempData["ResultMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
+                                @if (TempData["ResultMessage"] != null &&
+                                                                !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
                                 {
-                                    <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show" role="alert">
+                                    <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show"
+                                        role="alert">
                                         @Html.Raw(TempData["ResultMessage"])
-                                        <button type="button" class="btn-close btn-sm align-top" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        <button type="button" class="btn-close btn-sm align-top" data-bs-dismiss="alert"
+                                            aria-label="Close"></button>
                                     </div>
                                 }
                             </div>
@@ -41,7 +44,9 @@
                             <!-- Client Selection -->
                             <div class="col-12">
                                 <div class="form-custom-floating">
-                                    <select asp-for="ClientID" id="clientDropdown" asp-items="@(ViewBag.Clients != null ? new SelectList(ViewBag.Clients, "Value", "Text", Model.ClientID) : new SelectList(Enumerable.Empty<SelectListItem>()))" class="form-select" placeholder=" ">
+                                    <select asp-for="ClientID" id="clientDropdown"
+                                        asp-items="@(ViewBag.Clients != null ? new SelectList(ViewBag.Clients, "Value", "Text", Model.ClientID) : new SelectList(Enumerable.Empty<SelectListItem>()))"
+                                        class="form-select" placeholder=" ">
                                         <option value=""> </option>
                                     </select>
                                     <label asp-for="ClientID"></label>
@@ -53,7 +58,7 @@
                             <div class="col-12">
                                 <div class="card border-info mt-1">
                                     <div class="card-header bg-info bg-opacity-10 border-bottom border-info mb-3"
-                                         style="padding-top: 10px; padding-bottom: 10px;">
+                                        style="padding-top: 10px; padding-bottom: 10px;">
                                         <h6 class="mb-0 text-info">
                                             <i class="bi bi-building me-2"></i>Client Information
                                         </h6>
@@ -62,28 +67,32 @@
                                         <div class="row g-3">
                                             <div class="col-12 col-md-6">
                                                 <div class="form-custom-floating">
-                                                    <input asp-for="AgencyName" type="text" class="form-control" placeholder=" " id="agencyNameInput" readonly>
+                                                    <input asp-for="AgencyName" type="text" class="form-control"
+                                                        placeholder=" " id="agencyNameInput" readonly>
                                                     <label asp-for="AgencyName"></label>
                                                 </div>
                                             </div>
 
                                             <div class="col-12 col-md-6">
                                                 <div class="form-custom-floating">
-                                                    <input asp-for="LocationSiteName" type="text" class="form-control" placeholder=" " id="addressInput" readonly>
+                                                    <input asp-for="LocationSiteName" type="text" class="form-control"
+                                                        placeholder=" " id="addressInput" readonly>
                                                     <label asp-for="LocationSiteName"></label>
                                                 </div>
                                             </div>
 
                                             <div class="col-12 col-md-6">
                                                 <div class="form-custom-floating">
-                                                    <input asp-for="SurveyTeamName" type="text" class="form-control" placeholder=" " id="contactPersonInput" readonly>
+                                                    <input asp-for="SurveyTeamName" type="text" class="form-control"
+                                                        placeholder=" " id="contactPersonInput" readonly>
                                                     <label asp-for="SurveyTeamName">Contact Person</label>
                                                 </div>
                                             </div>
 
                                             <div class="col-12 col-md-6">
                                                 <div class="form-custom-floating">
-                                                    <input asp-for="SurveyTeamContact" type="text" class="form-control" placeholder=" " id="contactNumberInput" readonly>
+                                                    <input asp-for="SurveyTeamContact" type="text" class="form-control"
+                                                        placeholder=" " id="contactNumberInput" readonly>
                                                     <label asp-for="SurveyTeamContact">Contact Number</label>
                                                 </div>
                                             </div>
@@ -93,7 +102,8 @@
                                                     @* <input type="text" class="form-control" placeholder=" " id="stateInput" readonly>
                                                     <label>State</label> *@
 
-                                                    <input asp-for="MapMarking" type="text" class="form-control" placeholder=" " id="State" readonly>
+                                                    <input asp-for="MapMarking" type="text" class="form-control"
+                                                        placeholder=" " id="State" readonly>
                                                     <label asp-for="MapMarking">State</label>
                                                 </div>
                                             </div>
@@ -103,7 +113,8 @@
                                                     @* <input type="text" class="form-control" placeholder=" " id="cityInput" readonly>
                                                     <label>City</label> *@
 
-                                                    <input asp-for="CityDistrict" type="text" class="form-control" placeholder=" " id="City" readonly>
+                                                    <input asp-for="CityDistrict" type="text" class="form-control"
+                                                        placeholder=" " id="City" readonly>
                                                     <label asp-for="CityDistrict">City</label>
                                                 </div>
                                             </div>
@@ -126,7 +137,8 @@
                                         <div class="row g-3 mt-1">
                                             <div class="col-12 col-md-6">
                                                 <div class="form-custom-floating">
-                                                    <input asp-for="SurveyName" type="text" class="form-control" placeholder=" " required>
+                                                    <input asp-for="SurveyName" type="text" class="form-control"
+                                                        placeholder=" " required>
                                                     <label asp-for="SurveyName"></label>
                                                     <span asp-validation-for="SurveyName" class="text-danger"></span>
                                                 </div>
@@ -134,7 +146,9 @@
 
                                             <div class="col-12 col-md-6">
                                                 <div class="form-custom-floating">
-                                                    <select asp-for="RegionID" asp-items="@(ViewBag.Regions as SelectList)" class="form-select" placeholder=" ">
+                                                    <select asp-for="RegionID"
+                                                        asp-items="@(ViewBag.Regions as SelectList)" class="form-select"
+                                                        placeholder=" ">
                                                         <option value=""> </option>
                                                     </select>
                                                     <label asp-for="RegionID"></label>
@@ -144,7 +158,9 @@
 
                                             <div class="col-12 col-md-6">
                                                 <div class="form-custom-floating">
-                                                    <select asp-for="ImplementationType" asp-items="Model.ImplementationTypeOptions" class="form-select" placeholder=" ">
+                                                    <select asp-for="ImplementationType"
+                                                        asp-items="Model.ImplementationTypeOptions" class="form-select"
+                                                        placeholder=" ">
                                                         <option value=""> </option>
                                                     </select>
                                                     <label asp-for="ImplementationType"></label>
@@ -153,28 +169,37 @@
 
                                             <div class="col-12 col-md-6">
                                                 <div class="form-custom-floating">
-                                                    <input asp-for="SurveyDate" type="date" class="form-control" placeholder=" ">
+                                                    <input asp-for="SurveyDate" type="date" class="form-control"
+                                                        placeholder=" ">
                                                     <label asp-for="SurveyDate"></label>
                                                 </div>
                                             </div>
 
                                             <div class="col-12 col-md-6">
                                                 <div class="form-custom-floating">
-                                                    <input asp-for="SurveyTeamName" type="text" class="form-control" placeholder=" ">
-                                                    <label asp-for="SurveyTeamName"></label>
+                                                    <select asp-for="SurveyTeamId" id="teamDropdown"
+                                                        asp-items="@(ViewBag.Employees as SelectList)"
+                                                        class="form-select" placeholder=" ">
+                                                        <option value=""> </option>
+                                                    </select>
+                                                    <label asp-for="SurveyTeamId">Survey Team Member</label>
+                                                    <span asp-validation-for="SurveyTeamId" class="text-danger"></span>
                                                 </div>
+                                                <input type="hidden" asp-for="SurveyTeamName" id="teamNameHidden" />
                                             </div>
 
                                             <div class="col-12 col-md-6">
                                                 <div class="form-custom-floating">
-                                                    <input asp-for="SurveyTeamContact" type="text" class="form-control" placeholder=" " maxlength="15">
+                                                    <input asp-for="SurveyTeamContact" type="text" id="teamContactInput"
+                                                        class="form-control" placeholder=" " maxlength="15" readonly>
                                                     <label asp-for="SurveyTeamContact"></label>
                                                 </div>
                                             </div>
 
                                             <div class="col-12">
                                                 <div class="form-custom-floating">
-                                                    <textarea asp-for="ScopeOfWork" class="form-control" placeholder=" " rows="3" style="min-height: 100px;"></textarea>
+                                                    <textarea asp-for="ScopeOfWork" class="form-control" placeholder=" "
+                                                        rows="3" style="min-height: 100px;"></textarea>
                                                     <label asp-for="ScopeOfWork"></label>
                                                 </div>
                                             </div>
@@ -192,8 +217,10 @@
                     <div class="card-footer mt-4">
                         <div class="row">
                             <div class="col text-end">
-                                <button type="submit" class="btn btn-primary me-2"><i class="bi bi-check2-circle me-2"></i> Update</button>
-                                <a asp-controller="SurveyCreation" asp-action="Index" class="btn btn-secondary"><i class="bi bi-x-circle me-2"></i> Cancel</a>
+                                <button type="submit" class="btn btn-primary me-2"><i
+                                        class="bi bi-check2-circle me-2"></i> Update</button>
+                                <a asp-controller="SurveyCreation" asp-action="Index" class="btn btn-secondary"><i
+                                        class="bi bi-x-circle me-2"></i> Cancel</a>
                             </div>
                         </div>
                     </div>
@@ -205,24 +232,53 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
+            // Handle team member selection
+            $('#teamDropdown').change(function () {
+                var empId = $(this).val();
+                var selectedText = $(this).find('option:selected').text().trim();
+
+                // Store the selected employee name in the hidden field
+                $('#teamNameHidden').val(selectedText !== '' ? selectedText : '');
+
+                if (empId) {
+                    $.ajax({
+                        url: '@Url.Action("GetEmployeePhone", "SurveyCreation")',
+                        type: 'GET',
+                        data: { empId: empId },
+                        success: function (response) {
+                            if (response.success) {
+                                $('#teamContactInput').val(response.data.phoneNumber || '');
+                            } else {
+                                $('#teamContactInput').val('');
+                            }
+                        },
+                        error: function () {
+                            $('#teamContactInput').val('');
+                        }
+                    });
+                } else {
+                    $('#teamContactInput').val('');
+                }
+            });
+
             // Handle client selection
-            $('#clientDropdown').change(function() {
+            $('#clientDropdown').change(function () {
                 var clientId = $(this).val();
-                
+
                 if (clientId) {
                     $.ajax({
                         url: '@Url.Action("GetClientDetails", "SurveyCreation")',
                         type: 'GET',
                         data: { clientId: clientId },
-                        success: function(response) {
+                        success: function (response) {
                             if (response.success) {
                                 applyClientDetails(response.data);
                             } else {
                                 alert('Error loading client details: ' + response.message);
                             }
                         },
-                        error: function() {
+                        error: function () {
                             alert('Failed to load client details. Please try again.');
                         }
                     });
@@ -236,16 +292,16 @@
             if (initialClientId > 0) {
                 // Set the dropdown value
                 $('#clientDropdown').val(initialClientId);
-                
+
                 // Populate the readonly fields with the model's current data
                 var initialClientData = {
                     clientName: '@Model.AgencyName',
                     address: '@Model.LocationSiteName',
                     contactPerson: '@Model.SurveyTeamName',
                     contactNumber: '@Model.SurveyTeamContact',
-                    stateId: @(Model.StateId.HasValue ? Model.StateId.Value.ToString() : "null"),
+                    stateId: @(Model.StateId.HasValue? Model.StateId.Value.ToString() : "null"),
                     stateName: '@Model.MapMarking',
-                    cityId: @(Model.CityId.HasValue ? Model.CityId.Value.ToString() : "null"),
+                    cityId: @(Model.CityId.HasValue? Model.CityId.Value.ToString() : "null"),
                     cityName: '@Model.CityDistrict'
                 };
                 applyClientDetails(initialClientData);
@@ -260,7 +316,7 @@
             $('#contactNumberInput').val(client.contactNumber || '');
             $('#stateInput').val(client.stateName || '');
             $('#cityInput').val(client.cityName || '');
-            
+
             // Populate hidden fields for form submission
             $('#stateIdHidden').val(client.stateId || '');
             $('#stateNameHidden').val(client.stateName || '');

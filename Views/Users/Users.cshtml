@@ -1,5 +1,4 @@
-﻿
-@model AnalyticaDocs.Models.UserModel
+﻿@model AnalyticaDocs.Models.UserModel
 @{
     ViewData["Title"] = "User";
 }
@@ -10,7 +9,7 @@
         body {
             overflow-x: hidden !important;
         }
-        
+
         /* Mobile full-screen card */
         @@media (max-width: 767.98px) {
             .full-screen-card {
@@ -23,108 +22,242 @@
 }
 
 <form>
-<div class="container-fluid p-0 m-0">
-    <div class="row g-0">
-        <div class="col-12">
-    <div class="card shadow mt-0 rounded-0 full-screen-card">
-        <div class="card-header bg-purple mb-8 py-2">
-                    <h6 class="text-white fs-4 pt-1">
-                        Application Users
-                    </h6>
-        </div>
-        <div class="card-body">
+    <div class="container-fluid p-0 m-0">
+        <div class="row g-0">
+            <div class="col-12">
+                <div class="card shadow mt-0 rounded-0 full-screen-card">
+                    <div class="card-header bg-purple mb-8 py-2">
+                        <h6 class="text-white fs-4 pt-1">
+                            Application Users
+                        </h6>
+                    </div>
+                    <div class="card-body">
 
-                <div class="col-md-12">
-                   
-                        <div class="nav-align-top">
-                            <ul class="nav nav-pills flex-column flex-md-row mb-6">
-                                <li class="nav-item me-4"> <a asp-controller="Users" asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i>Add New User </a></li>
-                            </ul>
+                        <div class="col-md-12">
+
+                            <div class="nav-align-top">
+                                <ul class="nav nav-pills flex-column flex-md-row mb-6">
+                                    <li class="nav-item me-4">
+                                        <a asp-controller="Users" asp-action="Create" class="btn btn-primary">
+                                            <i class="bi bi-plus-circle me-2"></i>Add New User
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button type="button" class="btn btn-success"
+                                            onclick="showSyncEmployeesModal()">
+                                            <i class="bi bi-arrow-repeat me-2"></i>Sync Employees to Login
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+
                         </div>
-                   
-                </div>
 
-                <div class="col-12">
-                    @if (TempData["ResultMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
-                    {
-                        <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show " role="alert">
-                            @Html.Raw(TempData["ResultMessage"])
-                            <button type="button" class="btn-close btn-sm align-top" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    }
-
-
-                </div>
-            <div class="table-responsive text-nowrap">
-                <table id="userDataTable" class="datatables-basic table table-outer-border table-responsive table-hover custom-hover">
-                    <thead>
-                        <tr class="text-nowrap fw-semibold table-header">
-                            <th class="px-2 py-3">#</th>
-                            <th class="px-2 py-3">User ID</th>
-                            <th class="px-2 py-3">Login Name</th>
-                            <th class="px-2 py-3 d-none d-lg-table-cell">Login ID</th>
-                            <th class="px-2 py-3 d-none d-lg-table-cell">Mobile No</th>
-                            <th class="px-2 py-3 d-none d-lg-table-cell">Email ID</th>
-                            <th class="px-2 py-3 d-none d-lg-table-cell">Password</th>
-                            <th class="px-2 py-3">Status</th>
-                            <th class="px-2 py-3">Role</th>
-                            <th class="px-2 py-3 text-center" style="width:100px">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-border-bottom-0">
-                        @if (ViewBag.DataForGrid != null && ((List<UserModel>)ViewBag.DataForGrid).Count > 0)
-                        {
-                            foreach (var GridData in (List<UserModel>)ViewBag.DataForGrid)
+                        <div class="col-12">
+                            @if (TempData["ResultMessage"] != null &&
+                                                        !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
                             {
-                                <tr class="small text-nowrap">
-                                    <td class="px-2 py-1">@GridData.Srno</td>
-                                    <td class="px-2 py-1">@GridData.UserId</td>
-                                    <td class="px-2 py-1">@GridData.LoginName</td>
-                                    <td class="px-2 py-1  d-none d-lg-table-cell">@GridData.LoginId</td>
-                                    <td class="px-2 py-1  d-none d-lg-table-cell">@GridData.MobileNo</td>
-                                    <td class="px-2 py-1  d-none d-lg-table-cell">@GridData.EmailID</td>
-                                    <td class="px-2 py-1  d-none d-lg-table-cell">*******</td>
-                                    <td class="px-2 py-1">
-                                        <span class="badge @(GridData.ISActive == "Y" ? "bg-label-success" : "bg-label-danger")">@GridData.ISActivedesc</span>
-                                    </td>
-                                    <td class="px-2 py-1">@GridData.RoleName</td>
-                                    <td class="px-2 py-1 text-center">
-                                       @*  <a asp-route-id="@GridData.UserId" class="btn btn-sm btn-outline-primary py-1 px-2" data-bs-toggle="modal" data-bs-target="#basicModal">
+                                <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show " role="alert">
+                                    @Html.Raw(TempData["ResultMessage"])
+                                    <button type="button" class="btn-close btn-sm align-top" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
+                                </div>
+                            }
+
+
+                        </div>
+                        <div class="table-responsive text-nowrap">
+                            <table id="userDataTable"
+                                class="datatables-basic table table-outer-border table-responsive table-hover custom-hover">
+                                <thead>
+                                    <tr class="text-nowrap fw-semibold table-header">
+                                        <th class="px-2 py-3">#</th>
+                                        <th class="px-2 py-3">User ID</th>
+                                        <th class="px-2 py-3">Login Name</th>
+                                        <th class="px-2 py-3 d-none d-lg-table-cell">Login ID</th>
+                                        <th class="px-2 py-3 d-none d-lg-table-cell">Mobile No</th>
+                                        <th class="px-2 py-3 d-none d-lg-table-cell">Email ID</th>
+                                        <th class="px-2 py-3 d-none d-lg-table-cell">Password</th>
+                                        <th class="px-2 py-3">Status</th>
+                                        <th class="px-2 py-3">Role</th>
+                                        <th class="px-2 py-3 text-center" style="width:100px">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-border-bottom-0">
+                                    @if (ViewBag.DataForGrid != null && ((List<UserModel>)ViewBag.DataForGrid).Count >
+                                                                        0)
+                                    {
+                                        foreach (var GridData in (List<UserModel>)ViewBag.DataForGrid)
+                                        {
+                                            <tr class="small text-nowrap">
+                                                <td class="px-2 py-1">@GridData.Srno</td>
+                                                <td class="px-2 py-1">@GridData.UserId</td>
+                                                <td class="px-2 py-1">@GridData.LoginName</td>
+                                                <td class="px-2 py-1  d-none d-lg-table-cell">@GridData.LoginId</td>
+                                                <td class="px-2 py-1  d-none d-lg-table-cell">@GridData.MobileNo</td>
+                                                <td class="px-2 py-1  d-none d-lg-table-cell">@GridData.EmailID</td>
+                                                <td class="px-2 py-1  d-none d-lg-table-cell">*******</td>
+                                                <td class="px-2 py-1">
+                                                    <span
+                                                        class="badge @(GridData.ISActive == "Y" ? "bg-label-success" : "bg-label-danger")">@GridData.ISActivedesc</span>
+                                                </td>
+                                                <td class="px-2 py-1">@GridData.RoleName</td>
+                                                <td class="px-2 py-1 text-center">
+                                                    @*  <a asp-route-id="@GridData.UserId" class="btn btn-sm btn-outline-primary py-1 px-2" data-bs-toggle="modal" data-bs-target="#basicModal">
                                             <i class="bi bi-eye me-1"></i> View
                                         </a> *@
 
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-primary"
-                                                data-userid="@GridData.UserId"
-                                                onclick="openUserModal(this)">
-                                            <i class="bi bi-eye me-1"></i> View
-                                        </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                                        data-userid="@GridData.UserId" onclick="openUserModal(this)">
+                                                        <i class="bi bi-eye me-1"></i> View
+                                                    </button>
 
 
-                                        <a asp-action="Edit" asp-route-id="@GridData.UserId" class="btn btn-sm btn-outline-warning" >
-                                            <i class="bi bi-pencil me-1"></i> Edit
-                                        </a>
-                                    
-                                    </td>
-                                </tr>
-                            }
-                        }
+                                                    <a asp-action="Edit" asp-route-id="@GridData.UserId"
+                                                        class="btn btn-sm btn-outline-warning">
+                                                        <i class="bi bi-pencil me-1"></i> Edit
+                                                    </a>
 
-                    </tbody>
-                </table>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                                        data-userid="@GridData.UserId" data-username="@GridData.LoginName"
+                                                        onclick="openResetPasswordModal(this)" title="Reset Password">
+                                                        <i class="bi bi-key-fill"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-        </div>
-    </div>
-</div>
-   
 </form>
 <div id="modalContainer"></div>
 
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="resetPasswordModalLabel">
+                    <i class="bi bi-key-fill me-2"></i>Reset Password
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <form id="resetPasswordForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="resetUserId" name="userId" />
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <strong>Warning!</strong> This will reset the password for user: <strong
+                            id="resetUserName"></strong>
+                    </div>
+                    <div class="mb-3">
+                        <label for="temporaryPassword" class="form-label fw-semibold">
+                            <i class="bi bi-lock-fill me-1"></i>Temporary Password
+                        </label>
+                        <input type="password" class="form-control" id="temporaryPassword" name="temporaryPassword"
+                            required minlength="6" placeholder="Enter temporary password (min 6 characters)" />
+                        <small class="text-muted">User will be required to change this password on next login.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmTempPassword" class="form-label fw-semibold">
+                            <i class="bi bi-lock-fill me-1"></i>Confirm Temporary Password
+                        </label>
+                        <input type="password" class="form-control" id="confirmTempPassword" required minlength="6"
+                            placeholder="Confirm temporary password" />
+                    </div>
+                    <div id="resetPasswordMessageArea"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-key-fill me-1"></i>Reset Password
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Sync Employees Modal -->
+<div class="modal fade" id="syncEmployeesModal" tabindex="-1" aria-labelledby="syncEmployeesModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h5 class="modal-title text-white" id="syncEmployeesModalLabel">
+                    <i class="bi bi-arrow-repeat me-2"></i>Sync Employees to Login Accounts
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    This will create login accounts for all active employees who don't have one yet.
+                    Each employee will be assigned a temporary password and must change it on first login.
+                </div>
+
+                <div class="mb-3">
+                    <label for="syncDefaultPassword" class="form-label fw-semibold">
+                        <i class="bi bi-key-fill me-1"></i>Default Temporary Password
+                    </label>
+                    <input type="password" class="form-control" id="syncDefaultPassword"
+                        placeholder="Enter default password (min 6 characters)" required minlength="6" />
+                    <div class="form-text">
+                        All new accounts will use this temporary password. Users will be prompted to change it on first
+                        login.
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="syncDefaultRole" class="form-label fw-semibold">
+                        <i class="bi bi-person-badge me-1"></i>Default Role
+                    </label>
+                    <select class="form-select" id="syncDefaultRole">
+                        <option value="102" selected>User (102)</option>
+                        <option value="101">Admin (101)</option>
+                    </select>
+                    <div class="form-text">
+                        Select the default role for all new user accounts.
+                    </div>
+                </div>
+
+                <div id="syncMessageArea"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-success" id="btnSyncEmployees">
+                    <i class="bi bi-arrow-repeat me-1"></i>Sync Employees
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
+    @Html.AntiForgeryToken()
     <script>
+        function showSyncEmployeesModal() {
+            $('#syncDefaultPassword').val('');
+            $('#syncDefaultRole').val('102');
+            $('#syncMessageArea').html('');
+            var modal = new bootstrap.Modal(document.getElementById('syncEmployeesModal'));
+            modal.show();
+        }
+
         function openUserModal(button) {
             const userId = $(button).data("userid");
 
@@ -138,14 +271,167 @@
     </script>
     <script>
         $(document).ready(function () {
-          var table = $('#userDataTable').DataTable({
-            pageLength: 10,
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']], // Use -1 for 'All'
-            order: [[2, 'asc']]
-          });
+            var table = $('#userDataTable').DataTable({
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']], // Use -1 for 'All'
+                order: [[2, 'asc']]
+            });
+        });
 
-          
+        // Reset Password Modal Functions
+        function openResetPasswordModal(button) {
+            var userId = $(button).data('userid');
+            var userName = $(button).data('username');
+            console.log('Opening reset password modal for:', userId, userName);
+            $('#resetUserId').val(userId);
+            $('#resetUserName').text(userName);
+            $('#temporaryPassword').val('');
+            $('#confirmTempPassword').val('');
+            $('#resetPasswordMessageArea').html('');
+            var modal = new bootstrap.Modal(document.getElementById('resetPasswordModal'));
+            modal.show();
+        }
+
+        // Reset Password Form Submit
+        $('#resetPasswordForm').on('submit', function (e) {
+            e.preventDefault();
+            console.log('Reset password form submitted');
+
+            var tempPassword = $('#temporaryPassword').val();
+            var confirmPassword = $('#confirmTempPassword').val();
+            var userId = $('#resetUserId').val();
+
+            // Validation
+            if (tempPassword !== confirmPassword) {
+                $('#resetPasswordMessageArea').html(
+                    '<div class="alert alert-danger"><i class="bi bi-x-circle me-2"></i>Passwords do not match!</div>'
+                );
+                return;
+            }
+
+            if (tempPassword.length < 6) {
+                $('#resetPasswordMessageArea').html(
+                    '<div class="alert alert-danger"><i class="bi bi-x-circle me-2"></i>Password must be at least 6 characters!</div>'
+                );
+                return;
+            }
+
+            var token = $('input[name="__RequestVerificationToken"]').val();
+            console.log('Sending reset password request for userId:', userId);
+
+            $.ajax({
+                url: '/Users/ResetPassword',
+                type: 'POST',
+                data: {
+                    __RequestVerificationToken: token,
+                    userId: userId,
+                    temporaryPassword: tempPassword
+                },
+                success: function (response) {
+                    console.log('Reset password response:', response);
+                    if (response.success) {
+                        $('#resetPasswordMessageArea').html(
+                            '<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>' + response.message + '</div>'
+                        );
+                        setTimeout(function () {
+                            bootstrap.Modal.getInstance(document.getElementById('resetPasswordModal')).hide();
+                        }, 1500);
+                    } else {
+                        $('#resetPasswordMessageArea').html(
+                            '<div class="alert alert-danger"><i class="bi bi-x-circle me-2"></i>' + response.message + '</div>'
+                        );
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Reset password error:', xhr.responseText);
+                    $('#resetPasswordMessageArea').html(
+                        '<div class="alert alert-danger"><i class="bi bi-x-circle me-2"></i>Error resetting password. Please try again.</div>'
+                    );
+                }
+            });
+        });
+
+        // Sync Employees to Login
+        $(document).ready(function () {
+            $('#btnSyncEmployees').click(function () {
+                var defaultPassword = $('#syncDefaultPassword').val();
+                var defaultRoleId = $('#syncDefaultRole').val();
+
+                if (!defaultPassword) {
+                    $('#syncMessageArea').html(
+                        '<div class="alert alert-danger"><i class="bi bi-x-circle me-2"></i>Please enter a default password.</div>'
+                    );
+                    return;
+                }
+
+                if (defaultPassword.length < 6) {
+                    $('#syncMessageArea').html(
+                        '<div class="alert alert-danger"><i class="bi bi-x-circle me-2"></i>Password must be at least 6 characters.</div>'
+                    );
+                    return;
+                }
+
+                // Show loading
+                $('#syncMessageArea').html(
+                    '<div class="alert alert-info"><span class="spinner-border spinner-border-sm me-2"></span>Syncing employees...</div>'
+                );
+                $('#btnSyncEmployees').prop('disabled', true);
+
+                var token = $('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: '/Users/SyncEmployeesToLogin',
+                    type: 'POST',
+                    data: {
+                        __RequestVerificationToken: token,
+                        defaultPassword: defaultPassword,
+                        defaultRoleId: defaultRoleId
+                    },
+                    success: function (response) {
+                        console.log('Sync response:', response);
+                        $('#btnSyncEmployees').prop('disabled', false);
+
+                        if (response.success) {
+                            var message = '<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>' + response.message;
+
+                            if (response.errors && response.errors.length > 0) {
+                                message += '<hr><strong>Errors:</strong><ul>';
+                                response.errors.forEach(function (error) {
+                                    message += '<li>' + error + '</li>';
+                                });
+                                message += '</ul>';
+                            }
+
+                            message += '</div>';
+                            $('#syncMessageArea').html(message);
+
+                            setTimeout(function () {
+                                location.reload(); // Reload to show new users
+                            }, 3000);
+                        } else {
+                            var errorMessage = '<div class="alert alert-danger"><i class="bi bi-x-circle me-2"></i>' + response.message;
+
+                            if (response.errors && response.errors.length > 0) {
+                                errorMessage += '<hr><strong>Details:</strong><ul>';
+                                response.errors.forEach(function (error) {
+                                    errorMessage += '<li>' + error + '</li>';
+                                });
+                                errorMessage += '</ul>';
+                            }
+
+                            errorMessage += '</div>';
+                            $('#syncMessageArea').html(errorMessage);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Sync error:', xhr.responseText);
+                        $('#btnSyncEmployees').prop('disabled', false);
+                        $('#syncMessageArea').html(
+                            '<div class="alert alert-danger"><i class="bi bi-x-circle me-2"></i>Error syncing employees. Please try again.</div>'
+                        );
+                    }
+                });
+            });
         });
     </script>
-
 }

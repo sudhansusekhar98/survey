@@ -16,15 +16,17 @@ namespace SurveyApp.Controllers
         private readonly IAdmin _adminRepository;
         private readonly ISurveyLocationStatus _statusRepo;
         private readonly IClientMaster _clientRepository;
+        private readonly IEmpMaster _empRepository;
         private readonly SurveyApp.Services.ILocationApiService _locationService;
 
-        public SurveyCreationController(ISurvey surveyRepository, ICommonUtil util, IAdmin adminRepository, ISurveyLocationStatus statusRepo, IClientMaster clientRepository, SurveyApp.Services.ILocationApiService locationService)
+        public SurveyCreationController(ISurvey surveyRepository, ICommonUtil util, IAdmin adminRepository, ISurveyLocationStatus statusRepo, IClientMaster clientRepository, IEmpMaster empRepository, SurveyApp.Services.ILocationApiService locationService)
         {
             _surveyRepository = surveyRepository;
             _util = util;
             _adminRepository = adminRepository;
             _statusRepo = statusRepo;
             _clientRepository = clientRepository;
+            _empRepository = empRepository;
             _locationService = locationService;
         }
     // ...existing code...
@@ -151,6 +153,9 @@ namespace SurveyApp.Controllers
                     s.SurveyStatus != "Completed"
                 );
                 
+                // Check if user has create rights for surveys (RightsID 103 with IsCreate)
+                ViewBag.CanCreateSurvey = _util.IsAuthorizedWithAction(UserID, 103, "Create");
+                
                 return View(surveys);
             }
             catch (Exception ex)
@@ -169,6 +174,7 @@ namespace SurveyApp.Controllers
 
             ViewBag.Regions = new SelectList(_adminRepository.GetRegionMaster(), "RegionID", "RegionDesc");
             ViewBag.Clients = new SelectList(_clientRepository.GetAllClients(), "ClientID", "ClientName");
+            ViewBag.Employees = new SelectList(_empRepository.GetAllEmployees().Where(e => e.IsActive), "EmpID", "EmpName");
             return View("SurveyCreation", new SurveyModel());
         }
 
@@ -187,6 +193,7 @@ namespace SurveyApp.Controllers
                     TempData["ResultType"] = "warning";
                     ViewBag.Regions = new SelectList(_adminRepository.GetRegionMaster(), "RegionID", "RegionDesc", model.RegionID);
                     ViewBag.Clients = new SelectList(_clientRepository.GetAllClients(), "ClientID", "ClientName", model.ClientID);
+                    ViewBag.Employees = new SelectList(_empRepository.GetAllEmployees().Where(e => e.IsActive), "EmpID", "EmpName", model.SurveyTeamId);
                     return View("SurveyCreation", model);
                 }
                 
@@ -207,6 +214,7 @@ namespace SurveyApp.Controllers
                     TempData["ResultType"] = "danger";
                     ViewBag.Regions = new SelectList(_adminRepository.GetRegionMaster(), "RegionID", "RegionDesc", model.RegionID);
                     ViewBag.Clients = new SelectList(_clientRepository.GetAllClients(), "ClientID", "ClientName", model.ClientID);
+                    ViewBag.Employees = new SelectList(_empRepository.GetAllEmployees().Where(e => e.IsActive), "EmpID", "EmpName", model.SurveyTeamId);
                     return View("SurveyCreation", model);
                 }
             }
@@ -216,6 +224,7 @@ namespace SurveyApp.Controllers
                 TempData["ResultType"] = "danger";
                 ViewBag.Regions = new SelectList(_adminRepository.GetRegionMaster(), "RegionID", "RegionDesc", model.RegionID);
                 ViewBag.Clients = new SelectList(_clientRepository.GetAllClients(), "ClientID", "ClientName", model.ClientID);
+                ViewBag.Employees = new SelectList(_empRepository.GetAllEmployees().Where(e => e.IsActive), "EmpID", "EmpName", model.SurveyTeamId);
                 return View("SurveyCreation", model);
             }
         }
@@ -242,6 +251,7 @@ namespace SurveyApp.Controllers
             }
             ViewBag.Regions = new SelectList(_adminRepository.GetRegionMaster(), "RegionID", "RegionDesc", survey.RegionID);
             ViewBag.Clients = new SelectList(_clientRepository.GetAllClients(), "ClientID", "ClientName", survey.ClientID);
+            ViewBag.Employees = new SelectList(_empRepository.GetAllEmployees().Where(e => e.IsActive), "EmpID", "EmpName", survey.SurveyTeamId);
             return View("SurveyEdit", survey); // Render full page for normal navigation
         }
 
@@ -262,6 +272,7 @@ namespace SurveyApp.Controllers
                     TempData["ResultType"] = "warning";
                     ViewBag.Regions = new SelectList(_adminRepository.GetRegionMaster(), "RegionID", "RegionDesc", model.RegionID);
                     ViewBag.Clients = new SelectList(_clientRepository.GetAllClients(), "ClientID", "ClientName", model.ClientID);
+                    ViewBag.Employees = new SelectList(_empRepository.GetAllEmployees().Where(e => e.IsActive), "EmpID", "EmpName", model.SurveyTeamId);
                     return View("SurveyEdit", model);
                 }
 
@@ -289,6 +300,7 @@ namespace SurveyApp.Controllers
                     TempData["ResultType"] = "danger";
                     ViewBag.Regions = new SelectList(_adminRepository.GetRegionMaster(), "RegionID", "RegionDesc", model.RegionID);
                     ViewBag.Clients = new SelectList(_clientRepository.GetAllClients(), "ClientID", "ClientName", model.ClientID);
+                    ViewBag.Employees = new SelectList(_empRepository.GetAllEmployees().Where(e => e.IsActive), "EmpID", "EmpName", model.SurveyTeamId);
                     return View("SurveyEdit", model);
                 }
             }
@@ -298,6 +310,7 @@ namespace SurveyApp.Controllers
                 TempData["ResultType"] = "danger";
                 ViewBag.Regions = new SelectList(_adminRepository.GetRegionMaster(), "RegionID", "RegionDesc", model.RegionID);
                 ViewBag.Clients = new SelectList(_clientRepository.GetAllClients(), "ClientID", "ClientName", model.ClientID);
+                ViewBag.Employees = new SelectList(_empRepository.GetAllEmployees().Where(e => e.IsActive), "EmpID", "EmpName", model.SurveyTeamId);
                 return View("SurveyEdit", model);
             }
         }
@@ -411,7 +424,6 @@ namespace SurveyApp.Controllers
                 ViewBag.AssignedEmpIds = new List<int>();
                 ViewBag.Employees = new SelectList(_adminRepository.GetEmpMaster(), "EmpID", "EmpName");
             }
-            
             ViewBag.SurveyID = surveyId;
             return View(model);        
         }
@@ -776,6 +788,42 @@ namespace SurveyApp.Controllers
                 // Get current user from session
                 int createdBy = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
                 model.CreateBy = createdBy;
+
+                // Check for duplicate location name or coordinates (only for new locations or when updating to different values)
+                var existingLocations = _surveyRepository.GetSurveyLocationById(model.SurveyID) ?? new List<SurveyLocationModel>();
+                
+                // For updates, exclude the current location from duplicate check
+                var locationsToCheck = model.LocID > 0 
+                    ? existingLocations.Where(l => l.LocID != model.LocID).ToList() 
+                    : existingLocations;
+                
+                // Check for duplicate location name
+                var duplicateName = locationsToCheck.FirstOrDefault(l => 
+                    !string.IsNullOrEmpty(l.LocName) && 
+                    l.LocName.Trim().Equals(model.LocName?.Trim(), StringComparison.OrdinalIgnoreCase));
+                
+                if (duplicateName != null)
+                {
+                    TempData["ResultMessage"] = $"<strong>Error!</strong> A location with the name '<strong>{model.LocName}</strong>' already exists for this survey.";
+                    TempData["ResultType"] = "danger";
+                    return RedirectToAction("SurveyLocation", new { surveyId = model.SurveyID, SurveyName = ViewBag.SelectedSurveyName });
+                }
+                
+                // Check for duplicate coordinates (if coordinates are provided)
+                if (model.LocLat.HasValue && model.LocLog.HasValue)
+                {
+                    var duplicateCoords = locationsToCheck.FirstOrDefault(l => 
+                        l.LocLat.HasValue && l.LocLog.HasValue &&
+                        Math.Abs((double)(l.LocLat.Value - model.LocLat.Value)) < 0.0001 &&
+                        Math.Abs((double)(l.LocLog.Value - model.LocLog.Value)) < 0.0001);
+                    
+                    if (duplicateCoords != null)
+                    {
+                        TempData["ResultMessage"] = $"<strong>Error!</strong> A location with the same coordinates already exists (Location: <strong>{duplicateCoords.LocName}</strong>).";
+                        TempData["ResultType"] = "danger";
+                        return RedirectToAction("SurveyLocation", new { surveyId = model.SurveyID, SurveyName = ViewBag.SelectedSurveyName });
+                    }
+                }
 
                 bool isSaved;
         
@@ -1184,6 +1232,37 @@ namespace SurveyApp.Controllers
                         stateName = client.State,
                         cityId,
                         cityName = client.City
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        /// <summary>
+        /// Get employee phone number for auto-populating team contact field
+        /// </summary>
+        [HttpGet]
+        public IActionResult GetEmployeePhone(int empId)
+        {
+            try
+            {
+                var employee = _empRepository.GetEmployeeById(empId);
+                if (employee == null)
+                {
+                    return Json(new { success = false, message = "Employee not found" });
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    data = new
+                    {
+                        empId = employee.EmpID,
+                        empName = employee.EmpName,
+                        phoneNumber = employee.MobileNo
                     }
                 });
             }

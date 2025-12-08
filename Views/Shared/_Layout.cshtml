@@ -1,5 +1,55 @@
 ﻿@using Microsoft.AspNetCore.Http
+@using AnalyticaDocs.Repo
+@using AnalyticaDocs.Models
 @inject IHttpContextAccessor HttpContextAccessor
+@inject IAdmin AdminRepository
+
+@{
+    // Get current user ID and their rights
+    var userIdStr = HttpContextAccessor.HttpContext?.Session.GetString("UserID");
+    var roleIdStr = HttpContextAccessor.HttpContext?.Session.GetString("RoleId");
+    var userId = !string.IsNullOrEmpty(userIdStr) ? int.Parse(userIdStr) : 0;
+    var roleId = !string.IsNullOrEmpty(roleIdStr) ? int.Parse(roleIdStr) : 0;
+
+    // Get user rights only if user is logged in
+    List<UsersRightsModel> userRights = new List<UsersRightsModel>();
+    if (userId > 0)
+    {
+        try
+        {
+            userRights = AdminRepository.GetUserRightsByUserId(userId);
+        }
+        catch (Exception)
+        {
+            // If error getting rights, assume user has no rights (will show no menus except for admin)
+            userRights = new List<UsersRightsModel>();
+        }
+    }
+
+    // Helper function to check if user has access to a right
+    bool HasRight(int rightsId)
+    {
+        // If user is not logged in, don't show menus
+        if (userId == 0) return false;
+
+        // If user is Admin (RoleId 101), show all menus
+        if (roleId == 101) return true;
+
+        // Dashboard and Survey are accessible to all logged-in users by default
+        // (users need to see their own surveys and dashboard)
+        if (rightsId == 102 || rightsId == 103) return true;
+
+        // For Admin and Reports, check if user has the right with IsView = true
+        return userRights.Any(r => r.RightsID == rightsId && r.IsView);
+    }
+
+    // Rights IDs (based on RightsMaster table)
+    const int RIGHTS_ADMIN = 101;
+    const int RIGHTS_DASHBOARD = 102;
+    const int RIGHTS_SURVEY = 103;
+    const int RIGHTS_REPORTS = 104;
+}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -127,71 +177,84 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
 
-                        <!-- Analytics -->
-                        <li class="nav-item">
-                            <a asp-controller="Dashboard" asp-action="Index" class="nav-link text-dark">
-                                Dashboards
-                            </a>
-                        </li>
+                        <!-- Dashboard -->
+                        @if (HasRight(RIGHTS_DASHBOARD))
+                        {
+                            <li class="nav-item">
+                                <a asp-controller="Dashboard" asp-action="Index" class="nav-link text-dark">
+                                    Dashboards
+                                </a>
+                            </li>
+                        }
 
                         <!-- Admin -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link text-dark dropdown-toggle" href="javascript:void(0)" id="navbardropAdmin"
-                                data-bs-toggle="dropdown" aria-expanded="false"> Admin </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbardropAdmin">
-                                <li><a class="dropdown-item" asp-controller="Users" asp-action="Index"><i
-                                            class="bi bi-people-fill me-2"></i>Users</a></li>
-                                <li><a class="dropdown-item" asp-controller="UserRights" asp-action="Index"><i
-                                            class="bi bi-shield-lock-fill me-2"></i>User Rights</a></li>
-                                <li><a class="dropdown-item" asp-controller="EmployeeMaster" asp-action="Index"><i
-                                            class="bi bi-person-vcard-fill me-2"></i>Employee Master</a></li>
-                                <li><a class="dropdown-item" asp-controller="ClientMaster" asp-action="Index"><i
-                                            class="bi bi-building me-2"></i>Client Master</a></li>
-                                <li><a class="dropdown-item" asp-controller="DevicesAdmin" asp-action="Manage"><i
-                                            class="bi bi-gear-fill me-2"></i>Manage Devices</a></li>
-                            </ul>
-                        </li>
+                        @if (HasRight(RIGHTS_ADMIN))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link text-dark dropdown-toggle" href="javascript:void(0)" id="navbardropAdmin"
+                                    data-bs-toggle="dropdown" aria-expanded="false"> Admin </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbardropAdmin">
+                                    <li><a class="dropdown-item" asp-controller="Users" asp-action="Index"><i
+                                                class="bi bi-people-fill me-2"></i>Users</a></li>
+                                    <li><a class="dropdown-item" asp-controller="UserRights" asp-action="Index"><i
+                                                class="bi bi-shield-lock-fill me-2"></i>User Rights</a></li>
+                                    <li><a class="dropdown-item" asp-controller="EmployeeMaster" asp-action="Index"><i
+                                                class="bi bi-person-vcard-fill me-2"></i>Employee Master</a></li>
+                                    <li><a class="dropdown-item" asp-controller="ClientMaster" asp-action="Index"><i
+                                                class="bi bi-building me-2"></i>Client Master</a></li>
+                                    <li><a class="dropdown-item" asp-controller="DevicesAdmin" asp-action="Manage"><i
+                                                class="bi bi-gear-fill me-2"></i>Manage Devices</a></li>
+                                </ul>
+                            </li>
+                        }
 
-                        <li class="nav-item dropdown">
-                            <a class="nav-link text-dark dropdown-toggle" href="javascript:void(0)"
-                                id="navbardropSurvey" data-bs-toggle="dropdown" aria-expanded="false"> Survey </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbardropSurvey">
-                                <li><a class="dropdown-item" asp-controller="SurveyCreation" asp-action="Index"><i
-                                            class="bi bi-list-ul me-2"></i>All Surveys</a></li>
-                                <li><a class="dropdown-item" asp-controller="SurveyCreation" asp-action="Create"><i
-                                            class="bi bi-plus-square-fill me-2"></i>New Survey</a></li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li>
-                                    <h6 class="dropdown-header">Submissions</h6>
-                                </li>
-                                <li><a class="dropdown-item" asp-controller="SurveySubmission"
-                                        asp-action="MySubmissions"><i class="bi bi-file-earmark-check me-2"></i>My
-                                        Submissions</a></li>
-                                <li><a class="dropdown-item" asp-controller="SurveySubmission" asp-action="Index"><i
-                                            class="bi bi-clipboard-check me-2"></i>Pending Reviews</a></li>
-                            </ul>
-                        </li>
+                        <!-- Survey -->
+                        @if (HasRight(RIGHTS_SURVEY))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link text-dark dropdown-toggle" href="javascript:void(0)"
+                                    id="navbardropSurvey" data-bs-toggle="dropdown" aria-expanded="false"> Survey </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbardropSurvey">
+                                    <li><a class="dropdown-item" asp-controller="SurveyCreation" asp-action="Index"><i
+                                                class="bi bi-list-ul me-2"></i>All Surveys</a></li>
+                                    <li><a class="dropdown-item" asp-controller="SurveyCreation" asp-action="Create"><i
+                                                class="bi bi-plus-square-fill me-2"></i>New Survey</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li>
+                                        <h6 class="dropdown-header">Submissions</h6>
+                                    </li>
+                                    <li><a class="dropdown-item" asp-controller="SurveySubmission"
+                                            asp-action="MySubmissions"><i class="bi bi-file-earmark-check me-2"></i>My
+                                            Submissions</a></li>
+                                    <li><a class="dropdown-item" asp-controller="SurveySubmission" asp-action="Index"><i
+                                                class="bi bi-clipboard-check me-2"></i>Pending Reviews</a></li>
+                                </ul>
+                            </li>
+                        }
 
                         <!-- Reports -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link text-dark dropdown-toggle" href="javascript:void(0)"
-                                id="navbardropReports" data-bs-toggle="dropdown" aria-expanded="false"> Reports </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbardropReports">
-                                <li>
-                                    <h6 class="dropdown-header">Survey Reports</h6>
-                                </li>
-                                <li><a class="dropdown-item" asp-controller="SurveyReports" asp-action="Index"><i
-                                            class="bi bi-house-door-fill me-2"></i>Reports Home</a></li>
-                                <li><a class="dropdown-item" asp-controller="SurveyReports"
-                                        asp-action="SummaryReport"><i class="bi bi-bar-chart-fill me-2"></i>Summary
-                                        Report</a></li>
-                                <li><a class="dropdown-item" asp-controller="SurveyReports"
-                                        asp-action="ExportToExcel"><i
-                                            class="bi bi-file-earmark-excel-fill me-2"></i>Export to Excel</a></li>
-                            </ul>
-                        </li>
+                        @if (HasRight(RIGHTS_REPORTS))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link text-dark dropdown-toggle" href="javascript:void(0)"
+                                    id="navbardropReports" data-bs-toggle="dropdown" aria-expanded="false"> Reports </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbardropReports">
+                                    <li>
+                                        <h6 class="dropdown-header">Survey Reports</h6>
+                                    </li>
+                                    <li><a class="dropdown-item" asp-controller="SurveyReports" asp-action="Index"><i
+                                                class="bi bi-house-door-fill me-2"></i>Reports Home</a></li>
+                                    <li><a class="dropdown-item" asp-controller="SurveyReports"
+                                            asp-action="SummaryReport"><i class="bi bi-bar-chart-fill me-2"></i>Summary
+                                            Report</a></li>
+                                    <li><a class="dropdown-item" asp-controller="SurveyReports"
+                                            asp-action="ExportToExcel"><i
+                                                class="bi bi-file-earmark-excel-fill me-2"></i>Export to Excel</a></li>
+                                </ul>
+                            </li>
+                        }
 
                         <!-- Help -->
                         <li class="nav-item">
@@ -362,6 +425,7 @@
     @await RenderSectionAsync("Scripts", required: false)
     @await Html.PartialAsync("_ChangePasswordModal")
     @await Html.PartialAsync("_BackConfirmModal")
+    @await Html.PartialAsync("_AccessDeniedModal")
 </body>
 
 </html>

@@ -220,15 +220,20 @@
                                             class="card-header card-h bg-light border-0 d-flex justify-content-between align-items-center">
                                             <span class="badge bg-purple">ID: @survey.SurveyId</span>
                                             <span
-                                                class="badge bg-@(survey.SurveyStatus == "Pending" ? "secondary" : 
-                                                                                                                    survey.SurveyStatus == "In Progress" ? "warning" : 
-                                                                                                                    survey.SurveyStatus == "Completed" ? "success" :
-                                                                                                                    survey.SurveyStatus == "Created" ? "primary" : "danger")">
+                                                class="badge bg-@(survey.SurveyStatus == "Pending" ? "secondary" : survey.SurveyStatus == "Created" ? "primary" : "danger")">
                                                 @survey.SurveyStatus
                                             </span>
                                         </div>
                                         <div class="d-flex flex-row flex-md-column">
                                             <div class="card-body flex-grow-1">
+                                                @if (!string.IsNullOrEmpty(survey.ClientName))
+                                                {
+                                                    <div class="mb-2 pb-2 border-bottom">
+                                                        <span class="badge bg-info text-dark">
+                                                            <i class="bi bi-building-fill me-1"></i>@survey.ClientName
+                                                        </span>
+                                                    </div>
+                                                }
                                                 <h5 class="card-title text-dark fw-semibold mb-3">
                                                     <i class="bi bi-clipboard-data text-primary me-2"></i>@survey.SurveyName
                                                 </h5>
@@ -247,7 +252,7 @@
                                                 </div>
                                                 <div class="mb-2">
                                                     <small class="text-muted d-block mb-1">
-                                                        <i class="bi bi-people me-1"></i><strong>Team:</strong>
+                                                        <i class="bi bi-people me-1"></i><strong>Team Leader:</strong>
                                                     </small>
                                                     <span class="text-dark">@survey.SurveyTeamName</span>
                                                 </div>
@@ -268,8 +273,9 @@
                                                 @{
                                                     var hasAssignments = ViewData[$"HasAssignments_{survey.SurveyId}"] as bool? ??
                                                     false;
+                                                    var hasValidDueDate = survey.DueDate.HasValue && survey.DueDate.Value.Year > 1;
                                                 }
-                                                @if (hasAssignments && survey.DueDate.HasValue)
+                                                @if (hasAssignments && hasValidDueDate)
                                                 {
                                                     var isOverdue = survey.DueDate.Value < DateTime.Now && survey.SurveyStatus !=
                                                     "Completed";
@@ -292,6 +298,7 @@
                                                 @{
                                                     var isSubmitted = ViewData[$"IsSubmitted_{survey.SurveyId}"] as bool? ?? false;
                                                     var isLocked = ViewData[$"IsLocked_{survey.SurveyId}"] as bool? ?? false;
+                                                    var canCreateSurvey = ViewBag.CanCreateSurvey as bool? ?? false;
                                                 }
                                                 @if (isSubmitted)
                                                 {
@@ -311,23 +318,26 @@
                                                     </button>
                                                 }
 
-                                                @if (isSubmitted)
+                                                @if (canCreateSurvey)
                                                 {
-                                                    <button type="button" class="btn btn-sm btn-secondary" disabled
-                                                        title="Cannot modify team for submitted survey">
-                                                        <i class="bi bi-people-fill me-1"></i><span
-                                                            class="d-none d-sm-inline">Team</span>
-                                                    </button>
-                                                }
-                                                else
-                                                {
-                                                    <a asp-controller="SurveyCreation" asp-action="SurveyAssignment"
-                                                        asp-route-surveyId="@survey.SurveyId"
-                                                        asp-route-SurveyName="@survey.SurveyName" class="btn btn-sm btn-primary"
-                                                        title="Assign Team">
-                                                        <i class="bi bi-people-fill me-1"></i><span
-                                                            class="d-none d-sm-inline">Team</span>
-                                                    </a>
+                                                    @if (isSubmitted)
+                                                    {
+                                                        <button type="button" class="btn btn-sm btn-secondary" disabled
+                                                            title="Cannot modify team for submitted survey">
+                                                            <i class="bi bi-people-fill me-1"></i><span
+                                                                class="d-none d-sm-inline">Team</span>
+                                                        </button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a asp-controller="SurveyCreation" asp-action="SurveyAssignment"
+                                                            asp-route-surveyId="@survey.SurveyId"
+                                                            asp-route-SurveyName="@survey.SurveyName" class="btn btn-sm btn-primary"
+                                                            title="Assign Team">
+                                                            <i class="bi bi-people-fill me-1"></i><span
+                                                                class="d-none d-sm-inline">Team</span>
+                                                        </a>
+                                                    }
                                                 }
 
                                                 @if (isLocked)

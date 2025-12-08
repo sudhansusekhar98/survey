@@ -61,7 +61,7 @@
                             <a asp-controller="SurveyCreation" asp-action="CreateSurveyAssignment"
                                 asp-route-surveyId="@ViewBag.SurveyID" class="btn btn-sm btn-light">
                                 <i class="bi bi-plus-circle"></i>
-                                <span class="d-none d-sm-inline ms-1">Add Assignment</span>
+                                <span class="d-none d-sm-inline ms-1">Add Members</span>
                             </a>
                         </div>
                     </div>
@@ -103,7 +103,7 @@
                                             <td>@assignment.EmpName</td>
                                             <td>
                                                 <span class="badge bg-info">
-                                                    <i class="bi bi-calendar-event me-1"></i>@assignment.DueDate.ToString("dd                           MMM yyyy")
+                                                    <i class="bi bi-calendar-event me-1"></i>@assignment.DueDate.ToString("dd                                   MMM yyyy")
                                                 </span>
                                             </td>
                                             <td>@assignment.CreateBy</td>

@@ -92,6 +92,8 @@ namespace SurveyApp.Repo
                 // If your model uses DateTime? convert to string (yyyy-MM-dd) or pass as DBNull if null.
                 cmd.Parameters.AddWithValue("@SurveyDate", survey.SurveyDate ?? (object)DBNull.Value);
 
+                // Pass the selected team leader's EmpID for auto-assignment
+                cmd.Parameters.AddWithValue("@SurveyTeamId", survey.SurveyTeamId ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@SurveyTeamName", survey.SurveyTeamName ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@SurveyTeamContact", survey.SurveyTeamContact ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@AgencyName", survey.AgencyName ?? (object)DBNull.Value);

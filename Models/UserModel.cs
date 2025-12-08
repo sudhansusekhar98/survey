@@ -77,5 +77,8 @@ namespace AnalyticaDocs.Models
 
         [DisplayName("Profile Picture Public ID")]
         public string? ProfilePicturePublicId { get; set; }
+
+        [DisplayName("Must Change Password")]
+        public bool MustChangePassword { get; set; } = false;
     }
 }

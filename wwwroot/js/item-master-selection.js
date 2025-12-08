@@ -1,42 +1,168 @@
 // Item Master Selection - Quantity and Image Management
 // This script handles quantity increment/decrement, camera capture, and image upload functionality
 
+// function applyWatermark(ctx, watermarkText) {
+//     const canvas = ctx.canvas;
+//     const maxWidth = canvas.width - 40; // Leave 20px padding on each side
+    
+//     // Limit watermark text to maximum 20 words
+//     const words = watermarkText.split(/\s+/);
+//     if (words.length > 20) {
+//         watermarkText = words.slice(0, 20).join(' ') + '...';
+//     }
+    
+//     // Calculate initial font size based on canvas width (responsive sizing)
+//     let fontSize = Math.max(20, canvas.width * 0.025);
+//     ctx.font = `bold ${fontSize}px Arial`;
+    
+//     // Measure text width and adjust if needed
+//     let textMetrics = ctx.measureText(watermarkText);
+//     let textWidth = textMetrics.width;
+//     let displayText = watermarkText;
+    
+//     // If text is too wide, first try to reduce font size
+//     if (textWidth > maxWidth) {
+//         // Try reducing font size (minimum 14px)
+//         while (fontSize > 14 && textWidth > maxWidth) {
+//             fontSize -= 1;
+//             ctx.font = `bold ${fontSize}px Arial`;
+//             textMetrics = ctx.measureText(watermarkText);
+//             textWidth = textMetrics.width;
+//         }
+        
+//         // If still too wide after reducing font, truncate with ellipsis
+//         if (textWidth > maxWidth) {
+//             const ellipsis = '...';
+//             let truncatedText = watermarkText;
+            
+//             // Remove characters from the end until it fits
+//             while (truncatedText.length > 0 && ctx.measureText(truncatedText + ellipsis).width > maxWidth) {
+//                 truncatedText = truncatedText.slice(0, -1);
+//             }
+            
+//             displayText = truncatedText + ellipsis;
+//             textMetrics = ctx.measureText(displayText);
+//             textWidth = textMetrics.width;
+//         }
+//     }
+    
+//     const textHeight = fontSize;
+    
+//     // Position at bottom center with padding
+//     const x = (canvas.width - textWidth) / 2;
+//     const y = canvas.height - 30;
+//     const padding = 15;
+    
+//     // Draw semi-transparent background for text
+//     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+//     ctx.fillRect(
+//         x - padding, 
+//         y - textHeight - padding/2, 
+//         textWidth + (padding * 2), 
+//         textHeight + padding
+//     );
+    
+//     // Draw white text
+//     ctx.fillStyle = '#FFFFFF';
+//     ctx.textAlign = 'center';
+//     ctx.textBaseline = 'bottom';
+//     ctx.fillText(displayText, canvas.width / 2, canvas.height - 20);
+    
+//     // Add a thin black stroke for better visibility
+//     ctx.strokeStyle = '#000000';
+//     ctx.lineWidth = 1;
+//     ctx.strokeText(displayText, canvas.width / 2, canvas.height - 20);
+// }
+
 function applyWatermark(ctx, watermarkText) {
+    if (!watermarkText) return; // nothing to draw
+
     const canvas = ctx.canvas;
-    // Calculate font size based on canvas width (responsive sizing)
-    const fontSize = Math.max(20, canvas.width * 0.025);
+    const maxWidth = canvas.width - 40; // 20px padding on each side
+
+    // Clean and limit to max 20 words
+    let words = watermarkText
+        .trim()
+        .split(/\s+/)
+        .filter(w => w.length > 0);
+
+    let wasTruncatedByWords = false;
+
+    if (words.length > 20) {
+        words = words.slice(0, 20);
+        wasTruncatedByWords = true;
+    }
+
+    let watermarkLimited = words.join(" ");
+
+    // If it was truncated by words, add ellipsis
+    if (wasTruncatedByWords) {
+        watermarkLimited += "...";
+    }
+
+    // Initial font size (responsive)
+    let fontSize = Math.max(20, canvas.width * 0.025);
     ctx.font = `bold ${fontSize}px Arial`;
-    
-    // Measure text width
-    const textMetrics = ctx.measureText(watermarkText);
-    const textWidth = textMetrics.width;
+
+    let displayText = watermarkLimited;
+    let textMetrics = ctx.measureText(displayText);
+    let textWidth = textMetrics.width;
+
+    // If text is too wide, reduce font size first (down to min 14px)
+    if (textWidth > maxWidth) {
+        while (fontSize > 14 && textWidth > maxWidth) {
+            fontSize -= 1;
+            ctx.font = `bold ${fontSize}px Arial`;
+            textMetrics = ctx.measureText(displayText);
+            textWidth = textMetrics.width;
+        }
+
+        // If still too wide, truncate characters with ellipsis
+        if (textWidth > maxWidth) {
+            const ellipsis = "...";
+            let truncatedText = displayText;
+
+            while (
+                truncatedText.length > 0 &&
+                ctx.measureText(truncatedText + ellipsis).width > maxWidth
+            ) {
+                truncatedText = truncatedText.slice(0, -1);
+            }
+
+            displayText = truncatedText + ellipsis;
+            textMetrics = ctx.measureText(displayText);
+            textWidth = textMetrics.width;
+        }
+    }
+
     const textHeight = fontSize;
-    
-    // Position at bottom center with padding
-    const x = (canvas.width - textWidth) / 2;
+    const x = (canvas.width - textWidth) / 2; // left edge of background
     const y = canvas.height - 30;
     const padding = 15;
-    
-    // Draw semi-transparent background for text
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+
+    // Background rectangle
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     ctx.fillRect(
-        x - padding, 
-        y - textHeight - padding/2, 
-        textWidth + (padding * 2), 
+        x - padding,
+        y - textHeight - padding / 2,
+        textWidth + padding * 2,
         textHeight + padding
     );
-    
-    // Draw white text
-    ctx.fillStyle = '#FFFFFF';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText(watermarkText, canvas.width / 2, canvas.height - 20);
-    
-    // Add a thin black stroke for better visibility
-    ctx.strokeStyle = '#000000';
+
+    // Text
+    ctx.fillStyle = "#FFFFFF";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+
+    const textX = canvas.width / 2;
+    const textY = canvas.height - 20;
+
+    ctx.fillText(displayText, textX, textY);
+    ctx.strokeStyle = "#000000";
     ctx.lineWidth = 1;
-    ctx.strokeText(watermarkText, canvas.width / 2, canvas.height - 20);
+    ctx.strokeText(displayText, textX, textY);
 }
+
 
 // Global variables for Cloudinary URLs (will be set from view)
 let cloudinaryUploadUrl = '';

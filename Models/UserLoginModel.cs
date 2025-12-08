@@ -27,6 +27,7 @@ namespace AnalyticaDocs.Models
 
         public string? ProfilePicturePublicId { get; set; }
 
+        public bool MustChangePassword { get; set; } = false;
         
     }
 }

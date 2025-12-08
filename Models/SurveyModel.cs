@@ -17,6 +17,9 @@ namespace SurveyApp.Models
         [Display(Name = "Survey Date")]
         public DateTime? SurveyDate { get; set; }
 
+        [Display(Name = "Survey Team")]
+        public int? SurveyTeamId { get; set; }
+
         [Display(Name = "Survey Team Name")]
         public string? SurveyTeamName { get; set; }
 

@@ -84,7 +84,7 @@
                                 </div>
                             </div> *@
 
-                                    <div class="mb-3">
+                                        <div class="mb-3">
                                 <label class="form-label fw-bold required"><i class="bi bi-people me-1"></i>Select
                                     Employees</label>
 
@@ -100,7 +100,6 @@
                                     <div class="row g-2">
                                         @{
                                             IEnumerable<SelectListItem>? employeeList = null;
-
                                             // Handle both SelectList and List<SelectListItem>
                                             if (ViewBag.Employees is SelectList selectList)
                                             {
@@ -119,16 +118,39 @@
                                                     <div class="col-6 col-md-4 col-lg-3">
                                                         <div class="card shadow-sm border-0 h-100">
                                                             <div class="card-body p-2 d-flex align-items-center">
-                                                                <div class="form-check m-0 text-truncate w-100">
-                                                                    <input class="form-check-input me-2" type="checkbox"
-                                                                        name="SelectedEmpIDs" value="@emp.Value" id="e_@emp.Value"
-                                                                        @(isCurrentlyAssigned ? "checked" : "")>
+                                                                @* <div class="form-check m-0 text-truncate w-100">
+                                                                    <input readonly="readonly" class="form-check-input me-2"
+                                                                        type="checkbox" name="SelectedEmpIDs" value="@emp.Value"
+                                                                        id="e_@emp.Value" @(isCurrentlyAssigned ? "checked" : "")>
                                                                     <label class="form-check-label stretched-link small fw-semibold"
                                                                         for="e_@emp.Value" title="@emp.Text">
                                                                         @if (isCurrentlyAssigned)
                                                                         {
                                                                             <span class="badge bg-success me-1"
                                                                                 title="Currently assigned">✓</span>
+                                                                        }
+                                                                        @emp.Text
+                                                                    </label>
+                                                                </div> *@
+
+                                                                <div class="form-check m-0 text-truncate w-100">
+                                                                    <input
+                                                                        class="form-check-input me-2"
+                                                                        type="checkbox"
+                                                                        name="SelectedEmpIDs"
+                                                                        value="@emp.Value"
+                                                                        id="e_@emp.Value"
+                                                                        @(isCurrentlyAssigned ? "checked" : "")
+                                                                        onclick="return false;" />
+
+                                                                    <label
+                                                                        class="form-check-label stretched-link small fw-semibold"
+                                                                        for="e_@emp.Value"
+                                                                        title="@emp.Text">
+
+                                                                        @if (isCurrentlyAssigned)
+                                                                        {
+                                                                            <span class="badge bg-success me-1" title="Currently assigned">✓</span>
                                                                         }
                                                                         @emp.Text
                                                                     </label>
@@ -167,7 +189,7 @@
                             </a>
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-@(Model.TransID > 0 ? "check-circle" : "plus-circle") me-2"></i>
-                                @(Model.TransID > 0 ? "Update Assignment" : "Assign Survey")
+                                @(Model.TransID > 0 ? "Update Members" : "Assign Members")
                             </button>
                         </div>
                     </form>
@@ -225,10 +247,10 @@
                                 e.preventDefault();
                             alert('Please select at least one employee');
                             return false;
-                                    }
+                                            }
                         </text>
                 }
-                    });
+                        });
 
             // Highlight selected checkboxes
             $('input[name="SelectedEmpIDs"]').on('change', function () {

@@ -99,25 +99,216 @@ namespace AnalyticaDocs.Repo
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine($"AdminRepo.ChangePassword called - userId: {userId}");
+                
                 using var con = new SqlConnection(DBConnection.ConnectionString);
-                using var cmd = new SqlCommand("dbo.SpUsers", con);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@SpType", 8);
-                cmd.Parameters.AddWithValue("@UserID", userId);
-                cmd.Parameters.AddWithValue("@LoginPassword", currentPassword);
-                cmd.Parameters.AddWithValue("@NewPassword", newPassword);
-
                 con.Open();
-                int result = cmd.ExecuteNonQuery();
-                if (result >= 0)
-                    return true;
-                else
+                System.Diagnostics.Debug.WriteLine($"Database connection opened successfully");
+                
+                // First verify the current password
+                using var verifyCmd = new SqlCommand(@"
+                    SELECT COUNT(1) FROM LoginMaster 
+                    WHERE UserID = @UserID AND LoginPassword = @CurrentPassword", con);
+                verifyCmd.Parameters.AddWithValue("@UserID", userId);
+                verifyCmd.Parameters.AddWithValue("@CurrentPassword", currentPassword);
+                
+                int count = Convert.ToInt32(verifyCmd.ExecuteScalar());
+                System.Diagnostics.Debug.WriteLine($"Password verification count: {count}");
+                
+                if (count == 0)
+                {
+                    // Current password doesn't match
+                    System.Diagnostics.Debug.WriteLine($"Current password verification FAILED for userId: {userId}");
                     return false;
+                }
+                
+                System.Diagnostics.Debug.WriteLine($"Current password verified. Updating to new password...");
+                
+                // Update to new password and clear MustChangePassword flag
+                using var updateCmd = new SqlCommand(@"
+                    UPDATE LoginMaster 
+                    SET LoginPassword = @NewPassword, 
+                        MustChangePassword = 0 
+                    WHERE UserID = @UserID", con);
+                updateCmd.Parameters.AddWithValue("@UserID", userId);
+                updateCmd.Parameters.AddWithValue("@NewPassword", newPassword);
+                
+                int result = updateCmd.ExecuteNonQuery();
+                System.Diagnostics.Debug.WriteLine($"Update query executed. Rows affected: {result}");
+                
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ERROR in ChangePassword: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                // log ex.ToString()
+                throw;
+            }
+        }
+
+        public bool ResetPasswordWithFlag(int userId, string temporaryPassword)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                con.Open();
+                
+                // Update password and set MustChangePassword flag
+                using var cmd = new SqlCommand(@"
+                    UPDATE LoginMaster 
+                    SET LoginPassword = @Password, 
+                        MustChangePassword = 1 
+                    WHERE UserID = @UserID", con);
+                
+                cmd.Parameters.AddWithValue("@UserID", userId);
+                cmd.Parameters.AddWithValue("@Password", temporaryPassword);
+
+                int result = cmd.ExecuteNonQuery();
+                return result > 0;
             }
             catch (Exception ex)
             {
                 // log ex.ToString()
                 throw;
+            }
+        }
+
+        public bool ClearMustChangePasswordFlag(int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                con.Open();
+                
+                using var cmd = new SqlCommand(@"
+                    UPDATE LoginMaster 
+                    SET MustChangePassword = 0 
+                    WHERE UserID = @UserID", con);
+                
+                cmd.Parameters.AddWithValue("@UserID", userId);
+
+                int result = cmd.ExecuteNonQuery();
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                // log ex.ToString()
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Sync employees from EmpMaster to LoginMaster with temporary passwords
+        /// Creates login accounts for employees who don't have one
+        /// </summary>
+        public (int synced, int skipped, List<string> errors) SyncEmployeesToLoginMaster(string defaultPassword, int defaultRoleId, int createdBy)
+        {
+            int syncedCount = 0;
+            int skippedCount = 0;
+            var errors = new List<string>();
+
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                con.Open();
+
+                // Get active employees without login accounts
+                var getEmployeesQuery = @"
+                    SELECT e.EmpID, e.EmpCode, e.EmpName, e.MobileNo, e.Email
+                    FROM EmpMaster e
+                    WHERE e.IsActive = 1 
+                    AND NOT EXISTS (
+                        SELECT 1 FROM LoginMaster l WHERE l.EmpID = e.EmpID
+                    )
+                    ORDER BY e.EmpCode";
+
+                using var getCmd = new SqlCommand(getEmployeesQuery, con);
+                using var reader = getCmd.ExecuteReader();
+
+                var employeesToSync = new List<(int empId, string empCode, string empName, string mobileNo, string email)>();
+                
+                while (reader.Read())
+                {
+                    employeesToSync.Add((
+                        empId: Convert.ToInt32(reader["EmpID"]),
+                        empCode: reader["EmpCode"]?.ToString() ?? "",
+                        empName: reader["EmpName"]?.ToString() ?? "",
+                        mobileNo: reader["MobileNo"]?.ToString() ?? "",
+                        email: reader["Email"]?.ToString() ?? ""
+                    ));
+                }
+                reader.Close();
+
+                // Insert each employee into LoginMaster
+                foreach (var emp in employeesToSync)
+                {
+                    try
+                    {
+                        // Generate LoginID from EmpCode (or EmpName if EmpCode is empty)
+                        string loginId = !string.IsNullOrWhiteSpace(emp.empCode) 
+                            ? emp.empCode 
+                            : emp.empName.Replace(" ", "").ToLower();
+
+                        // Check if LoginID already exists
+                        var checkQuery = "SELECT COUNT(1) FROM LoginMaster WHERE LoginID = @LoginID";
+                        using var checkCmd = new SqlCommand(checkQuery, con);
+                        checkCmd.Parameters.AddWithValue("@LoginID", loginId);
+                        int existingCount = Convert.ToInt32(checkCmd.ExecuteScalar());
+
+                        if (existingCount > 0)
+                        {
+                            // LoginID already exists, append EmpID to make it unique
+                            loginId = $"{loginId}_{emp.empId}";
+                        }
+
+                        var insertQuery = @"
+                            INSERT INTO LoginMaster 
+                            (LoginID, LoginName, EmpID, EmailID, MobileNo, LoginPassword, 
+                             RoleID, ISActive, CreateBy, CreateDate, MustChangePassword)
+                            VALUES 
+                            (@LoginID, @LoginName, @EmpID, @EmailID, @MobileNo, @LoginPassword, 
+                             @RoleID, @IsActive, @CreateBy, GETDATE(), 1)";
+
+                        using var insertCmd = new SqlCommand(insertQuery, con);
+                        insertCmd.Parameters.AddWithValue("@LoginID", loginId);
+                        insertCmd.Parameters.AddWithValue("@LoginName", emp.empName);
+                        insertCmd.Parameters.AddWithValue("@EmpID", emp.empId);
+                        insertCmd.Parameters.AddWithValue("@EmailID", string.IsNullOrWhiteSpace(emp.email) ? DBNull.Value : emp.email);
+                        insertCmd.Parameters.AddWithValue("@MobileNo", string.IsNullOrWhiteSpace(emp.mobileNo) ? DBNull.Value : emp.mobileNo);
+                        insertCmd.Parameters.AddWithValue("@LoginPassword", defaultPassword);
+                        insertCmd.Parameters.AddWithValue("@RoleID", defaultRoleId);
+                        insertCmd.Parameters.AddWithValue("@IsActive", "1");
+                        insertCmd.Parameters.AddWithValue("@CreateBy", createdBy.ToString());
+
+                        int result = insertCmd.ExecuteNonQuery();
+                        
+                        if (result > 0)
+                        {
+                            syncedCount++;
+                            System.Diagnostics.Debug.WriteLine($"Synced employee: {emp.empName} (LoginID: {loginId})");
+                        }
+                        else
+                        {
+                            skippedCount++;
+                            errors.Add($"Failed to create login for {emp.empName}");
+                        }
+                    }
+                    catch (Exception empEx)
+                    {
+                        skippedCount++;
+                        errors.Add($"Error syncing {emp.empName}: {empEx.Message}");
+                        System.Diagnostics.Debug.WriteLine($"Error syncing {emp.empName}: {empEx.Message}");
+                    }
+                }
+
+                return (syncedCount, skippedCount, errors);
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"Database error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"SyncEmployeesToLoginMaster error: {ex.ToString()}");
+                return (syncedCount, skippedCount, errors);
             }
         }
 
@@ -151,10 +342,24 @@ namespace AnalyticaDocs.Repo
             try
             {
                 using var con = new SqlConnection(DBConnection.ConnectionString);
-                using var cmd = new SqlCommand("dbo.SpUsers", con);
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.Parameters.AddWithValue("@SpType", 1);
+                
+                // Use direct SQL to ensure MustChangePassword is returned
+                using var cmd = new SqlCommand(@"
+                    SELECT 
+                        UserID as UserId,
+                        LoginID as LoginId,
+                        LoginName,
+                        LoginPassword,
+                        RoleID as RoleId,
+                        ISActive,
+                        ProfilePictureUrl,
+                        ProfilePicturePublicId,
+                        ISNULL(MustChangePassword, 0) as MustChangePassword
+                    FROM LoginMaster 
+                    WHERE LoginID = @LoginId 
+                        AND LoginPassword = @LoginPassword
+                        AND ISActive = 'Y'", con);
+                
                 cmd.Parameters.AddWithValue("@LoginId", obj.LoginId);
                 cmd.Parameters.AddWithValue("@LoginPassword", obj.LoginPassword);
 
@@ -250,6 +455,56 @@ namespace AnalyticaDocs.Repo
             }
         }
 
+        /// <summary>
+        /// Get user rights by UserID for menu filtering - returns rights with IsView = 'Y'
+        /// </summary>
+        public List<UsersRightsModel> GetUserRightsByUserId(int userId)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"GetUserRightsByUserId called for userId: {userId}");
+                
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                
+                // Get user rights where IsView = 'Y' (user has view permission)
+                var query = @"
+                    SELECT 
+                        ur.UserRightsID as Srno,
+                        ur.RightsID,
+                        rm.RightsName,
+                        ur.RegionID,
+                        CASE WHEN ur.IsView = 'Y' THEN 1 ELSE 0 END as IsView,
+                        CASE WHEN ur.IsCreate = 'Y' THEN 1 ELSE 0 END as IsCreate,
+                        CASE WHEN ur.IsUpdate = 'Y' THEN 1 ELSE 0 END as IsUpdate,
+                        CASE WHEN ur.IsDelete = 'Y' THEN 1 ELSE 0 END as IsDelete
+                    FROM UserRightsMaster ur
+                    INNER JOIN RightsMaster rm ON ur.RightsID = rm.RightsID
+                    WHERE ur.UserID = @UserID 
+                        AND ur.IsActive = 'Y' 
+                        AND ur.IsView = 'Y'
+                        AND rm.IsActive = 'Y'";
+                
+                using var cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@UserID", userId);
+                
+                con.Open();
+                using var adapter = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                adapter.Fill(dt);
+                
+                var result = SqlDbHelper.DataTableToList<UsersRightsModel>(dt);
+                System.Diagnostics.Debug.WriteLine($"GetUserRightsByUserId returned {result.Count} rights for userId: {userId}");
+                
+                return result;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetUserRightsByUserId error for userId {userId}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                return new List<UsersRightsModel>();
+            }
+        }
+
         public bool UpdateRights(UsersRightsFormModel model)
         {
             using var con = new SqlConnection(DBConnection.ConnectionString);
@@ -270,6 +525,7 @@ namespace AnalyticaDocs.Repo
                     cmd.Parameters.AddWithValue("@IsView", right.IsView ? 'Y' : 'N' );
                     cmd.Parameters.AddWithValue("@IsCreate", right.IsCreate ? 'Y' : 'N');
                     cmd.Parameters.AddWithValue("@IsUpdate", right.IsUpdate ? 'Y' : 'N');
+                    cmd.Parameters.AddWithValue("@IsDelete", right.IsDelete ? 'Y' : 'N');
                     cmd.Parameters.AddWithValue("@IsActive", model.IsActive); 
                     cmd.Parameters.AddWithValue("@CreateBy", model.CreateBy); 
 

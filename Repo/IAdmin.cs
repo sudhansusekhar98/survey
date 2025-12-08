@@ -14,8 +14,28 @@ namespace AnalyticaDocs.Repo
         bool UpdateProfilePicture(int userId, string profilePictureUrl, string profilePicturePublicId);
 
         bool ChangePassword(int userId, string currentPassword, string newPassword);
+        
+        /// <summary>
+        /// Reset password with MustChangePassword flag for admin-set temporary passwords
+        /// </summary>
+        bool ResetPasswordWithFlag(int userId, string temporaryPassword);
+        
+        /// <summary>
+        /// Clear the MustChangePassword flag after user changes their password
+        /// </summary>
+        bool ClearMustChangePasswordFlag(int userId);
+
+        /// <summary>
+        /// Sync employees from EmpMaster to LoginMaster with temporary passwords
+        /// </summary>
+        (int synced, int skipped, List<string> errors) SyncEmployeesToLoginMaster(string defaultPassword, int defaultRoleId, int createdBy);
 
         List<UsersRightsModel> GetUserRights(int RecordID);
+        
+        /// <summary>
+        /// Get user rights by UserID for menu filtering
+        /// </summary>
+        List<UsersRightsModel> GetUserRightsByUserId(int userId);
 
         bool UpdateRights(UsersRightsFormModel model);
         List<EmpMasterModel> GetEmpMaster();
