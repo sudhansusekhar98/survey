@@ -424,7 +424,7 @@ wwwroot\css\survey-index.css
 wwwroot\js\pages-account-settings-account.js
 wwwroot\js\poleInfrastructure.js
 wwwroot\js\profile.js
-wwwroot\js\site.js
+wwwroot\js\item-master-selection.js
 wwwroot\js\survey-details.js
 wwwroot\js\camera-remarks.js
 wwwroot\js\survey-location-status.js
@@ -485,4 +485,4 @@ wwwroot\pwa-diagnostic.html
 wwwroot\pwa-install.js
 wwwroot\service-worker.js
 wwwroot\css\cloudinary-images.css
-wwwroot\js\item-master-selection.js
+wwwroot\js\site.js

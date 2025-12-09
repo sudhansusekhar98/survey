@@ -216,55 +216,78 @@
                             {
                                 <div class="col-12 col-md-6 col-lg-4">
                                     <div class="card h-100 shadow-sm border-0 hover-lift">
-                                        <div
-                                            class="card-header card-h bg-light border-0 d-flex justify-content-between align-items-center">
+                                        <!-- Compact header -->
+                                        <div class="card-header border-0 d-flex justify-content-between align-items-center py-2"
+                                            style="background-color: rgb(159 139 233 / 78%);">
                                             <span class="badge bg-purple">ID: @survey.SurveyId</span>
-                                            <span
-                                                class="badge bg-@(survey.SurveyStatus == "Pending" ? "secondary" : survey.SurveyStatus == "Created" ? "primary" : "danger")">
+                                            @{
+                                                var statusColor = survey.SurveyStatus switch
+                                                {
+                                                    "Created" => "primary",
+                                                    "Assigned" => "info",
+                                                    "In Progress" => "warning",
+                                                    "Completed" => "success",
+                                                    "Verified" => "success",
+                                                    "Pending" => "secondary",
+                                                    "Cancelled" => "danger",
+                                                    _ => "secondary"
+                                                };
+                                            }
+                                            <span class="badge bg-@statusColor">
                                                 @survey.SurveyStatus
                                             </span>
                                         </div>
-                                        <div class="d-flex flex-row flex-md-column">
-                                            <div class="card-body flex-grow-1">
+
+
+                                        <div class="d-flex flex-row flex-md-column h-100">
+                                            <!-- Compact body -->
+                                            <div class="card-body flex-grow-1 py-2">
                                                 @if (!string.IsNullOrEmpty(survey.ClientName))
                                                 {
-                                                    <div class="mb-2 pb-2 border-bottom">
+                                                    <div class="mb-1">
                                                         <span class="badge bg-info text-dark">
                                                             <i class="bi bi-building-fill me-1"></i>@survey.ClientName
                                                         </span>
                                                     </div>
                                                 }
-                                                <h5 class="card-title text-dark fw-semibold mb-3">
+
+                                                <h5 class="card-title text-dark fw-semibold mb-2">
                                                     <i class="bi bi-clipboard-data text-primary me-2"></i>@survey.SurveyName
                                                 </h5>
-                                                <div class="mb-2">
-                                                    <small class="text-muted d-block mb-1">
+
+                                                <div class="mb-1">
+                                                    <small class="text-muted d-block">
                                                         <i class="bi bi-building me-1"></i><strong>Type:</strong>
                                                     </small>
                                                     <span class="text-dark">@survey.ImplementationType</span>
                                                 </div>
-                                                <div class="mb-2">
-                                                    <small class="text-muted d-block mb-1">
+
+                                                <div class="mb-1">
+                                                    <small class="text-muted d-block">
                                                         <i class="bi bi-calendar-event me-1"></i><strong>Date:</strong>
                                                     </small>
-                                                    <span class="text-dark">@(survey.SurveyDate?.ToString("dd-MMM-yyyy") ??
-                                                                                                        "-")</span>
+                                                    <span class="text-dark">
+                                                        @(survey.SurveyDate?.ToString("dd-MMM-yyyy") ?? "-")
+                                                    </span>
                                                 </div>
-                                                <div class="mb-2">
-                                                    <small class="text-muted d-block mb-1">
+
+                                                <div class="mb-1">
+                                                    <small class="text-muted d-block">
                                                         <i class="bi bi-people me-1"></i><strong>Team Leader:</strong>
                                                     </small>
                                                     <span class="text-dark">@survey.SurveyTeamName</span>
                                                 </div>
-                                                <div class="mb-2">
-                                                    <small class="text-muted d-block mb-1">
+
+                                                <div class="mb-1">
+                                                    <small class="text-muted d-block">
                                                         <i class="bi bi-geo-alt me-1"></i><strong>Location:</strong>
                                                     </small>
                                                     <span class="text-dark">@survey.LocationSiteName,
                                                         @survey.CityDistrict</span>
                                                 </div>
-                                                <div class="mb-2">
-                                                    <small class="text-muted d-block mb-1">
+
+                                                <div class="mb-1">
+                                                    <small class="text-muted d-block">
                                                         <i class="bi bi-map me-1"></i><strong>Region:</strong>
                                                     </small>
                                                     <span class="text-dark">@(survey.RegionName ?? "-")</span>
@@ -279,8 +302,8 @@
                                                 {
                                                     var isOverdue = survey.DueDate.Value < DateTime.Now && survey.SurveyStatus !=
                                                     "Completed";
-                                                    <div class="mb-2">
-                                                        <small class="text-muted d-block mb-1">
+                                                    <div class="mb-1">
+                                                        <small class="text-muted d-block">
                                                             <i class="bi bi-calendar-check me-1"></i><strong>Due Date:</strong>
                                                         </small>
                                                         <span class="badge @(isOverdue ? "bg-danger" : "bg-info")">
@@ -293,13 +316,18 @@
                                                     </div>
                                                 }
                                             </div>
-                                            <div class="card-footer bg-white border-0 d-flex flex-column flex-md-row gap-2 justify-content-center align-items-stretch p-3"
-                                                style="border-left: 1px solid rgba(0,0,0,.125) !important;">
+
+                                            <!-- Compact footer -->
+                                            <div
+                                                class="card-footer bg-white border-0 d-flex flex-column flex-md-row gap-2 
+                                                                                                        justify-content-center align-items-stretch py-2 px-2 mt-auto">
                                                 @{
                                                     var isSubmitted = ViewData[$"IsSubmitted_{survey.SurveyId}"] as bool? ?? false;
                                                     var isLocked = ViewData[$"IsLocked_{survey.SurveyId}"] as bool? ?? false;
                                                     var canCreateSurvey = ViewBag.CanCreateSurvey as bool? ?? false;
                                                 }
+
+                                                @* Edit *@
                                                 @if (isSubmitted)
                                                 {
                                                     <button type="button" class="btn btn-sm btn-secondary" disabled
@@ -318,9 +346,10 @@
                                                     </button>
                                                 }
 
+                                                @* Team *@
                                                 @if (canCreateSurvey)
                                                 {
-                                                    @if (isSubmitted)
+                                                    if (isSubmitted)
                                                     {
                                                         <button type="button" class="btn btn-sm btn-secondary" disabled
                                                             title="Cannot modify team for submitted survey">
@@ -340,6 +369,7 @@
                                                     }
                                                 }
 
+                                                @* Locations *@
                                                 @if (isLocked)
                                                 {
                                                     <button type="button" class="btn btn-sm btn-info"
@@ -359,12 +389,15 @@
                                                             class="d-none d-sm-inline">Locations</span>
                                                     </a>
                                                 }
+
+                                                @* Details *@
                                                 <button type="button" class="btn btn-sm btn-success" title="View Details"
                                                     onclick="openSurveyDetailsModal(@survey.SurveyId)">
                                                     <i class="bi bi-file-earmark-spreadsheet me-1"></i><span
                                                         class="d-none d-sm-inline">Details</span>
                                                 </button>
 
+                                                @* Submit *@
                                                 @if (isSubmitted)
                                                 {
                                                     <button type="button" class="btn btn-sm btn-secondary" disabled
@@ -396,6 +429,7 @@
                             <p class="text-muted fs-5">No surveys found. Click "Add New Survey" to create one.</p>
                         </div>
                     }
+
                 </div>
             </div>
         </div>

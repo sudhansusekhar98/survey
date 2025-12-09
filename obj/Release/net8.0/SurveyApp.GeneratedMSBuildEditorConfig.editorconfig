@@ -164,6 +164,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXFVuYXV0aG9yaXplZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/VL Access/Survey/AS.NET SURVEY/survey/Views/Shared/_AccessDeniedModal.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9BY2Nlc3NEZW5pZWRNb2RhbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/VL Access/Survey/AS.NET SURVEY/survey/Views/Shared/_BackConfirmModal.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9CYWNrQ29uZmlybU1vZGFsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -282,6 +286,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/VL Access/Survey/AS.NET SURVEY/survey/Views/SurveySubmission/MySubmissions.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5U3VibWlzc2lvblxNeVN1Ym1pc3Npb25zLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/AS.NET SURVEY/survey/Views/UserLogin/ForceChangePassword.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlckxvZ2luXEZvcmNlQ2hhbmdlUGFzc3dvcmQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/VL Access/Survey/AS.NET SURVEY/survey/Views/UserLogin/LoginBasic.cshtml]

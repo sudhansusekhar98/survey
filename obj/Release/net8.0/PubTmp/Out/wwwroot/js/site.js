@@ -15,12 +15,31 @@ function showPasswordModal() {
     modal.show();
 }
 
-$('#changePasswordForm').submit(function (e) {
-    e.preventDefault();
+// Wrap in document ready to ensure form exists
+$(document).ready(function() {
+    console.log('Document ready - attaching password form handler');
+    
+    $('#changePasswordForm').off('submit').on('submit', function (e) {
+        e.preventDefault();
+        
+        console.log('Change password form submitted');
 
-    const currentPassword = $('#currentPassword').val();
-    const newPassword = $('#newPassword').val();
-    const confirmPassword = $('#confirmPassword').val();
+        const currentPassword = $('#currentPassword').val();
+        const newPassword = $('#newPassword').val();
+        const confirmPassword = $('#confirmPassword').val();
+    
+    console.log('Current password length:', currentPassword ? currentPassword.length : 0);
+    console.log('New password length:', newPassword ? newPassword.length : 0);
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        $('#passwordMessageArea').html(`
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    All password fields are required.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                `);
+        return;
+    }
 
     if (newPassword !== confirmPassword) {
         $('#passwordMessageArea').html(`
@@ -32,42 +51,99 @@ $('#changePasswordForm').submit(function (e) {
         return;
     }
 
+    if (newPassword.length < 6) {
+        $('#passwordMessageArea').html(`
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    New password must be at least 6 characters.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                `);
+        return;
+    }
+
+    // Show loading state
+    $('#passwordMessageArea').html(`
+        <div class="alert alert-info" role="alert">
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            Changing password...
+        </div>
+    `);
+    
+    console.log('Sending AJAX request to /Users/ChangePassword');
+
     $.ajax({
         url: '/Users/ChangePassword',
         type: 'POST',
         data: {
-            currentPassword,
-            newPassword
-        },
-        headers: {
-            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            currentPassword: currentPassword,
+            newPassword: newPassword,
+            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
         },
         success: function (response) {
-            $('#passwordMessageArea').html(`
+            console.log('Success response received:', response);
+            
+            if (response && typeof response === 'object') {
+                $('#passwordMessageArea').html(`
                     <div class="alert alert-${response.success ? 'success' : 'danger'} alert-dismissible fade show" role="alert">
-                        ${response.message}
+                        ${response.message || 'Operation completed'}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
-                    `);
+                `);
 
-            if (response.success) {
-                window.setTimeout(() => {
-                    bootstrap.Modal.getInstance(document.getElementById('passwordModal')).hide();
-                }, 2000);
+                if (response.success) {
+                    // Clear the form
+                    $('#currentPassword').val('');
+                    $('#newPassword').val('');
+                    $('#confirmPassword').val('');
+                    
+                    window.setTimeout(() => {
+                        const modalEl = document.getElementById('passwordModal');
+                        if (modalEl) {
+                            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                            if (modalInstance) {
+                                modalInstance.hide();
+                            }
+                        }
+                        $('#passwordMessageArea').html('');
+                    }, 2000);
+                }
+            } else {
+                console.log('Unexpected response format:', response);
+                $('#passwordMessageArea').html(`
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        Unexpected response from server
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `);
             }
         },
-        error: function () {
+        error: function (xhr, status, error) {
+            console.error('AJAX Error:', {
+                status: status,
+                error: error,
+                responseText: xhr.responseText,
+                statusCode: xhr.status
+            });
+            
+            let errorMessage = 'Something went wrong';
+            if (xhr.status === 400) {
+                errorMessage = 'Invalid request. Please check your input.';
+            } else if (xhr.status === 401) {
+                errorMessage = 'You are not authorized. Please login again.';
+            } else if (xhr.status === 500) {
+                errorMessage = 'Server error. Please try again later.';
+            }
+            
             $('#passwordMessageArea').html(`
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            Something went wrong.
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    `);
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    ${errorMessage}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `);
         }
     });
+    });
 });
-
-//  --------------------------------------------------------------------------------------------------------------
 
 // back Conform popup  --------------------------------------------------------------------------------------------------------------
 document.querySelectorAll('.form-custom-floating .form-control').forEach(input => {

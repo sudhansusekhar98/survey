@@ -6,8 +6,14 @@
 	var surveyName = ViewBag.SelectedSurveyName ?? "Survey";
 	var locName = ViewBag.SelectedLocName ?? "Location";
 
-	// Get existing items from database
-	var existingItems = Model?.ItemLists ?? new List<SurveyApp.Models.SurveyDetailsUpdatelist>();
+	// Get existing items from database and sort by SqNo (items with SqNo=0 or null keep original order)
+	var existingItemsRaw = Model?.ItemLists ?? new List<SurveyApp.Models.SurveyDetailsUpdatelist>();
+	var existingItems = existingItemsRaw
+	.Select((item, index) => new { Item = item, OriginalIndex = index })
+	.OrderBy(x => x.Item.SqNo > 0 ? x.Item.SqNo : int.MaxValue)
+	.ThenBy(x => x.OriginalIndex)
+	.Select(x => x.Item)
+	.ToList();
 
 	// Use TypeName from model (item type name) instead of first item's name
 	var pageTitle = Model?.TypeName ?? "Survey Items";
@@ -565,7 +571,7 @@
 		initItemMasterSelection(
 			'@Url.Action("UploadBase64Image", "Cloudinary")',
 			'@Url.Action("DeleteImage", "Cloudinary")',
-					@surveyId,
+						@surveyId,
 			@locId
 		);
 

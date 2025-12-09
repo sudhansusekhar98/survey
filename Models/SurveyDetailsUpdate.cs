@@ -20,6 +20,7 @@
         public int ItemID { get; set; }
         public int ItemQtyExist { get; set; }
         public int ItemQtyReq { get; set; }
+        public int SqNo { get; set; } // Sequence number for sorting
 
         public string? ImgPath { get; set; } = string.Empty;
         public string? ItemCode { get; set; } = string.Empty;

@@ -409,6 +409,11 @@ namespace SurveyApp.Controllers
         {
             try
             {
+                // User must have Delete rights to unlock a location
+                var result = _util.CheckAuthorizationAll(this, 103, null, surveyId, "Delete");
+                if (result != null)
+                    return Json(new { success = false, message = "You do not have permission to unlock locations. Delete rights are required." });
+
                 var userId = HttpContext.Session.GetString("UserID");
                 if (string.IsNullOrEmpty(userId))
                 {
