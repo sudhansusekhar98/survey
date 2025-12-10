@@ -1,4 +1,4 @@
-﻿@using SurveyApp.Models
+@using SurveyApp.Models
 @model IEnumerable<SurveyDetailsLocationModel>
 
 @{
@@ -96,6 +96,119 @@
             50% { transform: scale(1.2); }
             100% { transform: scale(1); }
         }
+
+        /* Camera preview styles */
+		.cam-preview-wrapper {
+			width: 150px;
+			height: 120px;
+			overflow: hidden;
+			border: 1px solid #dee2e6;
+			border-radius: 4px;
+			padding: 4px;
+			background: #fff;
+			position: relative;
+			display: inline-block;
+			margin: 0.25rem;
+		}
+
+		.cam-preview-img {
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+			background: #f8f9fa;
+		}
+
+		.cam-preview-wrapper .btn-danger.position-absolute,
+		.cam-preview-wrapper .btn-info.position-absolute {
+			display: none;
+		}
+
+		.cam-preview-wrapper:hover .btn-danger.position-absolute,
+		.cam-preview-wrapper:hover .btn-info.position-absolute {
+			display: block;
+		}
+
+		/* Always show buttons on mobile (no hover) */
+		@@media (max-width: 767.98px) {
+
+			.cam-preview-wrapper .btn-danger.position-absolute,
+			.cam-preview-wrapper .btn-info.position-absolute {
+				display: block !important;
+				padding: 0.25rem 0.5rem;
+				font-size: 0.75rem;
+			}
+		}
+
+		/* Watermark input in modal */
+		.watermark-input-container {
+			margin-top: 15px;
+			padding: 15px;
+			background: #f8f9fa;
+			border-radius: 8px;
+			border: 1px solid #dee2e6;
+		}
+
+		.watermark-input-container label {
+			font-weight: 600;
+			color: #495057;
+			margin-bottom: 8px;
+			display: block;
+		}
+
+		.watermark-input-container input {
+			width: 100%;
+			padding: 8px 12px;
+			border: 1px solid #ced4da;
+			border-radius: 4px;
+			font-size: 14px;
+		}
+
+		.watermark-input-container input:focus {
+			outline: none;
+			border-color: #667eea;
+			box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+		}
+
+		/* Device card gradient header */
+		.device-card-header-gradient {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		}
+
+		/* Quantity control buttons */
+		.cam-qty-minus,
+		.cam-qty-plus {
+			min-width: 36px;
+			height: 36px;
+			padding: 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.cam-qty-input {
+			width: 70px;
+			text-align: center;
+			font-weight: 600;
+		}
+
+		@@media (max-width: 767.98px) {
+			.cam-qty-input {
+				width: 60px;
+			}
+		}
+
+		#previewImage {
+			max-width: 400px;
+			/* fixed maximum width */
+			max-height: 400px;
+			/* fixed maximum height */
+			width: auto;
+			/* maintain aspect ratio */
+			height: auto;
+			/* maintain aspect ratio */
+			object-fit: contain;
+			/* ensures full image fits without cropping */
+		}
     </style>
 }
 
@@ -285,90 +398,11 @@
                                     </button>
                                 </h2>
 
-                                <div id="@collapseId"
+                                <div id="collapse_@index"
                                      class="accordion-collapse collapse"
                                      data-bs-parent="#accordionExample">
-                                    <div class="accordion-body">
-                                        @if (!string.IsNullOrWhiteSpace(gridData.TypeDesc))
-                                        {
-                                            <div class="mb-3 mt-3 p-3 bg-light rounded border-start border-4 border-info">
-                                                <p class="mb-0 text-dark">
-                                                    <i class="bi bi-info-circle text-info me-2"></i><strong>Description:</strong> @gridData.TypeDesc
-                                                </p>
-                                            </div>
-                                        }
-
-                                        @if (gridData.ItemLists != null && gridData.ItemLists.Any())
-                                        {
-                                            <div class="row g-3">
-                                                @foreach (var item in gridData.ItemLists)
-                                                {
-                                                    <div class="col-12 col-md-6 col-lg-4">
-                                                        <div class="card h-100 shadow-sm border-0 hover-lift">
-                                                            <div class="card-header card-h bg-light border-0 d-flex justify-content-between align-items-center">
-                                                                <h6 class="mb-0 fw-semibold text-dark">@item.ItemName</h6>
-                                                                <span class="badge bg-purple">ID: @item.ItemID</span>
-                                                            </div>
-                                                            <div class="card-body">
-                                                                <div class="row mb-3">
-                                                                    <div class="col-6">
-                                                                        <small class="text-muted d-block mb-1">
-                                                                            <i class="bi bi-box me-1"></i><strong>Existing:</strong>
-                                                                        </small>
-                                                                        <span class="badge bg-secondary fs-6">@item.ItemQtyExist</span>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <small class="text-muted d-block mb-1">
-                                                                            <i class="bi bi-cart-plus me-1"></i><strong>Required:</strong>
-                                                                        </small>
-                                                                        <span class="badge bg-success fs-6">@item.ItemQtyReq</span>
-                                                                    </div>
-                                                                </div>
-
-                                                                @if (!string.IsNullOrWhiteSpace(item.Remarks))
-                                                                {
-                                                                    <div class="mb-2">
-                                                                        <small class="text-muted d-block mb-1">
-                                                                            <i class="bi bi-chat-left-text me-1"></i><strong>Remarks:</strong>
-                                                                        </small>
-                                                                        <p class="text-dark small mb-0">@item.Remarks</p>
-                                                                    </div>
-                                                                }
-                                                            </div>
-                                                            @* <div class="card-footer bg-white border-0 d-flex gap-2 justify-content-center pb-3">
-                                                                <a href="@Url.Action("UpdateItem", "SurveyDetails", new { surveyId = gridData.SurveyID, locId = gridData.LocID, itemTypeID = gridData.ItemTypeID, itemId = item.ItemID })"
-                                                                   class="btn btn-sm btn-warning"
-                                                                   title="Edit Item">
-                                                                    <i class="bi bi-pencil me-1"></i>Edit
-                                                                </a>
-                                                                <a class="btn btn-sm btn-info"
-                                                                   href="@Url.Action("ViewItem", "SurveyDetails", new { itemId = item.ItemID })"
-                                                                   title="View Details">
-                                                                    <i class="bi bi-eye me-1"></i>View
-                                                                </a>
-                                                            </div> *@
-                                                        </div>
-                                                    </div>
-                                                }
-                                            </div>
-                                            <div class="text-center mt-4">
-                                                <a href="@Url.Action("UpdateItem", "SurveyDetails", new { surveyId = gridData.SurveyID, locId = gridData.LocID, itemTypeID = gridData.ItemTypeID, itemId = 0 })"
-                                                   class="btn btn-primary">
-                                                    <i class="bi bi-plus-circle me-2"></i> View / Edit
-                                                </a>
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <div class="text-center py-5">
-                                                <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
-                                                <p class="text-muted fs-5 mb-3">No items added yet for this device type.</p>
-                                                <a href="@Url.Action("UpdateItem", "SurveyDetails", new { surveyId = gridData.SurveyID, locId = gridData.LocID, itemTypeID = gridData.ItemTypeID, itemId = 0 })"
-                                                   class="btn btn-primary">
-                                                    <i class="bi bi-play-circle me-2"></i> Start Survey
-                                                </a>
-                                            </div>
-                                        }
+                                    <div class="accordion-body" id="accordion-body-@gridData.ItemTypeID">
+                                        @await Html.PartialAsync("_SurveyDetailsGrid", gridData)
                                     </div>
                                 </div>
                             </div>
@@ -416,10 +450,65 @@
                 <button type="button" class="btn btn-success ms-2 mb-2" id="submitLocationBtn" onclick="submitLocationCompletion()">
                     <i class="bi bi-check-circle me-2"></i>Mark as Completed
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-                @* <button type="button" class="btn btn-primary ms-2" id="submitSurveyBtn" onclick="submitSurveyForApproval()">
-                    <i class="bi bi-send-check me-2"></i>Submit Survey for Approval
-                </button> *@
+<!-- Camera Capture Modal -->
+<div id="camDeviceVideoModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Capture Image</h5>
+                <button type="button" class="btn btn-outline-primary btn-sm me-2" id="camFlipBtn">
+                    <i class="bi bi-arrow-repeat"></i> Flip Camera
+                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <video id="camDeviceCaptureVideo" autoplay playsinline
+                    style="max-width:100%;height:400px;border-radius:8px;"></video>
+                <div class="watermark-input-container">
+                    <label for="camWatermarkText">
+                        <i class="bi bi-fonts me-1"></i>Add Watermark Text (Within 20 words)
+                    </label>
+
+                    <input type="text" id="camWatermarkText" class="form-control"
+                        placeholder="Enter text to appear at bottom of image..." />
+
+                    <small id="watermarkError" class="text-danger d-none mt-1">
+                        <i class="bi bi-exclamation-circle me-1"></i>
+                        Maximum 20 words allowed.
+                    </small>
+
+                    <small class="text-muted d-block mt-2">
+                        <i class="bi bi-info-circle me-1"></i>
+                        This text will be added as a watermark at the bottom of the captured image
+                    </small>
+                </div>
+                <div class="mt-3 d-flex justify-content-center gap-3">
+                    <button type="button" class="btn btn-gradient-primary px-4 py-2 fw-semibold"
+                        id="camDeviceCaptureBtn"><i class="bi bi-camera me-2"></i> Capture</button>
+                    <button type="button" class="btn btn-outline-danger px-4 py-2 fw-semibold"
+                        data-bs-dismiss="modal"><i class="bi bi-x-circle me-2"></i> Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Preview Modal -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imagePreviewModalLabel">Image Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="" id="previewImage" class="img-fluid rounded" alt="Image Preview" />
             </div>
         </div>
     </div>
@@ -460,6 +549,8 @@
 
 @section Scripts {
     <script src="~/js/survey-details.js"></script>
+    <script src="~/js/camera-remarks.js"></script>
+    <script src="~/js/item-master-selection.js"></script>
     <script>
         // Initialize survey details with Razor-generated URLs
         initSurveyDetails(
@@ -469,5 +560,268 @@
             @((ViewBag.IsCompleted ?? false).ToString().ToLower()),
             $('input[name="__RequestVerificationToken"]').val()
         );
+
+        // Initialize Cloudinary uploader with URLs and IDs
+        if (typeof initItemMasterSelection === 'function') {
+            var surveyIdForUpload = @(Model?.FirstOrDefault()?.SurveyID ?? 0);
+            var locIdForUpload = @(Model?.FirstOrDefault()?.LocID ?? 0);
+            initItemMasterSelection(
+                '@Url.Action("UploadBase64Image", "Cloudinary")',
+                '@Url.Action("DeleteImage", "Cloudinary")',
+                surveyIdForUpload,
+                locIdForUpload
+            );
+        }
+
+        $(document).ready(function () {
+            let itemIndex = 0; // This will be a counter for unique indices
+
+            function findItemInData(itemId) {
+                if (typeof allItemsData !== 'undefined' && Array.isArray(allItemsData)) {
+                    return allItemsData.find(d => (d.ItemID || d.itemID) == itemId);
+                }
+                return null;
+            }
+
+            function renderItemForm(item, prepend = false) {
+                var template = $('#item-form-template').html();
+
+                const itemID = item.ItemID || item.itemID;
+                let itemName = item.ItemName || item.itemName;
+                let itemCode = item.ItemCode || item.itemCode;
+                let isCamera = item.IsCamera || item.isCamera;
+                const itemQtyExist = item.ItemQtyExist || item.itemQtyExist;
+                const itemQtyReq = item.ItemQtyReq || item.itemQtyReq;
+                const remarks = item.Remarks || item.remarks;
+                const cameraRemarksJson = item.CameraRemarksJson || item.cameraRemarksJson;
+
+                if (!itemName) {
+                    const fullItemData = findItemInData(itemID);
+                    if (fullItemData) {
+                        itemName = fullItemData.itemName;
+                        itemCode = fullItemData.itemCode;
+                        isCamera = fullItemData.isCamera;
+                    }
+                }
+
+                template = template.replace(/{index}/g, itemIndex);
+                template = template.replace(/{itemId}/g, itemID);
+                template = template.replace(/{itemName}/g, itemName || `Item ID: ${itemID}`);
+                template = template.replace(/{itemCode}/g, itemCode || '');
+                template = template.replace(/{itemQtyExist}/g, itemQtyExist || 0);
+                template = template.replace(/{itemQtyReq}/g, itemQtyReq || 0);
+                template = template.replace(/{remarks}/g, remarks || '');
+                template = template.replace(/{isCamera}/g, isCamera || false);
+                
+                // Clear placeholder and set value via .val() to handle encoding
+                template = template.replace('value="{cameraRemarksJson}"', 'value=""');
+
+                var newElement;
+                if (prepend) {
+                    $('#selected-items-container').prepend(template);
+                    newElement = $('#selected-items-container').children().first();
+                } else {
+                    $('#selected-items-container').append(template);
+                    newElement = $('#selected-items-container').children().last();
+                }
+
+                const cameraRemarksJsonString = cameraRemarksJson ? (typeof cameraRemarksJson === 'string' ? cameraRemarksJson : JSON.stringify(cameraRemarksJson)) : '[]';
+                newElement.find('.camera-remarks-json').val(cameraRemarksJsonString);
+
+                var totalQty = (itemQtyExist || 0) + (itemQtyReq || 0);
+                if (totalQty > 0) {
+                    newElement.find('.cam-extra-section').show();
+                }
+                if (isCamera) {
+                    newElement.find('.camera-remarks-section').show();
+                }
+
+                if (typeof updateCameraRemarksUI === 'function') {
+                    updateCameraRemarksUI(itemIndex);
+                }
+
+                itemIndex++;
+            }
+
+            function initializeItemSelection() {
+                if (typeof selectedItemsData !== 'undefined' && selectedItemsData.length > 0) {
+                    selectedItemsData.forEach(function(item) {
+                        renderItemForm(item, false);
+                    });
+                }
+            }
+
+            $('body').on('click', '.load-item-selection', function () {
+                var button = $(this);
+                var surveyId = button.data('surveyid');
+                var locId = button.data('locid');
+                var itemTypeId = button.data('itemtypeid');
+                var targetSelector = button.data('target');
+                var targetContainer = $(targetSelector);
+
+                targetContainer.html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+
+                $.ajax({
+                    url: '@Url.Action("GetItemSelectionPartial", "SurveyDetails")',
+                    type: 'GET',
+                    data: { surveyId: surveyId, locId: locId, itemTypeID: itemTypeId },
+                    success: function (response) {
+                        targetContainer.html(response);
+                        button.closest('.text-center').hide();
+                        initializeItemSelection();
+                    },
+                    error: function () {
+                        targetContainer.html('<div class="alert alert-danger">Error loading content. Please try again.</div>');
+                    }
+                });
+            });
+
+            $('body').on('click', '#add-item-btn', function() {
+                var selectedItemId = $('#add-item-dropdown').val();
+                if (!selectedItemId) {
+                    Swal.fire('No Item Selected', 'Please select an item from the dropdown to add.', 'warning');
+                    return;
+                }
+                var selectedOption = $('#add-item-dropdown option:selected');
+                var item = {
+                    ItemID: selectedItemId,
+                    ItemName: selectedOption.data('itemname'),
+                    ItemCode: selectedOption.data('itemcode'),
+                    IsCamera: selectedOption.data('iscamera') === 'True' || selectedOption.data('iscamera') === true,
+                    ItemQtyExist: 0,
+                    ItemQtyReq: 1,
+                    Remarks: '',
+                    CameraRemarksJson: '[]'
+                };
+                renderItemForm(item, true);
+                $('#add-item-dropdown option[value="' + selectedItemId + '"]').remove();
+                $('#add-item-dropdown').val('');
+            });
+
+            $('body').on('click', '.remove-item-btn', function() {
+                var itemForm = $(this).closest('.item-form-instance');
+                var itemId = itemForm.data('item-id');
+                var itemName = itemForm.find('h6').text();
+                var itemCode = itemForm.find('input[name$=".ItemCode"]').val();
+                var isCamera = itemForm.find('.is-camera-item').val();
+                if ($('#add-item-dropdown option[value="' + itemId + '"]').length === 0) {
+                    $('#add-item-dropdown').append($('<option>', {
+                        value: itemId,
+                        text: itemName,
+                        'data-itemname': itemName,
+                        'data-itemcode': itemCode,
+                        'data-iscamera': isCamera
+                    }));
+                }
+                itemForm.remove();
+            });
+
+            function updateItemUI(input) {
+                const itemForm = $(input).closest('.item-form-instance');
+                const itemIndex = $(input).data('index');
+                const existQty = parseInt(itemForm.find('.cam-qty-exist').val()) || 0;
+                const reqQty = parseInt(itemForm.find('.cam-qty-req').val()) || 0;
+                if (existQty + reqQty > 0) {
+                    itemForm.find('.cam-extra-section').slideDown();
+                } else {
+                    itemForm.find('.cam-extra-section').slideUp();
+                }
+                if (typeof updateCameraRemarksUI === 'function') {
+                    updateCameraRemarksUI(itemIndex);
+                }
+            }
+
+            $('body').on('click', '.cam-qty-plus, .cam-qty-minus', function() {
+                const button = $(this);
+                const input = button.siblings('.cam-qty-input');
+                let currentValue = parseInt(input.val()) || 0;
+                if (button.hasClass('cam-qty-plus')) {
+                    currentValue++;
+                } else {
+                    if (currentValue > 0) currentValue--;
+                }
+                input.val(currentValue);
+                updateItemUI(input);
+            });
+
+            $('body').on('input', '.cam-qty-input', function() {
+                updateItemUI(this);
+            });
+
+            function reindexFormForSubmission(form) {
+                const itemForms = form.find('.item-form-instance');
+                itemForms.each(function(newIndex, itemForm) {
+                    $(itemForm).find('input, textarea, select').each(function() {
+                        if (this.name) {
+                            this.name = this.name.replace(/\[\d+\]/, '[' + newIndex + ']');
+                        }
+                        const dataIndex = $(this).data('index');
+                        if(dataIndex !== undefined) {
+                            $(this).attr('data-index', newIndex);
+                        }
+                        if(this.id && this.id.includes('_')) {
+                           this.id = this.id.replace(/_\d+$/, '_' + newIndex);
+                        }
+                    });
+                });
+            }
+
+            $('body').on('submit', '.item-selection-form', function (e) {
+                e.preventDefault();
+                var form = $(this);
+                reindexFormForSubmission(form);
+
+                var submitButton = form.find('button[type="submit"]');
+                submitButton.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Saving...');
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: form.attr('method'),
+                    data: form.serialize(),
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: response.message,
+                                icon: 'success',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+
+                            const surveyId = form.find('input[name="SurveyID"]').val();
+                            const locId = form.find('input[name="LocID"]').val();
+                            const itemTypeId = form.find('input[name="ItemTypeID"]').val();
+                            const accordionBody = $(`#accordion-body-${itemTypeId}`);
+                            const itemSelectionContainer = form.closest('.item-selection-container');
+
+                            accordionBody.load('@Url.Action("GetAccordionBody", "SurveyDetails")' + `?surveyId=${surveyId}&locId=${locId}&itemTypeID=${itemTypeId}`, function() {
+                                itemSelectionContainer.html('');
+                            });
+                            
+                        } else {
+                            let message = response.message || 'An error occurred.';
+                            if (response.errors) {
+                                message += '<ul class="text-start mt-2">';
+                                response.errors.forEach(err => { message += `<li>${err}</li>`; });
+                                message += '</ul>';
+                            }
+                            Swal.fire({ icon: 'error', title: 'Error!', html: message });
+                            submitButton.prop('disabled', false).html('<i class="bi bi-check-circle me-2"></i> Save All Changes');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Error!', 'An unexpected server error occurred. Please check the console for details.', 'error');
+                        submitButton.prop('disabled', false).html('<i class="bi bi-check-circle me-2"></i> Save All Changes');
+                    }
+                });
+            });
+
+            $('body').on('click', '.cancel-item-selection', function() {
+                var container = $(this).closest('.item-selection-container');
+                var buttonContainer = container.siblings('.text-center');
+                container.html('');
+                buttonContainer.show();
+            });
+        });
     </script>
 }

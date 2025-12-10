@@ -31,6 +31,9 @@
         public string? ItemDesc { get; set; } = string.Empty;
         public string? Remarks { get; set; } = string.Empty;
         
+        // Camera flag - true if ItemID = 100 (camera item)
+        public bool IsCamera { get; set; } = false;
+        
         // For Cloudinary - support multiple images per item
         public List<string>? CloudinaryUrls { get; set; }
         public List<string>? CloudinaryPublicIds { get; set; }

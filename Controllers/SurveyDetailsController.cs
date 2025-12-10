@@ -88,6 +88,51 @@ namespace SurveyApp.Controllers
             return View("SurveyDetails", modelList);
         }
 
+        public IActionResult GetItemSelectionPartial(long surveyId, int locId, int itemTypeID)
+        {
+            // Authorization check
+            var result = _util.CheckAuthorizationAll(this, 103, null, surveyId, "View");
+            if (result != null) return Unauthorized();
+
+            var formModel = new SurveyDetailsUpdate
+            {
+                SurveyID = surveyId,
+                LocID = locId,
+                ItemTypeID = itemTypeID,
+                ItemLists = _repository.GetSurveyUpdateItemList(surveyId, locId, itemTypeID) ?? new List<SurveyDetailsUpdatelist>()
+            };
+
+            // Load camera remarks and set IsCamera flag
+            foreach (var item in formModel.ItemLists)
+            {
+                // Set IsCamera flag based on ItemCode
+                item.IsCamera = item.ItemCode?.StartsWith("CAM", StringComparison.OrdinalIgnoreCase) == true;
+                
+                if (item.IsCamera)
+                {
+                    var remarks = _camRemarksRepo.GetCameraRemarks(surveyId, locId, item.ItemID);
+                    if (remarks != null && remarks.Count > 0)
+                    {
+                        item.CameraRemarksJson = JsonSerializer.Serialize(remarks.Select(r => r.Remarks).ToList());
+                    }
+                }
+            }
+
+            var surveyInfo = _repository.GetAssignedTypeList(surveyId, locId)?.FirstOrDefault(x => x.ItemTypeID == itemTypeID);
+            if (surveyInfo != null)
+            {
+                ViewBag.SelectedSurveyName = surveyInfo.SurveyName;
+                ViewBag.SelectedLocName = surveyInfo.LocName;
+                formModel.TypeName = surveyInfo.TypeName;
+            }
+
+            ViewBag.SelectedSurveyId = surveyId;
+            ViewBag.SelectedLocId = locId;
+            ViewBag.ItemTypeID = itemTypeID;
+
+            return PartialView("_ItemSelection", formModel);
+        }
+
         public IActionResult UpdateItem(Int64 surveyId, int locId, int itemTypeID, int itemId)
         {
             int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
@@ -182,114 +227,121 @@ namespace SurveyApp.Controllers
             return View("ItemMasterSelection", formModel);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult UpdateItem(SurveyDetailsUpdate model)
-        {
-            int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
-            var result = _util.CheckAuthorizationAll(this, 103, null, model.SurveyID, "Update");
-            if (result != null) return Json(new { success = false, message = "Unauthorized" });
-
-            var userId = HttpContext.Session.GetString("UserID");
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Json(new { success = false, message = "User not logged in" });
-            }
-
-            model.CreateBy = Convert.ToInt32(userId);
-
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-                return Json(new { success = false, message = "Validation failed", errors });
-            }
-
-            try
-            {
-                // Process camera remarks (ItemCode starts with "CAM")
-                for (int i = 0; i < model.ItemLists.Count; i++)
+                [HttpPost]
+                [ValidateAntiForgeryToken]
+                public IActionResult UpdateItem(SurveyDetailsUpdate model)
                 {
-                    var item = model.ItemLists[i];
-                    // Check if it's a camera item by ItemCode prefix
-                    bool isCamera = item.ItemCode?.StartsWith("CAM", StringComparison.OrdinalIgnoreCase) == true;
-                    
-                    if (isCamera && !string.IsNullOrEmpty(item.CameraRemarksJson))
+                    int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
+                    var result = _util.CheckAuthorizationAll(this, 103, null, model.SurveyID, "Update");
+                    if (result != null) return Json(new { success = false, message = "Unauthorized" });
+        
+                    var userId = HttpContext.Session.GetString("UserID");
+                    if (string.IsNullOrEmpty(userId))
                     {
-                        try
+                        return Json(new { success = false, message = "User not logged in" });
+                    }
+        
+                    model.CreateBy = Convert.ToInt32(userId);
+        
+                    if (!ModelState.IsValid)
+                    {
+                        var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                        return Json(new { success = false, message = "Validation failed", errors });
+                    }
+        
+                    try
+                    {
+                        // Process camera remarks (ItemCode starts with "CAM")
+                        for (int i = 0; i < model.ItemLists.Count; i++)
                         {
-                            var remarks = JsonSerializer.Deserialize<List<string>>(item.CameraRemarksJson);
+                            var item = model.ItemLists[i];
+                            // Check if it's a camera item by ItemCode prefix
+                            bool isCamera = item.ItemCode?.StartsWith("CAM", StringComparison.OrdinalIgnoreCase) == true;
                             
-                            if (remarks != null && remarks.Count > 0)
+                            if (isCamera && !string.IsNullOrEmpty(item.CameraRemarksJson))
                             {
-                                // Delete existing remarks for this camera item
-                                _camRemarksRepo.DeleteAllCameraRemarks(model.SurveyID, model.LocID, item.ItemID);
-                                
-                                // Save new remarks with sequence number
-                                int remarkNo = 1;
-                                foreach (var remark in remarks)
+                                try
                                 {
-                                    if (!string.IsNullOrWhiteSpace(remark))
+                                    var remarks = JsonSerializer.Deserialize<List<string>>(item.CameraRemarksJson);
+                                    
+                                    if (remarks != null && remarks.Count > 0)
                                     {
-                                        var camRemark = new SurveyCamRemarksModel
+                                        // Delete existing remarks for this camera item
+                                        _camRemarksRepo.DeleteAllCameraRemarks(model.SurveyID, model.LocID, item.ItemID);
+                                        
+                                        // Save new remarks with sequence number
+                                        int remarkNo = 1;
+                                        foreach (var remark in remarks)
                                         {
-                                            SurveyID = model.SurveyID,
-                                            LocID = model.LocID,
-                                            ItemID = item.ItemID,
-                                            RemarkNo = remarkNo,
-                                            Remarks = remark.Trim(),
-                                            CreatedBy = model.CreateBy
-                                        };
-                                        _camRemarksRepo.SaveCameraRemarks(camRemark);
-                                        remarkNo++;
+                                            if (!string.IsNullOrWhiteSpace(remark))
+                                            {
+                                                var camRemark = new SurveyCamRemarksModel
+                                                {
+                                                    SurveyID = model.SurveyID,
+                                                    LocID = model.LocID,
+                                                    ItemID = item.ItemID,
+                                                    RemarkNo = remarkNo,
+                                                    Remarks = remark.Trim(),
+                                                    CreatedBy = model.CreateBy
+                                                };
+                                                _camRemarksRepo.SaveCameraRemarks(camRemark);
+                                                remarkNo++;
+                                            }
+                                        }
                                     }
+                                }
+                                catch (JsonException jsonEx)
+                                {
+                                    Console.WriteLine($"JSON parsing error for camera remarks: {jsonEx.Message}");
+                                    // Continue processing, don't fail the entire update
                                 }
                             }
                         }
-                        catch (JsonException jsonEx)
+        
+                        bool isSaved = _repository.UpdateSurveyDetails(model);
+        
+                        if (isSaved)
                         {
-                            Console.WriteLine($"JSON parsing error for camera remarks: {jsonEx.Message}");
-                            // Continue processing, don't fail the entire update
+                            return Json(new { success = true, message = "Survey details updated successfully." });
+                        }
+                        else
+                        {
+                            return Json(new { success = false, message = "Failed to update survey details." });
                         }
                     }
-                }
-
-                bool isSaved = _repository.UpdateSurveyDetails(model);
-
-                if (isSaved)
-                {
-                    TempData["ResultMessage"] = "<strong>Success!</strong> Survey details updated successfully.";
-                    TempData["ResultType"] = "success";
-                    // Redirect to Survey Details Index page
-                    return RedirectToAction("Index", new { 
-                        surveyId = model.SurveyID, 
-                        locId = model.LocID 
-                    });
-                }
-                else
-                {
-                    TempData["ResultMessage"] = "<strong>Error!</strong> Failed to update survey details.";
-                    TempData["ResultType"] = "danger";
-                    return RedirectToAction("Index", new { 
-                        surveyId = model.SurveyID, 
-                        locId = model.LocID 
-                    });
-                }
-            }
-            catch (InvalidOperationException ex)
-            {
-                TempData["ResultMessage"] = $"<strong>Validation Error!</strong> {ex.Message}";
-                TempData["ResultType"] = "warning";
-                return RedirectToAction("UpdateItem", new { surveyId = model.SurveyID, locId = model.LocID, itemTypeID = model.ItemTypeID, itemId = 0 });
-            }
-            catch (Exception ex)
-            {
-                TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
-                TempData["ResultType"] = "danger";
-                return RedirectToAction("UpdateItem", new { surveyId = model.SurveyID, locId = model.LocID, itemTypeID = model.ItemTypeID, itemId = 0 });
-            }
-        }
-
-        // GET: SurveyDetails/GetLocationPreview
+                    catch (InvalidOperationException ex)
+                    {
+                        return Json(new { success = false, message = $"Validation Error! {ex.Message}" });
+                    }
+                                    catch (Exception ex)
+                                    {
+                                        return Json(new { success = false, message = $"Error! {ex.Message}" });
+                                    }
+                                }
+                    
+                                public IActionResult GetAccordionBody(long surveyId, int locId, int itemTypeID)
+                                {
+                                    // Authorization check
+                                    var result = _util.CheckAuthorizationAll(this, 103, null, surveyId, "View");
+                                    if (result != null) return Unauthorized();
+                    
+                                    // Get the specific device type details
+                                    var deviceType = (_repository.GetAssignedTypeList(surveyId, locId) ?? new List<SurveyDetailsLocationModel>())
+                                                     .FirstOrDefault(dt => dt.ItemTypeID == itemTypeID);
+                    
+                                    if (deviceType == null)
+                                    {
+                                        return Content("<div class='alert alert-danger'>Could not reload item data.</div>");
+                                    }
+                    
+                                    // Load the item list for this type
+                                    deviceType.ItemLists = _repository.GetAssignedItemList(surveyId, locId, itemTypeID) ?? new List<SurveyDetailsModel>();
+                    
+                                    // Return the partial view with the model
+                                    return PartialView("_SurveyDetailsGrid", deviceType);
+                                }
+                    
+                                // GET: SurveyDetails/GetLocationPreview
         public IActionResult GetLocationPreview(long surveyId, int locId)
         {
             try

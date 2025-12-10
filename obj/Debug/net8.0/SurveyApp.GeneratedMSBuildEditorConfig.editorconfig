@@ -264,8 +264,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5RGV0YWlsc1xVcGRhdGVTdXJ2ZXlEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/VL Access/Survey/AS.NET SURVEY/survey/Views/SurveyDetails/_ItemSelection.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5RGV0YWlsc1xfSXRlbVNlbGVjdGlvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/VL Access/Survey/AS.NET SURVEY/survey/Views/SurveyDetails/_LocationPreview.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5RGV0YWlsc1xfTG9jYXRpb25QcmV2aWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/AS.NET SURVEY/survey/Views/SurveyDetails/_SurveyDetailsGrid.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5RGV0YWlsc1xfU3VydmV5RGV0YWlsc0dyaWQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/VL Access/Survey/AS.NET SURVEY/survey/Views/SurveyReports/DetailedReport.cshtml]
