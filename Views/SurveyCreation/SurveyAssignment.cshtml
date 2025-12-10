@@ -86,7 +86,7 @@
                                         <th>Employee ID</th>
                                         <th>Employee Name</th>
                                         <th>Due Date</th>
-                                        <th>Created By</th>
+                                        @* <th>Created By</th> *@
                                         <th class="text-center">Actions</th>
                                     </tr>
                                 </thead>
@@ -103,10 +103,11 @@
                                             <td>@assignment.EmpName</td>
                                             <td>
                                                 <span class="badge bg-info">
-                                                    <i class="bi bi-calendar-event me-1"></i>@assignment.DueDate.ToString("dd                                          MMM yyyy")
+                                                    <i class="bi bi-calendar-event me-1"></i>
+                                                    @(assignment.DueDate.HasValue? assignment.DueDate.Value.ToString("dd MMM yyyy") : "")
                                                 </span>
                                             </td>
-                                            <td>@assignment.CreateBy</td>
+                                            @* <td>@assignment.CreateBy</td> *@
                                             <td class="text-center">
                                                 <div class="btn-group btn-group-sm" role="group">
                                                     <a asp-controller="SurveyCreation" asp-action="EditSurveyAssignment"

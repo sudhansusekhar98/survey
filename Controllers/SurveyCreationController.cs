@@ -617,7 +617,17 @@ namespace SurveyApp.Controllers
                 }
 
                 // Update due date for all assignments of this survey
-                bool isUpdated = _surveyRepository.UpdateAllSurveyAssignmentsDueDate(model.SurveyID, model.DueDate);
+                bool isUpdated = false;
+                if (model.DueDate.HasValue)
+                {
+                    isUpdated = _surveyRepository.UpdateAllSurveyAssignmentsDueDate((int)model.SurveyID, model.DueDate.Value);
+                }
+                else
+                {
+                    TempData["ResultMessage"] = "<strong>Error!</strong> Due date is required.";
+                    TempData["ResultType"] = "danger";
+                    return View("CreateSurveyAssignment", model);
+                }
 
                 if (isUpdated)
                 {

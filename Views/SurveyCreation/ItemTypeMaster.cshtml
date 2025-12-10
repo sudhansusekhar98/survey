@@ -21,7 +21,7 @@
         .assign-card.selected {
             border: 2px solid rgba(13, 110, 253, 0.5) !important;
             background-color: #a4cbffd1 !important;
-            color: white !important; 
+            color: rgb(181, 181, 181) !important; 
         }
     </style>
 }
@@ -96,9 +96,9 @@
                             <button type="submit" class="btn btn-primary order-1 order-sm-0" name="action" value="save">
                                 <i class="bi bi-check2-circle me-2"></i> Save Selection
                             </button>
-                            <a asp-controller="SurveyCreation" asp-action="SaveItemType" class="btn btn-danger order-2 order-sm-1">
+                            @* <a asp-controller="SurveyCreation" asp-action="SaveItemType" class="btn btn-danger order-2 order-sm-1">
                                 <i class="bi bi-slash-circle me-2"></i> Reset
-                            </a>
+                            </a> *@
                             <button type="submit" class="btn btn-success order-0 order-sm-2" name="action" value="start">
                                 <i class="bi bi-play-circle me-2"></i> Start Survey
                             </button>

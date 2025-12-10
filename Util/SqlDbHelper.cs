@@ -55,9 +55,23 @@ namespace AnalyticaDocs.Util
 
                         else
                         {
-                            safeValue = value != DBNull.Value
-                                ? Convert.ChangeType(value, propType)
-                                : propType.IsValueType ? Activator.CreateInstance(propType) : null;
+                            if (value != DBNull.Value)
+                            {
+                                safeValue = Convert.ChangeType(value, propType);
+                            }
+                            else
+                            {
+                                // If the property is a non-nullable value type, create a default instance.
+                                // Otherwise, set it to null.
+                                if (prop.PropertyType.IsValueType && Nullable.GetUnderlyingType(prop.PropertyType) == null)
+                                {
+                                    safeValue = Activator.CreateInstance(prop.PropertyType);
+                                }
+                                else
+                                {
+                                    safeValue = null;
+                                }
+                            }
                         }
                         prop.SetValue(obj, safeValue, null);
                     }

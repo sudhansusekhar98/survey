@@ -13,10 +13,8 @@ namespace SurveyApp.Models
         public int EmpID { get; set; }
         public string? EmpName { get; set; }
         public int? CreateBy { get; set; }
-        public DateTime DueDate { get; set; }
+        public DateTime? DueDate { get; set; }
         [NotMapped]
         public List<int> SelectedEmpIDs { get; set; } // For multi-select binding, not mapped to DB
     }
-    
-
 }

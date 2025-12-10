@@ -11,65 +11,6 @@ namespace SurveyApp.Repo
 {
         public class SurveyRepo : ISurvey
     {
-        // public bool AddSurvey(SurveyModel survey)
-        // {
-        //     try
-        //     {
-        //         using var con = new SqlConnection(DBConnection.ConnectionString);
-        //         using var cmd = new SqlCommand("dbo.SpSurvey", con);
-        //         cmd.CommandType = CommandType.StoredProcedure;
-
-        //         // SpType = 1 -> Insert Survey 
-        //         cmd.Parameters.AddWithValue("@SpType", 1);
-
-        //         // The SP generates SurveyId internally. Passing SurveyId is optional
-        //         // but we'll pass null to keep it explicit.
-        //         cmd.Parameters.AddWithValue("@SurveyID", survey.SurveyId == 0 ? (object)DBNull.Value : survey.SurveyId);
-
-        //         cmd.Parameters.AddWithValue("@SurveyName", survey.SurveyName ?? (object)DBNull.Value);
-        //         cmd.Parameters.AddWithValue("@ImplementationType", survey.ImplementationType ?? (object)DBNull.Value);
-
-        //         // Your SP expects SurveyDate as varchar(100) � keep same format or adjust SP to accept DATE.
-        //         // If your model uses DateTime? convert to string (yyyy-MM-dd) or pass as DBNull if null.
-        //         cmd.Parameters.AddWithValue("@SurveyDate", survey.SurveyDate ?? (object)DBNull.Value);
-
-        //         cmd.Parameters.AddWithValue("@SurveyTeamName", survey.SurveyTeamName ?? (object)DBNull.Value);
-        //         cmd.Parameters.AddWithValue("@SurveyTeamContact", survey.SurveyTeamContact ?? (object)DBNull.Value);
-        //         cmd.Parameters.AddWithValue("@AgencyName", survey.AgencyName ?? (object)DBNull.Value);
-        //         cmd.Parameters.AddWithValue("@LocationSiteName", survey.LocationSiteName ?? (object)DBNull.Value);
-        //         cmd.Parameters.AddWithValue("@CityDistrict", survey.CityDistrict ?? (object)DBNull.Value);
-        //         cmd.Parameters.AddWithValue("@ScopeOfWork", survey.ScopeOfWork ?? (object)DBNull.Value);
-        //         cmd.Parameters.AddWithValue("@Latitude", survey.Latitude ?? (object)DBNull.Value);
-        //         cmd.Parameters.AddWithValue("@Longitude", survey.Longitude ?? (object)DBNull.Value);
-        //         cmd.Parameters.AddWithValue("@MapMarking", survey.MapMarking ?? (object)DBNull.Value);
-        //         cmd.Parameters.AddWithValue("@SurveyStatus", survey.SurveyStatus ?? (object)DBNull.Value);
-        //         cmd.Parameters.AddWithValue("@RegionID", survey.RegionID ?? (object)DBNull.Value);
-        //         cmd.Parameters.AddWithValue("@ClientID", survey.ClientID ?? (object)DBNull.Value);
-        //         // cmd.Parameters.AddWithValue("@StateId", survey.StateId ?? (object)DBNull.Value);
-        //         // cmd.Parameters.AddWithValue("@CityId", survey.CityId ?? (object)DBNull.Value);
-
-        //         if (survey.CreatedBy == 0)
-        //             cmd.Parameters.AddWithValue("@CreatedBy", DBNull.Value);
-        //         else
-        //             cmd.Parameters.AddWithValue("@CreatedBy", survey.CreatedBy);
-
-        //         con.Open();
-
-        //         int rowsAffected = cmd.ExecuteNonQuery();
-
-        //         // NOTE: If you later modify the stored procedure to output the generated SurveyId
-        //         // you can add an output parameter and read it here:
-        //         // var newId = cmd.Parameters["@NewSurveyId"].Value;
-
-        //         return rowsAffected > 0;
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         // TODO: log ex.ToString()
-        //         throw;
-        //     }
-        // }
-
         public bool AddSurvey(SurveyModel survey)
         {
             try
@@ -274,7 +215,7 @@ namespace SurveyApp.Repo
             }
         }
 
-        public List<SurveyLocationModel> GetSurveyLocationById(long surveyId)
+        public List<SurveyLocationModel> GetSurveyLocationById(Int64 surveyId)
         {
             var locations = new List<SurveyLocationModel>();
             using (var conn = new SqlConnection(DBConnection.ConnectionString))
@@ -657,18 +598,21 @@ namespace SurveyApp.Repo
             }
         }
 
-        public  bool AddSurveyAssignment(SurveyAssignmentModel assignment)
+        public bool AddSurveyAssignment(SurveyAssignmentModel assignment)
         {
             try
             {
                 using var con = new SqlConnection(DBConnection.ConnectionString);
                 using var cmd = new SqlCommand("dbo.SpSurvey", con);
                 cmd.CommandType = CommandType.StoredProcedure;
+
                 cmd.Parameters.AddWithValue("@SpType", 17);
                 cmd.Parameters.AddWithValue("@SurveyID", assignment.SurveyID);
                 cmd.Parameters.AddWithValue("@EmpID", assignment.EmpID);
-                cmd.Parameters.AddWithValue("@DueDate", assignment.DueDate);
+                // If DueDate is null, pass DBNull.Value. Otherwise, pass the date.
+                cmd.Parameters.AddWithValue("@DueDate", (object)assignment.DueDate ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@CreatedBy", assignment.CreateBy ?? (object)DBNull.Value);
+
                 con.Open();
                 int rowsAffected = cmd.ExecuteNonQuery();
                 return rowsAffected > 0;
@@ -690,7 +634,7 @@ namespace SurveyApp.Repo
                 cmd.Parameters.AddWithValue("@TransID", assignment.TransID);
                 cmd.Parameters.AddWithValue("@SurveyID", assignment.SurveyID);
                 cmd.Parameters.AddWithValue("@EmpID", assignment.EmpID);
-                cmd.Parameters.AddWithValue("@DueDate", assignment.DueDate);
+                cmd.Parameters.AddWithValue("@DueDate", (object)assignment.DueDate ?? DBNull.Value);
                 con.Open();
                 int rowsAffected = cmd.ExecuteNonQuery();
                 return rowsAffected > 0;
@@ -789,7 +733,7 @@ namespace SurveyApp.Repo
         //}
         //------------------- Survey Details -------------------//
 
-        public List<SurveyDetailsLocationModel> GetAssignedTypeList(long SurveyID, int LocId)
+        public List<SurveyDetailsLocationModel> GetAssignedTypeList(Int64 SurveyID, int LocId)
         {
             try
             {
@@ -815,7 +759,7 @@ namespace SurveyApp.Repo
             }
         }
 
-        public List<SurveyDetailsModel> GetAssignedItemList(long SurveyID, int LocId, int ItemTypeID)
+        public List<SurveyDetailsModel> GetAssignedItemList(Int64 SurveyID, int LocId, int ItemTypeID)
         {
             try
             {
@@ -842,7 +786,7 @@ namespace SurveyApp.Repo
             }
         }
 
-        public List<SurveyDetailsUpdatelist> GetSurveyUpdateItemList(long SurveyID, int LocId, int ItemTypeID)
+        public List<SurveyDetailsUpdatelist> GetSurveyUpdateItemList(Int64 SurveyID, int LocId, int ItemTypeID)
         {
             try
             {
@@ -932,7 +876,7 @@ namespace SurveyApp.Repo
             }
         }
 
-        public bool MarkLocationAsCompleted(long surveyId, int locId, int userId)
+        public bool MarkLocationAsCompleted(Int64 surveyId, int locId, int userId)
         {
             try
             {
@@ -959,7 +903,7 @@ namespace SurveyApp.Repo
         }
 
         // Survey Submission Methods
-        public bool SubmitSurvey(long surveyId, int userId)
+        public bool SubmitSurvey(Int64 surveyId, int userId)
         {
             try
             {
@@ -989,7 +933,7 @@ namespace SurveyApp.Repo
             }
         }
 
-        public bool WithdrawSubmission(long surveyId)
+        public bool WithdrawSubmission(Int64 surveyId)
         {
             try
             {
@@ -1063,7 +1007,7 @@ namespace SurveyApp.Repo
             }
         }
 
-        public SurveySubmissionModel? GetSubmissionBySurveyId(long surveyId)
+        public SurveySubmissionModel? GetSubmissionBySurveyId(Int64 surveyId)
         {
             try
             {
@@ -1140,7 +1084,7 @@ namespace SurveyApp.Repo
             }
         }
 
-        public bool CanEditSurvey(long surveyId)
+        public bool CanEditSurvey(Int64 surveyId)
         {
             try
             {
@@ -1161,7 +1105,7 @@ namespace SurveyApp.Repo
             }
         }
 
-        public SurveyCompletionStatus CheckSurveyCompletionStatus(long surveyId)
+        public SurveyCompletionStatus CheckSurveyCompletionStatus(Int64 surveyId)
         {
             var status = new SurveyCompletionStatus();
             
@@ -1228,14 +1172,20 @@ namespace SurveyApp.Repo
             }
         }
 
-        public bool UpdateAllSurveyAssignmentsDueDate(long SurveyID, DateTime DueDate)
+        // 1. Ensure this is 'int' to match your Interface (ISurvey)
+        public bool UpdateAllSurveyAssignmentsDueDate(Int64 SurveyID, DateTime? DueDate)
         {
             try
             {
                 using var con = new SqlConnection(DBConnection.ConnectionString);
                 using var cmd = new SqlCommand(@"UPDATE SurveyAssignment SET DueDate = @DueDate WHERE SurveyID = @SurveyID", con);
+
                 cmd.Parameters.AddWithValue("@SurveyID", SurveyID);
-                cmd.Parameters.AddWithValue("@DueDate", DueDate);
+
+                // 2. ERROR FIXED HERE: 
+                // Use 'DueDate' (the parameter), not 'assignment.DueDate'
+                cmd.Parameters.AddWithValue("@DueDate", (object)DueDate ?? DBNull.Value);
+
                 con.Open();
                 int rowsAffected = cmd.ExecuteNonQuery();
                 return rowsAffected > 0;
@@ -1247,7 +1197,7 @@ namespace SurveyApp.Repo
             }
         }
 
-        public DataTable GetSurveyDetails(long surveyId, int spType)
+        public DataTable GetSurveyDetails(Int64 surveyId, int spType)
 {
     try
     {
@@ -1274,6 +1224,5 @@ namespace SurveyApp.Repo
 }
     }
 }
-
 
 

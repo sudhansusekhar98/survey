@@ -118,7 +118,9 @@
                                                     <div class="col-6 col-md-4 col-lg-3">
                                                         <div class="card shadow-sm border-0 h-100">
                                                             <div class="card-body p-2 d-flex align-items-center">
-                                                                @* <div class="form-check m-0 text-truncate w-100">
+
+                                                                @* 
+                                                                <div class="form-check m-0 text-truncate w-100">
                                                                     <input readonly="readonly" class="form-check-input me-2"
                                                                         type="checkbox" name="SelectedEmpIDs" value="@emp.Value"
                                                                         id="e_@emp.Value" @(isCurrentlyAssigned ? "checked" : "")>
@@ -131,7 +133,8 @@
                                                                         }
                                                                         @emp.Text
                                                                     </label>
-                                                                </div> *@
+                                                                </div> 
+                                                                *@
 
                                                                 <div class="form-check m-0 text-truncate w-100">
                                                                     <input
@@ -141,7 +144,7 @@
                                                                         value="@emp.Value"
                                                                         id="e_@emp.Value"
                                                                         @(isCurrentlyAssigned ? "checked" : "")
-                                                                        onclick="return false;" />
+                                                                         />
 
                                                                     <label
                                                                         class="form-check-label stretched-link small fw-semibold"
@@ -173,10 +176,10 @@
                                 <label asp-for="DueDate" class="form-label fw-bold required">
                                     <i class="bi bi-calendar-event me-1"></i>Due Date
                                 </label>
-                                <input asp-for="DueDate" type="date" class="form-control"
-                                    min="@DateTime.Now.ToString("yyyy-MM-dd")"
-                                    value="@(Model.DueDate != default(DateTime) ? Model.DueDate.ToString("yyyy-MM-dd") : DateTime.Now.ToString("yyyy-MM-dd"))"
-                                    required />
+                               <input asp-for="DueDate" type="date" class="form-control"
+                                min="@DateTime.Now.ToString("yyyy-MM-dd")"
+                                value="@(Model.DueDate.HasValue ? Model.DueDate.Value.ToString("yyyy-MM-dd") : "")" 
+                                />
                                 <div class="form-text">Select the deadline for completing this survey</div>
                                 <span asp-validation-for="DueDate" class="text-danger"></span>
                             </div>

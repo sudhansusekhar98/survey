@@ -30,7 +30,7 @@ namespace SurveyApp.Repo
         List<SurveyAssignmentModel>? GetSurveyAssignments(Int64 surveyId);
         bool AddSurveyAssignment(SurveyAssignmentModel assignment);
         bool UpdateSurveyAssignment(SurveyAssignmentModel assignment);
-        bool UpdateAllSurveyAssignmentsDueDate(Int64 SurveyID, DateTime DueDate);
+        bool UpdateAllSurveyAssignmentsDueDate(Int64 SurveyID, DateTime? DueDate);
         bool DeleteSurveyAssignment(int transId);
         List<SurveyAssignmentModel> GetAllSurveyAssignments(int userId);
 
@@ -59,4 +59,3 @@ namespace SurveyApp.Repo
         DataTable GetSurveyDetails(long surveyId, int spType);
     }
 }
-

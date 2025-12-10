@@ -714,7 +714,7 @@ namespace SurveyApp.Controllers
                             assignSheet.Cells[row, 2].Value = assign.SurveyID;
                             assignSheet.Cells[row, 3].Value = assign.EmpID;
                             assignSheet.Cells[row, 4].Value = assign.EmpName;
-                            assignSheet.Cells[row, 5].Value = assign.DueDate.ToString("dd-MMM-yyyy");
+                            assignSheet.Cells[row, 5].Value = assign.DueDate.HasValue ? assign.DueDate.Value.ToString("dd-MM-yyyy") : "";
                             row++;
                         }
                         assignSheet.Cells.AutoFitColumns();
