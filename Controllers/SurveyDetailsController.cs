@@ -340,6 +340,30 @@ namespace SurveyApp.Controllers
                                     // Return the partial view with the model
                                     return PartialView("_SurveyDetailsGrid", deviceType);
                                 }
+
+        public IActionResult GetSurveyAccordionItem(long surveyId, int locId, int itemTypeID)
+        {
+            // Authorization check
+            var result = _util.CheckAuthorizationAll(this, 103, null, surveyId, "View");
+            if (result != null) return Unauthorized();
+
+            // Get the specific device type details
+            var deviceType = (_repository.GetAssignedTypeList(surveyId, locId) ?? new List<SurveyDetailsLocationModel>())
+                             .FirstOrDefault(dt => dt.ItemTypeID == itemTypeID);
+
+            if (deviceType == null)
+            {
+                // Return a specific empty content if the item type is somehow gone
+                return Content("");
+            }
+
+            // Load the item list for this type
+            deviceType.ItemLists = _repository.GetAssignedItemList(surveyId, locId, itemTypeID) ?? new List<SurveyDetailsModel>();
+
+            // Return the new partial view with the model
+            return PartialView("_SurveyAccordionItem", deviceType);
+        }
+
                     
                                 // GET: SurveyDetails/GetLocationPreview
         public IActionResult GetLocationPreview(long surveyId, int locId)

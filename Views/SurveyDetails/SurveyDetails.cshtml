@@ -344,69 +344,9 @@
                     {
                         foreach (var gridData in Model)
                         {
-                            var headingId = $"heading_{index}";
-                            var collapseId = $"collapse_{index}";
-                            var hasItems = gridData.ItemLists != null && gridData.ItemLists.Any();
-                            var itemCount = hasItems && gridData.ItemLists != null ? gridData.ItemLists.Count : 0;
-                            var totalQtyReq = hasItems && gridData.ItemLists != null ? gridData.ItemLists.Sum(x => x.ItemQtyReq) : 0;
-                            var accordionClass = hasItems ? "card accordion-item shadow-sm mb-2 has-items" : "card accordion-item shadow-sm mb-2";
-                            
-                            <div class="@accordionClass">
-                                <h2 class="accordion-header" id="@headingId">
-                                    <button type="button"
-                                            class="accordion-button collapsed"
-                                            data-bs-toggle="collapse"
-                                            data-bs-target="#@collapseId"
-                                            aria-expanded="false"
-                                            aria-controls="@collapseId">
-
-                                        <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center w-100 gap-2">
-                                            <div class="d-flex align-items-center">
-                                                @if (hasItems)
-                                                {
-                                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                                }
-
-                                                <i class="bi bi-cpu item-type-icon fs-5 fs-sm-2 me-2"
-                                                style="@(hasItems ? "color: #28a745;" : "color: #6c757d;")"></i>
-
-                                                <span class="fw-semibold fs-6 fs-sm-5">
-                                                    @gridData.TypeName
-                                                </span>
-                                            </div>
-
-                                            @if (hasItems)
-                                            {
-                                                <div class="d-flex flex-wrap align-items-center">
-                                                    <span class="badge bg-success text-white me-2">
-                                                        <i class="bi bi-check2-all me-1"></i>
-                                                        @itemCount item@(itemCount != 1 ? "s" : "") selected
-                                                        @if (totalQtyReq > 0)
-                                                        {
-                                                            <span class="ms-1">(Qty: @totalQtyReq)</span>
-                                                        }
-                                                    </span>
-                                                </div>
-                                            }
-
-                                            <div class="mt-1 mt-sm-0 ms-sm-auto">
-                                                <span class="badge bg-info text-dark">
-                                                    ID: @gridData.ItemTypeID
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </button>
-                                </h2>
-
-                                <div id="collapse_@index"
-                                     class="accordion-collapse collapse"
-                                     data-bs-parent="#accordionExample">
-                                    <div class="accordion-body" id="accordion-body-@gridData.ItemTypeID">
-                                        @await Html.PartialAsync("_SurveyDetailsGrid", gridData)
-                                    </div>
-                                </div>
+                            <div id="accordion-wrapper-@gridData.ItemTypeID">
+                                @await Html.PartialAsync("_SurveyAccordionItem", gridData)
                             </div>
-
                             index++;
                         }
                     }
@@ -676,13 +616,16 @@
                 });
             });
 
-            $('body').on('click', '#add-item-btn', function() {
-                var selectedItemId = $('#add-item-dropdown').val();
+            $('body').on('click', '.add-item-btn', function() {
+                var itemTypeId = $(this).data('itemtypeid');
+                var dropdown = $('#add-item-dropdown-' + itemTypeId);
+                var selectedItemId = dropdown.val();
+
                 if (!selectedItemId) {
                     Swal.fire('No Item Selected', 'Please select an item from the dropdown to add.', 'warning');
                     return;
                 }
-                var selectedOption = $('#add-item-dropdown option:selected');
+                var selectedOption = dropdown.find('option:selected');
                 var item = {
                     ItemID: selectedItemId,
                     ItemName: selectedOption.data('itemname'),
@@ -694,18 +637,22 @@
                     CameraRemarksJson: '[]'
                 };
                 renderItemForm(item, true);
-                $('#add-item-dropdown option[value="' + selectedItemId + '"]').remove();
-                $('#add-item-dropdown').val('');
+                dropdown.find('option[value="' + selectedItemId + '"]').remove();
+                dropdown.val('');
             });
 
             $('body').on('click', '.remove-item-btn', function() {
                 var itemForm = $(this).closest('.item-form-instance');
                 var itemId = itemForm.data('item-id');
+                var itemTypeId = itemForm.closest('.item-selection-form').find('input[name="ItemTypeID"]').val();
+                var dropdown = $('#add-item-dropdown-' + itemTypeId);
+
                 var itemName = itemForm.find('h6').text();
                 var itemCode = itemForm.find('input[name$=".ItemCode"]').val();
                 var isCamera = itemForm.find('.is-camera-item').val();
-                if ($('#add-item-dropdown option[value="' + itemId + '"]').length === 0) {
-                    $('#add-item-dropdown').append($('<option>', {
+
+                if (dropdown.length > 0 && dropdown.find('option[value="' + itemId + '"]').length === 0) {
+                    dropdown.append($('<option>', {
                         value: itemId,
                         text: itemName,
                         'data-itemname': itemName,
@@ -791,11 +738,15 @@
                             const surveyId = form.find('input[name="SurveyID"]').val();
                             const locId = form.find('input[name="LocID"]').val();
                             const itemTypeId = form.find('input[name="ItemTypeID"]').val();
-                            const accordionBody = $(`#accordion-body-${itemTypeId}`);
-                            const itemSelectionContainer = form.closest('.item-selection-container');
+                            const wrapper = $(`#accordion-wrapper-${itemTypeId}`);
 
-                            accordionBody.load('@Url.Action("GetAccordionBody", "SurveyDetails")' + `?surveyId=${surveyId}&locId=${locId}&itemTypeID=${itemTypeId}`, function() {
-                                itemSelectionContainer.html('');
+                            const url = '@Url.Action("GetSurveyAccordionItem", "SurveyDetails")' + `?surveyId=${surveyId}&locId=${locId}&itemTypeID=${itemTypeId}`;
+                            
+                            // Replace the entire item's content (summary + accordion)
+                            wrapper.load(url, function() {
+                                // After loading, we might want to re-collapse other items
+                                // or perform other UI adjustments if needed.
+                                // For now, just loading is enough to fix the stale data issue.
                             });
                             
                         } else {

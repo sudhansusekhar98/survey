@@ -1,0 +1,85 @@
+@using SurveyApp.Models
+@model SurveyDetailsLocationModel
+
+@{
+    var hasItems = Model.ItemLists != null && Model.ItemLists.Any();
+    var itemCount = hasItems ? Model.ItemLists.Count : 0;
+    var totalQtyReq = hasItems ? Model.ItemLists.Sum(x => x.ItemQtyReq) : 0;
+    var accordionClass = hasItems ? "card accordion-item shadow-sm mb-2 has-items" : "card accordion-item shadow-sm mb-2";
+    var collapseId = $"collapse_{Model.ItemTypeID}"; // Use ItemTypeID for a stable ID
+}
+
+@* @if (hasItems)
+{
+    <div class="d-flex justify-content-between align-items-center mb-1 ps-2" style="font-size: 0.9rem; color: #555;">
+        <div>
+            <span class="badge bg-success text-white me-2">
+                <i class="bi bi-check2-all me-1"></i>
+                @itemCount item@(itemCount != 1 ? "s" : "")
+            </span>
+            @if (totalQtyReq > 0)
+            {
+                <span class="badge bg-primary text-white">
+                    Qty: @totalQtyReq
+                </span>
+            }
+        </div>
+        <small class="text-muted">Assigned items for @Model.TypeName</small>
+    </div>
+} *@
+
+<div class="@accordionClass">
+    <h2 class="accordion-header" id="heading_@Model.ItemTypeID">
+        <button type="button"
+                class="accordion-button collapsed"
+                data-bs-toggle="collapse"
+                data-bs-target="#@collapseId"
+                aria-expanded="false"
+                aria-controls="@collapseId">
+
+            <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center w-100 gap-2">
+                <div class="d-flex align-items-center">
+                    @if (hasItems)
+                    {
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    }
+
+                    <i class="bi bi-cpu item-type-icon fs-5 fs-sm-2 me-2"
+                       style="@(hasItems ? "color: #28a745;" : "color: #6c757d;")"></i>
+
+                    <span class="fw-semibold fs-6 fs-sm-5">
+                        @Model.TypeName
+                    </span>
+                </div>
+
+                @if (hasItems)
+                {
+                    <div class="d-flex flex-wrap align-items-center">
+                        <span class="badge bg-success text-white me-2">
+                            <i class="bi bi-check2-all me-1"></i>
+                            @itemCount item@(itemCount != 1 ? "s" : "") selected
+                            @if (totalQtyReq > 0)
+                            {
+                                <span class="ms-1">(Qty: @totalQtyReq)</span>
+                            }
+                        </span>
+                    </div>
+                }
+
+                <div class="mt-1 mt-sm-0 ms-sm-auto">
+                    <span class="badge bg-info text-dark">
+                        ID: @Model.ItemTypeID
+                    </span>
+                </div>
+            </div>
+        </button>
+    </h2>
+
+    <div id="@collapseId"
+         class="accordion-collapse collapse"
+         data-bs-parent="#accordionExample">
+        <div class="accordion-body" id="accordion-body-@Model.ItemTypeID">
+            @await Html.PartialAsync("_SurveyDetailsGrid", Model)
+        </div>
+    </div>
+</div>

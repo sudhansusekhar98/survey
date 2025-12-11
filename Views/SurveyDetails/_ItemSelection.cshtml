@@ -16,7 +16,7 @@
         <div class="row align-items-end">
             <div class="col-md-8">
                 <label for="add-item-dropdown" class="form-label fw-semibold">Add a new item:</label>
-                <select class="form-select" id="add-item-dropdown">
+                <select class="form-select" id="add-item-dropdown-@Model.ItemTypeID">
                     <option value="">-- Select an item --</option>
                     @foreach (var item in availableItems)
                     {
@@ -26,7 +26,7 @@
                 </select>
             </div>
             <div class="col-md-4">
-                <button type="button" class="btn btn-success w-100" id="add-item-btn">
+                <button type="button" class="btn btn-success w-100 add-item-btn" data-itemtypeid="@Model.ItemTypeID">
                     <i class="bi bi-plus-circle me-1"></i> Add Item
                 </button>
             </div>
