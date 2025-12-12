@@ -300,7 +300,9 @@
                                                 <small class="text-muted d-block">
                                                     <i class="bi bi-person me-1"></i><strong>Created By:</strong>
                                                 </small>
-                                                <span class="text-dark">@loc.CreateBy</span>
+                                                <span class="text-dark">
+                                                    @(ViewBag.UserNames != null && loc.CreateBy.HasValue && ((Dictionary<int, string>)ViewBag.UserNames).ContainsKey(loc.CreateBy.Value) ? ((Dictionary<int, string>)ViewBag.UserNames)[loc.CreateBy.Value] : loc.CreateBy)
+                                                </span>
                                             </div>
                                         </div>
 

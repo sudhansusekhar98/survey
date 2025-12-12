@@ -241,13 +241,49 @@ function updateExtraSection(input) {
 // Camera and Gallery logic
 let currentFacingMode = 'environment'; // Default to back camera
 
+// Helper function to get itemId from either _ItemSelection (template-based) or ItemMasterSelection (server-rendered)
+function getItemIdFromContext(element) {
+    // First try: _ItemSelection.cshtml uses .item-form-instance with data-item-id attribute
+    const itemFormInstance = element.closest('.item-form-instance');
+    if (itemFormInstance && itemFormInstance.dataset.itemId) {
+        return itemFormInstance.dataset.itemId;
+    }
+    
+    // Second try: ItemMasterSelection.cshtml uses .item-id-field hidden input within a .col-12 container
+    const container = element.closest('.col-12');
+    if (container) {
+        const itemIdField = container.querySelector('.item-id-field');
+        if (itemIdField && itemIdField.value) {
+            return itemIdField.value;
+        }
+    }
+    
+    // Third try: Look within the closest card for .item-id-field
+    const card = element.closest('.card');
+    if (card) {
+        const parentContainer = card.closest('.col-12');
+        if (parentContainer) {
+            const itemIdField = parentContainer.querySelector('.item-id-field');
+            if (itemIdField && itemIdField.value) {
+                return itemIdField.value;
+            }
+        }
+    }
+    
+    console.warn('Could not determine itemId from context. Element:', element);
+    return '0'; // Fallback to 0, but log a warning
+}
+
 document.addEventListener('click', function (e) {
     // Take Photo
     if (e.target.closest('.cam-take-photo-btn')) {
         const btn = e.target.closest('.cam-take-photo-btn');
+        const itemId = getItemIdFromContext(btn);
         const section = btn.closest('.cam-extra-section');
         const preview = section.querySelector('.cam-preview');
-        const modal = new bootstrap.Modal(document.getElementById('camDeviceVideoModal'));
+        const modalElement = document.getElementById('camDeviceVideoModal');
+        modalElement.dataset.itemId = itemId; // Store itemId on the modal
+        const modal = new bootstrap.Modal(modalElement);
         const video = document.getElementById('camDeviceCaptureVideo');
         const captureBtn = document.getElementById('camDeviceCaptureBtn');
         const flipBtn = document.getElementById('camFlipBtn');
@@ -334,9 +370,8 @@ document.addEventListener('click', function (e) {
             }
             
             // Upload to Cloudinary with folder structure
-            const itemIndex = preview.dataset.itemIndex;
-            const itemId = document.querySelector(`input.item-id-field[data-index=\"${itemIndex}\"]`)?.value || '0';
-            uploadToCloudinary(canvas.toDataURL('image/png'), preview, itemId);
+            const currentItemId = document.getElementById('camDeviceVideoModal').dataset.itemId; // Retrieve itemId from the modal
+            uploadToCloudinary(canvas.toDataURL('image/png'), preview, currentItemId);
             
             // Clear watermark input for next capture
             document.getElementById('camWatermarkText').value = '';
@@ -353,13 +388,12 @@ document.addEventListener('click', function (e) {
     // Gallery Upload
     if (e.target.closest('.cam-gallery-btn')) {
         const btn = e.target.closest('.cam-gallery-btn');
+        const itemId = getItemIdFromContext(btn);
         const section = btn.closest('.cam-extra-section');
         const uploadInput = section.querySelector('.cam-upload-input');
         const preview = section.querySelector('.cam-preview');
         uploadInput.click();
         uploadInput.onchange = async function () {
-            const itemIndex = preview.dataset.itemIndex;
-            const itemId = document.querySelector(`input.item-id-field[data-index="${itemIndex}"]`)?.value || '0';
             
             // Ask for watermark once for all images
             const watermarkText = prompt('Enter watermark text for all selected images (optional, leave empty for no watermark):');

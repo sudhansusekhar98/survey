@@ -16,7 +16,7 @@
         body {
             overflow-x: hidden !important;
         }
-        
+
         /* Mobile full-screen card */
         @@media (max-width: 767.98px) {
             .full-screen-card {
@@ -38,10 +38,10 @@
         .swal2-container {
             z-index: 999999 !important;
         }
-        
+
         /* Ensure all message boxes stay below modals */
-        .card-body > div[class*="border-start"],
-        .accordion-body > div[class*="border-start"] {
+        .card-body>div[class*="border-start"],
+        .accordion-body>div[class*="border-start"] {
             z-index: 1 !important;
             position: relative;
         }
@@ -79,8 +79,15 @@
         }
 
         @@keyframes pulse {
-            0%, 100% { box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3); }
-            50% { box-shadow: 0 4px 8px rgba(40, 167, 69, 0.5); }
+
+            0%,
+            100% {
+                box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 4px 8px rgba(40, 167, 69, 0.5);
+            }
         }
 
         /* Checkmark icon for completed items */
@@ -92,123 +99,131 @@
         }
 
         @@keyframes checkmark {
-            0% { transform: scale(0); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(0);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         /* Camera preview styles */
-		.cam-preview-wrapper {
-			width: 150px;
-			height: 120px;
-			overflow: hidden;
-			border: 1px solid #dee2e6;
-			border-radius: 4px;
-			padding: 4px;
-			background: #fff;
-			position: relative;
-			display: inline-block;
-			margin: 0.25rem;
-		}
+        .cam-preview-wrapper {
+            width: 150px;
+            height: 120px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 4px;
+            background: #fff;
+            position: relative;
+            display: inline-block;
+            margin: 0.25rem;
+        }
 
-		.cam-preview-img {
-			width: 100%;
-			height: 100%;
-			object-fit: contain;
-			background: #f8f9fa;
-		}
+        .cam-preview-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #f8f9fa;
+        }
 
-		.cam-preview-wrapper .btn-danger.position-absolute,
-		.cam-preview-wrapper .btn-info.position-absolute {
-			display: none;
-		}
+        .cam-preview-wrapper .btn-danger.position-absolute,
+        .cam-preview-wrapper .btn-info.position-absolute {
+            display: none;
+        }
 
-		.cam-preview-wrapper:hover .btn-danger.position-absolute,
-		.cam-preview-wrapper:hover .btn-info.position-absolute {
-			display: block;
-		}
+        .cam-preview-wrapper:hover .btn-danger.position-absolute,
+        .cam-preview-wrapper:hover .btn-info.position-absolute {
+            display: block;
+        }
 
-		/* Always show buttons on mobile (no hover) */
-		@@media (max-width: 767.98px) {
+        /* Always show buttons on mobile (no hover) */
+        @@media (max-width: 767.98px) {
 
-			.cam-preview-wrapper .btn-danger.position-absolute,
-			.cam-preview-wrapper .btn-info.position-absolute {
-				display: block !important;
-				padding: 0.25rem 0.5rem;
-				font-size: 0.75rem;
-			}
-		}
+            .cam-preview-wrapper .btn-danger.position-absolute,
+            .cam-preview-wrapper .btn-info.position-absolute {
+                display: block !important;
+                padding: 0.25rem 0.5rem;
+                font-size: 0.75rem;
+            }
+        }
 
-		/* Watermark input in modal */
-		.watermark-input-container {
-			margin-top: 15px;
-			padding: 15px;
-			background: #f8f9fa;
-			border-radius: 8px;
-			border: 1px solid #dee2e6;
-		}
+        /* Watermark input in modal */
+        .watermark-input-container {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
 
-		.watermark-input-container label {
-			font-weight: 600;
-			color: #495057;
-			margin-bottom: 8px;
-			display: block;
-		}
+        .watermark-input-container label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            display: block;
+        }
 
-		.watermark-input-container input {
-			width: 100%;
-			padding: 8px 12px;
-			border: 1px solid #ced4da;
-			border-radius: 4px;
-			font-size: 14px;
-		}
+        .watermark-input-container input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
 
-		.watermark-input-container input:focus {
-			outline: none;
-			border-color: #667eea;
-			box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-		}
+        .watermark-input-container input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
 
-		/* Device card gradient header */
-		.device-card-header-gradient {
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		}
+        /* Device card gradient header */
+        .device-card-header-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
 
-		/* Quantity control buttons */
-		.cam-qty-minus,
-		.cam-qty-plus {
-			min-width: 36px;
-			height: 36px;
-			padding: 0;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-		}
+        /* Quantity control buttons */
+        .cam-qty-minus,
+        .cam-qty-plus {
+            min-width: 36px;
+            height: 36px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-		.cam-qty-input {
-			width: 70px;
-			text-align: center;
-			font-weight: 600;
-		}
+        .cam-qty-input {
+            width: 70px;
+            text-align: center;
+            font-weight: 600;
+        }
 
-		@@media (max-width: 767.98px) {
-			.cam-qty-input {
-				width: 60px;
-			}
-		}
+        @@media (max-width: 767.98px) {
+            .cam-qty-input {
+                width: 60px;
+            }
+        }
 
-		#previewImage {
-			max-width: 400px;
-			/* fixed maximum width */
-			max-height: 400px;
-			/* fixed maximum height */
-			width: auto;
-			/* maintain aspect ratio */
-			height: auto;
-			/* maintain aspect ratio */
-			object-fit: contain;
-			/* ensures full image fits without cropping */
-		}
+        #previewImage {
+            max-width: 400px;
+            /* fixed maximum width */
+            max-height: 400px;
+            /* fixed maximum height */
+            width: auto;
+            /* maintain aspect ratio */
+            height: auto;
+            /* maintain aspect ratio */
+            object-fit: contain;
+            /* ensures full image fits without cropping */
+        }
     </style>
 }
 
@@ -227,15 +242,16 @@
                                 var firstItem = Model.FirstOrDefault();
                                 if (firstItem != null)
                                 {
-                                    <button type="button" 
-                                            class="btn btn-sm btn-success" 
-                                            onclick="showPreviewModal(@firstItem.SurveyID, @firstItem.LocID)">
+                                    <button type="button" class="btn btn-sm btn-success"
+                                        onclick="showPreviewModal(@firstItem.SurveyID, @firstItem.LocID)">
                                         <i class="bi bi-eye-fill"></i>
                                         <span class="d-none d-sm-inline ms-1">Preview & Submit</span>
                                     </button>
                                 }
                             }
-                            <a asp-controller="SurveyCreation" asp-action="SurveyLocation" asp-route-surveyId="@(Model?.FirstOrDefault()?.SurveyID)" class="btn btn-sm btn-outline-light">
+                            <a asp-controller="SurveyCreation" asp-action="SurveyLocation"
+                                asp-route-surveyId="@(Model?.FirstOrDefault()?.SurveyID)"
+                                class="btn btn-sm btn-outline-light">
                                 <i class="bi bi-arrow-left-circle"></i>
                                 <span class="d-none d-sm-inline ms-1">Back to Locations</span>
                             </a>
@@ -244,7 +260,8 @@
                 </div>
 
                 <div class="card-body">
-                    @if (TempData["ResultMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
+                    @if (TempData["ResultMessage"] != null &&
+                                        !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
                     {
                         var resultType = TempData["ResultType"]?.ToString() ?? "info";
                         var borderColor = resultType switch
@@ -276,30 +293,36 @@
                                 <div class="flex-grow-1 @textColor">
                                     @Html.Raw(TempData["ResultMessage"])
                                 </div>
-                                <button type="button" class="btn-close btn-sm ms-2" onclick="this.parentElement.parentElement.style.display='none'" aria-label="Close"></button>
+                                <button type="button" class="btn-close btn-sm ms-2"
+                                    onclick="this.parentElement.parentElement.style.display='none'"
+                                    aria-label="Close"></button>
                             </div>
                         </div>
                     }
 
                     <div class="d-flex flex-row align-items-center gap-2 flex-wrap mb-1 mt-2">
-                        <span class="badge bg-purple d-flex align-items-center px-3 py-1 shadow-sm" style="font-size:0.92rem; height:32px; line-height:32px; border-radius:0.5rem;">
+                        <span class="badge bg-purple d-flex align-items-center px-3 py-1 shadow-sm"
+                            style="font-size:0.92rem; height:32px; line-height:32px; border-radius:0.5rem;">
                             <i class="bi bi-clipboard-data me-1" style="font-size:1.1em;"></i>
                             @(Model?.FirstOrDefault()?.SurveyName ?? "Survey Details")
                         </span>
-                        <span class="badge bg-secondary d-flex align-items-center px-3 py-1 shadow-sm" style="font-size:0.92rem; height:32px; line-height:32px; border-radius:0.5rem;">
+                        <span class="badge bg-secondary d-flex align-items-center px-3 py-1 shadow-sm"
+                            style="font-size:0.92rem; height:32px; line-height:32px; border-radius:0.5rem;">
                             <i class="bi bi-geo-alt-fill me-1" style="font-size:1.1em;"></i>
                             @(Model?.FirstOrDefault()?.LocName ?? "Location Details")
                         </span>
                         @{
                             var status = ViewBag.LocationStatus as string ?? "Pending";
-                            var statusBadgeClass = status switch {
+                            var statusBadgeClass = status switch
+                            {
                                 "Pending" => "bg-secondary",
                                 "In Progress" => "bg-info",
                                 "Completed" => "bg-success",
                                 "Verified" => "bg-primary",
                                 _ => "bg-secondary"
                             };
-                            var statusIcon = status switch {
+                            var statusIcon = status switch
+                            {
                                 "Pending" => "bi-clock",
                                 "In Progress" => "bi-play-circle",
                                 "Completed" => "bi-check-circle",
@@ -307,7 +330,8 @@
                                 _ => "bi-question-circle"
                             };
                         }
-                        <span class="badge @statusBadgeClass d-flex align-items-center px-3 py-1 shadow-sm ms-1" style="font-size:0.92rem; letter-spacing:0.01em; height:32px; line-height:32px; border-radius:0.5rem;">
+                        <span class="badge @statusBadgeClass d-flex align-items-center px-3 py-1 shadow-sm ms-1"
+                            style="font-size:0.92rem; letter-spacing:0.01em; height:32px; line-height:32px; border-radius:0.5rem;">
                             <i class="bi @statusIcon me-1" style="font-size:1.1em;"></i>
                             @status
                         </span>
@@ -316,463 +340,541 @@
                             var firstItem = Model?.FirstOrDefault();
                             if (firstItem != null)
                             {
-                                <button type="button" 
-                                        class="btn btn-warning d-flex align-items-center gap-1 px-3 py-1 shadow-sm border-0 ms-1" 
-                                        style="font-size:0.92rem; height:32px; line-height:32px; font-weight:500; letter-spacing:0.01em; border-radius:0.5rem;" 
-                                        onclick="unlockLocationForEditing(@firstItem.SurveyID, @firstItem.LocID)">
-                                    <i class="bi bi-unlock" style="font-size:1.1em;"></i> 
+                                <button type="button"
+                                    class="btn btn-warning d-flex align-items-center gap-1 px-3 py-1 shadow-sm border-0 ms-1"
+                                    style="font-size:0.92rem; height:32px; line-height:32px; font-weight:500; letter-spacing:0.01em; border-radius:0.5rem;"
+                                    onclick="unlockLocationForEditing(@firstItem.SurveyID, @firstItem.LocID)">
+                                    <i class="bi bi-unlock" style="font-size:1.1em;"></i>
                                     <span class="d-none d-sm-inline">Unlock for Editing</span>
                                     <span class="d-inline d-sm-none">Unlock</span>
                                 </button>
                             }
                         }
-                        
+
                         @* Show warning if completed *@
                         @if (ViewBag.IsCompleted == true)
                         {
                             <div class="w-100 mt-3 mb-0 p-3 bg-warning-subtle rounded border-start border-4 border-warning">
                                 <p class="mb-0 text-warning-emphasis">
                                     <i class="bi bi-exclamation-triangle me-2"></i>
-                                    <strong>Location is @status!</strong> Items cannot be modified. Click "Unlock for Editing" to make changes.
+                                    <strong>Location is @status!</strong> Items cannot be modified. Click "Unlock for
+                                    Editing" to make changes.
                                 </p>
                             </div>
                         }
                     </div>
 
                     <div class="accordion mt-4" id="accordionExample">
-                    @if (Model != null && Model.Any())
-                    {
-                        foreach (var gridData in Model)
+                        @if (Model != null && Model.Any())
                         {
-                            <div id="accordion-wrapper-@gridData.ItemTypeID">
-                                @await Html.PartialAsync("_SurveyAccordionItem", gridData)
-                            </div>
-                            index++;
+                            foreach (var gridData in Model)
+                            {
+                                <div id="accordion-wrapper-@gridData.ItemTypeID">
+                                    @await Html.PartialAsync("_SurveyAccordionItem", gridData)
+                                </div>
+                                index++;
+                            }
                         }
-                    }
-                    else
-                    {
-                        <div class="text-center py-5">
-                            <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
-                            <p class="text-muted fs-5">No survey data found. Please select a survey and location.</p>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Preview Modal -->
-<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header bg-purple text-white py-3">
-                <h5 class="modal-title fw-bold text-white" id="previewModalLabel">
-                    <i class="bi bi-eye-fill me-2"></i>Survey Preview - All Items
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="previewModalContent">
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+                                <p class="text-muted fs-5">No survey data found. Please select a survey and location.</p>
+                            </div>
+                        }
                     </div>
-                    <p class="mt-3 text-muted">Loading preview...</p>
-                </div>
-            </div>
-
-            <div class="modal-footer text-center text-md-end">
-                <button type="button" class="btn btn-secondary ms-2 mb-2" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-2"></i>Close
-                </button>
-
-                <button type="button" class="btn btn-success ms-2 mb-2" id="submitLocationBtn" onclick="submitLocationCompletion()">
-                    <i class="bi bi-check-circle me-2"></i>Mark as Completed
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Camera Capture Modal -->
-<div id="camDeviceVideoModal" class="modal fade" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Capture Image</h5>
-                <button type="button" class="btn btn-outline-primary btn-sm me-2" id="camFlipBtn">
-                    <i class="bi bi-arrow-repeat"></i> Flip Camera
-                </button>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center">
-                <video id="camDeviceCaptureVideo" autoplay playsinline
-                    style="max-width:100%;height:400px;border-radius:8px;"></video>
-                <div class="watermark-input-container">
-                    <label for="camWatermarkText">
-                        <i class="bi bi-fonts me-1"></i>Add Watermark Text (Within 20 words)
-                    </label>
-
-                    <input type="text" id="camWatermarkText" class="form-control"
-                        placeholder="Enter text to appear at bottom of image..." />
-
-                    <small id="watermarkError" class="text-danger d-none mt-1">
-                        <i class="bi bi-exclamation-circle me-1"></i>
-                        Maximum 20 words allowed.
-                    </small>
-
-                    <small class="text-muted d-block mt-2">
-                        <i class="bi bi-info-circle me-1"></i>
-                        This text will be added as a watermark at the bottom of the captured image
-                    </small>
-                </div>
-                <div class="mt-3 d-flex justify-content-center gap-3">
-                    <button type="button" class="btn btn-gradient-primary px-4 py-2 fw-semibold"
-                        id="camDeviceCaptureBtn"><i class="bi bi-camera me-2"></i> Capture</button>
-                    <button type="button" class="btn btn-outline-danger px-4 py-2 fw-semibold"
-                        data-bs-dismiss="modal"><i class="bi bi-x-circle me-2"></i> Cancel</button>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Image Preview Modal -->
-<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="imagePreviewModalLabel">Image Preview</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center">
-                <img src="" id="previewImage" class="img-fluid rounded" alt="Image Preview" />
+    <!-- Preview Modal -->
+    <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-purple text-white py-3">
+                    <h5 class="modal-title fw-bold text-white" id="previewModalLabel">
+                        <i class="bi bi-eye-fill me-2"></i>Survey Preview - All Items
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="previewModalContent">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Loading preview...</p>
+                    </div>
+                </div>
+
+                <div class="modal-footer text-center text-md-end">
+                    <button type="button" class="btn btn-secondary ms-2 mb-2" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-2"></i>Close
+                    </button>
+
+                    <button type="button" class="btn btn-success ms-2 mb-2" id="submitLocationBtn"
+                        onclick="submitLocationCompletion()">
+                        <i class="bi bi-check-circle me-2"></i>Mark as Completed
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<style>
-    .hover-lift {
-        transition: all 0.3s ease;
-    }
-    .hover-lift:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-    }
-    .card-h {
-        --bs-bg-opacity: 1;
-        background-color: rgb(159 139 233 / 78%) !important;
-        padding: 0.75rem 1rem;
-    }
-    .accordion-button:not(.collapsed) {
-        background-color: rgb(159 139 233 / 78%) !important;
-        color: #212529;
-    }
-    .accordion-button:focus {
-        box-shadow: none;
-        border-color: rgba(0,0,0,.125);
-    }
-    
-    /* Ensure alerts in accordion don't overlap modals */
-    .accordion-body .alert {
-        position: relative;
-        z-index: 1 !important;
-    }
-</style>
+    <!-- Camera Capture Modal -->
+    <div id="camDeviceVideoModal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Capture Image</h5>
+                    <button type="button" class="btn btn-outline-primary btn-sm me-2" id="camFlipBtn">
+                        <i class="bi bi-arrow-repeat"></i> Flip Camera
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <video id="camDeviceCaptureVideo" autoplay playsinline
+                        style="max-width:100%;height:400px;border-radius:8px;"></video>
+                    <div class="watermark-input-container">
+                        <label for="camWatermarkText">
+                            <i class="bi bi-fonts me-1"></i>Add Watermark Text (Within 20 words)
+                        </label>
+
+                        <input type="text" id="camWatermarkText" class="form-control"
+                            placeholder="Enter text to appear at bottom of image..." />
+
+                        <small id="watermarkError" class="text-danger d-none mt-1">
+                            <i class="bi bi-exclamation-circle me-1"></i>
+                            Maximum 20 words allowed.
+                        </small>
+
+                        <small class="text-muted d-block mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            This text will be added as a watermark at the bottom of the captured image
+                        </small>
+                    </div>
+                    <div class="mt-3 d-flex justify-content-center gap-3">
+                        <button type="button" class="btn btn-gradient-primary px-4 py-2 fw-semibold"
+                            id="camDeviceCaptureBtn"><i class="bi bi-camera me-2"></i> Capture</button>
+                        <button type="button" class="btn btn-outline-danger px-4 py-2 fw-semibold"
+                            data-bs-dismiss="modal"><i class="bi bi-x-circle me-2"></i> Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imagePreviewModalLabel">Image Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="" id="previewImage" class="img-fluid rounded" alt="Image Preview" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .card-h {
+            --bs-bg-opacity: 1;
+            background-color: rgb(159 139 233 / 78%) !important;
+            padding: 0.75rem 1rem;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: rgb(159 139 233 / 78%) !important;
+            color: #212529;
+        }
+
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: rgba(0, 0, 0, .125);
+        }
+
+        /* Ensure alerts in accordion don't overlap modals */
+        .accordion-body .alert {
+            position: relative;
+            z-index: 1 !important;
+        }
+    </style>
 
 @section VendorScripts {
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 }
 
 @section Scripts {
-    <script src="~/js/survey-details.js"></script>
-    <script src="~/js/camera-remarks.js"></script>
-    <script src="~/js/item-master-selection.js"></script>
-    <script>
-        // Initialize survey details with Razor-generated URLs
-        initSurveyDetails(
-            '@Url.Action("GetLocationPreview", "SurveyDetails")',
-            '@Url.Action("SubmitLocationCompletion", "SurveyDetails")',
-            '@Url.Action("UnlockLocationForEditing", "SurveyDetails")',
-            @((ViewBag.IsCompleted ?? false).ToString().ToLower()),
-            $('input[name="__RequestVerificationToken"]').val()
-        );
-
-        // Initialize Cloudinary uploader with URLs and IDs
-        if (typeof initItemMasterSelection === 'function') {
-            var surveyIdForUpload = @(Model?.FirstOrDefault()?.SurveyID ?? 0);
-            var locIdForUpload = @(Model?.FirstOrDefault()?.LocID ?? 0);
-            initItemMasterSelection(
-                '@Url.Action("UploadBase64Image", "Cloudinary")',
-                '@Url.Action("DeleteImage", "Cloudinary")',
-                surveyIdForUpload,
-                locIdForUpload
+        <script src="~/js/survey-details.js"></script>
+        <script src="~/js/camera-remarks.js"></script>
+        <script src="~/js/item-master-selection.js"></script>
+        <script>
+            // Initialize survey details with Razor-generated URLs
+            initSurveyDetails(
+                '@Url.Action("GetLocationPreview", "SurveyDetails")',
+                '@Url.Action("SubmitLocationCompletion", "SurveyDetails")',
+                '@Url.Action("UnlockLocationForEditing", "SurveyDetails")',
+                @((ViewBag.IsCompleted ?? false).ToString().ToLower()),
+                $('input[name="__RequestVerificationToken"]').val()
             );
-        }
 
-        $(document).ready(function () {
-            let itemIndex = 0; // This will be a counter for unique indices
-
-            function findItemInData(itemId) {
-                if (typeof allItemsData !== 'undefined' && Array.isArray(allItemsData)) {
-                    return allItemsData.find(d => (d.ItemID || d.itemID) == itemId);
-                }
-                return null;
+            // Initialize Cloudinary uploader with URLs and IDs
+            if (typeof initItemMasterSelection === 'function') {
+                var surveyIdForUpload = @(Model?.FirstOrDefault()?.SurveyID ?? 0);
+                var locIdForUpload = @(Model?.FirstOrDefault()?.LocID ?? 0);
+                initItemMasterSelection(
+                    '@Url.Action("UploadBase64Image", "Cloudinary")',
+                    '@Url.Action("DeleteImage", "Cloudinary")',
+                    surveyIdForUpload,
+                    locIdForUpload
+                );
             }
 
-            function renderItemForm(item, prepend = false) {
-                var template = $('#item-form-template').html();
+            $(document).ready(function () {
+                let itemIndex = 0; // This will be a counter for unique indices
 
-                const itemID = item.ItemID || item.itemID;
-                let itemName = item.ItemName || item.itemName;
-                let itemCode = item.ItemCode || item.itemCode;
-                let isCamera = item.IsCamera || item.isCamera;
-                const itemQtyExist = item.ItemQtyExist || item.itemQtyExist;
-                const itemQtyReq = item.ItemQtyReq || item.itemQtyReq;
-                const remarks = item.Remarks || item.remarks;
-                const cameraRemarksJson = item.CameraRemarksJson || item.cameraRemarksJson;
+                function findItemInData(itemId) {
+                    if (typeof allItemsData !== 'undefined' && Array.isArray(allItemsData)) {
+                        return allItemsData.find(d => (d.ItemID || d.itemID) == itemId);
+                    }
+                    return null;
+                }
 
-                if (!itemName) {
-                    const fullItemData = findItemInData(itemID);
-                    if (fullItemData) {
-                        itemName = fullItemData.itemName;
-                        itemCode = fullItemData.itemCode;
-                        isCamera = fullItemData.isCamera;
+                function renderItemForm(item, prepend = false) {
+                    var template = $('#item-form-template').html();
+
+                    const itemID = item.ItemID || item.itemID;
+                    let itemName = item.ItemName || item.itemName;
+                    let itemCode = item.ItemCode || item.itemCode;
+                    let isCamera = item.IsCamera || item.isCamera;
+                    const itemQtyExist = item.ItemQtyExist || item.itemQtyExist;
+                    const itemQtyReq = item.ItemQtyReq || item.itemQtyReq;
+                    const remarks = item.Remarks || item.remarks;
+                    const cameraRemarksJson = item.CameraRemarksJson || item.cameraRemarksJson;
+
+                    // Get existing images from ImgPath and ImgID fields
+                    const imgPath = item.ImgPath || item.imgPath || '';
+                    const imgID = item.ImgID || item.imgID || '';
+
+                    if (!itemName) {
+                        const fullItemData = findItemInData(itemID);
+                        if (fullItemData) {
+                            itemName = fullItemData.itemName;
+                            itemCode = fullItemData.itemCode;
+                            isCamera = fullItemData.isCamera;
+                        }
+                    }
+
+                    template = template.replace(/{index}/g, itemIndex);
+                    template = template.replace(/{itemId}/g, itemID);
+                    template = template.replace(/{itemName}/g, itemName || `Item ID: ${itemID}`);
+                    template = template.replace(/{itemCode}/g, itemCode || '');
+                    template = template.replace(/{itemQtyExist}/g, itemQtyExist || 0);
+                    template = template.replace(/{itemQtyReq}/g, itemQtyReq || 0);
+                    template = template.replace(/{remarks}/g, remarks || '');
+                    template = template.replace(/{isCamera}/g, isCamera || false);
+
+                    // Clear cloudinary placeholders - we'll add images after DOM insertion
+                    template = template.replace(/{cloudinaryUrls}/g, '');
+                    template = template.replace(/{cloudinaryPublicIds}/g, '');
+
+                    // Clear placeholder and set value via .val() to handle encoding
+                    template = template.replace('value="{cameraRemarksJson}"', 'value=""');
+
+                    var newElement;
+                    if (prepend) {
+                        $('#selected-items-container').prepend(template);
+                        newElement = $('#selected-items-container').children().first();
+                    } else {
+                        $('#selected-items-container').append(template);
+                        newElement = $('#selected-items-container').children().last();
+                    }
+
+                    const cameraRemarksJsonString = cameraRemarksJson ? (typeof cameraRemarksJson === 'string' ? cameraRemarksJson : JSON.stringify(cameraRemarksJson)) : '[]';
+                    newElement.find('.camera-remarks-json').val(cameraRemarksJsonString);
+
+                    var totalQty = (itemQtyExist || 0) + (itemQtyReq || 0);
+                    if (totalQty > 0) {
+                        newElement.find('.cam-extra-section').show();
+                    }
+                    if (isCamera) {
+                        newElement.find('.camera-remarks-section').show();
+                    }
+
+                    // Render existing images if any
+                    if (imgPath && imgPath.trim()) {
+                        renderExistingImages(newElement, itemIndex, imgPath, imgID);
+                    }
+
+                    if (typeof updateCameraRemarksUI === 'function') {
+                        updateCameraRemarksUI(itemIndex);
+                    }
+
+                    itemIndex++;
+                }
+
+                // Helper function to render existing images in the preview container
+                function renderExistingImages(element, index, imgPath, imgID) {
+                    const previewContainer = element.find('.cam-preview');
+                    if (!previewContainer.length) return;
+
+                    const imageUrls = imgPath.split(',').map(url => url.trim()).filter(url => url);
+                    const publicIds = imgID ? imgID.split(',').map(id => id.trim()).filter(id => id) : [];
+
+                    imageUrls.forEach((imgUrl, imgIdx) => {
+                        const publicId = imgIdx < publicIds.length ? publicIds[imgIdx] : '';
+
+                        const wrapper = $('<div>', {
+                            'class': 'cam-preview-wrapper position-relative d-inline-block',
+                            'data-public-id': publicId
+                        });
+
+                        const img = $('<img>', {
+                            'src': imgUrl,
+                            'class': 'cam-preview-img',
+                            'alt': 'Survey image'
+                        });
+                        wrapper.append(img);
+
+                        // Hidden inputs for form submission
+                        wrapper.append($('<input>', {
+                            'type': 'hidden',
+                            'name': `ItemLists[${index}].CloudinaryUrls`,
+                            'value': imgUrl
+                        }));
+
+                        wrapper.append($('<input>', {
+                            'type': 'hidden',
+                            'name': `ItemLists[${index}].CloudinaryPublicIds`,
+                            'value': publicId
+                        }));
+
+                        // Preview button
+                        const previewBtn = $('<button>', {
+                            'type': 'button',
+                            'class': 'btn btn-sm btn-info position-absolute cam-preview-btn',
+                            'data-url': imgUrl,
+                            'aria-label': 'Preview image'
+                        }).css({ 'top': '1px', 'right': '50px' }).html('<i class="bi bi-eye"></i>');
+                        wrapper.append(previewBtn);
+
+                        // Delete button
+                        const deleteBtn = $('<button>', {
+                            'type': 'button',
+                            'class': 'btn btn-sm btn-outline-danger position-absolute cam-delete-existing',
+                            'data-public-id': publicId,
+                            'aria-label': 'Delete image'
+                        }).css({ 'top': '1px', 'right': '10px' }).html('<i class="bi bi-trash"></i>');
+                        wrapper.append(deleteBtn);
+
+                        previewContainer.append(wrapper);
+                    });
+                }
+
+                function initializeItemSelection() {
+                    if (typeof selectedItemsData !== 'undefined' && selectedItemsData.length > 0) {
+                        selectedItemsData.forEach(function (item) {
+                            renderItemForm(item, false);
+                        });
                     }
                 }
 
-                template = template.replace(/{index}/g, itemIndex);
-                template = template.replace(/{itemId}/g, itemID);
-                template = template.replace(/{itemName}/g, itemName || `Item ID: ${itemID}`);
-                template = template.replace(/{itemCode}/g, itemCode || '');
-                template = template.replace(/{itemQtyExist}/g, itemQtyExist || 0);
-                template = template.replace(/{itemQtyReq}/g, itemQtyReq || 0);
-                template = template.replace(/{remarks}/g, remarks || '');
-                template = template.replace(/{isCamera}/g, isCamera || false);
-                
-                // Clear placeholder and set value via .val() to handle encoding
-                template = template.replace('value="{cameraRemarksJson}"', 'value=""');
+                $('body').on('click', '.load-item-selection', function () {
+                    var button = $(this);
+                    var surveyId = button.data('surveyid');
+                    var locId = button.data('locid');
+                    var itemTypeId = button.data('itemtypeid');
+                    var targetSelector = button.data('target');
+                    var targetContainer = $(targetSelector);
 
-                var newElement;
-                if (prepend) {
-                    $('#selected-items-container').prepend(template);
-                    newElement = $('#selected-items-container').children().first();
-                } else {
-                    $('#selected-items-container').append(template);
-                    newElement = $('#selected-items-container').children().last();
-                }
+                    targetContainer.html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
 
-                const cameraRemarksJsonString = cameraRemarksJson ? (typeof cameraRemarksJson === 'string' ? cameraRemarksJson : JSON.stringify(cameraRemarksJson)) : '[]';
-                newElement.find('.camera-remarks-json').val(cameraRemarksJsonString);
-
-                var totalQty = (itemQtyExist || 0) + (itemQtyReq || 0);
-                if (totalQty > 0) {
-                    newElement.find('.cam-extra-section').show();
-                }
-                if (isCamera) {
-                    newElement.find('.camera-remarks-section').show();
-                }
-
-                if (typeof updateCameraRemarksUI === 'function') {
-                    updateCameraRemarksUI(itemIndex);
-                }
-
-                itemIndex++;
-            }
-
-            function initializeItemSelection() {
-                if (typeof selectedItemsData !== 'undefined' && selectedItemsData.length > 0) {
-                    selectedItemsData.forEach(function(item) {
-                        renderItemForm(item, false);
+                    $.ajax({
+                        url: '@Url.Action("GetItemSelectionPartial", "SurveyDetails")',
+                        type: 'GET',
+                        data: { surveyId: surveyId, locId: locId, itemTypeID: itemTypeId },
+                        success: function (response) {
+                            targetContainer.html(response);
+                            button.closest('.text-center').hide();
+                            initializeItemSelection();
+                        },
+                        error: function () {
+                            targetContainer.html('<div class="alert alert-danger">Error loading content. Please try again.</div>');
+                        }
                     });
-                }
-            }
+                });
 
-            $('body').on('click', '.load-item-selection', function () {
-                var button = $(this);
-                var surveyId = button.data('surveyid');
-                var locId = button.data('locid');
-                var itemTypeId = button.data('itemtypeid');
-                var targetSelector = button.data('target');
-                var targetContainer = $(targetSelector);
+                $('body').on('click', '.add-item-btn', function () {
+                    var itemTypeId = $(this).data('itemtypeid');
+                    var dropdown = $('#add-item-dropdown-' + itemTypeId);
+                    var selectedItemId = dropdown.val();
 
-                targetContainer.html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
-
-                $.ajax({
-                    url: '@Url.Action("GetItemSelectionPartial", "SurveyDetails")',
-                    type: 'GET',
-                    data: { surveyId: surveyId, locId: locId, itemTypeID: itemTypeId },
-                    success: function (response) {
-                        targetContainer.html(response);
-                        button.closest('.text-center').hide();
-                        initializeItemSelection();
-                    },
-                    error: function () {
-                        targetContainer.html('<div class="alert alert-danger">Error loading content. Please try again.</div>');
+                    if (!selectedItemId) {
+                        Swal.fire('No Item Selected', 'Please select an item from the dropdown to add.', 'warning');
+                        return;
                     }
+                    var selectedOption = dropdown.find('option:selected');
+                    var item = {
+                        ItemID: selectedItemId,
+                        ItemName: selectedOption.data('itemname'),
+                        ItemCode: selectedOption.data('itemcode'),
+                        IsCamera: selectedOption.data('iscamera') === 'True' || selectedOption.data('iscamera') === true,
+                        ItemQtyExist: 0,
+                        ItemQtyReq: 1,
+                        Remarks: '',
+                        CameraRemarksJson: '[]'
+                    };
+                    renderItemForm(item, true);
+                    dropdown.find('option[value="' + selectedItemId + '"]').remove();
+                    dropdown.val('');
                 });
-            });
 
-            $('body').on('click', '.add-item-btn', function() {
-                var itemTypeId = $(this).data('itemtypeid');
-                var dropdown = $('#add-item-dropdown-' + itemTypeId);
-                var selectedItemId = dropdown.val();
+                $('body').on('click', '.remove-item-btn', function () {
+                    var itemForm = $(this).closest('.item-form-instance');
+                    var itemId = itemForm.data('item-id');
+                    var itemTypeId = itemForm.closest('.item-selection-form').find('input[name="ItemTypeID"]').val();
+                    var dropdown = $('#add-item-dropdown-' + itemTypeId);
 
-                if (!selectedItemId) {
-                    Swal.fire('No Item Selected', 'Please select an item from the dropdown to add.', 'warning');
-                    return;
-                }
-                var selectedOption = dropdown.find('option:selected');
-                var item = {
-                    ItemID: selectedItemId,
-                    ItemName: selectedOption.data('itemname'),
-                    ItemCode: selectedOption.data('itemcode'),
-                    IsCamera: selectedOption.data('iscamera') === 'True' || selectedOption.data('iscamera') === true,
-                    ItemQtyExist: 0,
-                    ItemQtyReq: 1,
-                    Remarks: '',
-                    CameraRemarksJson: '[]'
-                };
-                renderItemForm(item, true);
-                dropdown.find('option[value="' + selectedItemId + '"]').remove();
-                dropdown.val('');
-            });
+                    var itemName = itemForm.find('h6').text();
+                    var itemCode = itemForm.find('input[name$=".ItemCode"]').val();
+                    var isCamera = itemForm.find('.is-camera-item').val();
 
-            $('body').on('click', '.remove-item-btn', function() {
-                var itemForm = $(this).closest('.item-form-instance');
-                var itemId = itemForm.data('item-id');
-                var itemTypeId = itemForm.closest('.item-selection-form').find('input[name="ItemTypeID"]').val();
-                var dropdown = $('#add-item-dropdown-' + itemTypeId);
-
-                var itemName = itemForm.find('h6').text();
-                var itemCode = itemForm.find('input[name$=".ItemCode"]').val();
-                var isCamera = itemForm.find('.is-camera-item').val();
-
-                if (dropdown.length > 0 && dropdown.find('option[value="' + itemId + '"]').length === 0) {
-                    dropdown.append($('<option>', {
-                        value: itemId,
-                        text: itemName,
-                        'data-itemname': itemName,
-                        'data-itemcode': itemCode,
-                        'data-iscamera': isCamera
-                    }));
-                }
-                itemForm.remove();
-            });
-
-            function updateItemUI(input) {
-                const itemForm = $(input).closest('.item-form-instance');
-                const itemIndex = $(input).data('index');
-                const existQty = parseInt(itemForm.find('.cam-qty-exist').val()) || 0;
-                const reqQty = parseInt(itemForm.find('.cam-qty-req').val()) || 0;
-                if (existQty + reqQty > 0) {
-                    itemForm.find('.cam-extra-section').slideDown();
-                } else {
-                    itemForm.find('.cam-extra-section').slideUp();
-                }
-                if (typeof updateCameraRemarksUI === 'function') {
-                    updateCameraRemarksUI(itemIndex);
-                }
-            }
-
-            $('body').on('click', '.cam-qty-plus, .cam-qty-minus', function() {
-                const button = $(this);
-                const input = button.siblings('.cam-qty-input');
-                let currentValue = parseInt(input.val()) || 0;
-                if (button.hasClass('cam-qty-plus')) {
-                    currentValue++;
-                } else {
-                    if (currentValue > 0) currentValue--;
-                }
-                input.val(currentValue);
-                updateItemUI(input);
-            });
-
-            $('body').on('input', '.cam-qty-input', function() {
-                updateItemUI(this);
-            });
-
-            function reindexFormForSubmission(form) {
-                const itemForms = form.find('.item-form-instance');
-                itemForms.each(function(newIndex, itemForm) {
-                    $(itemForm).find('input, textarea, select').each(function() {
-                        if (this.name) {
-                            this.name = this.name.replace(/\[\d+\]/, '[' + newIndex + ']');
-                        }
-                        const dataIndex = $(this).data('index');
-                        if(dataIndex !== undefined) {
-                            $(this).attr('data-index', newIndex);
-                        }
-                        if(this.id && this.id.includes('_')) {
-                           this.id = this.id.replace(/_\d+$/, '_' + newIndex);
-                        }
-                    });
+                    if (dropdown.length > 0 && dropdown.find('option[value="' + itemId + '"]').length === 0) {
+                        dropdown.append($('<option>', {
+                            value: itemId,
+                            text: itemName,
+                            'data-itemname': itemName,
+                            'data-itemcode': itemCode,
+                            'data-iscamera': isCamera
+                        }));
+                    }
+                    itemForm.remove();
                 });
-            }
 
-            $('body').on('submit', '.item-selection-form', function (e) {
-                e.preventDefault();
-                var form = $(this);
-                reindexFormForSubmission(form);
+                function updateItemUI(input) {
+                    const itemForm = $(input).closest('.item-form-instance');
+                    const itemIndex = $(input).data('index');
+                    const existQty = parseInt(itemForm.find('.cam-qty-exist').val()) || 0;
+                    const reqQty = parseInt(itemForm.find('.cam-qty-req').val()) || 0;
+                    if (existQty + reqQty > 0) {
+                        itemForm.find('.cam-extra-section').slideDown();
+                    } else {
+                        itemForm.find('.cam-extra-section').slideUp();
+                    }
+                    if (typeof updateCameraRemarksUI === 'function') {
+                        updateCameraRemarksUI(itemIndex);
+                    }
+                }
 
-                var submitButton = form.find('button[type="submit"]');
-                submitButton.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Saving...');
+                $('body').on('click', '.cam-qty-plus, .cam-qty-minus', function () {
+                    const button = $(this);
+                    const input = button.siblings('.cam-qty-input');
+                    let currentValue = parseInt(input.val()) || 0;
+                    if (button.hasClass('cam-qty-plus')) {
+                        currentValue++;
+                    } else {
+                        if (currentValue > 0) currentValue--;
+                    }
+                    input.val(currentValue);
+                    updateItemUI(input);
+                });
 
-                $.ajax({
-                    url: form.attr('action'),
-                    type: form.attr('method'),
-                    data: form.serialize(),
-                    success: function (response) {
-                        if (response.success) {
-                            Swal.fire({
-                                title: 'Success!',
-                                text: response.message,
-                                icon: 'success',
-                                timer: 1500,
-                                showConfirmButton: false
-                            });
+                $('body').on('input', '.cam-qty-input', function () {
+                    updateItemUI(this);
+                });
 
-                            const surveyId = form.find('input[name="SurveyID"]').val();
-                            const locId = form.find('input[name="LocID"]').val();
-                            const itemTypeId = form.find('input[name="ItemTypeID"]').val();
-                            const wrapper = $(`#accordion-wrapper-${itemTypeId}`);
-
-                            const url = '@Url.Action("GetSurveyAccordionItem", "SurveyDetails")' + `?surveyId=${surveyId}&locId=${locId}&itemTypeID=${itemTypeId}`;
-                            
-                            // Replace the entire item's content (summary + accordion)
-                            wrapper.load(url, function() {
-                                // After loading, we might want to re-collapse other items
-                                // or perform other UI adjustments if needed.
-                                // For now, just loading is enough to fix the stale data issue.
-                            });
-                            
-                        } else {
-                            let message = response.message || 'An error occurred.';
-                            if (response.errors) {
-                                message += '<ul class="text-start mt-2">';
-                                response.errors.forEach(err => { message += `<li>${err}</li>`; });
-                                message += '</ul>';
+                function reindexFormForSubmission(form) {
+                    const itemForms = form.find('.item-form-instance');
+                    itemForms.each(function (newIndex, itemForm) {
+                        $(itemForm).find('input, textarea, select').each(function () {
+                            if (this.name) {
+                                this.name = this.name.replace(/\[\d+\]/, '[' + newIndex + ']');
                             }
-                            Swal.fire({ icon: 'error', title: 'Error!', html: message });
+                            const dataIndex = $(this).data('index');
+                            if (dataIndex !== undefined) {
+                                $(this).attr('data-index', newIndex);
+                            }
+                            if (this.id && this.id.includes('_')) {
+                                this.id = this.id.replace(/_\d+$/, '_' + newIndex);
+                            }
+                        });
+                    });
+                }
+
+                $('body').on('submit', '.item-selection-form', function (e) {
+                    e.preventDefault();
+                    var form = $(this);
+                    reindexFormForSubmission(form);
+
+                    var submitButton = form.find('button[type="submit"]');
+                    submitButton.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Saving...');
+
+                    $.ajax({
+                        url: form.attr('action'),
+                        type: form.attr('method'),
+                        data: form.serialize(),
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: response.message,
+                                    icon: 'success',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+
+                                const surveyId = form.find('input[name="SurveyID"]').val();
+                                const locId = form.find('input[name="LocID"]').val();
+                                const itemTypeId = form.find('input[name="ItemTypeID"]').val();
+                                const wrapper = $(`#accordion-wrapper-${itemTypeId}`);
+
+                                const url = '@Url.Action("GetSurveyAccordionItem", "SurveyDetails")' + `?surveyId=${surveyId}&locId=${locId}&itemTypeID=${itemTypeId}`;
+
+                                // Replace the entire item's content (summary + accordion)
+                                wrapper.load(url, function () {
+                                    // After loading, we might want to re-collapse other items
+                                    // or perform other UI adjustments if needed.
+                                    // For now, just loading is enough to fix the stale data issue.
+                                });
+
+                            } else {
+                                let message = response.message || 'An error occurred.';
+                                if (response.errors) {
+                                    message += '<ul class="text-start mt-2">';
+                                    response.errors.forEach(err => { message += `<li>${err}</li>`; });
+                                    message += '</ul>';
+                                }
+                                Swal.fire({ icon: 'error', title: 'Error!', html: message });
+                                submitButton.prop('disabled', false).html('<i class="bi bi-check-circle me-2"></i> Save All Changes');
+                            }
+                        },
+                        error: function () {
+                            Swal.fire('Error!', 'An unexpected server error occurred. Please check the console for details.', 'error');
                             submitButton.prop('disabled', false).html('<i class="bi bi-check-circle me-2"></i> Save All Changes');
                         }
-                    },
-                    error: function () {
-                        Swal.fire('Error!', 'An unexpected server error occurred. Please check the console for details.', 'error');
-                        submitButton.prop('disabled', false).html('<i class="bi bi-check-circle me-2"></i> Save All Changes');
-                    }
+                    });
+                });
+
+                $('body').on('click', '.cancel-item-selection', function () {
+                    var container = $(this).closest('.item-selection-container');
+                    var buttonContainer = container.siblings('.text-center');
+                    container.html('');
+                    buttonContainer.show();
                 });
             });
-
-            $('body').on('click', '.cancel-item-selection', function() {
-                var container = $(this).closest('.item-selection-container');
-                var buttonContainer = container.siblings('.text-center');
-                container.html('');
-                buttonContainer.show();
-            });
-        });
-    </script>
+        </script>
 }

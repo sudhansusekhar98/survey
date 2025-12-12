@@ -6,6 +6,7 @@ using SurveyApp.Models;
 using SurveyApp.Repo;
 using System;
 using System.Linq;
+using AnalyticaDocs.Models; // Added this line
 
 namespace SurveyApp.Controllers
 {
@@ -760,6 +761,21 @@ namespace SurveyApp.Controllers
 
             // Fetch locations for the selected survey
             var locations = _surveyRepository.GetSurveyLocationById(surveyId) ?? new List<SurveyLocationModel>();
+
+            // Get all user details to map CreatedBy ID to a name
+            try
+            {
+                var allUsers = _adminRepository.GetAllDetails() ?? new List<UserModel>();
+                ViewBag.UserNames = allUsers
+                    .Where(u => u.UserId.HasValue) // Filter out users with null IDs
+                    .GroupBy(u => u.UserId.Value) // Group by the non-nullable value
+                    .ToDictionary(g => g.Key, g => g.First().LoginName);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading user details for CreatedBy mapping: {ex.Message}");
+                ViewBag.UserNames = new Dictionary<int, string>();
+            }
             
             // Get all location statuses for this survey (with error handling)
             try

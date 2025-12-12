@@ -31,7 +31,7 @@ namespace SurveyApp.Models
         public static List<SelectListItem> LocationTypeOptions => new List<SelectListItem>
         {
             new SelectListItem { Text = "Traffic", Value = "Traffic" },
-            new SelectListItem { Text = "Non-Traffic", Value = "Non-Traffic" }
+            new SelectListItem { Text = "Surveillance", Value = "Surveillance" }
         };
 
         public static List<SelectListItem> WayTypeOptions => new List<SelectListItem>

@@ -1345,6 +1345,9 @@ D:\VL Access\Survey\AS.NET SURVEY\survey\obj\Debug\net8.0\SurveyApp.genruntimeco
 D:\VL Access\Survey\AS.NET SURVEY\survey\obj\Debug\net8.0\ref\SurveyApp.dll
 D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\appsettings.Development.json
 D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\appsettings.json
+D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\libman.json
+D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\SurveyApp.staticwebassets.runtime.json
+D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\SurveyApp.staticwebassets.endpoints.json
 D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\LatoFont\Lato-Black.ttf
 D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\LatoFont\Lato-BlackItalic.ttf
 D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\LatoFont\Lato-Bold.ttf
@@ -1364,9 +1367,6 @@ D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\LatoFont\Lato-SemiBoldI
 D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\LatoFont\Lato-Thin.ttf
 D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\LatoFont\Lato-ThinItalic.ttf
 D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\LatoFont\OFL.txt
-D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\libman.json
-D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\SurveyApp.staticwebassets.runtime.json
-D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\SurveyApp.staticwebassets.endpoints.json
 D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\SurveyApp.exe
 D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\SurveyApp.deps.json
 D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\SurveyApp.runtimeconfig.json

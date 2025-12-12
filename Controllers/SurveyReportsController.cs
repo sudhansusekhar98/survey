@@ -770,548 +770,448 @@ namespace SurveyApp.Controllers
         }
 
         public IActionResult ExportDetailedReportNew(long surveyId)
-{
-    try
-    {
-        // 1: Get data (same as for the view)
-        DataTable dtSurveyDetails = _surveyRepo.GetSurveyDetails(surveyId, 1);
-        DataTable dtSurveyLocEmp = _surveyRepo.GetSurveyDetails(surveyId, 2);
-        DataTable dtSurveyItems = _surveyRepo.GetSurveyDetails(surveyId, 3);
-        DataTable dtSurveyRemarks = _surveyRepo.GetSurveyDetails(surveyId, 4);
-
-        if (dtSurveyDetails == null || dtSurveyDetails.Rows.Count == 0)
         {
-            TempData["ResultMessage"] = "<strong>Error!</strong> Survey not found.";
-            TempData["ResultType"] = "danger";
-            return RedirectToAction("SummaryReport");
-        }
-
-        var sRow = dtSurveyDetails.Rows[0];
-        string? surveyName = sRow["SurveyName"]?.ToString();
-        string? clientId = sRow["ClientId"]?.ToString();
-        string? clientName = sRow["ClientName"]?.ToString();
-        string? clientAddr = sRow["ClintAddress"]?.ToString();
-        string? contactPers = sRow["ContactPerson"]?.ToString();
-        string? status = sRow["SurveyStatus"]?.ToString();
-        string? region = sRow["RegionID"]?.ToString();
-        string? implType = sRow["ImplementationType"]?.ToString();
-        string? scopeOfWork = sRow["ScopeOfWork"]?.ToString();
-        DateTime? startDate = sRow["SurveyDate"] as DateTime?;
-        DateTime? complDate = sRow["SubmissionDate"] as DateTime?;
-        string? locationSite = sRow["LocationSiteName"]?.ToString();
-
-        OfficeOpenXml.ExcelPackage.License.SetNonCommercialOrganization("ABTMS");
-
-        using (var package = new ExcelPackage())
-        {
-            var ws = package.Workbook.Worksheets.Add("Survey Report");
-
-            // will use max column width across sections
-            int maxCols = Math.Max(
-                dtSurveyItems?.Columns.Count ?? 10,
-                12);
-
-            int row = 1;
-
-            // ========== TITLE ==========
-            ws.Cells[row, 1].Value = $"Survey Report: {surveyId} ({surveyName})";
-            ws.Cells[row, 1, row, 8].Merge = true;
-            ws.Cells[row, 1, row, 8].Style.Font.Bold = true;
-            ws.Cells[row, 1, row, 8].Style.Font.Size = 16;
-            ws.Cells[row, 1, row, 8].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            ws.Cells[row, 1, row, 8].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-            ws.Cells[row, 1, row, 8].Style.Fill.PatternType = ExcelFillStyle.Solid;
-            ws.Cells[row, 1, row, 8].Style.Fill.BackgroundColor.SetColor(Color.LightSteelBlue);
-
-            row += 1;
-
-            // ========== CLIENT INFO + STATUS BLOCK ==========
-            int blockHeaderRow = row;
-            // headers
-            ws.Cells[blockHeaderRow, 1].Value = "Client Info";
-            ws.Cells[blockHeaderRow, 1, blockHeaderRow, 4].Merge = true;
-            ws.Cells[blockHeaderRow, 1, blockHeaderRow, 4].Style.Font.Bold = true;
-            ws.Cells[blockHeaderRow, 1, blockHeaderRow, 4].Style.Font.Size = 14;
-            ws.Cells[blockHeaderRow, 1, blockHeaderRow, 4].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            ws.Cells[blockHeaderRow, 1, blockHeaderRow, 4].Style.Fill.PatternType = ExcelFillStyle.Solid;
-            ws.Cells[blockHeaderRow, 1, blockHeaderRow, 4].Style.Fill.BackgroundColor.SetColor(Color.LightGray);
-
-            ws.Cells[blockHeaderRow, 5].Value = "Survey Status";
-            ws.Cells[blockHeaderRow, 5, blockHeaderRow, 8].Merge = true;
-            ws.Cells[blockHeaderRow, 5, blockHeaderRow, 8].Style.Font.Bold = true;
-            ws.Cells[blockHeaderRow, 5, blockHeaderRow, 8].Style.Font.Size = 14;
-            ws.Cells[blockHeaderRow, 5, blockHeaderRow, 8].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            ws.Cells[blockHeaderRow, 5, blockHeaderRow, 8].Style.Fill.PatternType = ExcelFillStyle.Solid;
-            ws.Cells[blockHeaderRow, 5, blockHeaderRow, 8].Style.Fill.BackgroundColor.SetColor(Color.LightGray);
-
-            row++;
-
-            // left side (Client)
-            ws.Cells[row, 1].Value = "ID:";
-            ws.Cells[row, 1].Style.Font.Bold = true;
-            ws.Cells[row, 1, row, 2].Merge = true;
-            ws.Cells[row, 3].Value = clientId;
-            ws.Cells[row, 3, row, 4].Merge = true;
-
-            ws.Cells[row + 1, 1].Value = "Name:";
-            ws.Cells[row + 1, 1].Style.Font.Bold = true;
-            ws.Cells[row + 1, 1, row + 1, 2].Merge = true;
-            ws.Cells[row + 1, 3].Value = clientName;
-            ws.Cells[row + 1, 3, row + 1, 4].Merge = true;
-
-
-            ws.Cells[row + 2, 1].Value = "Address :";
-            ws.Cells[row + 2, 1].Style.Font.Bold = true;
-            ws.Cells[row + 2, 1, row + 2, 2].Merge = true;
-            ws.Cells[row + 2, 3].Value = clientAddr;
-            ws.Cells[row + 2, 3, row + 2, 4].Merge = true;
-
-            ws.Cells[row + 3, 1].Value = "Contact :";
-            ws.Cells[row + 3, 1].Style.Font.Bold = true;
-            ws.Cells[row + 3, 1, row + 3, 2].Merge = true;
-            ws.Cells[row + 3, 3].Value = contactPers;
-            ws.Cells[row + 3, 3, row + 3, 4].Merge = true;
-
-            //ws.Cells[row, 1, row + 3, 1].Style.Font.Bold = true;
-
-            // right side (Status / Region / Impl / Dates)
-            int rs = row;
-            ws.Cells[rs, 5].Value = "Status:";
-            ws.Cells[rs, 5].Style.Font.Bold = true;
-            ws.Cells[rs, 5, row, 6].Merge = true;
-            ws.Cells[rs, 7].Value = status;
-            ws.Cells[rs, 7, row, 8].Merge = true;
-
-            //ws.Cells[rs + 1, 5].Value = "Region:";
-            //ws.Cells[rs + 1, 6].Value = region;
-
-            ws.Cells[rs + 1, 5].Value = "Implementation Type:";
-            ws.Cells[rs + 1, 5].Style.Font.Bold = true;
-            ws.Cells[rs + 1, 5, row + 1, 6].Merge = true;
-            ws.Cells[rs + 1, 7].Value = implType;
-            ws.Cells[rs + 1, 7, row + 1, 8].Merge = true;
-
-            ws.Cells[rs + 2, 5].Value = "Start Date:";
-            ws.Cells[rs + 2, 5].Style.Font.Bold = true;
-            ws.Cells[rs + 2, 5, row + 2, 6].Merge = true;
-            ws.Cells[rs + 2, 7].Value = startDate?.ToString("dd-MMM-yyyy");
-            ws.Cells[rs + 2, 7, row + 2, 8].Merge = true;
-
-            ws.Cells[rs + 3, 5].Value = "Completion Date";
-            ws.Cells[rs + 3, 5].Style.Font.Bold = true;
-            ws.Cells[rs + 3, 5, row + 3, 6].Merge = true;
-            ws.Cells[rs + 3, 7].Value = complDate?.ToString("dd-MMM-yyyy");
-            ws.Cells[rs + 3, 7, row + 3, 8].Merge = true;
-
-            // ws.Cells[rs, 4, rs + 4, 4].Style.Font.Bold = true;
-
-            row = rs + 4;
-
-            // add border for this whole top block
-            using (var rng = ws.Cells[blockHeaderRow, 1, row - 1, 8])
+            try
             {
-                rng.Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                rng.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                rng.Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                rng.Style.Border.Right.Style = ExcelBorderStyle.Thin;
-            }
+                // 1) Get data (same as your original)
+                DataTable dtSurveyDetails = _surveyRepo.GetSurveyDetails(surveyId, 1);
+                DataTable dtSurveyLocEmp = _surveyRepo.GetSurveyDetails(surveyId, 2);
+                DataTable dtSurveyItems = _surveyRepo.GetSurveyDetails(surveyId, 3);
+                DataTable dtSurveyRemarks = _surveyRepo.GetSurveyDetails(surveyId, 4);
 
-            row++; // blank line
-
-            // ========== SCOPE OF WORK ==========
-            ws.Cells[row, 1].Value = "Scope Of Work";
-            ws.Cells[row, 1, row, 8].Merge = true;
-            ws.Cells[row, 1, row, 8].Style.Font.Bold = true;
-            ws.Cells[row, 1, row, 8].Style.Font.Size = 14;
-            ws.Cells[row, 1, row, 8].Style.Fill.PatternType = ExcelFillStyle.Solid;
-            ws.Cells[row, 1, row, 8].Style.Fill.BackgroundColor.SetColor(Color.LightGray);
-
-            row++;
-
-            ws.Cells[row, 1].Value = scopeOfWork;
-            ws.Cells[row, 1].Style.VerticalAlignment = ExcelVerticalAlignment.Top;
-            ws.Cells[row, 1, row, 8].Merge = true;
-            ws.Cells[row, 1, row, 8].Style.WrapText = true;
-
-            ws.Row(row).CustomHeight = true;
-            ws.Row(row).Height = 60;
-
-
-            using (var rng = ws.Cells[row - 1, 1, row, 8])
-            {
-                rng.Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                rng.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                rng.Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                rng.Style.Border.Right.Style = ExcelBorderStyle.Thin;
-            }
-
-            row += 2;
-
-            // ========== LOCATIONS + TEAM ==========
-            int locHeaderRow = row;
-
-            // section header row ("Locations" / "Team")
-            ws.Cells[locHeaderRow, 1].Value = "Locations";
-            ws.Cells[locHeaderRow, 1, locHeaderRow, 4].Merge = true;
-            ws.Cells[locHeaderRow, 1, locHeaderRow, 4].Style.Font.Bold = true;
-            ws.Cells[locHeaderRow, 1, locHeaderRow, 4].Style.Font.Size = 14;
-            ws.Cells[locHeaderRow, 1, locHeaderRow, 4].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            ws.Cells[locHeaderRow, 1, locHeaderRow, 4].Style.Fill.PatternType = ExcelFillStyle.Solid;
-            ws.Cells[locHeaderRow, 1, locHeaderRow, 4].Style.Fill.BackgroundColor.SetColor(Color.LightSteelBlue);
-
-            ws.Cells[locHeaderRow, 5].Value = "Team";
-            ws.Cells[locHeaderRow, 5, locHeaderRow, 8].Merge = true;
-            ws.Cells[locHeaderRow, 5, locHeaderRow, 8].Style.Font.Bold = true;
-            ws.Cells[locHeaderRow, 5, locHeaderRow, 8].Style.Font.Size = 14;
-            ws.Cells[locHeaderRow, 5, locHeaderRow, 8].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            ws.Cells[locHeaderRow, 5, locHeaderRow, 8].Style.Fill.PatternType = ExcelFillStyle.Solid;
-            ws.Cells[locHeaderRow, 5, locHeaderRow, 8].Style.Fill.BackgroundColor.SetColor(Color.LightSteelBlue);
-
-            row++;
-
-            // column headers
-            ws.Cells[row, 1].Value = "ID";
-            ws.Cells[row, 2].Value = "Location Name";
-            ws.Cells[row, 3].Value = "Location Type";
-            ws.Cells[row, 4].Value = "Cordinates";
-            ws.Cells[row, 5].Value = "Emp ID";
-            ws.Cells[row, 6].Value = "Name";
-            ws.Cells[row, 6, row, 7].Merge = true;
-            ws.Cells[row, 8].Value = "Contact No";
-            //  ws.Cells[row, 9].Value = "Due Date";
-
-            using (var rng = ws.Cells[row, 1, row, 8])
-            {
-                rng.Style.Font.Bold = true;
-                rng.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                rng.Style.Fill.BackgroundColor.SetColor(Color.LightGray);
-            }
-
-            row++;
-
-            if (dtSurveyLocEmp != null && dtSurveyLocEmp.Rows.Count > 0)
-            {
-                foreach (DataRow lr in dtSurveyLocEmp.Rows)
+                if (dtSurveyDetails == null || dtSurveyDetails.Rows.Count == 0)
                 {
-                    ws.Cells[row, 1].Value = lr["LocID"];
-                    ws.Cells[row, 2].Value = lr["LocName"];
-                    ws.Cells[row, 3].Value = lr["LocationType"];
-                    ws.Cells[row, 4].Value = lr["Cordinate"];
-                    ws.Cells[row, 5].Value = lr["EmpID"];
-                    ws.Cells[row, 6].Value = lr["EmpName"];
-                    ws.Cells[row, 6, row, 7].Merge = true;
-                    // ws.Cells[row, 7].Value = lr["Email"];
-                    ws.Cells[row, 8].Value = lr["MobileNo"];
-                    //ws.Cells[row, 9].Value = complDate?.ToString("dd-MMM-yyyy"); // due date (you can adjust)
+                    TempData["ResultMessage"] = "<strong>Error!</strong> Survey not found.";
+                    TempData["ResultType"] = "danger";
+                    return RedirectToAction("SummaryReport");
+                }
+
+                var sRow = dtSurveyDetails.Rows[0];
+                string surveyName = sRow["SurveyName"]?.ToString() ?? string.Empty;
+                string clientId = sRow["ClientId"]?.ToString() ?? string.Empty;
+                string clientName = sRow["ClientName"]?.ToString() ?? string.Empty;
+                string clientAddr = sRow["ClintAddress"]?.ToString() ?? string.Empty;
+                string contactPers = sRow["ContactPerson"]?.ToString() ?? string.Empty;
+                string status = sRow["SurveyStatus"]?.ToString() ?? string.Empty;
+                string region = sRow["RegionID"]?.ToString() ?? string.Empty;
+                string implType = sRow["ImplementationType"]?.ToString() ?? string.Empty;
+                string scopeOfWork = sRow["ScopeOfWork"]?.ToString() ?? string.Empty;
+                DateTime? startDate = sRow["SurveyDate"] as DateTime?;
+                DateTime? complDate = sRow["SubmissionDate"] as DateTime?;
+                string locationSite = sRow["LocationSiteName"]?.ToString() ?? string.Empty;
+
+                // EPPlus license context (modern API)
+                OfficeOpenXml.ExcelPackage.License.SetNonCommercialOrganization("ABTMS");
+
+                using (var package = new ExcelPackage())
+                {
+                    var ws = package.Workbook.Worksheets.Add("Survey Report");
+                    int row = 1;
+                    int maxCols = Math.Max(dtSurveyItems?.Columns.Count ?? 8, 8);
+
+                    // ---------- helpers ----------
+                    Action<int, int, int, int, Color> applyBorder = (r1, c1, r2, c2, color) =>
+                    {
+                        using (var rng = ws.Cells[r1, c1, r2, c2])
+                        {
+                            rng.Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                            rng.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                            rng.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                            rng.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                        }
+                    };
+
+                    Func<int, int, string, int, Color, ExcelRange> sectionHeader = (r, c, text, colspan, bg) =>
+                    {
+                        var target = ws.Cells[r, c, r, c + colspan - 1];
+                        target.Merge = true;
+                        target.Value = text;
+                        target.Style.Font.Bold = true;
+                        target.Style.Font.Size = 14;
+                        target.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        target.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        target.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        target.Style.Fill.BackgroundColor.SetColor(bg);
+                        return target;
+                    };
+
+                    Action<int, int, int, int, bool> setBoldRange = (r1, c1, r2, c2, bold) =>
+                    {
+                        ws.Cells[r1, c1, r2, c2].Style.Font.Bold = bold;
+                    };
+
+                    // subtle palette
+                    Color headerBg = Color.FromArgb(210, 225, 240); // light steel-like
+                    Color sectionBg = Color.FromArgb(230, 230, 230); // light gray
+                    Color locBg = Color.FromArgb(224, 243, 250); // light blue-ish
+                    Color totalReqBg = Color.FromArgb(217, 234, 211); // light green
+                    Color totalExBg = Color.FromArgb(255, 249, 196); // light yellow
+
+                    // ---------- TITLE ----------
+                    var titleRange = ws.Cells[row, 1, row, 8];
+                    titleRange.Merge = true;
+                    titleRange.Value = $"Survey Report: {surveyId} — {surveyName}";
+                    titleRange.Style.Font.Bold = true;
+                    titleRange.Style.Font.Size = 16;
+                    titleRange.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    titleRange.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                    titleRange.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    titleRange.Style.Fill.BackgroundColor.SetColor(headerBg);
+                    applyBorder(row, 1, row, 8, Color.Black);
+                    row += 1;
+
+                    // ---------- CLIENT INFO / STATUS BLOCK ----------
+                    int blockStart = row;
+
+                    // headers
+                    sectionHeader(row, 1, "Client Info", 4, sectionBg);
+                    sectionHeader(row, 5, "Survey Status", 4, sectionBg);
                     row++;
-                }
-            }
 
-            using (var rng = ws.Cells[locHeaderRow, 1, row - 1, 8])
-            {
-                rng.Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                rng.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                rng.Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                rng.Style.Border.Right.Style = ExcelBorderStyle.Thin;
-            }
+                    // client left side
+                    ws.Cells[row, 1].Value = "ID:";
+                    ws.Cells[row, 1].Style.Font.Bold = true;
+                    ws.Cells[row, 1, row, 2].Merge = true;
+                    ws.Cells[row, 3].Value = clientId;
+                    ws.Cells[row, 3, row, 4].Merge = true;
 
-            row += 2;
+                    ws.Cells[row + 1, 1].Value = "Name:";
+                    ws.Cells[row + 1, 1].Style.Font.Bold = true;
+                    ws.Cells[row + 1, 1, row + 1, 2].Merge = true;
+                    ws.Cells[row + 1, 3].Value = clientName;
+                    ws.Cells[row + 1, 3, row + 1, 4].Merge = true;
 
+                    ws.Cells[row + 2, 1].Value = "Address:";
+                    ws.Cells[row + 2, 1].Style.Font.Bold = true;
+                    ws.Cells[row + 2, 1, row + 2, 2].Merge = true;
+                    ws.Cells[row + 2, 3].Value = clientAddr;
+                    ws.Cells[row + 2, 3, row + 2, 4].Merge = true;
 
-            // ========== REQUIREMENT SUMMARY (ITEMS PIVOT) ==========
-            if (dtSurveyItems != null && dtSurveyItems.Rows.Count > 0)
-            {
-                int itemsCols = dtSurveyItems.Columns.Count;
-                int reqTitleRow = row;
+                    ws.Cells[row + 3, 1].Value = "Contact:";
+                    ws.Cells[row + 3, 1].Style.Font.Bold = true;
+                    ws.Cells[row + 3, 1, row + 3, 2].Merge = true;
+                    ws.Cells[row + 3, 3].Value = contactPers;
+                    ws.Cells[row + 3, 3, row + 3, 4].Merge = true;
 
-                // Title
-                var titleRange = ws.Cells[reqTitleRow, 1, reqTitleRow, itemsCols];
-                titleRange.Merge = true;
-                titleRange.Value = "Requirement Summary";
-                titleRange.Style.Font.Bold = true;
-                titleRange.Style.Font.Size = 14;
-                // titleRange.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                titleRange.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                titleRange.Style.Fill.BackgroundColor.SetColor(Color.LightSteelBlue);
+                    // right side (status)
+                    ws.Cells[row, 5].Value = "Status:";
+                    ws.Cells[row, 5].Style.Font.Bold = true;
+                    ws.Cells[row, 5, row, 6].Merge = true;
+                    ws.Cells[row, 7].Value = status;
+                    ws.Cells[row, 7, row, 8].Merge = true;
 
-                row++;
+                    ws.Cells[row + 1, 5].Value = "Implementation Type:";
+                    ws.Cells[row + 1, 5].Style.Font.Bold = true;
+                    ws.Cells[row + 1, 5, row + 1, 6].Merge = true;
+                    ws.Cells[row + 1, 7].Value = implType;
+                    ws.Cells[row + 1, 7, row + 1, 8].Merge = true;
 
-                // 3 Header rows
-                int row1 = row;
-                int row2 = row + 1;
-                int row3 = row + 2;
-                int dataStartRow = row + 3;
+                    ws.Cells[row + 2, 5].Value = "Start Date:";
+                    ws.Cells[row + 2, 5].Style.Font.Bold = true;
+                    ws.Cells[row + 2, 5, row + 2, 6].Merge = true;
+                    ws.Cells[row + 2, 7].Value = startDate?.ToString("dd-MMM-yyyy") ?? string.Empty;
+                    ws.Cells[row + 2, 7, row + 2, 8].Merge = true;
 
-                int locPairs = (itemsCols - 7) / 2;
-                int firstLocCol = 5;
-                int lastLocCol = firstLocCol + locPairs * 2 - 1;
-                int totalStartCol = lastLocCol + 1;
-                int totalEndCol = totalStartCol + 1;
-                int remarksCol = totalEndCol + 1;
+                    ws.Cells[row + 3, 5].Value = "Completion Date:";
+                    ws.Cells[row + 3, 5].Style.Font.Bold = true;
+                    ws.Cells[row + 3, 5, row + 3, 6].Merge = true;
+                    ws.Cells[row + 3, 7].Value = complDate?.ToString("dd-MMM-yyyy") ?? string.Empty;
+                    ws.Cells[row + 3, 7, row + 3, 8].Merge = true;
 
-                // Row1: main headers
-                ws.Cells[row1, 1].Value = "Item Code";
-                ws.Cells[row1, 1, row3, 1].Merge = true;
+                    int blockEnd = row + 3;
+                    applyBorder(blockStart, 1, blockEnd, 8, Color.Black);
+                    row = blockEnd + 2;
 
-                ws.Cells[row1, 2].Value = "Type";
-                ws.Cells[row1, 2, row3, 2].Merge = true;
+                    // ---------- SCOPE OF WORK ----------
+                    sectionHeader(row, 1, "Scope Of Work", 8, sectionBg);
+                    row++;
+                    ws.Cells[row, 1].Value = scopeOfWork;
+                    ws.Cells[row, 1, row, 8].Merge = true;
+                    ws.Cells[row, 1, row, 8].Style.WrapText = true;
+                    ws.Row(row).CustomHeight = true;
+                    ws.Row(row).Height = 60; // reasonable default; tweak if needed
+                    applyBorder(row - 1, 1, row, 8, Color.Black);
+                    row += 2;
 
-                ws.Cells[row1, 3].Value = "Item";
-                ws.Cells[row1, 3, row3, 3].Merge = true;
+                    // ---------- LOCATIONS + TEAM ----------
+                    int locHeaderRow = row;
+                    sectionHeader(row, 1, "Locations", 4, locBg);
+                    sectionHeader(row, 5, "Team", 4, locBg);
+                    row++;
 
-                ws.Cells[row1, 4].Value = "UOM";
-                ws.Cells[row1, 4, row3, 4].Merge = true;
-
-                ws.Cells[row1, firstLocCol].Value = "Locations";
-                ws.Cells[row1, firstLocCol, row1, lastLocCol].Merge = true;
-
-                ws.Cells[row1, totalStartCol].Value = "Total";
-                ws.Cells[row1, totalStartCol, row2, totalEndCol].Merge = true;
-
-                ws.Cells[row1, remarksCol].Value = "Remarks";
-                ws.Cells[row1, remarksCol, row3, remarksCol].Merge = true;
-
-                // Row2: Location names
-                int colIndex = firstLocCol;
-                for (int i = 0; i < locPairs; i++)
-                {
-                    string rawName = dtSurveyItems.Columns[colIndex - 1].ColumnName;
-                    string locName = rawName.Replace("Existing", "").Replace("Required", "").Trim();
-
-                    ws.Cells[row2, colIndex].Value = locName;
-                    ws.Cells[row2, colIndex, row2, colIndex + 1].Merge = true;
-
-                    colIndex += 2;
-                }
-
-                // Row3: Existing / Required
-                colIndex = firstLocCol;
-                for (int i = 0; i < locPairs; i++)
-                {
-                    ws.Cells[row3, colIndex].Value = "Existing";
-                    ws.Cells[row3, colIndex + 1].Value = "Required";
-                    colIndex += 2;
-                }
-
-                ws.Cells[row3, totalStartCol].Value = "Existing";
-                ws.Cells[row3, totalEndCol].Value = "Required";
-
-
-                // 🔹 Style ALL header rows
-                var headerRange = ws.Cells[row1, 1, row3, itemsCols];
-                headerRange.Style.Font.Bold = true;
-                headerRange.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                headerRange.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-                headerRange.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                headerRange.Style.Fill.BackgroundColor.SetColor(Color.LightGray);
-
-
-                // -------- Data Rows (with conditional formatting) --------
-                int r = dataStartRow;
-                foreach (DataRow dr in dtSurveyItems.Rows)
-                {
-                    for (int c = 0; c < itemsCols; c++)
+                    // column headers
+                    var locCols = new[] { "ID", "Location Name", "Location Type", "Coordinates", "Emp ID", "Name", "", "Contact No" };
+                    for (int c = 0; c < locCols.Length; c++)
                     {
-                        var cell = ws.Cells[r, c + 1];
-                        object value = dr[c];
+                        ws.Cells[row, c + 1].Value = locCols[c];
+                    }
+                    using (var hdr = ws.Cells[row, 1, row, 8])
+                    {
+                        hdr.Style.Font.Bold = true;
+                        hdr.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        hdr.Style.Fill.BackgroundColor.SetColor(sectionBg);
+                        hdr.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    }
+                    row++;
 
-
-
-                        if (c == 0) // first column = Item Code
+                    if (dtSurveyLocEmp != null && dtSurveyLocEmp.Rows.Count > 0)
+                    {
+                        foreach (DataRow lr in dtSurveyLocEmp.Rows)
                         {
-                            if (decimal.TryParse(value?.ToString(), out decimal codeNum))
-                            {
-                                cell.Value = codeNum;
-                                cell.Style.Numberformat.Format = "###0";
-                            }
-                            else
-                                cell.Value = value;
-
-                            continue;
-                        }
-
-                        // safe numeric parsing
-                        decimal num = 0m;
-                        bool isNumeric = value != DBNull.Value && decimal.TryParse(value.ToString(), out num);
-
-                        // Is this column a numeric location/total column? (Existing/Required)
-                        bool isLocValueColumn =
-                            (c + 1 >= firstLocCol && c + 1 <= lastLocCol) ||   // all location Existing/Required
-                            (c + 1 == totalStartCol || c + 1 == totalEndCol);  // Total Existing / Total Required
-
-                        // If numeric and zero → keep blank
-                        if (isNumeric && num == 0m)
-                        {
-                            cell.Value = value;
-                            cell.Style.Font.Color.SetColor(Color.LightGray);
-                            //cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                            cell.Style.Numberformat.Format = "#,##0.00";
-                        }
-                        else
-                        {
-                            // keep original value
-                            cell.Value = value;
-                            cell.Style.Numberformat.Format = "#,##0.00";
-                            // cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                            // Only color numeric > 0 in location/total columns
-                            if (isNumeric && num > 0m && isLocValueColumn)
-                            {
-                                cell.Style.Fill.PatternType = ExcelFillStyle.Solid;
-
-                                // Location Existing/Required → light yellow
-                                if (c + 1 >= firstLocCol && c + 1 <= lastLocCol)
-                                {
-                                    cell.Style.Fill.BackgroundColor.SetColor(Color.LightYellow);
-                                }
-                                // Total Existing → light yellow
-                                else if (c + 1 == totalStartCol)
-                                {
-                                    cell.Style.Fill.BackgroundColor.SetColor(Color.LightYellow);
-                                }
-                                // Total Required → light green
-                                else if (c + 1 == totalEndCol)
-                                {
-                                    cell.Style.Fill.BackgroundColor.SetColor(Color.LightGreen);
-                                }
-                            }
+                            ws.Cells[row, 1].Value = lr["LocID"]?.ToString() ?? string.Empty;
+                            ws.Cells[row, 2].Value = lr["LocName"]?.ToString() ?? string.Empty;
+                            ws.Cells[row, 3].Value = lr["LocationType"]?.ToString() ?? string.Empty;
+                            ws.Cells[row, 4].Value = lr["Cordinate"]?.ToString() ?? string.Empty;
+                            ws.Cells[row, 5].Value = lr["EmpID"]?.ToString() ?? string.Empty;
+                            ws.Cells[row, 6].Value = lr["EmpName"]?.ToString() ?? string.Empty;
+                            ws.Cells[row, 6, row, 7].Merge = true;
+                            ws.Cells[row, 8].Value = lr["MobileNo"]?.ToString() ?? string.Empty;
+                            row++;
                         }
                     }
+                    applyBorder(locHeaderRow, 1, row - 1, 8, Color.Black);
+                    row += 2;
 
-
-                    r++;
-                }
-
-                // Borders
-                using (var tableRange = ws.Cells[row1, 1, r - 1, itemsCols])
-                {
-                    tableRange.Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                    tableRange.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                    tableRange.Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                    tableRange.Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                }
-
-                // 🔹 Highlight totals
-                var exCol = ws.Cells[dataStartRow, totalStartCol, r - 1, totalStartCol];
-                exCol.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                exCol.Style.Fill.BackgroundColor.SetColor(Color.LightYellow);
-
-                var reqCol = ws.Cells[dataStartRow, totalEndCol, r - 1, totalEndCol];
-                reqCol.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                reqCol.Style.Fill.BackgroundColor.SetColor(Color.LightGreen);
-
-
-                r++;
-                
-                // Survey Camera Remarks ------------------------------------------------
-                row = r +1;
-               
-
-                int itemsCols1 = dtSurveyItems.Columns.Count;
-                int reqTitleRow1 = row;
-
-                // Title
-                var titleRange1 = ws.Cells[reqTitleRow1, 1, reqTitleRow1, itemsCols1];
-                titleRange1.Merge = true;
-                titleRange1.Value = "Camera Installation Remarks";
-                titleRange1.Style.Font.Bold = true;
-                titleRange1.Style.Font.Size = 14;
-                // titleRange.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                titleRange1.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                titleRange1.Style.Fill.BackgroundColor.SetColor(Color.LightSteelBlue);
-
-                row++;
-
-                // column headers
-                ws.Cells[row, 1].Value = "Location";
-                ws.Cells[row, 2].Value = "Item Code";
-                ws.Cells[row, 3].Value = "Items";
-                ws.Cells[row, 4].Value = "Remarks";
-                ws.Cells[row, 4, row, itemsCols1].Merge = true;
-                //ws.Cells[row, 8].Value = "Contact No";
-                //  ws.Cells[row, 9].Value = "Due Date";
-
-                using (var rng = ws.Cells[row, 1, row, 4])
-                {
-                    rng.Style.Font.Bold = true;
-                    rng.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                    rng.Style.Fill.BackgroundColor.SetColor(Color.LightGray);
-                }
-
-                row++;
-                int startMergeRow = row;
-                string prevLoc = "";
-
-                if (dtSurveyRemarks != null && dtSurveyRemarks.Rows.Count > 0)
-                {
-                    for (int i = 0; i < dtSurveyRemarks.Rows.Count; i++)
+                    // ---------- REQUIREMENT SUMMARY (ITEMS PIVOT) ----------
+                    if (dtSurveyItems != null && dtSurveyItems.Rows.Count > 0)
                     {
-                        DataRow lr = dtSurveyRemarks.Rows[i];
-                        string currentLoc = lr["LocName"].ToString();
+                        int itemsCols = dtSurveyItems.Columns.Count;
+                        int reqTitleRow = row;
+                        var reqTitle = ws.Cells[reqTitleRow, 1, reqTitleRow, Math.Max(itemsCols, 8)];
+                        reqTitle.Merge = true;
+                        reqTitle.Value = "Requirement Summary";
+                        reqTitle.Style.Font.Bold = true;
+                        reqTitle.Style.Font.Size = 14;
+                        reqTitle.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        reqTitle.Style.Fill.BackgroundColor.SetColor(headerBg);
 
-                        // Updated column order
-                        ws.Cells[row, 1].Value = currentLoc;           // LocName first column
-                        ws.Cells[row, 2].Value = lr["ItemID"];          // ItemID second column
-                        ws.Cells[row, 3].Value = lr["Cameras"];
-                        ws.Cells[row, 4].Value = lr["Remarks"];
-
-                        // Merge remarks column
-                        ws.Cells[row, 4, row, itemsCols1].Merge = true;
-
-                        // Merge LocName if same
-                        if (prevLoc != "" && prevLoc != currentLoc)
-                        {
-                            if (row - 1 > startMergeRow)
-                                ws.Cells[startMergeRow, 1, row - 1, 1].Merge = true; // Merge first column now
-                            startMergeRow = row;
-                        }
-
-                        prevLoc = currentLoc;
                         row++;
+
+                        // Prepare header rows (3 rows)
+                        int row1 = row;
+                        int row2 = row + 1;
+                        int row3 = row + 2;
+                        int dataStart = row + 3;
+
+                        // Calculate location pairs defensively
+                        int locPairs = Math.Max(0, (itemsCols - 7) / 2);
+                        int firstLocCol = 5;
+                        int lastLocCol = firstLocCol + locPairs * 2 - 1;
+                        int totalStartCol = Math.Max(firstLocCol, lastLocCol + 1);
+                        int totalEndCol = totalStartCol + 1;
+                        int remarksCol = totalEndCol + 1;
+
+                        // Main headers
+                        ws.Cells[row1, 1].Value = "Item Code";
+                        ws.Cells[row1, 1, row3, 1].Merge = true;
+
+                        ws.Cells[row1, 2].Value = "Type";
+                        ws.Cells[row1, 2, row3, 2].Merge = true;
+
+                        ws.Cells[row1, 3].Value = "Item";
+                        ws.Cells[row1, 3, row3, 3].Merge = true;
+
+                        ws.Cells[row1, 4].Value = "UOM";
+                        ws.Cells[row1, 4, row3, 4].Merge = true;
+
+                        // Locations header (if any)
+                        if (locPairs > 0)
+                        {
+                            ws.Cells[row1, firstLocCol].Value = "Locations";
+                            ws.Cells[row1, firstLocCol, row1, lastLocCol].Merge = true;
+
+                            // Row2: location names
+                            int colIndex = firstLocCol;
+                            for (int i = 0; i < locPairs && (colIndex - 1) < dtSurveyItems.Columns.Count; i++)
+                            {
+                                string rawName = dtSurveyItems.Columns[colIndex - 1].ColumnName;
+                                string locName = rawName.Replace("Existing", "").Replace("Required", "").Trim();
+                                ws.Cells[row2, colIndex].Value = locName;
+                                ws.Cells[row2, colIndex, row2, colIndex + 1].Merge = true;
+                                colIndex += 2;
+                            }
+
+                            // Row3 existing/required
+                            colIndex = firstLocCol;
+                            for (int i = 0; i < locPairs; i++)
+                            {
+                                ws.Cells[row3, colIndex].Value = "Existing";
+                                ws.Cells[row3, colIndex + 1].Value = "Required";
+                                colIndex += 2;
+                            }
+                        }
+
+                        // Totals
+                        ws.Cells[row1, totalStartCol].Value = "Total";
+                        ws.Cells[row1, totalStartCol, row2, totalEndCol].Merge = true;
+                        ws.Cells[row3, totalStartCol].Value = "Existing";
+                        ws.Cells[row3, totalEndCol].Value = "Required";
+
+                        // Remarks header
+                        ws.Cells[row1, remarksCol].Value = "Remarks";
+                        ws.Cells[row1, remarksCol, row3, remarksCol].Merge = true;
+
+                        // style header block
+                        var headerRange = ws.Cells[row1, 1, row3, Math.Max(itemsCols, remarksCol)];
+                        headerRange.Style.Font.Bold = true;
+                        headerRange.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        headerRange.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        headerRange.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        headerRange.Style.Fill.BackgroundColor.SetColor(sectionBg);
+
+                        // Data rows
+                        int r = dataStart;
+                        foreach (DataRow dr in dtSurveyItems.Rows)
+                        {
+                            for (int c = 0; c < itemsCols; c++)
+                            {
+                                var cell = ws.Cells[r, c + 1];
+                                object value = dr[c];
+
+                                if (c == 0)
+                                {
+                                    // Item code
+                                    cell.Value = value?.ToString() ?? string.Empty;
+                                    cell.Style.Numberformat.Format = "@"; // text
+                                    continue;
+                                }
+
+                                // numeric parsing (fixed: ensure PatternType is set before BackgroundColor.SetColor)
+                                if (decimal.TryParse(value?.ToString(), out decimal num))
+                                {
+                                    cell.Value = num;
+                                    cell.Style.Numberformat.Format = "###0";
+
+                                    bool isLocCol = (c + 1 >= firstLocCol && c + 1 <= lastLocCol)
+                                                    || (c + 1 == totalStartCol || c + 1 == totalEndCol);
+
+                                    if (isLocCol && num > 0)
+                                    {
+                                        // ensure a fill pattern exists before setting background color
+                                        cell.Style.Fill.PatternType = ExcelFillStyle.Solid;
+
+                                        if (c + 1 >= firstLocCol && c + 1 <= lastLocCol)
+                                        {
+                                            cell.Style.Fill.BackgroundColor.SetColor(Color.LightYellow);
+                                        }
+                                        else if (c + 1 == totalStartCol)
+                                        {
+                                            cell.Style.Fill.BackgroundColor.SetColor(totalExBg);
+                                        }
+                                        else if (c + 1 == totalEndCol)
+                                        {
+                                            cell.Style.Fill.BackgroundColor.SetColor(totalReqBg);
+                                        }
+                                    }
+                                    else if (isLocCol && num == 0)
+                                    {
+                                        // keep zero visible but grey it out
+                                        cell.Style.Font.Color.SetColor(Color.LightGray);
+                                        // optionally remove any fill if previously set:
+                                        // cell.Style.Fill.PatternType = ExcelFillStyle.None; // uncomment if you want no fill
+                                    }
+                                }
+                                else
+                                {
+                                    cell.Value = value?.ToString() ?? string.Empty;
+                                }
+                            }
+                            r++;
+                        }
+
+                        // borders and highlight totals
+                        applyBorder(row1, 1, r - 1, Math.Max(itemsCols, remarksCol), Color.Black);
+                        ws.Cells[dataStart, totalStartCol, r - 1, totalStartCol].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        ws.Cells[dataStart, totalStartCol, r - 1, totalStartCol].Style.Fill.BackgroundColor.SetColor(totalExBg);
+
+                        ws.Cells[dataStart, totalEndCol, r - 1, totalEndCol].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        ws.Cells[dataStart, totalEndCol, r - 1, totalEndCol].Style.Fill.BackgroundColor.SetColor(totalReqBg);
+
+                        // Move row pointer after items block
+                        row = r + 2;
+
+                        // ---------- Camera Installation Remarks ----------
+                        int remarksTitleRow = row;
+                        var titleRange1 = ws.Cells[remarksTitleRow, 1, remarksTitleRow, Math.Max(itemsCols, 6)];
+                        titleRange1.Merge = true;
+                        titleRange1.Value = "Camera Installation Remarks";
+                        titleRange1.Style.Font.Bold = true;
+                        titleRange1.Style.Font.Size = 14;
+                        titleRange1.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        titleRange1.Style.Fill.BackgroundColor.SetColor(headerBg);
+                        row++;
+
+                        // header for remarks
+                        ws.Cells[row, 1].Value = "Location";
+                        ws.Cells[row, 2].Value = "Item Code";
+                        ws.Cells[row, 3].Value = "Items";
+                        ws.Cells[row, 4].Value = "Remarks";
+                        ws.Cells[row, 4, row, Math.Max(6, itemsCols)].Merge = true;
+
+                        using (var rng = ws.Cells[row, 1, row, Math.Max(6, itemsCols)])
+                        {
+                            rng.Style.Font.Bold = true;
+                            rng.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            rng.Style.Fill.BackgroundColor.SetColor(sectionBg);
+                        }
+                        row++;
+
+                        // populate remarks (with merging of same locations)
+                        int startMergeRow = row;
+                        string prevLoc = null;
+                        if (dtSurveyRemarks != null && dtSurveyRemarks.Rows.Count > 0)
+                        {
+                            for (int i = 0; i < dtSurveyRemarks.Rows.Count; i++)
+                            {
+                                var dr = dtSurveyRemarks.Rows[i];
+                                string currentLoc = dr["LocName"]?.ToString() ?? string.Empty;
+
+                                ws.Cells[row, 1].Value = currentLoc;
+                                ws.Cells[row, 2].Value = dr["ItemID"]?.ToString() ?? string.Empty;
+                                ws.Cells[row, 3].Value = dr["Cameras"]?.ToString() ?? string.Empty;
+                                ws.Cells[row, 4].Value = dr["Remarks"]?.ToString() ?? string.Empty;
+                                ws.Cells[row, 4, row, Math.Max(6, itemsCols)].Merge = true;
+
+                                if (prevLoc != null && prevLoc != currentLoc)
+                                {
+                                    if (row - 1 > startMergeRow)
+                                        ws.Cells[startMergeRow, 1, row - 1, 1].Merge = true;
+                                    startMergeRow = row;
+                                }
+
+                                prevLoc = currentLoc;
+                                row++;
+                            }
+
+                            if (row - 1 > startMergeRow)
+                                ws.Cells[startMergeRow, 1, row - 1, 1].Merge = true;
+                        }
+
+                        applyBorder(remarksTitleRow, 1, row - 1, Math.Max(6, itemsCols), Color.Black);
                     }
 
-                    // Final merge block
-                    if (row - 1 > startMergeRow)
-                        ws.Cells[startMergeRow, 1, row - 1, 1].Merge = true;
+                    // Autosize and small polish
+                    ws.Cells[1, 1, ws.Dimension?.End.Row ?? 100, ws.Dimension?.End.Column ?? maxCols].AutoFitColumns();
+
+                    // Freeze top rows and first column for easy reading
+                    // ws.View.FreezePanes(4, 2);
+
+                    // prepare file
+                    var stream = new MemoryStream();
+                    package.SaveAs(stream);
+                    stream.Position = 0;
+
+                    string fileName = $"SurveyReport_{surveyId}.xlsx";
+                    return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
                 }
-
-
-
-                using (var rng = ws.Cells[locHeaderRow, 1, row - 1, itemsCols1])
-                {
-                    rng.Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                    rng.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                    rng.Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                    rng.Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                }
-
-               
-                                     
-
-              
-
-                row = r + 2;
             }
-
-            ws.Cells.AutoFitColumns();
-
-
-            // return file
-            var stream = new MemoryStream();
-            package.SaveAs(stream);
-            stream.Position = 0;
-
-            string fileName = $"SurveyReport_{surveyId}.xlsx";
-            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            catch (Exception ex)
+            {
+                TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
+                TempData["ResultType"] = "danger";
+                return RedirectToAction("DetailedReport", new { surveyId });
+            }
         }
-    }
-    catch (Exception ex)
-    {
-        TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
-        TempData["ResultType"] = "danger";
-        return RedirectToAction("DetailedReport", new { surveyId });
-    }
-}
-
     }
 
     // Helper class for storing survey item image information

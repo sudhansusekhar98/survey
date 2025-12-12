@@ -94,6 +94,37 @@ namespace SurveyApp.Controllers
             var result = _util.CheckAuthorizationAll(this, 103, null, surveyId, "View");
             if (result != null) return Unauthorized();
 
+            try
+            {
+                var locationStatus = _statusRepo.GetLocationStatus(surveyId, locId);
+                string currentStatus = locationStatus?.Status ?? "Pending";
+
+                if (currentStatus == "Completed" || currentStatus == "Verified")
+                {
+                    return Content($"<div class='alert alert-warning m-3'><i class='bi bi-exclamation-triangle-fill me-2'></i><strong>Location is {currentStatus}!</strong> Items cannot be modified. Click 'Unlock for Editing' to make changes.</div>");
+                }
+
+                var userId = HttpContext.Session.GetString("UserID");
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    if (currentStatus == "Pending")
+                    {
+                        _statusRepo.MarkLocationAsInProgress(surveyId, locId, Convert.ToInt32(userId), "Auto-marked when item selection started");
+                    }
+                    
+                    var submission = _submissionRepo.GetSubmissionBySurveyId(surveyId);
+                    if (submission != null && submission.SubmissionStatus == "Rejected")
+                    {
+                        _submissionRepo.SubmitSurvey(surveyId, Convert.ToInt32(userId), "In Progress");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetItemSelectionPartial status check: {ex.Message}");
+            }
+
+
             var formModel = new SurveyDetailsUpdate
             {
                 SurveyID = surveyId,
@@ -234,14 +265,45 @@ namespace SurveyApp.Controllers
                     int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
                     var result = _util.CheckAuthorizationAll(this, 103, null, model.SurveyID, "Update");
                     if (result != null) return Json(new { success = false, message = "Unauthorized" });
+
+                    try
+                    {
+                        var locationStatus = _statusRepo.GetLocationStatus(model.SurveyID, model.LocID);
+                        string currentStatus = locationStatus?.Status ?? "Pending";
+
+                        if (currentStatus == "Completed" || currentStatus == "Verified")
+                        {
+                            return Json(new { success = false, message = $"Location is {currentStatus} and locked. Cannot save changes." });
+                        }
+
+                        var userId = HttpContext.Session.GetString("UserID");
+                        if (!string.IsNullOrEmpty(userId))
+                        {
+                            if (currentStatus == "Pending")
+                            {
+                                _statusRepo.MarkLocationAsInProgress(model.SurveyID, model.LocID, Convert.ToInt32(userId), "Auto-marked on item save");
+                            }
+
+                            var submission = _submissionRepo.GetSubmissionBySurveyId(model.SurveyID);
+                            if (submission != null && submission.SubmissionStatus == "Rejected")
+                            {
+                                _submissionRepo.SubmitSurvey(model.SurveyID, Convert.ToInt32(userId), "In Progress");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error in UpdateItem [POST] status check: {ex.Message}");
+                        // Do not abort the save, but log the error.
+                    }
         
-                    var userId = HttpContext.Session.GetString("UserID");
-                    if (string.IsNullOrEmpty(userId))
+                    var userIdForCreate = HttpContext.Session.GetString("UserID");
+                    if (string.IsNullOrEmpty(userIdForCreate))
                     {
                         return Json(new { success = false, message = "User not logged in" });
                     }
         
-                    model.CreateBy = Convert.ToInt32(userId);
+                    model.CreateBy = Convert.ToInt32(userIdForCreate);
         
                     if (!ModelState.IsValid)
                     {
