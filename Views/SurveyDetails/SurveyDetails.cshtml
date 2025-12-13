@@ -266,26 +266,26 @@
                         var resultType = TempData["ResultType"]?.ToString() ?? "info";
                         var borderColor = resultType switch
                         {
-                            "success" => "border-success",
-                            "danger" => "border-danger",
-                            "warning" => "border-warning",
-                            "info" => "border-info",
+                                                    "success" => "border-success",
+                                                    "danger" => "border-danger",
+                                                    "warning" => "border-warning",
+                                                    "info" => "border-info",
                             _ => "border-info"
                         };
                         var bgColor = resultType switch
                         {
-                            "success" => "bg-success-subtle",
-                            "danger" => "bg-danger-subtle",
-                            "warning" => "bg-warning-subtle",
-                            "info" => "bg-info-subtle",
+                                                    "success" => "bg-success-subtle",
+                                                    "danger" => "bg-danger-subtle",
+                                                    "warning" => "bg-warning-subtle",
+                                                    "info" => "bg-info-subtle",
                             _ => "bg-light"
                         };
                         var textColor = resultType switch
                         {
-                            "success" => "text-success",
-                            "danger" => "text-danger",
-                            "warning" => "text-warning",
-                            "info" => "text-info",
+                                                    "success" => "text-success",
+                                                    "danger" => "text-danger",
+                                                    "warning" => "text-warning",
+                                                    "info" => "text-info",
                             _ => "text-dark"
                         };
                         <div class="mb-3 p-3 @bgColor rounded border-start border-4 @borderColor position-relative">
@@ -315,18 +315,18 @@
                             var status = ViewBag.LocationStatus as string ?? "Pending";
                             var statusBadgeClass = status switch
                             {
-                                "Pending" => "bg-secondary",
-                                "In Progress" => "bg-info",
-                                "Completed" => "bg-success",
-                                "Verified" => "bg-primary",
+                                                        "Pending" => "bg-secondary",
+                                                        "In Progress" => "bg-info",
+                                                        "Completed" => "bg-success",
+                                                        "Verified" => "bg-primary",
                                 _ => "bg-secondary"
                             };
                             var statusIcon = status switch
                             {
-                                "Pending" => "bi-clock",
-                                "In Progress" => "bi-play-circle",
-                                "Completed" => "bi-check-circle",
-                                "Verified" => "bi-shield-check",
+                                                        "Pending" => "bi-clock",
+                                                        "In Progress" => "bi-play-circle",
+                                                        "Completed" => "bi-check-circle",
+                                                        "Verified" => "bi-shield-check",
                                 _ => "bi-question-circle"
                             };
                         }
@@ -455,10 +455,13 @@
                         </small>
                     </div>
                     <div class="mt-3 d-flex justify-content-center gap-3">
-                        <button type="button" class="btn btn-gradient-primary px-4 py-2 fw-semibold"
-                            id="camDeviceCaptureBtn"><i class="bi bi-camera me-2"></i> Capture</button>
-                        <button type="button" class="btn btn-outline-danger px-4 py-2 fw-semibold"
+                        <button type="button" class="btn btn-outline-secondary px-4 py-2 fw-semibold"
                             data-bs-dismiss="modal"><i class="bi bi-x-circle me-2"></i> Cancel</button>
+                        <button type="button" class="btn btn-success btn-lg px-5 py-3 fw-bold shadow-lg"
+                            id="camDeviceCaptureBtn"
+                            style="background: linear-gradient(135deg, #28a745, #20c997); border: none; animation: pulse 2s infinite;">
+                            <i class="bi bi-camera-fill me-2 fs-4"></i> CAPTURE
+                        </button>
                     </div>
                 </div>
             </div>
@@ -512,6 +515,24 @@
             position: relative;
             z-index: 1 !important;
         }
+
+        /* Pulse animation for capture button */
+        @@keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+            }
+
+            50% {
+                transform: scale(1.02);
+                box-shadow: 0 0 20px 10px rgba(40, 167, 69, 0);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+            }
+        }
     </style>
 
 @section VendorScripts {
@@ -528,7 +549,7 @@
                 '@Url.Action("GetLocationPreview", "SurveyDetails")',
                 '@Url.Action("SubmitLocationCompletion", "SurveyDetails")',
                 '@Url.Action("UnlockLocationForEditing", "SurveyDetails")',
-                @((ViewBag.IsCompleted ?? false).ToString().ToLower()),
+                                        @((ViewBag.IsCompleted ?? false).ToString().ToLower()),
                 $('input[name="__RequestVerificationToken"]').val()
             );
 
@@ -613,6 +634,25 @@
                     }
                     if (isCamera) {
                         newElement.find('.camera-remarks-section').show();
+                    }
+
+                    // Show/hide conditional sections based on item code
+                    const itemCodeUpper = (itemCode || '').toUpperCase();
+
+                    // Load dynamic specifications from database (Pole Owner, Height, Road Width, etc.)
+                    // This replaces the old hardcoded pole-fields-section and road-width-section
+                    const specSection = newElement.find('.item-specifications-section')[0];
+                    if (specSection && typeof window.loadItemSpecifications === 'function') {
+                        window.loadItemSpecifications(specSection);
+                    }
+
+                    // Show image capture section only for Camera, Rack, Infrastructure, Public Announcement
+                    const captureEnabledTypes = ['CAM', 'RACK', 'INFRA', 'PUBLIC', 'ANNOUNCEMENT', 'PA'];
+                    const shouldShowCapture = captureEnabledTypes.some(type =>
+                        itemCodeUpper.includes(type) || itemName.toUpperCase().includes(type)
+                    );
+                    if (shouldShowCapture) {
+                        newElement.find('.image-capture-section').show();
                     }
 
                     // Render existing images if any
@@ -778,6 +818,12 @@
                     if (typeof updateCameraRemarksUI === 'function') {
                         updateCameraRemarksUI(itemIndex);
                     }
+
+                    // Reload specifications when quantities change (for conditional display like Pole Owner, Height)
+                    const specSection = itemForm.find('.item-specifications-section')[0];
+                    if (specSection && typeof window.loadItemSpecifications === 'function') {
+                        window.loadItemSpecifications(specSection);
+                    }
                 }
 
                 $('body').on('click', '.cam-qty-plus, .cam-qty-minus', function () {
@@ -802,7 +848,14 @@
                     itemForms.each(function (newIndex, itemForm) {
                         $(itemForm).find('input, textarea, select').each(function () {
                             if (this.name) {
+                                // Handle standard array notation: ItemLists[0].ItemID -> ItemLists[1].ItemID
                                 this.name = this.name.replace(/\[\d+\]/, '[' + newIndex + ']');
+
+                                // Handle ItemSpecs_ format: ItemSpecs_0_101_1 -> ItemSpecs_1_101_1
+                                // Only replace the first number after ItemSpecs_
+                                if (this.name.startsWith('ItemSpecs_')) {
+                                    this.name = this.name.replace(/^ItemSpecs_\d+_/, 'ItemSpecs_' + newIndex + '_');
+                                }
                             }
                             const dataIndex = $(this).data('index');
                             if (dataIndex !== undefined) {

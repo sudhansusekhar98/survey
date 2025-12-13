@@ -1,4 +1,6 @@
-﻿namespace SurveyApp.Models
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace SurveyApp.Models
 {
     public class SurveyDetailsUpdate
     {
@@ -13,6 +15,9 @@
         // For Cloudinary image uploads
         public List<string>? ImageUrls { get; set; }
         public List<string>? ImagePublicIds { get; set; }
+
+        // Note: Pole specifications (owner, height) are now managed through the
+        // ItemSpecificationMaster system and loaded dynamically via JavaScript
     }
 
     public class SurveyDetailsUpdatelist
@@ -40,5 +45,12 @@
         
         // Camera remarks JSON (for ItemID = 100)
         public string? CameraRemarksJson { get; set; }
+        
+        // Pole-specific fields
+        public string? PoleOwner { get; set; } // Telecom, Electrical, Municipality
+        public string? PoleHeight { get; set; } // 4m, 5m, 6.5m
+        
+        // Road width for ALPR and Gantry
+        public string? RoadWidth { get; set; }
     }
 }

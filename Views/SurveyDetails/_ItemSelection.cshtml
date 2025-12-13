@@ -55,10 +55,12 @@
 </script>
 
 <div id="item-form-template" style="display: none;">
-    <div class="col-12 item-form-instance" data-item-id="{itemId}" data-item-id-container="{index}">
-        <input type="hidden" name="ItemLists[{index}].ItemID" value="{itemId}" class="item-id-field" data-index="{index}" />
+    <div class="col-12 item-form-instance" data-item-id="{itemId}" data-item-code="{itemCode}"
+        data-item-id-container="{index}">
+        <input type="hidden" name="ItemLists[{index}].ItemID" value="{itemId}" class="item-id-field"
+            data-index="{index}" />
         <input type="hidden" name="ItemLists[{index}].ItemName" value="{itemName}" />
-        <input type="hidden" name="ItemLists[{index}].ItemCode" value="{itemCode}" />
+        <input type="hidden" name="ItemLists[{index}].ItemCode" value="{itemCode}" class="item-code-field" />
         <input type="hidden" class="is-camera-item" data-index="{index}" value="{isCamera}" />
         <input type="hidden" class="camera-remarks-json" name="ItemLists[{index}].CameraRemarksJson"
             data-item-index="{index}" value="{cameraRemarksJson}" />
@@ -108,17 +110,32 @@
 
                 <!-- Expandable section shown when either quantity > 0 -->
                 <div class="cam-extra-section mt-3 pt-3 border-top" style="display: none;">
-                    <div class="mb-3">
+
+                    <!-- Dynamic Item Specifications Section (Pole Owner, Height, Road Width, etc.) -->
+                    <!-- Loaded from ItemSpecificationMaster and ItemSpecificationOptionsMaster tables -->
+                    <div class="item-specifications-section mb-3" data-item-id="{itemId}" data-item-index="{index}">
+                        <div class="row g-3 specifications-container">
+                            <!-- Specifications will be dynamically loaded here via JavaScript -->
+                            <div class="col-12 specifications-loading text-center py-2 d-none">
+                                <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                <span class="text-muted small">Loading specifications...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image capture section (shown only for Camera, Rack, Infrastructure, Public Announcement) -->
+                    <div class="image-capture-section mb-3" data-item-index="{index}" style="display: none;">
                         <label class="form-label fw-semibold">
                             <i class="bi bi-camera me-1"></i>Images
                         </label>
                         <input type="file" class="form-control mb-2 cam-upload-input" multiple accept="image/*"
                             style="display:none;" />
                         <div class="d-flex flex-column flex-sm-row gap-2 mb-2">
-                            <button type="button" class="btn btn-primary btn-sm cam-take-photo-btn">
-                                <i class="bi bi-camera me-1"></i> Take Photo
+                            <button type="button" class="btn btn-success btn-lg cam-take-photo-btn shadow"
+                                style="background: linear-gradient(135deg, #28a745, #20c997); border: none;">
+                                <i class="bi bi-camera-fill me-1"></i> Take Photo
                             </button>
-                            <button type="button" class="btn btn-secondary btn-sm cam-gallery-btn">
+                            <button type="button" class="btn btn-primary btn-sm cam-gallery-btn">
                                 <i class="bi bi-images me-1"></i> Gallery
                             </button>
                         </div>
@@ -150,3 +167,263 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Dynamic Item Specifications Handler
+    (function () {
+        'use strict';
+
+        const specConfig = {
+            getSpecificationsUrl: '@Url.Action("GetItemSpecifications", "SurveyDetails")',
+            getSpecificationDetailsUrl: '@Url.Action("GetSpecificationDetails", "SurveyDetails")',
+            surveyId: @Model.SurveyID,
+            locId: @Model.LocID
+    };
+
+        // Cache for loaded specifications
+        const specsCache = {};
+
+        /**
+         * Load specifications for an item and render them
+         */
+        async function loadItemSpecifications(container) {
+            const itemId = parseInt(container.dataset.itemId);
+            const itemIndex = container.dataset.itemIndex;
+
+            if (!itemId || itemId <= 0) {
+                console.log('No valid itemId for specifications');
+                return;
+            }
+
+            const specsContainer = container.querySelector('.specifications-container');
+            const loadingEl = container.querySelector('.specifications-loading');
+
+            // Show loading
+            if (loadingEl) loadingEl.classList.remove('d-none');
+
+            try {
+                // Fetch specifications (with options included)
+                let specifications = specsCache[itemId];
+                if (!specifications) {
+                    const response = await fetch(`${specConfig.getSpecificationsUrl}?itemId=${itemId}`);
+                    const data = await response.json();
+
+                    if (data.success && data.specifications) {
+                        specifications = data.specifications;
+                        specsCache[itemId] = specifications;
+                    }
+                }
+
+                if (!specifications || specifications.length === 0) {
+                    // No specifications for this item
+                    if (loadingEl) loadingEl.classList.add('d-none');
+                    return;
+                }
+
+                // Try to load saved values
+                let savedDetails = [];
+                try {
+                    const detailsResponse = await fetch(
+                        `${specConfig.getSpecificationDetailsUrl}?surveyId=${specConfig.surveyId}&locId=${specConfig.locId}&itemId=${itemId}`
+                    );
+                    const detailsData = await detailsResponse.json();
+                    if (detailsData.success && detailsData.specifications) {
+                        savedDetails = detailsData.specifications;
+                    }
+                } catch (e) {
+                    console.log('Could not load saved specification details:', e);
+                }
+
+                // Get quantities for conditional display
+                const card = container.closest('.card');
+                const existQty = parseInt(card?.querySelector('.cam-qty-exist')?.value || 0);
+                const reqQty = parseInt(card?.querySelector('.cam-qty-req')?.value || 0);
+
+                // Render specifications
+                renderSpecifications(specsContainer, specifications, savedDetails, itemIndex, existQty, reqQty);
+
+            } catch (error) {
+                console.error('Error loading specifications:', error);
+            } finally {
+                if (loadingEl) loadingEl.classList.add('d-none');
+            }
+        }
+
+        /**
+         * Render specifications based on conditional display rules
+         */
+        function renderSpecifications(container, specifications, savedDetails, itemIndex, existQty, reqQty) {
+            // Clear existing specifications (except loading indicator)
+            const existingSpecs = container.querySelectorAll('.specification-field');
+            existingSpecs.forEach(el => el.remove());
+
+            specifications.forEach(spec => {
+                // Check conditional display
+                if (!shouldShowSpecification(spec, existQty, reqQty)) {
+                    return; // Skip this specification
+                }
+
+                // Determine number of instances to show
+                const instanceCount = getInstanceCount(spec, existQty, reqQty);
+
+                for (let instance = 1; instance <= instanceCount; instance++) {
+                    const savedValue = getSavedValue(savedDetails, spec.specificationID, instance);
+                    const fieldHtml = createSpecificationField(spec, itemIndex, instance, instanceCount, savedValue);
+                    container.insertAdjacentHTML('beforeend', fieldHtml);
+                }
+            });
+        }
+
+        /**
+         * Check if specification should be shown based on conditional display rule
+         */
+        function shouldShowSpecification(spec, existQty, reqQty) {
+            const rule = (spec.conditionalDisplay || 'Always').toLowerCase();
+
+            switch (rule) {
+                case 'existingqtyonly':
+                    return existQty > 0;
+                case 'requiredqtyonly':
+                    return reqQty > 0;
+                case 'bothqty':
+                    return existQty > 0 || reqQty > 0;
+                case 'always':
+                default:
+                    return true;
+            }
+        }
+
+        /**
+         * Get number of instances to show
+         */
+        function getInstanceCount(spec, existQty, reqQty) {
+            if (!spec.allowMultipleInstances) {
+                return 1;
+            }
+
+            const rule = (spec.conditionalDisplay || 'Always').toLowerCase();
+
+            switch (rule) {
+                case 'existingqtyonly':
+                    return existQty;
+                case 'requiredqtyonly':
+                    return reqQty;
+                case 'bothqty':
+                    return Math.max(existQty, reqQty);
+                default:
+                    return 1;
+            }
+        }
+
+        /**
+         * Get saved value for a specification instance
+         */
+        function getSavedValue(savedDetails, specId, instance) {
+            const saved = savedDetails.find(s =>
+                s.specificationID === specId &&
+                (s.instanceNumber || 1) === instance
+            );
+            return saved?.specificationDetails || '';
+        }
+
+        /**
+         * Create HTML for a specification field
+         */
+        function createSpecificationField(spec, itemIndex, instance, totalInstances, savedValue) {
+            const fieldId = `spec_${itemIndex}_${spec.specificationID}_${instance}`;
+            const fieldName = `ItemSpecs_${itemIndex}_${spec.specificationID}_${instance}`;
+            const label = totalInstances > 1 ? `${spec.specificationName} #${instance}` : spec.specificationName;
+
+            let inputHtml = '';
+
+            if (spec.inputType?.toLowerCase() === 'dropdown' && spec.optionsList && spec.optionsList.length > 0) {
+                // Dropdown with options from database
+                const optionsHtml = spec.optionsList.map(opt =>
+                    `<option value="${escapeHtml(opt.optionValue)}" ${savedValue === opt.optionValue ? 'selected' : ''}>${escapeHtml(opt.optionText)}</option>`
+                ).join('');
+
+                inputHtml = `
+                <select id="${fieldId}" name="${fieldName}" class="form-select spec-input" 
+                        data-spec-id="${spec.specificationID}" data-instance="${instance}">
+                    <option value="">-- Select ${spec.specificationName} --</option>
+                    ${optionsHtml}
+                </select>`;
+            } else {
+                // Text input
+                inputHtml = `
+                <input type="text" id="${fieldId}" name="${fieldName}" class="form-control spec-input"
+                       data-spec-id="${spec.specificationID}" data-instance="${instance}"
+                       placeholder="Enter ${spec.specificationName}..." value="${escapeHtml(savedValue)}" />`;
+            }
+
+            return `
+            <div class="col-12 col-md-6 specification-field" data-spec-id="${spec.specificationID}" data-instance="${instance}">
+                <label class="form-label fw-semibold text-info" for="${fieldId}">
+                    <i class="bi bi-${getIconForSpec(spec.specificationName)} me-1"></i>${escapeHtml(label)}
+                </label>
+                ${inputHtml}
+            </div>`;
+        }
+
+        /**
+         * Get Bootstrap icon for specification name
+         */
+        function getIconForSpec(name) {
+            const lowerName = (name || '').toLowerCase();
+            if (lowerName.includes('owner')) return 'building';
+            if (lowerName.includes('height')) return 'arrows-vertical';
+            if (lowerName.includes('width') || lowerName.includes('road')) return 'signpost-2';
+            return 'list-check';
+        }
+
+        /**
+         * Escape HTML to prevent XSS
+         */
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
+        }
+
+        /**
+         * Initialize specifications for all visible items
+         */
+        function initializeAllSpecifications() {
+            document.querySelectorAll('.item-specifications-section').forEach(section => {
+                loadItemSpecifications(section);
+            });
+        }
+
+        /**
+         * Setup quantity change listeners to reload specifications
+         */
+        function setupQuantityChangeListeners() {
+            document.addEventListener('change', function (e) {
+                if (e.target.classList.contains('cam-qty-input')) {
+                    const card = e.target.closest('.card');
+                    if (card) {
+                        const specSection = card.querySelector('.item-specifications-section');
+                        if (specSection) {
+                            loadItemSpecifications(specSection);
+                        }
+                    }
+                }
+            });
+        }
+
+        // Expose function globally for dynamic item addition
+        window.loadItemSpecifications = loadItemSpecifications;
+        window.initializeAllSpecifications = initializeAllSpecifications;
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function () {
+                initializeAllSpecifications();
+                setupQuantityChangeListeners();
+            });
+        } else {
+            initializeAllSpecifications();
+            setupQuantityChangeListeners();
+        }
+    })();
+</script>

@@ -685,7 +685,28 @@ style.innerHTML = `
 `;
 document.head.appendChild(style);
 
-document.getElementById('cameraDevicesForm').addEventListener('submit', function(e) {
+document.getElementById('cameraDevicesForm').addEventListener('submit', async function(e) {
+    e.preventDefault(); // Prevent default form submission
+    
+    const form = this;
+    const formData = new FormData(form);
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnHtml = submitBtn.innerHTML;
+    
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
+    
+    // First, save all item specifications if any
+    if (typeof saveAllSpecifications === 'function') {
+        try {
+            await saveAllSpecifications();
+        } catch (specError) {
+            console.error('Error saving specifications:', specError);
+            // Continue with main form submission even if specs fail
+        }
+    }
+    
     let warningMessage = '';
     const items = document.querySelectorAll('.card.shadow-sm'); // Each item is in a card
 
@@ -706,5 +727,65 @@ document.getElementById('cameraDevicesForm').addEventListener('submit', function
     if (warningMessage) {
         alert("Potential Data Length Issue\n--------------------------------\n" + warningMessage);
     }
+    
+    // Submit via AJAX
+    fetch(form.action, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message and redirect back to SurveyDetails
+            const surveyId = document.querySelector('input[name="SurveyID"]').value;
+            const locId = document.querySelector('input[name="LocID"]').value;
+            
+            // Use SweetAlert if available, otherwise fallback to alert
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: data.message || 'Survey details saved successfully.',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    // Redirect to SurveyDetails page to see updated status
+                    window.location.href = `/SurveyDetails/Index?surveyId=${surveyId}&locId=${locId}`;
+                });
+            } else {
+                alert(data.message || 'Survey details saved successfully.');
+                window.location.href = `/SurveyDetails/Index?surveyId=${surveyId}&locId=${locId}`;
+            }
+        } else {
+            // Show error message
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: data.message || 'Failed to save survey details.'
+                });
+            } else {
+                alert(data.message || 'Failed to save survey details.');
+            }
+            // Re-enable button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnHtml;
+        }
+    })
+    .catch(error => {
+        console.error('Error submitting form:', error);
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'An error occurred while saving. Please try again.'
+            });
+        } else {
+            alert('An error occurred while saving. Please try again.');
+        }
+        // Re-enable button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
+    });
 });
 

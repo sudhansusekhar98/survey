@@ -47,6 +47,9 @@ namespace SurveyApp.Repo
 
         bool MarkLocationAsCompleted(Int64 surveyId, int locId, int userId);
         
+        // Global cable count for location
+        void SaveGlobalCableCount(Int64 surveyId, int locId, string cableCount, string remarks, int userId);
+        
         // Survey Submission Methods
         bool SubmitSurvey(Int64 surveyId, int userId);
         bool WithdrawSubmission(Int64 surveyId);
@@ -57,5 +60,26 @@ namespace SurveyApp.Repo
         SurveyCompletionStatus CheckSurveyCompletionStatus(Int64 surveyId);
 
         DataTable GetSurveyDetails(long surveyId, int spType);
+        
+        // Item Specification Methods
+        /// <summary>
+        /// Get all specifications defined for a specific item
+        /// </summary>
+        List<ItemSpecificationModel> GetItemSpecifications(int itemId);
+        
+        /// <summary>
+        /// Get saved specification details for a specific survey/location/item combination
+        /// </summary>
+        List<SpecificationDetailsModel> GetSpecificationDetails(long surveyId, int locId, int itemId);
+        
+        /// <summary>
+        /// Save or update specification details for a survey item
+        /// </summary>
+        bool SaveSpecificationDetails(SpecificationDetailsSubmitModel model, int userId);
+        
+        /// <summary>
+        /// Get dropdown options for a specification from database
+        /// </summary>
+        List<SpecificationOptionModel> GetSpecificationOptions(int specificationId);
     }
 }

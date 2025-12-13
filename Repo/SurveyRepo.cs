@@ -1222,7 +1222,249 @@ namespace SurveyApp.Repo
         throw;
     }
 }
+
+        public void SaveGlobalCableCount(Int64 surveyId, int locId, string cableCount, string remarks, int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                // Save the global cable count for the location
+                // This inserts or updates the cable count record for the survey location
+                using var cmd = new SqlCommand(@"
+                    IF EXISTS (SELECT 1 FROM SurveyLocationCableCount WHERE SurveyID = @SurveyID AND LocID = @LocID)
+                    BEGIN
+                        UPDATE SurveyLocationCableCount 
+                        SET CableCount = @CableCount, Remarks = @Remarks, ModifiedBy = @UserId, ModifiedDate = GETDATE()
+                        WHERE SurveyID = @SurveyID AND LocID = @LocID
+                    END
+                    ELSE
+                    BEGIN
+                        INSERT INTO SurveyLocationCableCount (SurveyID, LocID, CableCount, Remarks, CreatedBy, CreatedDate)
+                        VALUES (@SurveyID, @LocID, @CableCount, @Remarks, @UserId, GETDATE())
+                    END
+                ", con);
+
+                cmd.Parameters.AddWithValue("@SurveyID", surveyId);
+                cmd.Parameters.AddWithValue("@LocID", locId);
+                cmd.Parameters.AddWithValue("@CableCount", string.IsNullOrEmpty(cableCount) ? DBNull.Value : cableCount);
+                cmd.Parameters.AddWithValue("@Remarks", string.IsNullOrEmpty(remarks) ? DBNull.Value : remarks);
+                cmd.Parameters.AddWithValue("@UserId", userId);
+
+                con.Open();
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception but don't throw - cable count is supplementary data
+                Console.WriteLine($"Error saving global cable count: {ex.Message}");
+            }
+        }
+
+        // Get all specifications defined for a specific item from ItemSpecificationMaster
+        // Also fetches dropdown options from ItemSpecificationOptionsMaster for each specification
+        public List<ItemSpecificationModel> GetItemSpecifications(int itemId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                
+                // First, get the specifications (Options column removed - options are in separate table)
+                using var cmd = new SqlCommand(@"
+                    SELECT ItemId, SpecificationID, SpecificationName, InputType, 
+                           ConditionalDisplay, AllowMultipleInstances
+                    FROM ItemSpecificationMaster
+                    WHERE ItemId = @ItemId
+                    ORDER BY SpecificationID
+                ", con);
+
+                cmd.Parameters.AddWithValue("@ItemId", itemId);
+
+                con.Open();
+                using var adapter = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                adapter.Fill(dt);
+
+                var specifications = SqlDbHelper.DataTableToList<ItemSpecificationModel>(dt);
+                
+                // For each specification with InputType = 'dropdown', fetch options from ItemSpecificationOptionsMaster
+                foreach (var spec in specifications)
+                {
+                    if (spec.InputType?.ToLower() == "dropdown")
+                    {
+                        var options = GetSpecificationOptions(spec.SpecificationID);
+                        if (options.Count > 0)
+                        {
+                            // Create a list of option objects for JSON serialization
+                            spec.OptionsList = options;
+                        }
+                    }
+                }
+                
+                return specifications;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching item specifications: {ex.Message}");
+                return new List<ItemSpecificationModel>();
+            }
+        }
+
+        /// <summary>
+        /// Get saved specification details for a specific survey/location/item combination
+        /// </summary>
+        public List<SpecificationDetailsModel> GetSpecificationDetails(long surveyId, int locId, int itemId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand(@"
+                    SELECT 
+                        sd.SurveyID, 
+                        sd.LocID, 
+                        sd.ItemID, 
+                        sd.SpecificationID, 
+                        sd.SpecificationDetails,
+                        sm.SpecificationName
+                    FROM SpecificationDetailsMaster sd
+                    LEFT JOIN ItemSpecificationMaster sm 
+                        ON sd.ItemID = sm.ItemId AND sd.SpecificationID = sm.SpecificationID
+                    WHERE sd.SurveyID = @SurveyID 
+                      AND sd.LocID = @LocID 
+                      AND sd.ItemID = @ItemID
+                    ORDER BY sd.SpecificationID
+                ", con);
+
+                cmd.Parameters.AddWithValue("@SurveyID", surveyId);
+                cmd.Parameters.AddWithValue("@LocID", locId);
+                cmd.Parameters.AddWithValue("@ItemID", itemId);
+
+                con.Open();
+                using var adapter = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                adapter.Fill(dt);
+
+                return SqlDbHelper.DataTableToList<SpecificationDetailsModel>(dt);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching specification details: {ex.Message}");
+                return new List<SpecificationDetailsModel>();
+            }
+        }
+
+        /// <summary>
+        /// Save or update specification details for a survey item
+        /// Uses stored procedure SpSaveSpecificationDetails for proper insert/update with InstanceNumber
+        /// </summary>
+        public bool SaveSpecificationDetails(SpecificationDetailsSubmitModel model, int userId)
+        {
+            Console.WriteLine($"[SurveyRepo] SaveSpecificationDetails - SurveyID: {model.SurveyID}, LocID: {model.LocID}, ItemID: {model.ItemID}");
+            
+            if (model.Specifications == null || model.Specifications.Count == 0)
+            {
+                Console.WriteLine("[SurveyRepo] No specifications to save");
+                return true; // Nothing to save
+            }
+
+            Console.WriteLine($"[SurveyRepo] Saving {model.Specifications.Count} specifications");
+
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                con.Open();
+                Console.WriteLine("[SurveyRepo] Database connection opened");
+
+                using var transaction = con.BeginTransaction();
+                try
+                {
+                    int savedCount = 0;
+                    foreach (var spec in model.Specifications)
+                    {
+                        // Extract instance number from spec if available, default to 1
+                        int instanceNumber = spec.InstanceNumber > 0 ? spec.InstanceNumber : 1;
+                        
+                        Console.WriteLine($"[SurveyRepo] Saving spec: SpecID={spec.SpecificationID}, Instance={instanceNumber}, Value={spec.SpecificationDetails}");
+                        
+                        // Use stored procedure for save/update
+                        using var cmd = new SqlCommand("SpSaveSpecificationDetails", con, transaction);
+                        cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                        cmd.Parameters.AddWithValue("@SurveyID", model.SurveyID);
+                        cmd.Parameters.AddWithValue("@LocID", model.LocID);
+                        cmd.Parameters.AddWithValue("@ItemID", model.ItemID);
+                        cmd.Parameters.AddWithValue("@SpecificationID", spec.SpecificationID);
+                        cmd.Parameters.AddWithValue("@InstanceNumber", instanceNumber);
+                        cmd.Parameters.AddWithValue("@SpecificationDetails", 
+                            string.IsNullOrEmpty(spec.SpecificationDetails) ? (object)DBNull.Value : spec.SpecificationDetails);
+
+                        using var reader = cmd.ExecuteReader();
+                        if (reader.Read())
+                        {
+                            int success = reader.GetInt32(0);
+                            string message = reader.GetString(1);
+                            
+                            if (success == 1)
+                            {
+                                Console.WriteLine($"[SurveyRepo] Success: {message}");
+                                savedCount++;
+                            }
+                            else
+                            {
+                                Console.WriteLine($"[SurveyRepo] Error: {message}");
+                                throw new Exception(message);
+                            }
+                        }
+                    }
+
+                    transaction.Commit();
+                    Console.WriteLine($"[SurveyRepo] Transaction committed. Total saved: {savedCount}");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[SurveyRepo] Transaction error: {ex.Message}");
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SurveyRepo] Error saving specification details: {ex.Message}");
+                Console.WriteLine($"[SurveyRepo] Stack trace: {ex.StackTrace}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Get dropdown options for a specification from ItemSpecificationOptionsMaster
+        /// </summary>
+        public List<SpecificationOptionModel> GetSpecificationOptions(int specificationId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand(@"
+                    SELECT OptionID, SpecificationID, OptionValue, OptionText, DisplayOrder, IsActive
+                    FROM ItemSpecificationOptionsMaster
+                    WHERE SpecificationID = @SpecificationID
+                      AND IsActive = 1
+                    ORDER BY DisplayOrder, OptionText
+                ", con);
+
+                cmd.Parameters.AddWithValue("@SpecificationID", specificationId);
+
+                con.Open();
+                using var adapter = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                adapter.Fill(dt);
+
+                return SqlDbHelper.DataTableToList<SpecificationOptionModel>(dt);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching specification options: {ex.Message}");
+                return new List<SpecificationOptionModel>();
+            }
+        }
     }
 }
-
-

@@ -3,20 +3,32 @@
 @* Custom Styles for this View *@
 <style>
     :root {
-        --app-purple: #6f42c1; /* Adjust to match your exact brand purple */
+        --app-purple: #6f42c1;
+        /* Adjust to match your exact brand purple */
         --app-purple-light: #f3e8ff;
     }
-    .bg-purple { background-color: var(--app-purple) !important; }
-    .text-purple { color: var(--app-purple) !important; }
-    .border-purple { border-color: var(--app-purple) !important; }
-    
+
+    .bg-purple {
+        background-color: var(--app-purple) !important;
+    }
+
+    .text-purple {
+        color: var(--app-purple) !important;
+    }
+
+    .border-purple {
+        border-color: var(--app-purple) !important;
+    }
+
     .hover-lift {
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
+
     .hover-lift:hover {
         transform: translateY(-3px);
-        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
     }
+
     .stat-box {
         background-color: #f8f9fa;
         border-radius: 8px;
@@ -24,11 +36,13 @@
         text-align: center;
         border: 1px solid #e9ecef;
     }
+
     .stat-box.required {
         background-color: #d1e7dd;
         border-color: #badbcc;
         color: #0f5132;
     }
+
     .img-wrapper {
         position: relative;
         overflow: hidden;
@@ -39,26 +53,27 @@
     .swal2-container {
         z-index: 999999 !important;
     }
-    
+
     .swal2-popup {
         z-index: 999999 !important;
     }
 
     /* Mobile Optimizations */
     @@media (max-width: 767.98px) {
+
         /* Reduce card margins and padding */
         .card {
             margin-bottom: 1rem !important;
         }
-        
+
         .card-body {
             padding: 1rem !important;
         }
-        
+
         .card-header {
             padding: 0.75rem 1rem !important;
         }
-        
+
         /* Optimize summary card */
         .border-end-md {
             border-right: none !important;
@@ -66,74 +81,74 @@
             margin-bottom: 1rem;
             border-bottom: 1px solid #dee2e6;
         }
-        
+
         /* Section headers */
         .bg-purple.p-3 {
             padding: 0.75rem !important;
         }
-        
+
         .display-6 {
             font-size: 1.5rem !important;
         }
-        
+
         /* Image optimization */
         .img-wrapper img {
             height: 100px !important;
         }
-        
+
         /* Stat boxes */
         .stat-box {
             padding: 10px 6px !important;
         }
-        
+
         .stat-box .fs-5 {
             font-size: 1.1rem !important;
         }
-        
+
         /* Alert boxes */
         .alert {
             padding: 1rem !important;
             font-size: 0.9rem;
         }
-        
+
         .alert .fs-4 {
             font-size: 1.2rem !important;
         }
-        
+
         /* Typography adjustments */
         h5 {
             font-size: 1.1rem !important;
         }
-        
+
         h6 {
             font-size: 0.95rem !important;
         }
-        
+
         /* Spacing adjustments */
         .mb-5 {
             margin-bottom: 2rem !important;
         }
-        
+
         .mb-4 {
             margin-bottom: 1.5rem !important;
         }
-        
+
         /* Grid gap */
         .g-3 {
             gap: 0.75rem !important;
         }
-        
+
         .g-2 {
             gap: 0.5rem !important;
         }
-        
+
         /* Image gallery - single column on mobile */
-        .row.g-2 > div[class*="col-6"] {
+        .row.g-2>div[class*="col-6"] {
             flex: 0 0 50%;
             max-width: 50%;
         }
     }
-    
+
     /* Ensure cards are full width on mobile */
     @@media (max-width: 767.98px) {
         .col-md-6.col-lg-4 {
@@ -147,7 +162,7 @@
 {
     var firstItem = Model.FirstOrDefault();
     @* Top Summary Card *@
-    <div class="card border-0 shadow-sm mb-3 mb-md-4 border-start border-5 border-purple">
+        <div class="card border-0 shadow-sm mb-3 mb-md-4 border-start border-5 border-purple">
         <div class="card-body py-2 py-md-3">
             <div class="row align-items-center">
                 <div class="col-md-6 border-end-md">
@@ -166,13 +181,13 @@
         </div>
     </div>
 
-    <hr class="my-4 text-muted opacity-25"/>
+    <hr class="my-4 text-muted opacity-25" />
 
     @foreach (var typeGroup in Model)
     {
         <div class="mb-5">
             @* Section Header *@
-            <div class="d-flex align-items-center bg-purple p-2 p-md-3 rounded shadow-sm mb-3">
+                    <div class="d-flex align-items-center bg-purple p-2 p-md-3 rounded shadow-sm mb-3">
                 <div class="display-6 me-2 me-md-3 text-white"><i class="bi bi-cpu"></i></div>
                 <div class="flex-grow-1">
                     <h5 class="mb-0 fw-bold text-white">@typeGroup.TypeName</h5>
@@ -191,7 +206,7 @@
                         <div class="col-12 col-md-6 col-lg-4">
                             <div class="card h-100 shadow-sm border-0 hover-lift">
                                 @* Card Header *@
-                                <div class="card-header bg-purple py-2 py-md-3 d-flex justify-content-between align-items-center mb-2">
+                                                <div class="card-header bg-purple py-2 py-md-3 d-flex justify-content-between align-items-center mb-2">
                                     <h6 class="mb-0 fw-bold text-white text-truncate flex-grow-1 me-2" title="@item.ItemName">
                                         @item.ItemName
                                     </h6>
@@ -200,28 +215,27 @@
 
                                 <div class="card-body">
                                     @* Image Section *@
-                                    <div class="mb-3">
+                                                    <div class="mb-3">
                                         @if (!string.IsNullOrWhiteSpace(item.ImgPath))
                                         {
                                             var imagePaths = item.ImgPath.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                                            var imageIds = item.ImgID?.Split(',', StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
-                                            
+                                            var imageIds = item.ImgID?.Split(',', StringSplitOptions.RemoveEmptyEntries) ??
+                                            Array.Empty<string>();
+
                                             <div class="d-flex align-items-center mb-2">
                                                 <i class="bi bi-camera text-muted me-2"></i>
                                                 <span class="text-muted small fw-bold">Photos (@imagePaths.Length)</span>
                                             </div>
-                                            
+
                                             <div class="row g-2">
                                                 @for (int i = 0; i < imagePaths.Length; i++)
                                                 {
                                                     <div class="col-6">
                                                         <div class="img-wrapper border">
-                                                            <img src="@imagePaths[i].Trim()" 
-                                                                 alt="Item @item.ItemName" 
-                                                                 class="img-fluid w-100"
-                                                                 style="height: 120px; object-fit: cover; cursor: pointer;"
-                                                                 onerror="this.src='/img/elements/Noimage.png'"
-                                                                 onclick="window.open(this.src, '_blank')" />
+                                                            <img src="@imagePaths[i].Trim()" alt="Item @item.ItemName" class="img-fluid w-100"
+                                                                style="height: 120px; object-fit: cover; cursor: pointer;"
+                                                                onerror="this.src='/img/elements/Noimage.png'"
+                                                                onclick="window.open(this.src, '_blank')" />
                                                         </div>
                                                     </div>
                                                 }
@@ -230,32 +244,33 @@
                                         else
                                         {
                                             <div class="bg-light rounded p-4 text-center border border-dashed">
-                                                <img src="~/img/elements/Noimage.png" 
-                                                     class="opacity-25 mb-2" 
-                                                     style="width: 40px; height: auto;" />
+                                                <img src="~/img/elements/Noimage.png" class="opacity-25 mb-2"
+                                                    style="width: 40px; height: auto;" />
                                                 <p class="text-muted small mb-0">No images captured</p>
                                             </div>
                                         }
                                     </div>
 
                                     @* Statistics / Quantities *@
-                                    <div class="row g-2 mb-3">
+                                                    <div class="row g-2 mb-3">
                                         <div class="col-6">
                                             <div class="stat-box">
-                                                <div class="small text-muted text-uppercase fw-bold" style="font-size: 0.6rem; letter-spacing: 0.5px;">Existing</div>
+                                                <div class="small text-muted text-uppercase fw-bold"
+                                                    style="font-size: 0.6rem; letter-spacing: 0.5px;">Existing</div>
                                                 <div class="fs-5 fw-bold text-dark mt-1">@item.ItemQtyExist</div>
                                             </div>
                                         </div>
                                         <div class="col-6">
                                             <div class="stat-box required">
-                                                <div class="small text-uppercase fw-bold" style="font-size: 0.6rem; letter-spacing: 0.5px;">Required</div>
+                                                <div class="small text-uppercase fw-bold"
+                                                    style="font-size: 0.6rem; letter-spacing: 0.5px;">Required</div>
                                                 <div class="fs-5 fw-bold mt-1">@item.ItemQtyReq</div>
                                             </div>
                                         </div>
                                     </div>
 
                                     @* Remarks Section *@
-                                    @if (!string.IsNullOrWhiteSpace(item.Remarks))
+                                                    @if (!string.IsNullOrWhiteSpace(item.Remarks))
                                     {
                                         <div class="bg-light p-2 rounded border">
                                             <div class="d-flex text-muted small mb-1">
@@ -280,6 +295,38 @@
             }
         </div>
     }
+
+    <!-- Global Cable Count Section -->
+    <div class="card shadow-sm border-warning mb-4">
+        <div class="card-header bg-warning text-dark py-2">
+            <h6 class="mb-0 fw-bold">
+                <i class="bi bi-ethernet me-2"></i>Global Cable Count
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-12">
+                    <p class="text-muted small mb-2">
+                        Enter the total cable length required for this location (in meters)
+                    </p>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-diagram-3 me-1"></i>Cable Length (meters)
+                    </label>
+                    <input type="number" id="globalCableCount" class="form-control"
+                        placeholder="Enter total cable length..." min="0" step="0.5" />
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-card-text me-1"></i>Cable Remarks
+                    </label>
+                    <input type="text" id="globalCableRemarks" class="form-control"
+                        placeholder="Enter cable specifications or notes..." />
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="alert alert-info shadow-sm border-0 d-flex align-items-start mt-4 mt-md-5">
         <i class="bi bi-info-circle-fill fs-5 fs-md-4 me-2 me-md-3 mt-1"></i>

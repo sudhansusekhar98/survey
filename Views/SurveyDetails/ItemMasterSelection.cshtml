@@ -20,6 +20,10 @@
 	ViewData["Title"] = pageTitle;
 }
 
+@section VendorStyles {
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+}
+
 @section PageStyles {
 	<style>
 		/* Prevent horizontal overflow */
@@ -234,6 +238,24 @@
 			object-fit: contain;
 			/* ensures full image fits without cropping */
 		}
+
+		/* Pulse animation for capture button */
+		@@keyframes pulse {
+			0% {
+				transform: scale(1);
+				box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+			}
+
+			50% {
+				transform: scale(1.02);
+				box-shadow: 0 0 20px 10px rgba(40, 167, 69, 0);
+			}
+
+			100% {
+				transform: scale(1);
+				box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+			}
+		}
 	</style>
 }
 
@@ -363,76 +385,108 @@
 												<!-- Expandable section shown when either quantity > 0 -->
 												<div class="cam-extra-section mt-2 mt-md-3 pt-2 pt-md-3 border-top"
 													style="display:@((item.ItemQtyExist > 0 || item.ItemQtyReq > 0) ? "block" : "none");">
-													<div class="mb-3">
-														<label class="form-label fw-semibold">
-															<i class="bi bi-camera me-1"></i>Images
-														</label>
-														<input type="file" class="form-control mb-2 cam-upload-input" multiple
-															accept="image/*" style="display:none;" />
-														<div class="d-flex flex-column flex-sm-row gap-2 mb-2">
-															<button type="button"
-																class="btn btn-primary btn-sm cam-take-photo-btn">
-																<i class="bi bi-camera me-1"></i> Take Photo
-															</button>
-															<button type="button"
-																class="btn btn-secondary btn-sm cam-gallery-btn">
-																<i class="bi bi-images me-1"></i> Gallery
-															</button>
-														</div>
-														<div class="cam-preview mt-2 d-flex flex-wrap" data-item-index="@i">
-															@if (!string.IsNullOrEmpty(item.ImgPath))
-															{
-																var imageUrls = item.ImgPath.Split(new[] { ',' },
-																StringSplitOptions.RemoveEmptyEntries);
-																var publicIds = (!string.IsNullOrEmpty(item.ImgID) ? item.ImgID :
-																"").Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-																for (int imgIdx = 0; imgIdx < imageUrls.Length; imgIdx++)
-																{
-																	var imgUrl = imageUrls[imgIdx].Trim();
-																	var publicId = imgIdx < publicIds.Length ? publicIds[imgIdx].Trim()
-																	: "";
+													@{
+														var itemCodeUpper = (item.ItemCode ?? "").ToUpper();
+														var itemNameUpper = (item.ItemName ?? "").ToUpper();
+														var isPoleItem = itemCodeUpper.Contains("POLE") ||
+														itemNameUpper.Contains("POLE");
+														var isAlprOrGantry = itemCodeUpper.Contains("ALPR") ||
+														itemCodeUpper.Contains("GANTRY") ||
+														itemNameUpper.Contains("ALPR") || itemNameUpper.Contains("GANTRY");
+														var captureTypes = new[] { "CAM", "RACK", "INFRA", "PUBLIC", "ANNOUNCEMENT",
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																"PA" };
+														var shouldShowCapture = captureTypes.Any(t => itemCodeUpper.Contains(t) ||
+														itemNameUpper.Contains(t));
+													}
 
-																	@* <div class="cam-preview-wrapper position-relative d-inline-block" data-public-id="@publicId">
-																<img src="@imgUrl" class="cam-preview-img" alt="Survey image" />
-																<input type="hidden" name="ItemLists[@i].CloudinaryUrls" value="@imgUrl" />
-																<input type="hidden" name="ItemLists[@i].CloudinaryPublicIds" value="@publicId" />
-																<button type="button" class="btn btn-sm btn-info position-absolute cam-preview-btn" data-url="@imgUrl" style="top: 1px; right: 10px;">
-																	<i class="bi bi-eye"></i>
-																</button>
-																<button type="button" class="btn btn-sm btn-danger position-absolute cam-delete-existing" data-public-id="@publicId">
-																	<i class="bi bi-x"></i>
-																</button>
-															</div> *@
-
-																	<div class="cam-preview-wrapper position-relative d-inline-block"
-																		data-public-id="@publicId">
-																		<img src="@imgUrl" class="cam-preview-img" alt="Survey image" />
-																		<input type="hidden" name="ItemLists[@i].CloudinaryUrls"
-																			value="@imgUrl" />
-																		<input type="hidden" name="ItemLists[@i].CloudinaryPublicIds"
-																			value="@publicId" />
-
-																		<!-- Preview Button -->
-																		<button type="button"
-																			class="btn btn-sm btn-info position-absolute cam-preview-btn"
-																			data-url="@imgUrl" style="top: 1px; right: 50px;"
-																			aria-label="Preview image">
-																			<i class="bi bi-eye"></i>
-																		</button>
-
-																		<!-- Delete Button -->
-																		<button type="button"
-																			class="btn btn-sm btn-outline-danger position-absolute cam-delete-existing"
-																			data-public-id="@publicId" style="top: 1px; right: 10px;"
-																			aria-label="Delete image">
-																			<i class="bi bi-trash"></i>
-																		</button>
-																	</div>
-																}
-															}
-														</div>
+													<!-- Dynamic Specifications Section -->
+													<!-- Specifications (Pole Owner, Height, Road Width, etc.) loaded from database -->
+													<div id="item-specifications-@i" class="item-specifications-container mb-3"
+														data-item-id="@item.ItemID" data-item-index="@i"
+														data-existing-qty="@item.ItemQtyExist"
+														data-required-qty="@item.ItemQtyReq">
+														<!-- Specifications will be dynamically loaded here via JavaScript -->
+														<!-- based on ItemSpecificationMaster and conditional display rules -->
 													</div>
+
+													<!-- Road Width Section (shown only for ALPR and GANTRY items) -->
+													@if (isAlprOrGantry)
+													{
+														<div class="road-width-section mb-3">
+															<label class="form-label fw-semibold text-warning">
+																<i class="bi bi-signpost-2 me-1"></i>Road Width (in meters)
+															</label>
+															<input type="text" name="ItemLists[@i].RoadWidth"
+																class="form-control road-width-input"
+																placeholder="Enter road width in meters..."
+																value="@item.RoadWidth" />
+														</div>
+													}
+
+													<!-- Image capture section (shown only for Camera, Rack, Infrastructure, Public Announcement) -->
+													@if (shouldShowCapture)
+													{
+														<div class="mb-3">
+															<label class="form-label fw-semibold">
+																<i class="bi bi-camera me-1"></i>Images
+															</label>
+															<input type="file" class="form-control mb-2 cam-upload-input" multiple
+																accept="image/*" style="display:none;" />
+															<div class="d-flex flex-column flex-sm-row gap-2 mb-2">
+																<button type="button"
+																	class="btn btn-success btn-lg cam-take-photo-btn shadow"
+																	style="background: linear-gradient(135deg, #28a745, #20c997); border: none;">
+																	<i class="bi bi-camera-fill me-1"></i> Take Photo
+																</button>
+																<button type="button"
+																	class="btn btn-primary btn-sm cam-gallery-btn">
+																	<i class="bi bi-images me-1"></i> Gallery
+																</button>
+															</div>
+															<div class="cam-preview mt-2 d-flex flex-wrap" data-item-index="@i">
+																@if (!string.IsNullOrEmpty(item.ImgPath))
+																{
+																	var imageUrls = item.ImgPath.Split(new[] { ',' },
+																	StringSplitOptions.RemoveEmptyEntries);
+																	var publicIds = (!string.IsNullOrEmpty(item.ImgID) ? item.ImgID :
+																																																																																																																																																																																																																																																																																																																																																																																																																									"").Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+																	for (int imgIdx = 0; imgIdx < imageUrls.Length; imgIdx++)
+																	{
+																		var imgUrl = imageUrls[imgIdx].Trim();
+																		var publicId = imgIdx < publicIds.Length ? publicIds[imgIdx].Trim()
+																		: "";
+
+																		<div class="cam-preview-wrapper position-relative d-inline-block"
+																			data-public-id="@publicId">
+																			<img src="@imgUrl" class="cam-preview-img" alt="Survey image" />
+																			<input type="hidden" name="ItemLists[@i].CloudinaryUrls"
+																				value="@imgUrl" />
+																			<input type="hidden" name="ItemLists[@i].CloudinaryPublicIds"
+																				value="@publicId" />
+
+																			<!-- Preview Button -->
+																			<button type="button"
+																				class="btn btn-sm btn-info position-absolute cam-preview-btn"
+																				data-url="@imgUrl" style="top: 1px; right: 50px;"
+																				aria-label="Preview image">
+																				<i class="bi bi-eye"></i>
+																			</button>
+
+																			<!-- Delete Button -->
+																			<button type="button"
+																				class="btn btn-sm btn-outline-danger position-absolute cam-delete-existing"
+																				data-public-id="@publicId" style="top: 1px; right: 10px;"
+																				aria-label="Delete image">
+																				<i class="bi bi-trash"></i>
+																			</button>
+																		</div>
+																	}
+																}
+															</div>
+														</div>
+													}
 
 													<!-- Camera Installation Remarks Section (only shown for cameras - ItemCode starts with CAM) -->
 													@if (item.ItemCode?.StartsWith("CAM", StringComparison.OrdinalIgnoreCase) ==
@@ -458,6 +512,23 @@
 																value="@item.CameraRemarksJson" />
 														</div>
 													}
+
+													<!-- Dynamic Item Specifications Section -->
+													<div class="item-specifications-section mt-3" data-item-id="@item.ItemID"
+														data-item-index="@i" data-survey-id="@surveyId" data-loc-id="@locId">
+														<div class="specifications-container">
+															<!-- Dynamic specification inputs will be loaded here by JavaScript -->
+															<div class="specifications-loading text-center py-2 d-none">
+																<span class="spinner-border spinner-border-sm me-2"
+																	role="status"></span>
+																Loading specifications...
+															</div>
+															<div class="specifications-inputs">
+																<!-- Inputs will be rendered here -->
+															</div>
+														</div>
+													</div>
+
 													<div class="mt-3">
 														<label class="form-label fw-semibold">Additional Remarks</label>
 														<textarea name="ItemLists[@i].Remarks" class="form-control"
@@ -537,10 +608,13 @@
 					</small>
 				</div>
 				<div class="mt-3 d-flex justify-content-center gap-3">
-					<button type="button" class="btn btn-gradient-primary px-4 py-2 fw-semibold"
-						id="camDeviceCaptureBtn"><i class="bi bi-camera me-2"></i> Capture</button>
-					<button type="button" class="btn btn-outline-danger px-4 py-2 fw-semibold"
+					<button type="button" class="btn btn-outline-secondary px-4 py-2 fw-semibold"
 						data-bs-dismiss="modal"><i class="bi bi-x-circle me-2"></i> Cancel</button>
+					<button type="button" class="btn btn-success btn-lg px-5 py-3 fw-bold shadow-lg"
+						id="camDeviceCaptureBtn"
+						style="background: linear-gradient(135deg, #28a745, #20c997); border: none; animation: pulse 2s infinite;">
+						<i class="bi bi-camera-fill me-2 fs-4"></i> CAPTURE
+					</button>
 				</div>
 			</div>
 		</div>
@@ -564,19 +638,31 @@
 </div>
 
 @section Scripts {
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
 	<script src="~/js/item-master-selection.js?v=@DateTime.Now.Ticks"></script>
 	<script src="~/js/camera-remarks.js?v=@DateTime.Now.Ticks"></script>
+	<script src="~/js/item-specifications.js?v=@DateTime.Now.Ticks"></script>
+	<script src="~/js/item-specifications-conditional.js?v=@DateTime.Now.Ticks"></script>
 	<script>
 		// Initialize the module with URLs and IDs from Razor
 		initItemMasterSelection(
 			'@Url.Action("UploadBase64Image", "Cloudinary")',
 			'@Url.Action("DeleteImage", "Cloudinary")',
-						@surveyId,
+																				@surveyId,
 			@locId
 		);
 
 		// Initialize camera remarks functionality
 		initCameraRemarks();
+
+		// Initialize item specifications functionality
+		// Get anti-forgery token from the form
+		var antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+		initItemSpecifications(
+			'@Url.Action("GetSpecificationDetails", "SurveyDetails")',
+			'@Url.Action("SaveSpecificationDetails", "SurveyDetails")',
+			antiForgeryToken
+		);
 
 		// Debug: Check if camera items exist
 		console.log('=== Camera Remarks Debug Info ===');

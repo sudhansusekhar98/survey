@@ -1,6 +1,7 @@
 ﻿using AnalyticaDocs.Models;
 using AnalyticaDocs.Repository;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using SurveyApp.Models;
 using SurveyApp.Repo;
 using System.Diagnostics;
@@ -254,6 +255,9 @@ namespace SurveyApp.Controllers
             ViewBag.SelectedLocId = locId;
             ViewBag.ItemTypeID = itemTypeID;
 
+            // Note: Pole Owner and Height options are now loaded from database via specifications system
+            // They will be dynamically rendered based on ItemSpecificationMaster and ItemSpecificationOptionsMaster tables
+
             // Use single dynamic view for all item types
             return View("ItemMasterSelection", formModel);
         }
@@ -364,6 +368,74 @@ namespace SurveyApp.Controllers
         
                         if (isSaved)
                         {
+                            // Save item specifications from form data
+                            // Field names are: ItemSpecs_{itemIndex}_{specificationId}_{instance}
+                            try
+                            {
+                                var formData = Request.Form;
+                                var userId = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
+                                
+                                // Process all ItemSpecs_ form fields
+                                var processedSpecs = new HashSet<string>(); // Avoid duplicates
+                                
+                                foreach (var key in formData.Keys.Where(k => k.StartsWith("ItemSpecs_")))
+                                {
+                                    if (processedSpecs.Contains(key)) continue;
+                                    processedSpecs.Add(key);
+                                    
+                                    // Parse: ItemSpecs_{itemIndex}_{specificationId}_{instance}
+                                    var parts = key.Split('_');
+                                    if (parts.Length >= 4)
+                                    {
+                                        if (int.TryParse(parts[1], out int itemIndex) &&
+                                            int.TryParse(parts[2], out int specId) &&
+                                            int.TryParse(parts[3], out int instance))
+                                        {
+                                            // Get item ID from the form using the item index
+                                            var itemIdKey = $"ItemLists[{itemIndex}].ItemID";
+                                            if (formData.ContainsKey(itemIdKey) && 
+                                                int.TryParse(formData[itemIdKey], out int itemIdFromForm))
+                                            {
+                                                var specValue = formData[key].ToString();
+                                                
+                                                Console.WriteLine($"[Controller] Saving spec: Key={key}, ItemID={itemIdFromForm}, SpecID={specId}, Instance={instance}, Value={specValue}");
+                                                
+                                                if (!string.IsNullOrEmpty(specValue))
+                                                {
+                                                    var specModel = new SpecificationDetailsSubmitModel
+                                                    {
+                                                        SurveyID = model.SurveyID,
+                                                        LocID = model.LocID,
+                                                        ItemID = itemIdFromForm,
+                                                        Specifications = new List<SpecificationDetailItem>
+                                                        {
+                                                            new SpecificationDetailItem
+                                                            {
+                                                                SpecificationID = specId,
+                                                                SpecificationDetails = specValue,
+                                                                InstanceNumber = instance
+                                                            }
+                                                        }
+                                                    };
+                                                    
+                                                    _repository.SaveSpecificationDetails(specModel, userId);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                Console.WriteLine($"[Controller] Could not find ItemID for key: {itemIdKey}");
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            catch (Exception specEx)
+                            {
+                                Console.WriteLine($"Error saving specifications: {specEx.Message}");
+                                Console.WriteLine($"Stack trace: {specEx.StackTrace}");
+                                // Don't fail the entire save, just log the error
+                            }
+                            
                             return Json(new { success = true, message = "Survey details updated successfully." });
                         }
                         else
@@ -471,7 +543,7 @@ namespace SurveyApp.Controllers
         // POST: SurveyDetails/SubmitLocationCompletion
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult SubmitLocationCompletion(long surveyId, int locId)
+        public IActionResult SubmitLocationCompletion(long surveyId, int locId, string? globalCableCount = null, string? globalCableRemarks = null)
         {
             try
             {
@@ -484,6 +556,21 @@ namespace SurveyApp.Controllers
                 if (string.IsNullOrEmpty(userId))
                 {
                     return Json(new { success = false, message = "User not logged in" });
+                }
+
+                // Save global cable count if provided
+                if (!string.IsNullOrEmpty(globalCableCount))
+                {
+                    try
+                    {
+                        // Save cable count to database
+                        _repository.SaveGlobalCableCount(surveyId, locId, globalCableCount, globalCableRemarks ?? "", Convert.ToInt32(userId));
+                    }
+                    catch (Exception cableEx)
+                    {
+                        Console.WriteLine($"Error saving global cable count: {cableEx.Message}");
+                        // Continue with submission even if cable count save fails
+                    }
                 }
 
                 // Validate that all device types have at least one item with quantity
@@ -634,6 +721,169 @@ namespace SurveyApp.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetLocationStatus(long surveyId, int locId)
+        {
+            try
+            {
+                var locationStatus = _statusRepo.GetLocationStatus(surveyId, locId);
+                string currentStatus = locationStatus?.Status ?? "Pending";
+                return Json(new { success = true, status = currentStatus });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details for debugging
+                Console.WriteLine($"Error fetching location status: {ex.Message}");
+                return StatusCode(500, Json(new { success = false, message = "An error occurred while fetching the status." }));
+            }
+        }
+
+        /// <summary>
+        /// Get item specifications for a given item ID
+        /// </summary>
+        [HttpGet]
+        public IActionResult GetItemSpecifications(int itemId)
+        {
+            try
+            {
+                var specifications = _repository.GetItemSpecifications(itemId);
+                Console.WriteLine($"GetItemSpecifications for ItemID {itemId}: Found {specifications.Count} specifications");
+                foreach (var spec in specifications)
+                {
+                    Console.WriteLine($"  - {spec.SpecificationName} (ID: {spec.SpecificationID}, Type: {spec.InputType}, Options: {spec.OptionsList?.Count ?? 0})");
+                }
+                return Json(new { success = true, specifications = specifications });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching item specifications: {ex.Message}");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Get dropdown options for a specific specification ID
+        /// </summary>
+        [HttpGet]
+        public IActionResult GetSpecificationOptions(int specificationId)
+        {
+            try
+            {
+                var options = _repository.GetSpecificationOptions(specificationId);
+                Console.WriteLine($"GetSpecificationOptions for SpecID {specificationId}: Found {options.Count} options");
+                return Json(new { success = true, options = options });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching specification options: {ex.Message}");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Get saved specification details for a survey/location/item
+        /// </summary>
+        [HttpGet]
+        public IActionResult GetSpecificationDetails(long surveyId, int locId, int itemId)
+        {
+            try
+            {
+                // Get both the specification definitions and saved values
+                var specifications = _repository.GetItemSpecifications(itemId);
+                var savedDetails = _repository.GetSpecificationDetails(surveyId, locId, itemId);
+
+                // Merge specifications with saved values
+                var result = specifications.Select(spec => new {
+                    spec.ItemId,
+                    spec.SpecificationID,
+                    spec.SpecificationName,
+                    spec.InputType,
+                    spec.Options,
+                    SpecificationDetails = savedDetails
+                        .FirstOrDefault(sd => sd.SpecificationID == spec.SpecificationID)?.SpecificationDetails ?? ""
+                }).ToList();
+
+                return Json(new { success = true, specifications = result });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching specification details: {ex.Message}");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Save specification details for a survey item
+        /// </summary>
+        [HttpPost]
+        public IActionResult SaveSpecificationDetails([FromBody] SpecificationDetailsSubmitModel model)
+        {
+            try
+            {
+                Console.WriteLine($"SaveSpecificationDetails called - SurveyID: {model?.SurveyID}, LocID: {model?.LocID}, ItemID: {model?.ItemID}");
+                Console.WriteLine($"Specifications count: {model?.Specifications?.Count ?? 0}");
+                
+                if (model == null)
+                {
+                    Console.WriteLine("Model is null!");
+                    return Json(new { success = false, message = "Invalid request - model is null" });
+                }
+
+                // Authorization check
+                var result = _util.CheckAuthorizationAll(this, 103, null, model.SurveyID, "Update");
+                if (result != null) return Json(new { success = false, message = "Unauthorized" });
+
+                // Check location status
+                var locationStatus = _statusRepo.GetLocationStatus(model.SurveyID, model.LocID);
+                string currentStatus = locationStatus?.Status ?? "Pending";
+
+                if (currentStatus == "Completed" || currentStatus == "Verified")
+                {
+                    return Json(new { success = false, message = $"Location is {currentStatus} and locked. Cannot save changes." });
+                }
+
+                var userIdStr = HttpContext.Session.GetString("UserID");
+                if (string.IsNullOrEmpty(userIdStr))
+                {
+                    return Json(new { success = false, message = "User not logged in" });
+                }
+
+                int userId = Convert.ToInt32(userIdStr);
+
+                // Validate input
+                if (model.Specifications == null || model.Specifications.Count == 0)
+                {
+                    Console.WriteLine("No specifications to save");
+                    return Json(new { success = true, message = "No specifications to save." });
+                }
+
+                // Log each specification
+                foreach (var spec in model.Specifications)
+                {
+                    Console.WriteLine($"  Spec: ID={spec.SpecificationID}, Value={spec.SpecificationDetails}");
+                }
+
+                // Save specifications
+                bool saved = _repository.SaveSpecificationDetails(model, userId);
+                Console.WriteLine($"SaveSpecificationDetails result: {saved}");
+
+                if (saved)
+                {
+                    return Json(new { success = true, message = "Specifications saved successfully." });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to save specifications." });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving specification details: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
             }
         }
 
