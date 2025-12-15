@@ -150,9 +150,12 @@
                                             }
                                         </select>
                                         <label>Way Type</label>
+                                        @if (ViewData.ModelState.ContainsKey("WayType"))
+                                        {
+                                            <span class="text-danger">@ViewData.ModelState["WayType"].Errors.FirstOrDefault()?.ErrorMessage</span>
+                                        }
                                     </div>
-                                </div>
-                                <div class="col-12 mb-2">
+                                </div>                                <div class="col-12 mb-2">
                                     <button type="button" class="btn btn-info" id="fetchLocationBtn">
                                         <i class="bi bi-geo-alt-fill me-2"></i>Fetch Location via GPS
                                     </button>

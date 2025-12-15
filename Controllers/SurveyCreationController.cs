@@ -806,6 +806,20 @@ namespace SurveyApp.Controllers
             var result = _util.CheckAuthorizationAll(this, 103, null, model.SurveyID, actionType);
             if (result != null) return result;
 
+            if (model.LocationType == "Traffic" && string.IsNullOrEmpty(model.WayType))
+            {
+                ModelState.AddModelError("WayType", "Way Type is required for Traffic locations.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var locations = _surveyRepository.GetSurveyLocationById(model.SurveyID) ?? new List<SurveyLocationModel>();
+                ViewBag.SelectedSurveyId = model.SurveyID;
+                ViewBag.LocationTypeOptions = SurveyLocationModel.LocationTypeOptions;
+                ViewBag.WayTypeOptions = SurveyLocationModel.WayTypeOptions;
+                return View("SurveyLocation", locations);
+            }
+
             try
             {
                 // Explicitly set Isactive from the parameter

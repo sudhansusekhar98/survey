@@ -1687,3 +1687,4 @@ D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\SurveyApp.runtimeconfig
 D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\SurveyApp.pdb
 D:\VL Access\Survey\CODES\Survey\survey\obj\Debug\net8.0\SurveyApp.genruntimeconfig.cache
 D:\VL Access\Survey\CODES\Survey\survey\obj\Debug\net8.0\ref\SurveyApp.dll
+D:\VL Access\Survey\CODES\Survey\survey\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

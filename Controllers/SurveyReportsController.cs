@@ -37,7 +37,7 @@ namespace SurveyApp.Controllers
         }
 
         // GET: SurveyReports/SummaryReport
-        public IActionResult SummaryReport(DateTime? fromDate = null, DateTime? toDate = null, 
+        public IActionResult SummaryReport(DateTime? fromDate = null, DateTime? toDate = null,
             string? status = null, string? region = null, string? type = null)
         {
             try
@@ -103,7 +103,7 @@ namespace SurveyApp.Controllers
                     InProgressSurveys = allSurveys.Count(s => s.SurveyStatus == "In Progress"),
                     PendingSurveys = allSurveys.Count(s => s.SurveyStatus == "Pending"),
                     OnHoldSurveys = allSurveys.Count(s => s.SurveyStatus == "On Hold"),
-                    MissedDeadlineSurveys = allSurveys.Count(s => 
+                    MissedDeadlineSurveys = allSurveys.Count(s =>
                         s.DueDate.HasValue && s.DueDate.Value.Date < today && s.SurveyStatus != "Completed"),
 
                     Surveys = allSurveys.OrderByDescending(s => s.SurveyDate).ToList(),
@@ -263,11 +263,11 @@ namespace SurveyApp.Controllers
             // Get all camera remarks for this survey directly from the database
             var allCameraRemarks = _camRemarksRepo.GetAllCameraRemarksBySurvey(surveyId);
             bool hasCameraRemarks = allCameraRemarks != null && allCameraRemarks.Count > 0;
-            
+
             // Group remarks by location, then by ItemID
             var cameraRemarks = new Dictionary<string, List<SurveyCamRemarksModel>>();
             var cameraItemNames = new Dictionary<int, string>();
-            
+
             if (hasCameraRemarks)
             {
                 var groupedByLocation = allCameraRemarks.GroupBy(r => r.LocID);
@@ -275,7 +275,7 @@ namespace SurveyApp.Controllers
                 {
                     cameraRemarks[$"{surveyId}_{group.Key}"] = group.ToList();
                 }
-                
+
                 // Get unique ItemIDs and fetch their names from the database
                 var uniqueItemIds = allCameraRemarks.Select(r => r.ItemID).Distinct().ToList();
                 using var con = new SqlConnection(DBConnection.ConnectionString);
@@ -313,7 +313,7 @@ namespace SurveyApp.Controllers
         public IActionResult DebugImageData(long surveyId = 0)
         {
             var debugInfo = new Dictionary<string, object>();
-            
+
             try
             {
                 using var con = new SqlConnection(DBConnection.ConnectionString);
@@ -328,7 +328,8 @@ namespace SurveyApp.Controllers
                     using var surveyReader = surveyCmd.ExecuteReader();
                     while (surveyReader.Read())
                     {
-                        surveys.Add(new {
+                        surveys.Add(new
+                        {
                             SurveyId = surveyReader["SurveyId"],
                             SurveyName = surveyReader["SurveyName"]?.ToString(),
                             SurveyStatus = surveyReader["SurveyStatus"]?.ToString()
@@ -351,7 +352,8 @@ namespace SurveyApp.Controllers
                 using var globalReader = globalCmd.ExecuteReader();
                 while (globalReader.Read())
                 {
-                    globalImages.Add(new {
+                    globalImages.Add(new
+                    {
                         SurveyID = globalReader["SurveyID"],
                         LocName = globalReader["LocName"]?.ToString(),
                         ItemID = globalReader["ItemID"]?.ToString(),
@@ -372,7 +374,7 @@ namespace SurveyApp.Controllers
                 DataTable dtItems = _surveyRepo.GetSurveyDetails(surveyId, 3);
                 debugInfo["PivotColumns"] = dtItems.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToList();
                 debugInfo["PivotRowCount"] = dtItems.Rows.Count;
-                
+
                 if (dtItems.Rows.Count > 0)
                 {
                     debugInfo["FirstRowData"] = new Dictionary<string, string>();
@@ -390,12 +392,13 @@ namespace SurveyApp.Controllers
                                 WHERE sd.SurveyID = @SurveyID";
                 using var cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@SurveyID", surveyId);
-                
+
                 var rawRecords = new List<object>();
                 using var reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
-                    rawRecords.Add(new {
+                    rawRecords.Add(new
+                    {
                         SurveyID = reader["SurveyID"],
                         LocID = reader["LocID"],
                         LocName = reader["LocName"]?.ToString(),
@@ -447,27 +450,27 @@ namespace SurveyApp.Controllers
                 }
 
                 // Determine the ItemCode column name - the pivot uses "Item Code" with space
-                string itemCodeColumnName = dtItems.Columns.Contains("Item Code") ? "Item Code" 
+                string itemCodeColumnName = dtItems.Columns.Contains("Item Code") ? "Item Code"
                     : dtItems.Columns.Contains("ItemCode") ? "ItemCode"
                     : dtItems.Columns.Count > 0 ? dtItems.Columns[0].ColumnName : "";
 
                 // Populate image URLs for each row
                 foreach (DataRow row in dtItems.Rows)
                 {
-                    string itemCode = !string.IsNullOrEmpty(itemCodeColumnName) 
+                    string itemCode = !string.IsNullOrEmpty(itemCodeColumnName)
                         ? row[itemCodeColumnName]?.ToString()?.Trim() ?? ""
                         : row[0]?.ToString()?.Trim() ?? "";  // Fallback to first column
-                    
+
                     foreach (var locationName in locationColumns)
                     {
                         string imageColumnName = $"{locationName}_Photos";
                         // Use case-insensitive and trimmed comparison for matching
                         // The location names from database are trimmed, the pivot column names need trimming too
                         var imageUrl = itemImages
-                            .FirstOrDefault(img => 
-                                img.LocationName.Trim().Equals(locationName.Trim(), StringComparison.OrdinalIgnoreCase) && 
+                            .FirstOrDefault(img =>
+                                img.LocationName.Trim().Equals(locationName.Trim(), StringComparison.OrdinalIgnoreCase) &&
                                 img.ItemCode.Trim().Equals(itemCode.Trim(), StringComparison.OrdinalIgnoreCase))?.ImageUrls ?? "";
-                        
+
                         row[imageColumnName] = imageUrl;
                     }
                 }
@@ -485,7 +488,7 @@ namespace SurveyApp.Controllers
         private List<SurveyItemImageInfo> GetSurveyItemImages(long surveyId)
         {
             var imageList = new List<SurveyItemImageInfo>();
-            
+
             try
             {
                 using var con = new SqlConnection(DBConnection.ConnectionString);
@@ -506,10 +509,10 @@ namespace SurveyApp.Controllers
 
                 using var cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@SurveyID", surveyId);
-                
+
                 con.Open();
                 using var reader = cmd.ExecuteReader();
-                
+
                 while (reader.Read())
                 {
                     imageList.Add(new SurveyItemImageInfo
@@ -653,7 +656,7 @@ namespace SurveyApp.Controllers
                     overviewSheet.Cells["A1:B1"].Merge = true;
                     overviewSheet.Cells["A1:B1"].Style.Font.Bold = true;
                     overviewSheet.Cells["A1:B1"].Style.Font.Size = 14;
-                    
+
                     int row = 2;
                     overviewSheet.Cells[row, 1].Value = "Survey ID:";
                     overviewSheet.Cells[row++, 2].Value = survey.SurveyId;
@@ -1048,7 +1051,7 @@ namespace SurveyApp.Controllers
                         ws.Cells[row3, totalEndCol].Value = "Required";
 
                         // Remarks header
-                        ws.Cells[row1, remarksCol].Value = "Remarks";
+                        ws.Cells[row1, remarksCol].Value = "Specification / Remarks";
                         ws.Cells[row1, remarksCol, row3, remarksCol].Merge = true;
 
                         // style header block
@@ -1212,6 +1215,7 @@ namespace SurveyApp.Controllers
                 return RedirectToAction("DetailedReport", new { surveyId });
             }
         }
+
     }
 
     // Helper class for storing survey item image information

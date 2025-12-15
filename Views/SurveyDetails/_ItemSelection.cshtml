@@ -74,7 +74,7 @@
             </div>
             <div class="card-body p-3">
                 <div class="row g-3">
-                    <div class="col-12 col-md-6">
+                    <div class="col-12">
                         <label class="form-label fw-semibold text-primary mb-2">
                             <i class="bi bi-box-seam me-1"></i>Existing:
                         </label>
@@ -90,7 +90,8 @@
                             </button>
                         </div>
                     </div>
-                    <div class="col-12 col-md-6">
+                    <hr class="my-3" /> @* Horizontal line added here *@
+                    <div class="col-12">
                         <label class="form-label fw-semibold text-success mb-2">
                             <i class="bi bi-plus-circle me-1"></i>Required (To Deploy):
                         </label>
@@ -239,9 +240,15 @@
                 const existQty = parseInt(card?.querySelector('.cam-qty-exist')?.value || 0);
                 const reqQty = parseInt(card?.querySelector('.cam-qty-req')?.value || 0);
 
-                // Render specifications
-                renderSpecifications(specsContainer, specifications, savedDetails, itemIndex, existQty, reqQty);
-
+                            // Render specifications
+                            renderSpecifications(specsContainer, specifications, savedDetails, itemIndex, existQty, reqQty);
+                
+                            // If no specifications are left in the main container, hide the container itself
+                            if (specsContainer.querySelectorAll('.specification-field').length === 0) {
+                                container.classList.add('d-none');
+                            } else {
+                                container.classList.remove('d-none');
+                            }
             } catch (error) {
                 console.error('Error loading specifications:', error);
             } finally {
@@ -257,6 +264,10 @@
             const existingSpecs = container.querySelectorAll('.specification-field');
             existingSpecs.forEach(el => el.remove());
 
+            const card = container.closest('.card');
+            const existQtyParent = card?.querySelector('.cam-qty-exist')?.closest('.col-12');
+            const reqQtyParent = card?.querySelector('.cam-qty-req')?.closest('.col-12');
+
             specifications.forEach(spec => {
                 // Check conditional display
                 if (!shouldShowSpecification(spec, existQty, reqQty)) {
@@ -265,11 +276,19 @@
 
                 // Determine number of instances to show
                 const instanceCount = getInstanceCount(spec, existQty, reqQty);
+                const specNameLower = (spec.specificationName || '').toLowerCase();
 
                 for (let instance = 1; instance <= instanceCount; instance++) {
                     const savedValue = getSavedValue(savedDetails, spec.specificationID, instance);
                     const fieldHtml = createSpecificationField(spec, itemIndex, instance, instanceCount, savedValue);
-                    container.insertAdjacentHTML('beforeend', fieldHtml);
+
+                    if (specNameLower.includes('pole owner') && existQtyParent) {
+                        existQtyParent.insertAdjacentHTML('afterend', fieldHtml);
+                    } else if (specNameLower.includes('pole height') && reqQtyParent) {
+                        reqQtyParent.insertAdjacentHTML('afterend', fieldHtml);
+                    } else {
+                        container.insertAdjacentHTML('beforeend', fieldHtml);
+                    }
                 }
             });
         }
@@ -278,6 +297,16 @@
          * Check if specification should be shown based on conditional display rule
          */
         function shouldShowSpecification(spec, existQty, reqQty) {
+            const specNameLower = (spec.specificationName || '').toLowerCase();
+
+            // Explicitly handle "Pole Owner" and "Pole Height"
+            if (specNameLower.includes('pole owner')) {
+                return existQty > 0; // Only show if existing quantity > 0
+            }
+            if (specNameLower.includes('pole height')) {
+                return reqQty > 0; // Only show if required quantity > 0
+            }
+
             const rule = (spec.conditionalDisplay || 'Always').toLowerCase();
 
             switch (rule) {
