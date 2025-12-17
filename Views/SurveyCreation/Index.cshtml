@@ -223,13 +223,13 @@
                                             @{
                                                 var statusColor = survey.SurveyStatus switch
                                                 {
-                                                    "Created" => "primary",
-                                                    "Assigned" => "info",
-                                                    "In Progress" => "warning",
-                                                    "Completed" => "success",
-                                                    "Verified" => "success",
-                                                    "Pending" => "secondary",
-                                                    "Cancelled" => "danger",
+                                                                    "Created" => "primary",
+                                                                    "Assigned" => "info",
+                                                                    "In Progress" => "warning",
+                                                                    "Completed" => "success",
+                                                                    "Verified" => "success",
+                                                                    "Pending" => "secondary",
+                                                                    "Cancelled" => "danger",
                                                     _ => "secondary"
                                                 };
                                             }
@@ -301,7 +301,7 @@
                                                 @if (hasAssignments && hasValidDueDate)
                                                 {
                                                     var isOverdue = survey.DueDate.Value < DateTime.Now && survey.SurveyStatus !=
-                                                    "Completed";
+                                                                            "Completed";
                                                     <div class="mb-1">
                                                         <small class="text-muted d-block">
                                                             <i class="bi bi-calendar-check me-1"></i><strong>Due Date:</strong>
@@ -320,7 +320,7 @@
                                             <!-- Compact footer -->
                                             <div
                                                 class="card-footer bg-white border-0 d-flex flex-column flex-md-row gap-2 
-                                                                                                        justify-content-center align-items-stretch py-2 px-2 mt-auto">
+                                                                                                                justify-content-center align-items-stretch py-2 px-2 mt-auto">
                                                 @{
                                                     var isSubmitted = ViewData[$"IsSubmitted_{survey.SurveyId}"] as bool? ?? false;
                                                     var isLocked = ViewData[$"IsLocked_{survey.SurveyId}"] as bool? ?? false;
@@ -429,7 +429,6 @@
                             <p class="text-muted fs-5">No surveys found. Click "Add New Survey" to create one.</p>
                         </div>
                     }
-
                 </div>
             </div>
         </div>
@@ -455,7 +454,10 @@
             edit: '@Url.Action("Edit", "SurveyCreation")',
             viewDetails: '@Url.Action("ViewDetails", "SurveyCreation")',
             deleteSurvey: '@Url.Action("Delete", "SurveyCreation")',
-            unlockSurvey: '@Url.Action("UnlockSurvey", "SurveyCreation")'
+            unlockSurvey: '@Url.Action("UnlockSurvey", "SurveyCreation")',
+            getCableItems: '@Url.Action("GetCableItems", "SurveyCreation")',
+            getSurveyCableCounts: '@Url.Action("GetSurveyCableCounts", "SurveyCreation")',
+            saveCableCounts: '@Url.Action("SaveSurveyCableCounts", "SurveyCreation")'
         };
     </script>
     <script src="~/js/survey-index.js"></script>

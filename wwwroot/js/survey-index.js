@@ -70,32 +70,8 @@ function submitSurvey(surveyId, surveyName) {
                     return;
                 }
                 
-                // All locations complete, show confirmation
-                Swal.fire({
-                    icon: 'question',
-                    title: 'Submit Survey?',
-                    html: `
-                        <p>Are you sure you want to submit <strong>"${surveyName}"</strong>?</p>
-                        <div class="alert alert-success mt-3">
-                            <i class="bi bi-check-circle me-2"></i>
-                            All ${data.totalLocations} location(s) are completed
-                        </div>
-                        <p class="text-warning mt-3">
-                            <i class="bi bi-exclamation-triangle me-1"></i>
-                            Once submitted, the survey will be locked for editing until reviewed.
-                        </p>
-                    `,
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, Submit',
-                    cancelButtonText: 'Cancel',
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#6c757d',
-                    reverseButtons: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        performSubmission(surveyId, surveyName);
-                    }
-                });
+                // All locations complete, directly submit the survey (cable counts are now in Global Location)
+                submitSurveyDirectly(surveyId, surveyName, data.totalLocations);
             }
         },
         error: function() {
@@ -105,6 +81,181 @@ function submitSurvey(surveyId, surveyName) {
                 text: 'Failed to check survey completion status.',
                 confirmButtonColor: '#667eea'
             });
+        }
+    });
+}
+
+// Show cable count modal before survey submission
+function showCableCountModal(surveyId, surveyName, totalLocations) {
+    // Fetch cable items and existing counts
+    Promise.all([
+        $.ajax({ url: surveyUrls.getCableItems, type: 'GET' }),
+        $.ajax({ url: surveyUrls.getSurveyCableCounts, type: 'GET', data: { surveyId: surveyId } })
+    ]).then(function([itemsResponse, countsResponse]) {
+        var cableItems = itemsResponse.success ? itemsResponse.items : [];
+        var savedCounts = countsResponse.success ? countsResponse.cableCounts : [];
+        
+        // Build saved counts lookup
+        var savedCountsMap = {};
+        savedCounts.forEach(function(c) {
+            savedCountsMap[c.itemId] = { quantity: c.quantity, remarks: c.remarks };
+        });
+        
+        // Build cable items form
+        var cableFormHtml = '';
+        if (cableItems.length === 0) {
+            cableFormHtml = '<p class="text-muted">No cable items configured in the system.</p>';
+        } else {
+            cableFormHtml = `
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Cable Type</th>
+                                <th style="width: 120px;">Quantity</th>
+                                <th style="width: 150px;">Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            cableItems.forEach(function(item) {
+                var saved = savedCountsMap[item.itemId] || { quantity: 0, remarks: '' };
+                cableFormHtml += `
+                    <tr>
+                        <td>
+                            <strong>${item.itemName}</strong>
+                            <br><small class="text-muted">${item.itemCode} (${item.itemUOM})</small>
+                        </td>
+                        <td>
+                            <input type="number" class="form-control form-control-sm cable-qty-input" 
+                                   data-item-id="${item.itemId}" 
+                                   value="${saved.quantity}" min="0" placeholder="0">
+                        </td>
+                        <td>
+                            <input type="text" class="form-control form-control-sm cable-remarks-input" 
+                                   data-item-id="${item.itemId}" 
+                                   value="${saved.remarks}" placeholder="Optional">
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            cableFormHtml += '</tbody></table></div>';
+        }
+        
+        Swal.fire({
+            icon: 'info',
+            title: 'Global Cable Count',
+            html: `
+                <div class="text-start">
+                    <p class="mb-3">Please enter the <strong>survey-level cable quantities</strong> for <strong>"${surveyName}"</strong>:</p>
+                    <div class="alert alert-info py-2">
+                        <i class="bi bi-info-circle me-1"></i>
+                        These are total cable quantities for the entire survey, not per location.
+                    </div>
+                    ${cableFormHtml}
+                    <div class="alert alert-success mt-3 mb-0">
+                        <i class="bi bi-check-circle me-2"></i>
+                        All ${totalLocations} location(s) are completed
+                    </div>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: '<i class="bi bi-send me-1"></i> Save & Submit Survey',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            width: '700px',
+            reverseButtons: true,
+            preConfirm: () => {
+                // Collect cable counts
+                var cableCounts = [];
+                $('.cable-qty-input').each(function() {
+                    var itemId = parseInt($(this).data('item-id'));
+                    var qty = parseInt($(this).val()) || 0;
+                    var remarks = $(`.cable-remarks-input[data-item-id="${itemId}"]`).val() || '';
+                    cableCounts.push({ itemId: itemId, quantity: qty, remarks: remarks });
+                });
+                return cableCounts;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                saveCableCountsAndSubmit(surveyId, surveyName, result.value);
+            }
+        });
+    }).catch(function() {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to load cable items.',
+            confirmButtonColor: '#dc3545'
+        });
+    });
+}
+
+// Save cable counts and then submit the survey
+function saveCableCountsAndSubmit(surveyId, surveyName, cableCounts) {
+    var token = $('input[name="__RequestVerificationToken"]').val();
+    
+    Swal.fire({
+        title: 'Submitting...',
+        text: 'Saving cable counts and submitting survey...',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    
+    // First save cable counts
+    $.ajax({
+        url: surveyUrls.saveCableCounts,
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            surveyId: surveyId,
+            cableCounts: cableCounts
+        }),
+        success: function(saveResponse) {
+            if (saveResponse.success) {
+                // Now submit the survey
+                performSubmission(surveyId, surveyName);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: saveResponse.message || 'Failed to save cable counts.',
+                    confirmButtonColor: '#dc3545'
+                });
+            }
+        },
+        error: function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to save cable counts.',
+                confirmButtonColor: '#dc3545'
+            });
+        }
+    });
+}
+
+// Direct submission without cable count modal (cable counts are now in Global Location)
+function submitSurveyDirectly(surveyId, surveyName, totalLocations) {
+    Swal.fire({
+        title: 'Submit Survey?',
+        html: `<p>All <strong>${totalLocations}</strong> location(s) are complete for survey: <strong>${surveyName}</strong></p>
+               <p>Are you sure you want to submit this survey?</p>`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Submit',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            performSubmission(surveyId, surveyName);
         }
     });
 }

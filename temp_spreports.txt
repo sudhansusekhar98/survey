@@ -1,0 +1,221 @@
+﻿CREATE PROCEDURE [dbo].[SpReports]
+( 
+	    @SpType int
+	   ,@SurveyID bigint =null
+	   ,@RegionID int = null
+ 	   
+)
+AS
+BEGIN TRY
+ BEGIN TRANSACTION
+	-- Survey Details
+	if @SpType = 1
+	begin
+		select A.SurveyId,SurveyName,ImplementationType,SurveyDate,LocationSiteName
+		,RegionID,ScopeOfWork,
+		case SurveyStatus when 'Completed' then 'Completed' 
+		else CONCAT((select dbo.SurveyStatusPer(@SurveyID)),'% Complete') end SurveyStatus
+		,c.SubmissionDate 
+		,A.ClientId,CONCAT( ClientName,' (',ClientType,')') ClientName
+		,CONCAT(Address1,' ',Address3,' ',State,' ',City) ClintAddress
+		,CONCAT(ContactPerson,' (',ContactNumber,')') ContactPerson
+		from Survey A left join ClientMaster B on A.ClientId=B.ClientID
+		left join SurveySubmission C on A.SurveyId=C.SurveyId
+		where A.SurveyId=@SurveyID 
+	end
+
+	-- Location + Employee Deatils
+	if @SpType = 2
+	begin
+		;WITH L AS
+		(SELECT  LocID,SurveyID,LocName,
+		CONCAT(LocationType,' - ',ISNULL(WayType,'')) AS LocationType,
+		CONCAT(LocLat, ',', LocLog) AS Cordinate,
+		ROW_NUMBER() OVER (ORDER BY LocID) AS rn
+		FROM SurveyLocation WHERE SurveyID = @SurveyID ), E AS
+		(SELECT  A.SurveyID,A.EmpID,B.EmpName,B.MobileNo,B.Email,
+		ROW_NUMBER() OVER (ORDER BY A.EmpID) AS rn FROM SurveyAssignment A
+		JOIN EmpMaster B ON A.EmpID = B.EmpID WHERE A.SurveyID = @SurveyID)
+		SELECT L.LocID,L.SurveyID AS SurveyID,
+		L.LocName,L.LocationType,L.Cordinate,E.EmpID,E.EmpName,E.MobileNo,E.Email
+		FROM L FULL OUTER JOIN E ON L.rn = E.rn ORDER BY COALESCE(L.rn, E.rn);
+	end
+
+	-- Survey Details Items
+	if @SpType = 3
+	begin
+		-----------------------------------------------------------
+		---- 1) Build dynamic columns from SurveyLocation (NOT SurveyDetails)
+		-----------------------------------------------------------
+		--DECLARE @cols nvarchar(max) = N'';
+
+		--SELECT @cols = STRING_AGG(
+		--	   'ISNULL(SUM(CASE WHEN D.LocID = ' + CAST(L.LocID AS varchar(20)) + 
+		--	   ' THEN D.ItemQtyExist END),0) AS [' + REPLACE(L.LocName, ']', ']]') + 'Existing], ' +
+		--	   'ISNULL(SUM(CASE WHEN D.LocID = ' + CAST(L.LocID AS varchar(20)) + 
+		--	   ' THEN D.ItemQtyReq END),0) AS [' + REPLACE(L.LocName, ']', ']]') + 'Required]'
+		--, ', ')
+		--FROM (
+		--	SELECT DISTINCT LocID, LocName FROM SurveyLocation WHERE SurveyID = @SurveyID
+		--) L;
+
+		-----------------------------------------------------------
+		---- 2) Build and run final query
+		-----------------------------------------------------------
+		--DECLARE @sql nvarchar(max) = N'
+		--;WITH D AS 
+		--(SELECT A.SurveyID,A.LocID,SL.LocName,A.ItemID,A.ItemQtyExist,
+		--A.ItemQtyReq,A.ImgPath,A.Remarks,IM.TypeName,IM.ItemName,
+		--IM.ItemUOM FROM SurveyDetails A LEFT JOIN SurveyLocation SL
+		--ON A.SurveyID = SL.SurveyID AND A.LocID   = SL.LocID
+		--LEFT JOIN ( SELECT A.ItemId,B.TypeName,A.ItemName,A.ItemUOM
+		--FROM ItemMaster A JOIN ItemTypeMaster B ON A.TypeId = B.Id
+		--) IM ON A.ItemID = IM.ItemId WHERE A.SurveyID = @SurveyID )
+		--SELECT D.ItemID   AS [Item Code],D.TypeName AS [Type],D.ItemName AS [Item],D.ItemUOM  AS [UOM],
+		--' + @cols + ',
+		--ISNULL(SUM(D.ItemQtyExist),0) AS totalExisting, ISNULL(SUM(D.ItemQtyReq),0)   AS totalRequired,
+		--STRING_AGG(D.Remarks, '' | '') AS AllRemarks FROM D 
+		--GROUP BY D.ItemID,D.TypeName, D.ItemName,
+		--D.ItemUOM HAVING ISNULL(SUM(D.ItemQtyExist),0) > 0 
+		--OR ISNULL(SUM(D.ItemQtyReq),0) > 0 ORDER BY D.ItemID; ';
+
+		--EXEC sp_executesql @sql, N'@SurveyID bigint', @SurveyID = @SurveyID;
+
+
+
+			DECLARE @cols nvarchar(max) = N'';
+
+---------------------------------------------------------
+-- 1) Dynamic location columns
+---------------------------------------------------------
+SELECT @cols = STRING_AGG(
+       'ISNULL(SUM(CASE WHEN D.LocID = ' + CAST(L.LocID AS varchar(20)) +
+       ' THEN D.ItemQtyExist END),0) AS [' + REPLACE(L.LocName, ']', ']]') + 'Existing], ' +
+       'ISNULL(SUM(CASE WHEN D.LocID = ' + CAST(L.LocID AS varchar(20)) +
+       ' THEN D.ItemQtyReq END),0) AS [' + REPLACE(L.LocName, ']', ']]') + 'Required]'
+, ', ')
+FROM (
+    SELECT DISTINCT LocID, LocName
+    FROM SurveyLocation
+    WHERE SurveyID = @SurveyID
+) L;
+
+---------------------------------------------------------
+-- 2) Final query
+---------------------------------------------------------
+DECLARE @sql nvarchar(max) = N'
+;WITH Spec AS
+(
+    SELECT
+        SDM.ItemID,
+        STRING_AGG(
+            ISM.SpecificationName + '' : '' + SDM.SpecificationDetails,
+            '' | ''
+        ) AS specification
+    FROM SpecificationDetailsMaster SDM
+    JOIN ItemSpecificationMaster ISM
+        ON SDM.SpecificationID = ISM.SpecificationID
+       AND SDM.ItemID = ISM.ItemID
+    WHERE SDM.SurveyID = @SurveyID
+    GROUP BY SDM.ItemID
+),
+D AS
+(
+    SELECT
+        A.SurveyID,
+        A.LocID,
+        SL.LocName,
+        A.ItemID,
+        A.ItemQtyExist,
+        A.ItemQtyReq,
+        A.Remarks,
+        IM.TypeName,
+        IM.ItemName,
+        IM.ItemUOM,
+        S.specification
+    FROM SurveyDetails A
+    LEFT JOIN SurveyLocation SL
+        ON A.SurveyID = SL.SurveyID
+       AND A.LocID   = SL.LocID
+    LEFT JOIN (
+        SELECT
+            IM1.ItemId,
+            IT.TypeName,
+            IM1.ItemName,
+            IM1.ItemUOM
+        FROM ItemMaster IM1
+        JOIN ItemTypeMaster IT
+            ON IM1.TypeId = IT.Id
+    ) IM ON A.ItemID = IM.ItemId
+    LEFT JOIN Spec S
+        ON A.ItemID = S.ItemID
+    WHERE A.SurveyID = @SurveyID
+)
+SELECT
+    D.ItemID   AS [Item Code],
+    D.TypeName AS [Type],
+    D.ItemName AS [Item],
+    D.ItemUOM  AS [UOM],
+    ' + @cols + ',
+    ISNULL(SUM(D.ItemQtyExist),0) AS totalExisting,
+    ISNULL(SUM(D.ItemQtyReq),0)   AS totalRequired,
+
+    -- ✅ Combined specification + remarks
+    LTRIM(RTRIM(
+        CONCAT(
+            MAX(D.specification),
+            CASE 
+                WHEN MAX(D.specification) IS NOT NULL 
+                 AND STRING_AGG(D.Remarks, '' | '') IS NOT NULL
+                THEN '' | ''
+                ELSE ''''
+            END,
+            STRING_AGG(D.Remarks, '' | '')
+        )
+    )) AS AllRemarks
+
+FROM D
+GROUP BY
+    D.ItemID,
+    D.TypeName,
+    D.ItemName,
+    D.ItemUOM
+HAVING
+    ISNULL(SUM(D.ItemQtyExist),0) > 0
+    OR ISNULL(SUM(D.ItemQtyReq),0) > 0
+ORDER BY D.ItemID;
+';
+
+---------------------------------------------------------
+-- 3) Execute
+---------------------------------------------------------
+EXEC sp_executesql
+    @sql,
+    N'@SurveyID numeric(12,0)',
+    @SurveyID = @SurveyID;
+
+	end
+
+	-- 
+	if @SpType = 4
+	begin
+		
+		select TransID,A.SurveyID,A.LocID,LocName,A.ItemID,TypeName,ItemName,CONCAT( ItemName, '-' , RemarkNo)  Cameras,Remarks
+		from SurveyCamRemarks A  Join 
+		(select TypeId,TypeName,ItemId,ItemName from ItemTypeMaster A, ItemMaster B where A.Id=B.TypeId) B
+		On A.ItemID=B.ItemId join SurveyLocation C on A.SurveyID=C.SurveyID and A.LocID=C.LocID
+		where A.SurveyID=@SurveyID order by  A.LocID,A.ItemID
+		
+		
+	end
+	
+
+
+COMMIT
+ END TRY                                                              
+ BEGIN CATCH                                                                
+ROLLBACK                                                                            
+ DECLARE @ErrorMessage NVARCHAR(4000);
+ SELECT @ErrorMessage = ERROR_MESSAGE();                                                                            
+  RAISERROR (@ErrorMessage, 16, 1);                                                                            
+END CATCH

@@ -63,6 +63,10 @@ function showPreviewModal(surveyId, locId) {
  * Submit location completion and mark as completed
  */
 function submitLocationCompletion() {
+    // Get global cable count values if they exist
+    var globalCableCount = $('#globalCableCount').val() || '';
+    var globalCableRemarks = $('#globalCableRemarks').val() || '';
+    
     // Disable button and show loading
     $('#submitLocationBtn').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Checking...');
     
@@ -73,6 +77,8 @@ function submitLocationCompletion() {
         data: { 
             surveyId: currentSurveyId, 
             locId: currentLocId,
+            globalCableCount: globalCableCount,
+            globalCableRemarks: globalCableRemarks,
             __RequestVerificationToken: window.surveyDetailsConfig.antiForgeryToken
         },
         success: function(response) {

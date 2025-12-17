@@ -203,9 +203,11 @@ function toggleWayType() {
     if (locationTypeSelect && wayTypeContainer && wayTypeSelect) {
         if (locationTypeSelect.value === 'Traffic') {
             wayTypeContainer.style.display = 'block';
+            wayTypeSelect.removeAttribute('disabled');
             wayTypeSelect.setAttribute('required', 'required');
         } else {
             wayTypeContainer.style.display = 'none';
+            wayTypeSelect.setAttribute('disabled', 'disabled');
             wayTypeSelect.removeAttribute('required');
             wayTypeSelect.value = ''; // Clear selection
         }

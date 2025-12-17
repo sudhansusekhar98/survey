@@ -266,26 +266,26 @@
                         var resultType = TempData["ResultType"]?.ToString() ?? "info";
                         var borderColor = resultType switch
                         {
-                                                    "success" => "border-success",
-                                                    "danger" => "border-danger",
-                                                    "warning" => "border-warning",
-                                                    "info" => "border-info",
+                                                                            "success" => "border-success",
+                                                                            "danger" => "border-danger",
+                                                                            "warning" => "border-warning",
+                                                                            "info" => "border-info",
                             _ => "border-info"
                         };
                         var bgColor = resultType switch
                         {
-                                                    "success" => "bg-success-subtle",
-                                                    "danger" => "bg-danger-subtle",
-                                                    "warning" => "bg-warning-subtle",
-                                                    "info" => "bg-info-subtle",
+                                                                            "success" => "bg-success-subtle",
+                                                                            "danger" => "bg-danger-subtle",
+                                                                            "warning" => "bg-warning-subtle",
+                                                                            "info" => "bg-info-subtle",
                             _ => "bg-light"
                         };
                         var textColor = resultType switch
                         {
-                                                    "success" => "text-success",
-                                                    "danger" => "text-danger",
-                                                    "warning" => "text-warning",
-                                                    "info" => "text-info",
+                                                                            "success" => "text-success",
+                                                                            "danger" => "text-danger",
+                                                                            "warning" => "text-warning",
+                                                                            "info" => "text-info",
                             _ => "text-dark"
                         };
                         <div class="mb-3 p-3 @bgColor rounded border-start border-4 @borderColor position-relative">
@@ -315,18 +315,18 @@
                             var status = ViewBag.LocationStatus as string ?? "Pending";
                             var statusBadgeClass = status switch
                             {
-                                                        "Pending" => "bg-secondary",
-                                                        "In Progress" => "bg-info",
-                                                        "Completed" => "bg-success",
-                                                        "Verified" => "bg-primary",
+                                                                                "Pending" => "bg-secondary",
+                                                                                "In Progress" => "bg-info",
+                                                                                "Completed" => "bg-success",
+                                                                                "Verified" => "bg-primary",
                                 _ => "bg-secondary"
                             };
                             var statusIcon = status switch
                             {
-                                                        "Pending" => "bi-clock",
-                                                        "In Progress" => "bi-play-circle",
-                                                        "Completed" => "bi-check-circle",
-                                                        "Verified" => "bi-shield-check",
+                                                                                "Pending" => "bi-clock",
+                                                                                "In Progress" => "bi-play-circle",
+                                                                                "Completed" => "bi-check-circle",
+                                                                                "Verified" => "bi-shield-check",
                                 _ => "bi-question-circle"
                             };
                         }
@@ -549,7 +549,7 @@
                 '@Url.Action("GetLocationPreview", "SurveyDetails")',
                 '@Url.Action("SubmitLocationCompletion", "SurveyDetails")',
                 '@Url.Action("UnlockLocationForEditing", "SurveyDetails")',
-                                        @((ViewBag.IsCompleted ?? false).ToString().ToLower()),
+                                                    @((ViewBag.IsCompleted ?? false).ToString().ToLower()),
                 $('input[name="__RequestVerificationToken"]').val()
             );
 
@@ -575,7 +575,7 @@
                     return null;
                 }
 
-                function renderItemForm(item, prepend = false) {
+                function renderItemForm(item, prepend = false, targetContainer = null) {
                     var template = $('#item-form-template').html();
 
                     const itemID = item.ItemID || item.itemID;
@@ -616,13 +616,16 @@
                     // Clear placeholder and set value via .val() to handle encoding
                     template = template.replace('value="{cameraRemarksJson}"', 'value=""');
 
+                    // Use the provided target container, or fall back to finding one by class
+                    var container = targetContainer ? $(targetContainer) : $('.selected-items-container').first();
+
                     var newElement;
                     if (prepend) {
-                        $('#selected-items-container').prepend(template);
-                        newElement = $('#selected-items-container').children().first();
+                        container.prepend(template);
+                        newElement = container.children().first();
                     } else {
-                        $('#selected-items-container').append(template);
-                        newElement = $('#selected-items-container').children().last();
+                        container.append(template);
+                        newElement = container.children().last();
                     }
 
                     const cameraRemarksJsonString = cameraRemarksJson ? (typeof cameraRemarksJson === 'string' ? cameraRemarksJson : JSON.stringify(cameraRemarksJson)) : '[]';
@@ -646,12 +649,11 @@
                         window.loadItemSpecifications(specSection);
                     }
 
-                    // Show image capture section only for Camera, Rack, Infrastructure, Public Announcement
-                    const captureEnabledTypes = ['CAM', 'RACK', 'INFRA', 'PUBLIC', 'ANNOUNCEMENT', 'PA'];
-                    const shouldShowCapture = captureEnabledTypes.some(type =>
-                        itemCodeUpper.includes(type) || itemName.toUpperCase().includes(type)
-                    );
-                    if (shouldShowCapture) {
+                    // Show image capture section only for specific ItemTypeMaster types:
+                    // Camera (100), Indoor - Rack (102), Outdoor - Rack (103), Infrastructure (109), Traffic (1104)
+                    const captureEnabledItemTypeIds = [100, 102, 103, 109, 1104];
+                    const currentItemTypeId = parseInt(newElement.closest('.item-selection-form').find('input[name="ItemTypeID"]').val()) || 0;
+                    if (captureEnabledItemTypeIds.includes(currentItemTypeId)) {
                         newElement.find('.image-capture-section').show();
                     }
 
@@ -725,10 +727,12 @@
                     });
                 }
 
-                function initializeItemSelection() {
+                function initializeItemSelection(itemTypeId) {
                     if (typeof selectedItemsData !== 'undefined' && selectedItemsData.length > 0) {
+                        // Get the correct container for this ItemType
+                        var targetContainer = itemTypeId ? '#selected-items-container-' + itemTypeId : null;
                         selectedItemsData.forEach(function (item) {
-                            renderItemForm(item, false);
+                            renderItemForm(item, false, targetContainer);
                         });
                     }
                 }
@@ -750,7 +754,7 @@
                         success: function (response) {
                             targetContainer.html(response);
                             button.closest('.text-center').hide();
-                            initializeItemSelection();
+                            initializeItemSelection(itemTypeId);
                         },
                         error: function () {
                             targetContainer.html('<div class="alert alert-danger">Error loading content. Please try again.</div>');
@@ -778,7 +782,9 @@
                         Remarks: '',
                         CameraRemarksJson: '[]'
                     };
-                    renderItemForm(item, true);
+                    // Pass the correct container for this ItemType
+                    var targetContainer = '#selected-items-container-' + itemTypeId;
+                    renderItemForm(item, true, targetContainer);
                     dropdown.find('option[value="' + selectedItemId + '"]').remove();
                     dropdown.val('');
                 });

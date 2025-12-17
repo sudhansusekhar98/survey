@@ -6,7 +6,11 @@
     var editLocation = isEdit ? Model.FirstOrDefault(l => l.LocID == editId) : null;
     var surveyId = ViewBag.SelectedSurveyId;
     var surveyName = ViewBag.SelectedSurveyName;
-    var hasExistingLocations = Model != null && Model.Count > 0;
+    // Filter out global locations for regular display
+    var regularLocations = Model?.Where(l => !l.IsGlobal).ToList() ?? new List<SurveyApp.Models.SurveyLocationModel>();
+    // Get the global location
+    var globalLocation = Model?.FirstOrDefault(l => l.IsGlobal);
+    var hasExistingLocations = regularLocations.Count > 0;
     // Show form if: editing, or no locations exist, or user clicked add button (handled via JS)
     var showFormByDefault = isEdit || !hasExistingLocations;
 }
@@ -45,6 +49,7 @@
                                 aria-label="Close"></button>
                         </div>
                     }
+
 
                     <!-- Add New Location Button (shown when locations exist and not editing) -->
                     @if (hasExistingLocations && !isEdit)
@@ -152,10 +157,12 @@
                                         <label>Way Type</label>
                                         @if (ViewData.ModelState.ContainsKey("WayType"))
                                         {
-                                            <span class="text-danger">@ViewData.ModelState["WayType"].Errors.FirstOrDefault()?.ErrorMessage</span>
+                                            <span
+                                                class="text-danger">@ViewData.ModelState["WayType"].Errors.FirstOrDefault()?.ErrorMessage</span>
                                         }
                                     </div>
-                                </div>                                <div class="col-12 mb-2">
+                                </div>
+                                <div class="col-12 mb-2">
                                     <button type="button" class="btn btn-info" id="fetchLocationBtn">
                                         <i class="bi bi-geo-alt-fill me-2"></i>Fetch Location via GPS
                                     </button>
@@ -202,124 +209,219 @@
                         </form>
                     </div>
 
-                    <!-- Locations Cards -->
-                    @if (Model != null && Model.Count > 0)
-                    {
-                        <div class="row g-3 mt-3"> @* reduced from mt-4 *@
-                            @foreach (var loc in Model)
-                            {
-                                <div class="col-12 col-md-4 col-lg-3">
-                                    <div class="card h-100 shadow-sm border-0 hover-lift">
-                                        <div class="card-header bg-light-purple border-0 d-flex justify-content-between align-items-center py-2"
-                                            style="background-color: rgb(159 139 233 / 78%);">
-                                            <span class="badge bg-purple">ID: @loc.LocID</span>
-                                            <span class="badge @(loc.Isactive ? "bg-success" : "bg-secondary")">
-                                                @(loc.Isactive ? "Active" : "Inactive")
+                    <!-- Locations Cards (includes Global Location and regular locations in same row) -->
+                    <div class="row g-3 mt-3">
+                        <!-- Global Location Card -->
+                        @if (globalLocation != null)
+                        {
+                            <div class="col-12 col-md-4 col-lg-3">
+                                <div class="card h-100 shadow-sm border-primary hover-lift">
+                                    <div
+                                        class="card-header bg-primary border-0 d-flex justify-content-between align-items-center py-2">
+                                        <span class="badge bg-light text-primary">ID: @globalLocation.LocID</span>
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-globe me-1"></i>Global
+                                        </span>
+                                    </div>
+
+                                    <div class="card-body py-2">
+                                        <h5 class="card-title text-dark fw-semibold mb-2">
+                                            <i class="bi bi-globe text-primary me-2"></i>@globalLocation.LocName
+                                        </h5>
+
+                                        <div class="mb-1">
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-hash me-1"></i><strong>Survey ID:</strong>
+                                            </small>
+                                            <span class="text-dark">@globalLocation.SurveyID</span>
+                                        </div>
+
+                                        <div class="mb-1">
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-signpost me-1"></i><strong>Location Type:</strong>
+                                            </small>
+                                            <span class="badge bg-primary">@globalLocation.LocationType</span>
+                                        </div>
+
+                                        <div class="mb-1">
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-flag me-1"></i><strong>Status:</strong>
+                                            </small>
+                                            @{
+                                                var globalStatusDict = ViewBag.LocationStatuses as Dictionary<int, string>;
+                                                var globalStatus = globalStatusDict != null &&
+                                                globalStatusDict.ContainsKey(globalLocation.LocID)
+                                                ? globalStatusDict[globalLocation.LocID]
+                                                : "Pending";
+                                                var globalStatusClass = globalStatus switch
+                                                {
+                                                    "Pending" => "bg-secondary",
+                                                    "In Progress" => "bg-info",
+                                                    "Completed" => "bg-success",
+                                                    "Verified" => "bg-primary",
+                                                    _ => "bg-secondary"
+                                                                };
+                                                var globalStatusIcon = globalStatus switch
+                                                {
+                                                    "Pending" => "bi-clock",
+                                                    "In Progress" => "bi-play-circle",
+                                                    "Completed" => "bi-check-circle",
+                                                    "Verified" => "bi-shield-check",
+                                                    _ => "bi-question-circle"
+                                                                };
+                                            }
+                                            <span class="badge @globalStatusClass">
+                                                <i class="bi @globalStatusIcon me-1"></i>@globalStatus
                                             </span>
                                         </div>
 
-                                        <div class="card-body py-2">
-                                            <h5 class="card-title text-dark fw-semibold mb-2">
-                                                <i class="bi bi-geo-alt-fill text-primary me-2"></i>@loc.LocName
-                                            </h5>
-
-                                            <div class="mb-1">
-                                                <small class="text-muted d-block">
-                                                    <i class="bi bi-hash me-1"></i><strong>Survey ID:</strong>
-                                                </small>
-                                                <span class="text-dark">@loc.SurveyID</span>
-                                            </div>
-
-                                            <div class="mb-1">
-                                                <small class="text-muted d-block">
-                                                    <i class="bi bi-compass me-1"></i><strong>Coordinates:</strong>
-                                                </small>
-                                                <span class="text-dark">@loc.LocLat, @loc.LocLog</span>
-                                                @if (loc.LocLat != null && loc.LocLog != null)
-                                                {
-                                                    <a class="btn btn-link btn-sm px-1 py-0 ms-2" target="_blank"
-                                                        href="https://www.google.com/maps/search/?api=1&query=@loc.LocLat,@loc.LocLog">
-                                                        <i class="bi bi-geo-fill"></i>&nbsp;See in Maps
-                                                    </a>
-                                                }
-                                            </div>
-
-                                            <div class="mb-1">
-                                                <small class="text-muted d-block">
-                                                    <i class="bi bi-signpost me-1"></i><strong>Location Type:</strong>
-                                                </small>
-                                                <span class="badge bg-purple">@loc.LocationType</span>
-                                            </div>
-
-                                            @if (!string.IsNullOrEmpty(loc.WayType))
-                                            {
-                                                <div class="mb-1">
-                                                    <small class="text-muted d-block">
-                                                        <i class="bi bi-arrows-move me-1"></i><strong>Way Type:</strong>
-                                                    </small>
-                                                    <span class="badge bg-info">@loc.WayType</span>
-                                                </div>
-                                            }
-
-                                            <div class="mb-1">
-                                                <small class="text-muted d-block">
-                                                    <i class="bi bi-flag me-1"></i><strong>Status:</strong>
-                                                </small>
-                                                @{
-                                                    var statusDict = ViewBag.LocationStatuses as Dictionary<int, string>;
-                                                    var status = statusDict != null && statusDict.ContainsKey(loc.LocID)
-                                                    ? statusDict[loc.LocID]
-                                                    : "Pending";
-                                                    var statusClass = status switch
-                                                    {
-                                                        "Pending" => "bg-secondary",
-                                                        "In Progress" => "bg-info",
-                                                        "Completed" => "bg-success",
-                                                        "Verified" => "bg-primary",
-                                                        _ => "bg-secondary"
-                                                    };
-                                                    var statusIcon = status switch
-                                                    {
-                                                        "Pending" => "bi-clock",
-                                                        "In Progress" => "bi-play-circle",
-                                                        "Completed" => "bi-check-circle",
-                                                        "Verified" => "bi-shield-check",
-                                                        _ => "bi-question-circle"
-                                                    };
-                                                }
-                                                <span class="badge @statusClass">
-                                                    <i class="bi @statusIcon me-1"></i>@status
-                                                </span>
-                                            </div>
-
-                                            <div class="mb-1">
-                                                <small class="text-muted d-block">
-                                                    <i class="bi bi-calendar-event me-1"></i><strong>Created:</strong>
-                                                </small>
-                                                <span class="text-dark">@loc.CreateOn?.ToString("dd-MMM-yyyy")</span>
-                                            </div>
-
-                                            <div class="mb-2">
-                                                <small class="text-muted d-block">
-                                                    <i class="bi bi-person me-1"></i><strong>Created By:</strong>
-                                                </small>
-                                                <span class="text-dark">
-                                                    @(ViewBag.UserNames != null && loc.CreateBy.HasValue && ((Dictionary<int, string>)ViewBag.UserNames).ContainsKey(loc.CreateBy.Value) ? ((Dictionary<int, string>)ViewBag.UserNames)[loc.CreateBy.Value] : loc.CreateBy)
-                                                </span>
-                                            </div>
+                                        <div class="mb-1">
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-info-circle me-1"></i><strong>Purpose:</strong>
+                                            </small>
+                                            <span class="text-dark">Common items for entire survey</span>
                                         </div>
 
-                                        <div class="card-footer bg-white border-0 py-2 px-2">
-                                            <div class="d-flex flex-wrap gap-2 justify-content-center">
-                                                <a asp-controller="SurveyCreation" asp-action="SurveyLocation"
-                                                    asp-route-editId="@loc.LocID" asp-route-surveyId="@surveyId"
-                                                    asp-route-surveyName="@surveyName"
-                                                    class="btn btn-sm btn-primary flex-fill flex-sm-grow-0"
-                                                    title="Edit Location">
-                                                    <i class="bi bi-pencil-square me-1"></i>Edit
-                                                </a>
+                                        <div class="mb-1">
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-calendar-event me-1"></i><strong>Created:</strong>
+                                            </small>
+                                            <span class="text-dark">@globalLocation.CreateOn?.ToString("dd-MMM-yyyy")</span>
+                                        </div>
+                                    </div>
 
-                                                @* <form asp-controller="SurveyCreation" asp-action="DeleteSurveyLocation"
+                                    <div class="card-footer bg-white border-0 py-2 px-2">
+                                        <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                            <a asp-controller="SurveyCreation" asp-action="GlobalItemTypeMaster"
+                                                asp-route-locId="@globalLocation.LocID" asp-route-surveyId="@surveyId"
+                                                class="btn btn-sm btn-info flex-fill flex-sm-grow-0"
+                                                title="Select Global Devices Types">
+                                                <i class="bi bi-cpu me-1"></i>Devices
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Regular Location Cards -->
+                        @foreach (var loc in regularLocations)
+                        {
+                            <div class="col-12 col-md-4 col-lg-3">
+                                <div class="card h-100 shadow-sm border-0 hover-lift">
+                                    <div class="card-header bg-light-purple border-0 d-flex justify-content-between align-items-center py-2"
+                                        style="background-color: rgb(159 139 233 / 78%);">
+                                        <span class="badge bg-purple">ID: @loc.LocID</span>
+                                        <span class="badge @(loc.Isactive ? "bg-success" : "bg-secondary")">
+                                            @(loc.Isactive ? "Active" : "Inactive")
+                                        </span>
+                                    </div>
+
+                                    <div class="card-body py-2">
+                                        <h5 class="card-title text-dark fw-semibold mb-2">
+                                            <i class="bi bi-geo-alt-fill text-primary me-2"></i>@loc.LocName
+                                        </h5>
+
+                                        <div class="mb-1">
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-hash me-1"></i><strong>Survey ID:</strong>
+                                            </small>
+                                            <span class="text-dark">@loc.SurveyID</span>
+                                        </div>
+
+                                        <div class="mb-1">
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-compass me-1"></i><strong>Coordinates:</strong>
+                                            </small>
+                                            <span class="text-dark">@loc.LocLat, @loc.LocLog</span>
+                                            @if (loc.LocLat != null && loc.LocLog != null)
+                                            {
+                                                <a class="btn btn-link btn-sm px-1 py-0 ms-2" target="_blank"
+                                                    href="https://www.google.com/maps/search/?api=1&query=@loc.LocLat,@loc.LocLog">
+                                                    <i class="bi bi-geo-fill"></i>&nbsp;See in Maps
+                                                </a>
+                                            }
+                                        </div>
+
+                                        <div class="mb-1">
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-signpost me-1"></i><strong>Location Type:</strong>
+                                            </small>
+                                            <span class="badge bg-purple">@loc.LocationType</span>
+                                        </div>
+
+                                        @if (!string.IsNullOrEmpty(loc.WayType))
+                                        {
+                                            <div class="mb-1">
+                                                <small class="text-muted d-block">
+                                                    <i class="bi bi-arrows-move me-1"></i><strong>Way Type:</strong>
+                                                </small>
+                                                <span class="badge bg-info">@loc.WayType</span>
+                                            </div>
+                                        }
+
+                                        <div class="mb-1">
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-flag me-1"></i><strong>Status:</strong>
+                                            </small>
+                                            @{
+                                                var statusDict = ViewBag.LocationStatuses as Dictionary<int, string>;
+                                                var status = statusDict != null && statusDict.ContainsKey(loc.LocID)
+                                                ? statusDict[loc.LocID]
+                                                : "Pending";
+                                                var statusClass = status switch
+                                                {
+                                                    "Pending" => "bg-secondary",
+                                                    "In Progress" => "bg-info",
+                                                    "Completed" => "bg-success",
+                                                    "Verified" => "bg-primary",
+                                                    _ => "bg-secondary"
+                                                                };
+                                                var statusIcon = status switch
+                                                {
+                                                    "Pending" => "bi-clock",
+                                                    "In Progress" => "bi-play-circle",
+                                                    "Completed" => "bi-check-circle",
+                                                    "Verified" => "bi-shield-check",
+                                                    _ => "bi-question-circle"
+                                                                };
+                                            }
+                                            <span class="badge @statusClass">
+                                                <i class="bi @statusIcon me-1"></i>@status
+                                            </span>
+                                        </div>
+
+                                        <div class="mb-1">
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-calendar-event me-1"></i><strong>Created:</strong>
+                                            </small>
+                                            <span class="text-dark">@loc.CreateOn?.ToString("dd-MMM-yyyy")</span>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-person me-1"></i><strong>Created By:</strong>
+                                            </small>
+                                            <span class="text-dark">
+                                                @(ViewBag.UserNames != null && loc.CreateBy.HasValue && ((Dictionary<int,
+                                                                                            string>)ViewBag.UserNames).ContainsKey(loc.CreateBy.Value) ?
+                                                                                            ((Dictionary<int, string>)ViewBag.UserNames)[loc.CreateBy.Value] :
+                                                                                            loc.CreateBy)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-footer bg-white border-0 py-2 px-2">
+                                        <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                            <a asp-controller="SurveyCreation" asp-action="SurveyLocation"
+                                                asp-route-editId="@loc.LocID" asp-route-surveyId="@surveyId"
+                                                asp-route-surveyName="@surveyName"
+                                                class="btn btn-sm btn-primary flex-fill flex-sm-grow-0"
+                                                title="Edit Location">
+                                                <i class="bi bi-pencil-square me-1"></i>Edit
+                                            </a>
+
+                                            @* <form asp-controller="SurveyCreation" asp-action="DeleteSurveyLocation"
                                                     method="post" class="flex-fill flex-sm-grow-0">
                                                     @Html.AntiForgeryToken()
                                                     <input type="hidden" name="locId" value="@loc.LocID" />
@@ -331,30 +433,29 @@
                                                     </button>
                                                 </form> *@
 
-                                                @if (loc.Isactive)
-                                                {
-                                                    <a asp-controller="SurveyCreation" asp-action="ItemTypeMaster"
-                                                        asp-route-locId="@loc.LocID" asp-route-surveyId="@surveyId"
-                                                        class="btn btn-sm btn-info flex-fill flex-sm-grow-0"
-                                                        title="Select Device Types">
-                                                        <i class="bi bi-cpu me-1"></i>Devices
-                                                    </a>
-                                                }
-                                                else
-                                                {
-                                                    <button type="button" class="btn btn-sm btn-secondary flex-fill flex-sm-grow-0"
-                                                        title="Location is inactive" disabled>
-                                                        <i class="bi bi-cpu me-1"></i>Devices
-                                                    </button>
-                                                }
-                                            </div>
+                                                    @if (loc.Isactive)
+                                            {
+                                                <a asp-controller="SurveyCreation" asp-action="ItemTypeMaster"
+                                                    asp-route-locId="@loc.LocID" asp-route-surveyId="@surveyId"
+                                                    class="btn btn-sm btn-info flex-fill flex-sm-grow-0"
+                                                    title="Select Device Types">
+                                                    <i class="bi bi-cpu me-1"></i>Devices
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="btn btn-sm btn-secondary flex-fill flex-sm-grow-0"
+                                                    title="Location is inactive" disabled>
+                                                    <i class="bi bi-cpu me-1"></i>Devices
+                                                </button>
+                                            }
                                         </div>
                                     </div>
                                 </div>
-                            }
-                        </div>
-                    }
-                    else
+                            </div>
+                        }
+                    </div>
+                    @if (globalLocation == null && regularLocations.Count == 0)
                     {
                         <div class="text-center py-5 mt-4">
                             <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>

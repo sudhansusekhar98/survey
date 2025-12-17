@@ -253,6 +253,7 @@ namespace SurveyApp.Controllers
             DataTable dtSurveyDetails = _surveyRepo.GetSurveyDetails(surveyId, 1);
             DataTable dtSurveyLocEmp = _surveyRepo.GetSurveyDetails(surveyId, 2);
             DataTable dtSurveyItems = _surveyRepo.GetSurveyDetails(surveyId, 3);
+            DataTable dtGlobalItems = _surveyRepo.GetSurveyDetails(surveyId, 5); // Global cable counts
 
             // Add image URL columns to dtSurveyItems
             dtSurveyItems = AddImageColumnsToItemsTable(dtSurveyItems, surveyId);
@@ -299,6 +300,7 @@ namespace SurveyApp.Controllers
             ViewBag.SurveyDetails = dtSurveyDetails;
             ViewBag.SurveyLocEmp = dtSurveyLocEmp;
             ViewBag.SurveyItems = dtSurveyItems;
+            ViewBag.GlobalItems = dtGlobalItems; // Global cable counts
             ViewBag.SurveyId = surveyId;
             ViewBag.Submission = submission;
             ViewBag.CameraRemarks = cameraRemarks;

@@ -432,17 +432,17 @@ wwwroot\js\dashboards-analytics.js
 wwwroot\js\DBChart.js
 wwwroot\js\extended-ui-perfect-scrollbar.js
 wwwroot\js\form-basic-inputs.js
-wwwroot\js\item-master-selection.js
+wwwroot\js\survey-details.js
 wwwroot\js\main.js
 wwwroot\js\pages-account-settings-account.js
 wwwroot\js\poleInfrastructure.js
 wwwroot\js\profile.js
 wwwroot\js\reportCharts.js
 wwwroot\js\site.js
-wwwroot\js\survey-details.js
-wwwroot\js\survey-index.js
+wwwroot\js\item-specifications.js
+wwwroot\js\item-specifications-conditional.js
 wwwroot\js\survey-location-status.js
-wwwroot\js\survey-location.js
+wwwroot\js\item-master-selection.js
 wwwroot\js\ui-modals.js
 wwwroot\js\ui-popover.js
 wwwroot\js\ui-toasts.js
@@ -486,3 +486,5 @@ wwwroot\vendor\libs\masonry\masonry.js
 wwwroot\vendor\libs\perfect-scrollbar\perfect-scrollbar.css
 wwwroot\vendor\libs\perfect-scrollbar\perfect-scrollbar.js
 wwwroot\vendor\libs\popper\popper.js
+wwwroot\js\survey-index.js
+wwwroot\js\survey-location.js

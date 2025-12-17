@@ -7,9 +7,9 @@ using SurveyApp.Models;
 using System.Data;
 
 namespace SurveyApp.Repo
-       
+
 {
-        public class SurveyRepo : ISurvey
+    public class SurveyRepo : ISurvey
     {
         public bool AddSurvey(SurveyModel survey)
         {
@@ -47,7 +47,7 @@ namespace SurveyApp.Repo
                 cmd.Parameters.AddWithValue("@SurveyStatus", survey.SurveyStatus ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@RegionID", survey.RegionID ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@ClientID", survey.ClientID ?? (object)DBNull.Value);
-                
+
                 if (survey.CreatedBy == 0)
                     cmd.Parameters.AddWithValue("@CreatedBy", DBNull.Value);
                 else
@@ -117,7 +117,7 @@ namespace SurveyApp.Repo
                 cmd.CommandType = CommandType.Text;
                 cmd.Parameters.AddWithValue("@SurveyId", surveyId);
                 cmd.Parameters.AddWithValue("@Status", status);
-                
+
                 con.Open();
                 int result = cmd.ExecuteNonQuery();
                 return result > 0;
@@ -146,7 +146,7 @@ namespace SurveyApp.Repo
                 //    LEFT JOIN RegionMaster r ON s.RegionID = r.RegionID
                 //    WHERE (@CreatedBy IS NULL OR s.CreatedBy = @CreatedBy)
                 //    ORDER BY s.SurveyId DESC", con);
-                
+
                 //if (UserId == 0)
                 //    cmd.Parameters.AddWithValue("@CreatedBy", DBNull.Value);
                 //else
@@ -244,7 +244,7 @@ namespace SurveyApp.Repo
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@SpType", 10);
                 cmd.Parameters.AddWithValue("@LocID", locId);
-                
+
                 conn.Open();
                 using var reader = cmd.ExecuteReader();
                 var dt = new DataTable();
@@ -273,7 +273,7 @@ namespace SurveyApp.Repo
                 cmd.Parameters.AddWithValue("@CreatedBy", location.CreateBy ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@LocationType", location.LocationType ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@WayType", location.WayType ?? (object)DBNull.Value);
-                
+
                 conn.Open();
                 int rowsAffected = cmd.ExecuteNonQuery();
                 return rowsAffected > 0;
@@ -456,7 +456,7 @@ namespace SurveyApp.Repo
             }
         }
 
-       
+
         public bool SaveItemTypesForLocation(Int64 surveyId, string surveyName, int locId, List<int> itemTypeIds, int createdBy)
         {
             using var conn = new SqlConnection(DBConnection.ConnectionString);
@@ -919,12 +919,12 @@ namespace SurveyApp.Repo
 
                 con.Open();
                 cmd.ExecuteNonQuery();
-                
+
                 // Update survey status to Submitted (not Completed - completion happens on approval)
                 using var updateCmd = new SqlCommand("UPDATE Survey SET SurveyStatus = 'Submitted' WHERE SurveyId = @SurveyId", con);
                 updateCmd.Parameters.AddWithValue("@SurveyId", surveyId);
                 updateCmd.ExecuteNonQuery();
-                
+
                 return true;
             }
             catch (Exception)
@@ -939,7 +939,7 @@ namespace SurveyApp.Repo
             {
                 // Get current survey status BEFORE opening transaction
                 var survey = GetSurveyById(surveyId);
-                
+
                 if (survey == null)
                 {
                     Console.WriteLine($"WithdrawSubmission: Survey {surveyId} not found");
@@ -1108,11 +1108,11 @@ namespace SurveyApp.Repo
         public SurveyCompletionStatus CheckSurveyCompletionStatus(Int64 surveyId)
         {
             var status = new SurveyCompletionStatus();
-            
+
             try
             {
                 using var con = new SqlConnection(DBConnection.ConnectionString);
-                
+
                 // Get all locations for the survey
                 using var cmd = new SqlCommand(@"
                     SELECT 
@@ -1123,19 +1123,19 @@ namespace SurveyApp.Repo
                     LEFT JOIN SurveyLocationStatus sls ON sl.LocID = sls.LocID AND sl.SurveyID = sls.SurveyID
                     WHERE sl.SurveyID = @SurveyId 
                     AND CAST(sl.Isactive AS VARCHAR(10)) IN ('Y', '1', 'True')", con);
-                
+
                 cmd.Parameters.AddWithValue("@SurveyId", surveyId);
-                
+
                 con.Open();
                 using var reader = cmd.ExecuteReader();
-                
+
                 while (reader.Read())
                 {
                     status.TotalLocations++;
                     var locationStatus = reader["LocationStatus"]?.ToString()?.Trim() ?? "Pending";
                     var locationName = reader["LocName"]?.ToString() ?? "Unknown";
-                    
-                    if (locationStatus.Equals("Completed", StringComparison.OrdinalIgnoreCase) || 
+
+                    if (locationStatus.Equals("Completed", StringComparison.OrdinalIgnoreCase) ||
                         locationStatus.Equals("Verified", StringComparison.OrdinalIgnoreCase))
                     {
                         status.CompletedLocations++;
@@ -1146,9 +1146,9 @@ namespace SurveyApp.Repo
                         status.IncompleteLocationNames.Add($"{locationName} ({locationStatus})");
                     }
                 }
-                
+
                 status.IsComplete = status.TotalLocations > 0 && status.PendingLocations == 0;
-                
+
                 if (status.TotalLocations == 0)
                 {
                     status.Message = "No locations found for this survey. Please add at least one location.";
@@ -1161,7 +1161,7 @@ namespace SurveyApp.Repo
                 {
                     status.Message = "All locations are completed. Survey is ready for submission.";
                 }
-                
+
                 return status;
             }
             catch (Exception ex)
@@ -1187,8 +1187,36 @@ namespace SurveyApp.Repo
                 cmd.Parameters.AddWithValue("@DueDate", (object)DueDate ?? DBNull.Value);
 
                 con.Open();
-                int rowsAffected = cmd.ExecuteNonQuery();
-                return rowsAffected > 0;
+                cmd.ExecuteNonQuery();
+                // Return true on successful execution - even if no rows affected (no assignments exist)
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // log ex.ToString()
+                Console.WriteLine($"Error updating due date: {ex.Message}");
+                return false;
+            }
+        }
+
+        public DataTable GetSurveyDetails(Int64 surveyId, int spType)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand("dbo.SpReports", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@SpType", spType);
+                cmd.Parameters.AddWithValue("@SurveyID", surveyId);
+
+                con.Open();
+
+                using var adapter = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                adapter.Fill(dt);
+
+                return dt;
             }
             catch (Exception ex)
             {
@@ -1196,32 +1224,6 @@ namespace SurveyApp.Repo
                 throw;
             }
         }
-
-        public DataTable GetSurveyDetails(Int64 surveyId, int spType)
-{
-    try
-    {
-        using var con = new SqlConnection(DBConnection.ConnectionString);
-        using var cmd = new SqlCommand("dbo.SpReports", con);
-        cmd.CommandType = CommandType.StoredProcedure;
-
-        cmd.Parameters.AddWithValue("@SpType", spType);
-        cmd.Parameters.AddWithValue("@SurveyID", surveyId);
-
-        con.Open();
-
-        using var adapter = new SqlDataAdapter(cmd);
-        var dt = new DataTable();
-        adapter.Fill(dt);
-
-        return dt;
-    }
-    catch (Exception ex)
-    {
-        // log ex.ToString()
-        throw;
-    }
-}
 
         public void SaveGlobalCableCount(Int64 surveyId, int locId, string cableCount, string remarks, int userId)
         {
@@ -1267,7 +1269,7 @@ namespace SurveyApp.Repo
             try
             {
                 using var con = new SqlConnection(DBConnection.ConnectionString);
-                
+
                 // First, get the specifications (Options column removed - options are in separate table)
                 using var cmd = new SqlCommand(@"
                     SELECT ItemId, SpecificationID, SpecificationName, InputType, 
@@ -1285,7 +1287,7 @@ namespace SurveyApp.Repo
                 adapter.Fill(dt);
 
                 var specifications = SqlDbHelper.DataTableToList<ItemSpecificationModel>(dt);
-                
+
                 // For each specification with InputType = 'dropdown', fetch options from ItemSpecificationOptionsMaster
                 foreach (var spec in specifications)
                 {
@@ -1299,7 +1301,7 @@ namespace SurveyApp.Repo
                         }
                     }
                 }
-                
+
                 return specifications;
             }
             catch (Exception ex)
@@ -1359,7 +1361,7 @@ namespace SurveyApp.Repo
         public bool SaveSpecificationDetails(SpecificationDetailsSubmitModel model, int userId)
         {
             Console.WriteLine($"[SurveyRepo] SaveSpecificationDetails - SurveyID: {model.SurveyID}, LocID: {model.LocID}, ItemID: {model.ItemID}");
-            
+
             if (model.Specifications == null || model.Specifications.Count == 0)
             {
                 Console.WriteLine("[SurveyRepo] No specifications to save");
@@ -1382,9 +1384,9 @@ namespace SurveyApp.Repo
                     {
                         // Extract instance number from spec if available, default to 1
                         int instanceNumber = spec.InstanceNumber > 0 ? spec.InstanceNumber : 1;
-                        
+
                         Console.WriteLine($"[SurveyRepo] Saving spec: SpecID={spec.SpecificationID}, Instance={instanceNumber}, Value={spec.SpecificationDetails}");
-                        
+
                         // Use stored procedure for save/update
                         using var cmd = new SqlCommand("SpSaveSpecificationDetails", con, transaction);
                         cmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -1394,7 +1396,7 @@ namespace SurveyApp.Repo
                         cmd.Parameters.AddWithValue("@ItemID", model.ItemID);
                         cmd.Parameters.AddWithValue("@SpecificationID", spec.SpecificationID);
                         cmd.Parameters.AddWithValue("@InstanceNumber", instanceNumber);
-                        cmd.Parameters.AddWithValue("@SpecificationDetails", 
+                        cmd.Parameters.AddWithValue("@SpecificationDetails",
                             string.IsNullOrEmpty(spec.SpecificationDetails) ? (object)DBNull.Value : spec.SpecificationDetails);
 
                         using var reader = cmd.ExecuteReader();
@@ -1402,7 +1404,7 @@ namespace SurveyApp.Repo
                         {
                             int success = reader.GetInt32(0);
                             string message = reader.GetString(1);
-                            
+
                             if (success == 1)
                             {
                                 Console.WriteLine($"[SurveyRepo] Success: {message}");
@@ -1466,5 +1468,144 @@ namespace SurveyApp.Repo
                 return new List<SpecificationOptionModel>();
             }
         }
+
+        #region Survey-Level Cable Count Methods
+
+        // Get all cable items from ItemMaster (TypeId = Cable category ID 107)
+        public List<CableItemModel> GetCableItems()
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand(@"
+                    SELECT 
+                        ItemId,
+                        ItemName,
+                        ItemCode,
+                        ISNULL(ItemUOM, 'Mtrs') AS ItemUOM,
+                        ISNULL(ItemDesc, '') AS ItemDesc
+                    FROM ItemMaster
+                    WHERE TypeId = 107  -- Cable category
+                      AND IsActive = 1
+                    ORDER BY SqNo, ItemName
+                ", con);
+
+                con.Open();
+                using var adapter = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                adapter.Fill(dt);
+
+                return SqlDbHelper.DataTableToList<CableItemModel>(dt);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching cable items: {ex.Message}");
+                return new List<CableItemModel>();
+            }
+        }
+
+        /// <summary>
+        /// Get saved cable counts for a survey (stored in SurveyDetails with LocID = 0)
+        /// </summary>
+        public List<SurveyCableCountModel> GetSurveyCableCounts(long surveyId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand(@"
+                    SELECT 
+                        sd.ItemID AS ItemId,
+                        ISNULL(im.ItemName, '') AS ItemName,
+                        ISNULL(im.ItemCode, '') AS ItemCode,
+                        ISNULL(im.ItemUOM, 'Mtrs') AS ItemUOM,
+                        ISNULL(sd.ItemQtyReq, 0) AS Quantity,
+                        ISNULL(sd.Remarks, '') AS Remarks
+                    FROM SurveyDetails sd
+                    LEFT JOIN ItemMaster im ON sd.ItemID = im.ItemId
+                    WHERE sd.SurveyID = @SurveyID
+                      AND (sd.LocID = 0 OR sd.LocID IS NULL)
+                      AND sd.ItemTypeID = 107  -- Cable category
+                    ORDER BY im.SqNo, im.ItemName
+                ", con);
+
+                cmd.Parameters.AddWithValue("@SurveyID", surveyId);
+
+                con.Open();
+                using var adapter = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                adapter.Fill(dt);
+
+                return SqlDbHelper.DataTableToList<SurveyCableCountModel>(dt);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching survey cable counts: {ex.Message}");
+                return new List<SurveyCableCountModel>();
+            }
+        }
+
+        /// <summary>
+        /// Save cable counts for a survey (stored in SurveyDetails with LocID = 0)
+        /// </summary>
+        public bool SaveSurveyCableCounts(long surveyId, List<SurveyCableCountModel> cableCounts, int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                con.Open();
+
+                using var transaction = con.BeginTransaction();
+                try
+                {
+                    // Delete existing cable counts for this survey (LocID = 0, ItemTypeID = 107)
+                    using (var deleteCmd = new SqlCommand(@"
+                        DELETE FROM SurveyDetails 
+                        WHERE SurveyID = @SurveyID 
+                          AND (LocID = 0 OR LocID IS NULL)
+                          AND ItemTypeID = 107
+                    ", con, transaction))
+                    {
+                        deleteCmd.Parameters.AddWithValue("@SurveyID", surveyId);
+                        deleteCmd.ExecuteNonQuery();
+                    }
+
+                    // Insert new cable counts
+                    foreach (var cable in cableCounts.Where(c => c.Quantity > 0))
+                    {
+                        using var insertCmd = new SqlCommand(@"
+                            INSERT INTO SurveyDetails 
+                                (SurveyID, LocID, ItemTypeID, ItemID, ItemQtyExist, ItemQtyReq, Remarks, CreateOn, CreateBy)
+                            VALUES 
+                                (@SurveyID, 0, 107, @ItemID, 0, @Quantity, @Remarks, GETDATE(), @CreateBy)
+                        ", con, transaction);
+
+                        insertCmd.Parameters.AddWithValue("@SurveyID", surveyId);
+                        insertCmd.Parameters.AddWithValue("@ItemID", cable.ItemId);
+                        insertCmd.Parameters.AddWithValue("@Quantity", cable.Quantity);
+                        insertCmd.Parameters.AddWithValue("@Remarks", string.IsNullOrEmpty(cable.Remarks) ? (object)DBNull.Value : cable.Remarks);
+                        insertCmd.Parameters.AddWithValue("@CreateBy", userId);
+
+                        insertCmd.ExecuteNonQuery();
+                    }
+
+                    transaction.Commit();
+                    Console.WriteLine($"[SurveyRepo] Saved {cableCounts.Count(c => c.Quantity > 0)} cable counts for survey {surveyId}");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[SurveyRepo] Transaction error saving cable counts: {ex.Message}");
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving survey cable counts: {ex.Message}");
+                return false;
+            }
+        }
+
+        #endregion
     }
 }

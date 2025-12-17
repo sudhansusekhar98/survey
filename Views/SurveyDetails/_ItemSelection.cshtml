@@ -33,7 +33,8 @@
         </div>
     </div>
 
-    <div id="selected-items-container">
+    <div id="selected-items-container-@Model.ItemTypeID" class="selected-items-container"
+        data-itemtypeid="@Model.ItemTypeID">
         <!-- Items that are already selected will be rendered here by JavaScript -->
     </div>
 
@@ -185,6 +186,34 @@
         const specsCache = {};
 
         /**
+         * Collect current DOM values for specifications before re-rendering
+         */
+        function collectCurrentDomValues(container) {
+            const domValues = [];
+            const card = container.closest('.card');
+            if (!card) return domValues;
+
+            // Find all specification inputs in the card (they may be placed in different locations)
+            const specInputs = card.querySelectorAll('input[name^="ItemSpecs_"], select[name^="ItemSpecs_"]');
+            specInputs.forEach(input => {
+                // Parse the name: ItemSpecs_{itemIndex}_{specId}_{instance}
+                const nameParts = input.name.split('_');
+                if (nameParts.length >= 4) {
+                    const specId = parseInt(nameParts[2]);
+                    const instance = parseInt(nameParts[3]);
+                    if (!isNaN(specId) && !isNaN(instance)) {
+                        domValues.push({
+                            specificationID: specId,
+                            instanceNumber: instance,
+                            value: input.value
+                        });
+                    }
+                }
+            });
+            return domValues;
+        }
+
+        /**
          * Load specifications for an item and render them
          */
         async function loadItemSpecifications(container) {
@@ -198,6 +227,9 @@
 
             const specsContainer = container.querySelector('.specifications-container');
             const loadingEl = container.querySelector('.specifications-loading');
+
+            // Collect current DOM values BEFORE clearing/re-rendering
+            const currentDomValues = collectCurrentDomValues(container);
 
             // Show loading
             if (loadingEl) loadingEl.classList.remove('d-none');
@@ -235,20 +267,37 @@
                     console.log('Could not load saved specification details:', e);
                 }
 
+                // Merge DOM values with saved details (DOM values take precedence)
+                // This preserves unsaved user input when quantities change
+                currentDomValues.forEach(domVal => {
+                    // Find if this spec/instance exists in savedDetails
+                    const existingIdx = savedDetails.findIndex(sd =>
+                        sd.specificationID === domVal.specificationID &&
+                        sd.instanceNumber === domVal.instanceNumber
+                    );
+                    if (existingIdx >= 0) {
+                        // Override with DOM value
+                        savedDetails[existingIdx].value = domVal.value;
+                    } else {
+                        // Add DOM value as new entry
+                        savedDetails.push(domVal);
+                    }
+                });
+
                 // Get quantities for conditional display
                 const card = container.closest('.card');
                 const existQty = parseInt(card?.querySelector('.cam-qty-exist')?.value || 0);
                 const reqQty = parseInt(card?.querySelector('.cam-qty-req')?.value || 0);
 
-                            // Render specifications
-                            renderSpecifications(specsContainer, specifications, savedDetails, itemIndex, existQty, reqQty);
-                
-                            // If no specifications are left in the main container, hide the container itself
-                            if (specsContainer.querySelectorAll('.specification-field').length === 0) {
-                                container.classList.add('d-none');
-                            } else {
-                                container.classList.remove('d-none');
-                            }
+                // Render specifications
+                renderSpecifications(specsContainer, specifications, savedDetails, itemIndex, existQty, reqQty);
+
+                // If no specifications are left in the main container, hide the container itself
+                if (specsContainer.querySelectorAll('.specification-field').length === 0) {
+                    container.classList.add('d-none');
+                } else {
+                    container.classList.remove('d-none');
+                }
             } catch (error) {
                 console.error('Error loading specifications:', error);
             } finally {

@@ -14,7 +14,7 @@ namespace SurveyApp.Models
         public string LocName { get; set; } = string.Empty;
 
         [Display(Name = "Latitude")]
-        public decimal? LocLat { get; set; } 
+        public decimal? LocLat { get; set; }
 
         [Display(Name = "Longitude")]
         public decimal? LocLog { get; set; }
@@ -27,6 +27,9 @@ namespace SurveyApp.Models
 
         [Display(Name = "Way Type")]
         public string? WayType { get; set; }
+
+        [Display(Name = "Is Global Location")]
+        public bool IsGlobal { get; set; }
 
         public static List<SelectListItem> LocationTypeOptions => new List<SelectListItem>
         {

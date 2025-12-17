@@ -46,10 +46,10 @@ namespace SurveyApp.Repo
         public bool UpdateSurveyDetails(SurveyDetailsUpdate model);
 
         bool MarkLocationAsCompleted(Int64 surveyId, int locId, int userId);
-        
+
         // Global cable count for location
         void SaveGlobalCableCount(Int64 surveyId, int locId, string cableCount, string remarks, int userId);
-        
+
         // Survey Submission Methods
         bool SubmitSurvey(Int64 surveyId, int userId);
         bool WithdrawSubmission(Int64 surveyId);
@@ -60,26 +60,42 @@ namespace SurveyApp.Repo
         SurveyCompletionStatus CheckSurveyCompletionStatus(Int64 surveyId);
 
         DataTable GetSurveyDetails(long surveyId, int spType);
-        
+
         // Item Specification Methods
         /// <summary>
         /// Get all specifications defined for a specific item
         /// </summary>
         List<ItemSpecificationModel> GetItemSpecifications(int itemId);
-        
+
         /// <summary>
         /// Get saved specification details for a specific survey/location/item combination
         /// </summary>
         List<SpecificationDetailsModel> GetSpecificationDetails(long surveyId, int locId, int itemId);
-        
+
         /// <summary>
         /// Save or update specification details for a survey item
         /// </summary>
         bool SaveSpecificationDetails(SpecificationDetailsSubmitModel model, int userId);
-        
+
         /// <summary>
         /// Get dropdown options for a specification from database
         /// </summary>
         List<SpecificationOptionModel> GetSpecificationOptions(int specificationId);
+
+        // Survey-Level Cable Count Methods
+        /// <summary>
+        /// Get all cable items from ItemMaster (TypeId = Cable category)
+        /// </summary>
+        List<CableItemModel> GetCableItems();
+
+        /// <summary>
+        /// Get saved cable counts for a survey (stored in SurveyDetails with LocID = 0)
+        /// </summary>
+        List<SurveyCableCountModel> GetSurveyCableCounts(long surveyId);
+
+        /// <summary>
+        /// Save cable counts for a survey (stored in SurveyDetails with LocID = 0)
+        /// </summary>
+        bool SaveSurveyCableCounts(long surveyId, List<SurveyCableCountModel> cableCounts, int userId);
     }
 }

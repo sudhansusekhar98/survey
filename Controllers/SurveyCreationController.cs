@@ -30,72 +30,72 @@ namespace SurveyApp.Controllers
             _empRepository = empRepository;
             _locationService = locationService;
         }
-    // ...existing code...
-    // ...existing code...
+        // ...existing code...
+        // ...existing code...
 
-    // ...existing code...
+        // ...existing code...
 
-            // GET: SurveyCreation/CameraDevices 
-            public IActionResult CameraDevices()
-            {
-                return View();
-            }
-            
+        // GET: SurveyCreation/CameraDevices 
+        public IActionResult CameraDevices()
+        {
+            return View();
+        }
+
 
         // GET: SurveyCreation/Index - List all surveys with filtering
         public IActionResult Index(string? status = null, string? region = null, string? type = null, string? search = null, bool? missed = null)
         {
-            var result = _util.CheckAuthorizationAll(this, 103, null,null,"View");
+            var result = _util.CheckAuthorizationAll(this, 103, null, null, "View");
             //if (result != null) return result;
             int UserID = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
             try
             {
                 var surveys = _surveyRepository.GetAllSurveys(UserID) ?? new List<SurveyModel>();
                 var today = DateTime.Now.Date;
-                
+
                 // Handle "Missed Deadline" as a special status value
                 if (status == "Missed Deadline")
                 {
                     missed = true;
                     status = null;
                 }
-                
+
                 // Apply filters
                 if (!string.IsNullOrEmpty(status))
                 {
                     surveys = surveys.Where(s => s.SurveyStatus == status).ToList();
                 }
-                
+
                 if (!string.IsNullOrEmpty(region))
                 {
                     surveys = surveys.Where(s => s.RegionName == region).ToList();
                 }
-                
+
                 if (!string.IsNullOrEmpty(type))
                 {
                     surveys = surveys.Where(s => s.ImplementationType == type).ToList();
                 }
-                
+
                 if (missed == true)
                 {
-                    surveys = surveys.Where(s => 
-                        s.DueDate.HasValue && 
-                        s.DueDate.Value.Date < today && 
+                    surveys = surveys.Where(s =>
+                        s.DueDate.HasValue &&
+                        s.DueDate.Value.Date < today &&
                         s.SurveyStatus != "Completed"
                     ).ToList();
                 }
-                
+
                 if (!string.IsNullOrEmpty(search))
                 {
                     var searchLower = search.ToLower();
-                    surveys = surveys.Where(s => 
+                    surveys = surveys.Where(s =>
                         (s.SurveyName != null && s.SurveyName.ToLower().Contains(searchLower)) ||
                         (s.LocationSiteName != null && s.LocationSiteName.ToLower().Contains(searchLower)) ||
                         (s.CityDistrict != null && s.CityDistrict.ToLower().Contains(searchLower)) ||
                         (s.SurveyTeamName != null && s.SurveyTeamName.ToLower().Contains(searchLower))
                     ).ToList();
                 }
-                
+
                 // Get submission status and assignment status for each survey
                 foreach (var survey in surveys)
                 {
@@ -105,15 +105,15 @@ namespace SurveyApp.Controllers
                         ViewData[$"IsSubmitted_{survey.SurveyId}"] = submission.SubmissionStatus == "Submitted" || submission.SubmissionStatus == "Approved";
                         ViewData[$"IsLocked_{survey.SurveyId}"] = submission.IsLockedForEditing;
                     }
-                    
+
                     // Check if survey has team assignments
                     var assignments = _surveyRepository.GetSurveyAssignments(survey.SurveyId);
                     ViewData[$"HasAssignments_{survey.SurveyId}"] = assignments != null && assignments.Count > 0;
                 }
-                
+
                 // Get all surveys for filter options
                 var allSurveys = _surveyRepository.GetAllSurveys(UserID) ?? new List<SurveyModel>();
-                
+
                 // Pass filter options to view
                 ViewBag.StatusOptions = allSurveys
                     .Where(s => !string.IsNullOrEmpty(s.SurveyStatus))
@@ -121,42 +121,42 @@ namespace SurveyApp.Controllers
                     .Distinct()
                     .OrderBy(s => s)
                     .ToList();
-                    
+
                 ViewBag.RegionOptions = allSurveys
                     .Where(s => !string.IsNullOrEmpty(s.RegionName))
                     .Select(s => s.RegionName)
                     .Distinct()
                     .OrderBy(r => r)
                     .ToList();
-                    
+
                 ViewBag.TypeOptions = allSurveys
                     .Where(s => !string.IsNullOrEmpty(s.ImplementationType))
                     .Select(s => s.ImplementationType)
                     .Distinct()
                     .OrderBy(t => t)
                     .ToList();
-                
+
                 // Pass current filter values
                 ViewBag.CurrentStatus = status;
                 ViewBag.CurrentRegion = region;
                 ViewBag.CurrentType = type;
                 ViewBag.CurrentSearch = search;
                 ViewBag.CurrentMissed = missed;
-                ViewBag.IsFiltered = !string.IsNullOrEmpty(status) || !string.IsNullOrEmpty(region) || 
+                ViewBag.IsFiltered = !string.IsNullOrEmpty(status) || !string.IsNullOrEmpty(region) ||
                                      !string.IsNullOrEmpty(type) || !string.IsNullOrEmpty(search) || missed == true;
                 ViewBag.TotalCount = allSurveys.Count;
                 ViewBag.FilteredCount = surveys.Count;
-                
+
                 // Calculate missed deadline count for display
-                ViewBag.MissedDeadlineCount = allSurveys.Count(s => 
-                    s.DueDate.HasValue && 
-                    s.DueDate.Value.Date < today && 
+                ViewBag.MissedDeadlineCount = allSurveys.Count(s =>
+                    s.DueDate.HasValue &&
+                    s.DueDate.Value.Date < today &&
                     s.SurveyStatus != "Completed"
                 );
-                
+
                 // Check if user has create rights for surveys (RightsID 103 with IsCreate)
                 ViewBag.CanCreateSurvey = _util.IsAuthorizedWithAction(UserID, 103, "Create");
-                
+
                 return View(surveys);
             }
             catch (Exception ex)
@@ -185,7 +185,7 @@ namespace SurveyApp.Controllers
         public IActionResult Create(SurveyModel model)
         {
 
-           
+
             try
             {
                 if (!ModelState.IsValid)
@@ -197,12 +197,12 @@ namespace SurveyApp.Controllers
                     ViewBag.Employees = new SelectList(_empRepository.GetAllEmployees().Where(e => e.IsActive), "EmpID", "EmpName", model.SurveyTeamId);
                     return View("SurveyCreation", model);
                 }
-                
+
                 // Set CreatedBy from session
                 model.CreatedBy = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
 
                 bool result = _surveyRepository.AddSurvey(model);
-                
+
                 if (result)
                 {
                     TempData["ResultMessage"] = "<strong>Success!</strong> Survey created successfully.";
@@ -244,7 +244,7 @@ namespace SurveyApp.Controllers
                 return RedirectToAction("Index");
             }
             var survey = _surveyRepository.GetSurveyById(id.Value);
-            if (survey == null) 
+            if (survey == null)
             {
                 TempData["ResultMessage"] = "<strong>Not Found!</strong> Survey not found.";
                 TempData["ResultType"] = "warning";
@@ -354,11 +354,11 @@ namespace SurveyApp.Controllers
                 {
                     return NotFound();
                 }
-                
+
                 // Check if survey is submitted
                 var submission = _surveyRepository.GetSubmissionBySurveyId(id);
                 ViewBag.IsSubmitted = submission != null;
-                
+
                 return PartialView("_SurveyDetailModal", survey);
             }
             catch (Exception ex)
@@ -375,15 +375,15 @@ namespace SurveyApp.Controllers
             if (result != null) return result;
 
             var assignments = _surveyRepository.GetSurveyAssignments(surveyId) ?? new List<SurveyAssignmentModel>();
-            var survey = _surveyRepository.GetSurveyById(surveyId); 
+            var survey = _surveyRepository.GetSurveyById(surveyId);
             ViewBag.SurveyName = survey?.SurveyName;
-            
+
             if (assignments == null || assignments.Count == 0)
             {
                 TempData["ResultMessage"] = $"<strong>Info!</strong> No assignments found for this survey {surveyId}.";
                 TempData["ResultType"] = "danger";
             }
-            
+
             ViewBag.SurveyID = surveyId;
             return View("SurveyAssignment", assignments);
         }
@@ -396,18 +396,18 @@ namespace SurveyApp.Controllers
             if (result != null) return result;
 
             var model = new SurveyAssignmentModel { SurveyID = surveyId };
-            
+
             // Get existing assignments
             var existingAssignments = _surveyRepository.GetSurveyAssignments(surveyId);
             if (existingAssignments != null && existingAssignments.Count > 0)
             {
                 // Pre-populate DueDate from existing assignments
                 model.DueDate = existingAssignments[0].DueDate;
-                
+
                 // Get list of already assigned employee IDs
                 var assignedEmpIds = existingAssignments.Select(a => a.EmpID).ToList();
                 ViewBag.AssignedEmpIds = assignedEmpIds;
-                
+
                 // Get all employees and mark already assigned ones as selected (for display purposes)
                 var allEmployees = _adminRepository.GetEmpMaster();
                 var employeeList = allEmployees.Select(e => new SelectListItem
@@ -417,7 +417,7 @@ namespace SurveyApp.Controllers
                     Selected = assignedEmpIds.Contains(e.EmpID),
                     Disabled = assignedEmpIds.Contains(e.EmpID) // Disable already assigned employees
                 }).ToList();
-                
+
                 ViewBag.Employees = employeeList;
             }
             else
@@ -426,142 +426,142 @@ namespace SurveyApp.Controllers
                 ViewBag.Employees = new SelectList(_adminRepository.GetEmpMaster(), "EmpID", "EmpName");
             }
             ViewBag.SurveyID = surveyId;
-            return View(model);        
+            return View(model);
         }
 
         //POST: SurveyCreation/SurveyAssignment/Create
-                [HttpPost]
-                [ValidateAntiForgeryToken]
-                public IActionResult CreateSurveyAssignment(SurveyAssignmentModel model)
-                {
-                    int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
-                    var result = _util.CheckAuthorizationAll(this, 103, null, model.SurveyID, "Create");
-                    if (result != null) return result;
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CreateSurveyAssignment(SurveyAssignmentModel model)
+        {
+            int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
+            var result = _util.CheckAuthorizationAll(this, 103, null, model.SurveyID, "Create");
+            if (result != null) return result;
 
-                    try
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    ViewBag.Employees = new SelectList(_adminRepository.GetEmpMaster(), "EmpID", "EmpName");
+                    foreach (var key in ModelState.Keys)
                     {
-                        if (!ModelState.IsValid)
+                        var modelStateEntry = ModelState[key];
+                        if (modelStateEntry != null)
                         {
-                            ViewBag.Employees = new SelectList(_adminRepository.GetEmpMaster(), "EmpID", "EmpName");
-                            foreach (var key in ModelState.Keys)
+                            var errors = modelStateEntry.Errors;
+                            foreach (var error in errors)
                             {
-                                var modelStateEntry = ModelState[key];
-                                if (modelStateEntry != null)
-                                {
-                                    var errors = modelStateEntry.Errors;
-                                    foreach (var error in errors)
-                                    {
-                                        Console.WriteLine($"{key}: {error.ErrorMessage}");
-                                    }
-                                }
-                            }
-                            TempData["ResultMessage"] = "<strong>Validation Error!</strong> Please check all required fields.";
-                            TempData["ResultType"] = "warning";
-                            return View("CreateSurveyAssignment", model);
-                        }
-                        int createdBy = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "101");
-                        
-                        // Get existing assignments
-                        var existingAssignments = _surveyRepository.GetSurveyAssignments(model.SurveyID);
-                        var existingEmpIds = existingAssignments?.Select(a => a.EmpID).ToList() ?? new List<int>();
-                        var selectedEmpIds = model.SelectedEmpIDs ?? new List<int>();
-                        
-                        int addedCount = 0;
-                        int removedCount = 0;
-                        int skippedCount = 0;
-                        
-                        // Find employees to add (selected but not currently assigned)
-                        var empIdsToAdd = selectedEmpIds.Except(existingEmpIds).ToList();
-                        
-                        // Find employees to remove (currently assigned but not selected)
-                        var empIdsToRemove = existingEmpIds.Except(selectedEmpIds).ToList();
-                        
-                        // Add new assignments
-                        foreach (var empId in empIdsToAdd)
-                        {
-                            var assignment = new SurveyAssignmentModel
-                            {
-                                SurveyID = model.SurveyID,
-                                EmpID = empId,
-                                DueDate = model.DueDate,
-                                CreateBy = createdBy,
-                            };
-                            
-                            if (_surveyRepository.AddSurveyAssignment(assignment))
-                            {
-                                addedCount++;
+                                Console.WriteLine($"{key}: {error.ErrorMessage}");
                             }
                         }
-                        
-                        // Remove unchecked assignments
-                        foreach (var empId in empIdsToRemove)
-                        {
-                            var assignmentToRemove = existingAssignments?.FirstOrDefault(a => a.EmpID == empId);
-                            if (assignmentToRemove != null && _surveyRepository.DeleteSurveyAssignment(assignmentToRemove.TransID))
-                            {
-                                removedCount++;
-                            }
-                        }
-                        
-                        // Update due date for existing assignments that remain selected
-                        var empIdsToUpdate = selectedEmpIds.Intersect(existingEmpIds).ToList();
-                        foreach (var empId in empIdsToUpdate)
-                        {
-                            var assignmentToUpdate = existingAssignments?.FirstOrDefault(a => a.EmpID == empId);
-                            if (assignmentToUpdate != null && assignmentToUpdate.DueDate != model.DueDate)
-                            {
-                                assignmentToUpdate.DueDate = model.DueDate;
-                                _surveyRepository.UpdateSurveyAssignment(assignmentToUpdate);
-                            }
-                        }
-                        
-                        // Update survey status based on assignment changes
-                        var currentAssignments = _surveyRepository.GetSurveyAssignments(model.SurveyID);
-                        if (currentAssignments != null && currentAssignments.Count > 0)
-                        {
-                            // If there are assignments, update status to "Assigned"
-                            var survey = _surveyRepository.GetSurveyById(model.SurveyID);
-                            if (survey != null && survey.SurveyStatus == "Created")
-                            {
-                                _surveyRepository.UpdateSurveyStatus(model.SurveyID, "Assigned");
-                            }
-                        }
-                        else if (removedCount > 0 && selectedEmpIds.Count == 0)
-                        {
-                            // If all assignments were removed, revert to "Created"
-                            _surveyRepository.UpdateSurveyStatus(model.SurveyID, "Created");
-                        }
-                        
-                        // Build success message
-                        if (addedCount > 0 || removedCount > 0)
-                        {
-                            var messageParts = new List<string>();
-                            if (addedCount > 0) messageParts.Add($"{addedCount} added");
-                            if (removedCount > 0) messageParts.Add($"{removedCount} removed");
-                            
-                            TempData["ResultMessage"] = $"<strong>Success!</strong> Assignments updated: {string.Join(", ", messageParts)}.";
-                            TempData["ResultType"] = "success";
-                        }
-                        else if (selectedEmpIds.Count > 0)
-                        {
-                            TempData["ResultMessage"] = "<strong>Info!</strong> No changes made to assignments.";
-                            TempData["ResultType"] = "info";
-                        }
-                        else
-                        {
-                            TempData["ResultMessage"] = "<strong>Warning!</strong> All assignments removed. Please assign at least one employee.";
-                            TempData["ResultType"] = "warning";
-                        }
-                        
-                        return RedirectToAction("SurveyAssignment", new { surveyId = model.SurveyID });
                     }
-                    catch (Exception ex)
+                    TempData["ResultMessage"] = "<strong>Validation Error!</strong> Please check all required fields.";
+                    TempData["ResultType"] = "warning";
+                    return View("CreateSurveyAssignment", model);
+                }
+                int createdBy = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "101");
+
+                // Get existing assignments
+                var existingAssignments = _surveyRepository.GetSurveyAssignments(model.SurveyID);
+                var existingEmpIds = existingAssignments?.Select(a => a.EmpID).ToList() ?? new List<int>();
+                var selectedEmpIds = model.SelectedEmpIDs ?? new List<int>();
+
+                int addedCount = 0;
+                int removedCount = 0;
+                int skippedCount = 0;
+
+                // Find employees to add (selected but not currently assigned)
+                var empIdsToAdd = selectedEmpIds.Except(existingEmpIds).ToList();
+
+                // Find employees to remove (currently assigned but not selected)
+                var empIdsToRemove = existingEmpIds.Except(selectedEmpIds).ToList();
+
+                // Add new assignments
+                foreach (var empId in empIdsToAdd)
+                {
+                    var assignment = new SurveyAssignmentModel
                     {
-                        ViewBag.Employees = new SelectList(_adminRepository.GetEmpMaster(), "EmpID", "EmpName");
-                        TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
-                        TempData["ResultType"] = "danger";
-                        return View("CreateSurveyAssignment", model); // <-- Fix here
+                        SurveyID = model.SurveyID,
+                        EmpID = empId,
+                        DueDate = model.DueDate,
+                        CreateBy = createdBy,
+                    };
+
+                    if (_surveyRepository.AddSurveyAssignment(assignment))
+                    {
+                        addedCount++;
                     }
+                }
+
+                // Remove unchecked assignments
+                foreach (var empId in empIdsToRemove)
+                {
+                    var assignmentToRemove = existingAssignments?.FirstOrDefault(a => a.EmpID == empId);
+                    if (assignmentToRemove != null && _surveyRepository.DeleteSurveyAssignment(assignmentToRemove.TransID))
+                    {
+                        removedCount++;
+                    }
+                }
+
+                // Update due date for existing assignments that remain selected
+                var empIdsToUpdate = selectedEmpIds.Intersect(existingEmpIds).ToList();
+                foreach (var empId in empIdsToUpdate)
+                {
+                    var assignmentToUpdate = existingAssignments?.FirstOrDefault(a => a.EmpID == empId);
+                    if (assignmentToUpdate != null && assignmentToUpdate.DueDate != model.DueDate)
+                    {
+                        assignmentToUpdate.DueDate = model.DueDate;
+                        _surveyRepository.UpdateSurveyAssignment(assignmentToUpdate);
+                    }
+                }
+
+                // Update survey status based on assignment changes
+                var currentAssignments = _surveyRepository.GetSurveyAssignments(model.SurveyID);
+                if (currentAssignments != null && currentAssignments.Count > 0)
+                {
+                    // If there are assignments, update status to "Assigned"
+                    var survey = _surveyRepository.GetSurveyById(model.SurveyID);
+                    if (survey != null && survey.SurveyStatus == "Created")
+                    {
+                        _surveyRepository.UpdateSurveyStatus(model.SurveyID, "Assigned");
+                    }
+                }
+                else if (removedCount > 0 && selectedEmpIds.Count == 0)
+                {
+                    // If all assignments were removed, revert to "Created"
+                    _surveyRepository.UpdateSurveyStatus(model.SurveyID, "Created");
+                }
+
+                // Build success message
+                if (addedCount > 0 || removedCount > 0)
+                {
+                    var messageParts = new List<string>();
+                    if (addedCount > 0) messageParts.Add($"{addedCount} added");
+                    if (removedCount > 0) messageParts.Add($"{removedCount} removed");
+
+                    TempData["ResultMessage"] = $"<strong>Success!</strong> Assignments updated: {string.Join(", ", messageParts)}.";
+                    TempData["ResultType"] = "success";
+                }
+                else if (selectedEmpIds.Count > 0)
+                {
+                    TempData["ResultMessage"] = "<strong>Info!</strong> No changes made to assignments.";
+                    TempData["ResultType"] = "info";
+                }
+                else
+                {
+                    TempData["ResultMessage"] = "<strong>Warning!</strong> All assignments removed. Please assign at least one employee.";
+                    TempData["ResultType"] = "warning";
+                }
+
+                return RedirectToAction("SurveyAssignment", new { surveyId = model.SurveyID });
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Employees = new SelectList(_adminRepository.GetEmpMaster(), "EmpID", "EmpName");
+                TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
+                TempData["ResultType"] = "danger";
+                return View("CreateSurveyAssignment", model); // <-- Fix here
+            }
         }
 
         // GET: SurveyCreation/EditSurveyAssignment
@@ -608,7 +608,7 @@ namespace SurveyApp.Controllers
             {
                 // Remove SelectedEmpIDs from ModelState for edit mode
                 ModelState.Remove("SelectedEmpIDs");
-                
+
                 if (!ModelState.IsValid)
                 {
                     ViewBag.Employees = new SelectList(_adminRepository.GetEmpMaster(), "EmpID", "EmpName", model.EmpID);
@@ -698,7 +698,7 @@ namespace SurveyApp.Controllers
                 {
                     var currentUserId = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
                     var existingAssignments = _surveyRepository.GetSurveyAssignments(surveyId);
-                    
+
                     // Only auto-assign if no assignments exist
                     if ((existingAssignments == null || existingAssignments.Count == 0) && currentUserId > 0)
                     {
@@ -714,7 +714,7 @@ namespace SurveyApp.Controllers
                                 DueDate = surveyModel?.DueDate ?? DateTime.Now.AddDays(30),
                                 CreateBy = currentUserId
                             };
-                            
+
                             if (_surveyRepository.AddSurveyAssignment(selfAssignment))
                             {
                                 // Update survey status to "Assigned" for self-assignment
@@ -750,10 +750,10 @@ namespace SurveyApp.Controllers
             // Check for survey assignments and status
             var assignments = _surveyRepository.GetSurveyAssignments(surveyId);
             var survey = _surveyRepository.GetSurveyById(surveyId);
-            
+
             // If no assignments and survey status is "Created", set flag for prompt
-            if ((assignments == null || assignments.Count == 0) && 
-                survey != null && 
+            if ((assignments == null || assignments.Count == 0) &&
+                survey != null &&
                 survey.SurveyStatus?.Equals("Created", StringComparison.OrdinalIgnoreCase) == true)
             {
                 ViewBag.ShowAssignmentPrompt = true;
@@ -776,7 +776,7 @@ namespace SurveyApp.Controllers
                 Console.WriteLine($"Error loading user details for CreatedBy mapping: {ex.Message}");
                 ViewBag.UserNames = new Dictionary<int, string>();
             }
-            
+
             // Get all location statuses for this survey (with error handling)
             try
             {
@@ -788,7 +788,7 @@ namespace SurveyApp.Controllers
                 Console.WriteLine($"Error loading location statuses: {ex.Message}");
                 ViewBag.LocationStatuses = new Dictionary<int, string>();
             }
-            
+
             ViewBag.SelectedSurveyId = surveyId;
             ViewBag.SelectedSurveyName = SurveyName;
             ViewBag.LocationTypeOptions = SurveyLocationModel.LocationTypeOptions;
@@ -824,39 +824,39 @@ namespace SurveyApp.Controllers
             {
                 // Explicitly set Isactive from the parameter
                 model.Isactive = Isactive;
-                
+
                 // Get current user from session
                 int createdBy = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
                 model.CreateBy = createdBy;
 
                 // Check for duplicate location name or coordinates (only for new locations or when updating to different values)
                 var existingLocations = _surveyRepository.GetSurveyLocationById(model.SurveyID) ?? new List<SurveyLocationModel>();
-                
+
                 // For updates, exclude the current location from duplicate check
-                var locationsToCheck = model.LocID > 0 
-                    ? existingLocations.Where(l => l.LocID != model.LocID).ToList() 
+                var locationsToCheck = model.LocID > 0
+                    ? existingLocations.Where(l => l.LocID != model.LocID).ToList()
                     : existingLocations;
-                
+
                 // Check for duplicate location name
-                var duplicateName = locationsToCheck.FirstOrDefault(l => 
-                    !string.IsNullOrEmpty(l.LocName) && 
+                var duplicateName = locationsToCheck.FirstOrDefault(l =>
+                    !string.IsNullOrEmpty(l.LocName) &&
                     l.LocName.Trim().Equals(model.LocName?.Trim(), StringComparison.OrdinalIgnoreCase));
-                
+
                 if (duplicateName != null)
                 {
                     TempData["ResultMessage"] = $"<strong>Error!</strong> A location with the name '<strong>{model.LocName}</strong>' already exists for this survey.";
                     TempData["ResultType"] = "danger";
                     return RedirectToAction("SurveyLocation", new { surveyId = model.SurveyID, SurveyName = ViewBag.SelectedSurveyName });
                 }
-                
+
                 // Check for duplicate coordinates (if coordinates are provided)
                 if (model.LocLat.HasValue && model.LocLog.HasValue)
                 {
-                    var duplicateCoords = locationsToCheck.FirstOrDefault(l => 
+                    var duplicateCoords = locationsToCheck.FirstOrDefault(l =>
                         l.LocLat.HasValue && l.LocLog.HasValue &&
                         Math.Abs((double)(l.LocLat.Value - model.LocLat.Value)) < 0.0001 &&
                         Math.Abs((double)(l.LocLog.Value - model.LocLog.Value)) < 0.0001);
-                    
+
                     if (duplicateCoords != null)
                     {
                         TempData["ResultMessage"] = $"<strong>Error!</strong> A location with the same coordinates already exists (Location: <strong>{duplicateCoords.LocName}</strong>).";
@@ -866,13 +866,13 @@ namespace SurveyApp.Controllers
                 }
 
                 bool isSaved;
-        
+
                 // Check if this is an update or create operation
                 if (model.LocID > 0)
                 {
                     // Update existing location
                     isSaved = _surveyRepository.UpdateSurveyLocation(model);
-            
+
                     if (isSaved)
                     {
                         TempData["ResultMessage"] = "<strong>Success!</strong> Location updated successfully.";
@@ -896,7 +896,7 @@ namespace SurveyApp.Controllers
                         {
                             _surveyRepository.UpdateSurveyStatus(model.SurveyID, "In Progress");
                         }
-                        
+
                         TempData["ResultMessage"] = "<strong>Success!</strong> Location added successfully.";
                         TempData["ResultType"] = "success";
                     }
@@ -1016,6 +1016,47 @@ namespace SurveyApp.Controllers
             }
         }
 
+        // GET: SurveyCreation/GlobalItemTypeMaster - Shows only Cable types for Global Location
+        public IActionResult GlobalItemTypeMaster(int locId, string SurveyName, Int64 surveyId)
+        {
+            var result = _util.CheckAuthorizationAll(this, 103, null, surveyId, "View");
+            if (result != null) return result;
+
+            try
+            {
+                // Get all assigned items for this location
+                var allItems = _surveyRepository.GetItemTypebySurveyLoc(locId, surveyId) ?? new List<AssignedItemsListModel>();
+
+                // Filter to show only Cable type (ID 107)
+                var cableItems = allItems.Where(x => x.ItemTypeID == 107).ToList();
+
+                var formModel = new AssignedItemsModel
+                {
+                    SurveyId = surveyId,
+                    LocID = locId,
+                    AssignItemList = cableItems
+                };
+
+                ViewBag.LocId = locId;
+                ViewBag.SelectedSurveyId = surveyId;
+                ViewBag.SelectedSurveyName = SurveyName;
+                ViewBag.IsGlobalLocation = true;
+                return View("ItemTypeMaster", formModel);
+            }
+            catch (Exception ex)
+            {
+                TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
+                TempData["ResultType"] = "danger";
+                var emptyModel = new AssignedItemsModel
+                {
+                    SurveyId = surveyId,
+                    LocID = locId,
+                    AssignItemList = new List<AssignedItemsListModel>()
+                };
+                return View("ItemTypeMaster", emptyModel);
+            }
+        }
+
         // GET: SurveyCreation/SaveItemType
         [HttpGet]
         public IActionResult ItemTypeMaster(int locId, Int64 surveyId)
@@ -1110,19 +1151,19 @@ namespace SurveyApp.Controllers
         }
 
         // Survey Location Status Management Actions
-        
+
         [HttpPost]
         public IActionResult MarkLocationAsCompleted(long surveyId, int locId, string? remarks)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
-                
+
                 // Log the parameters being sent
                 Console.WriteLine($"MarkLocationAsCompleted called: SurveyID={surveyId}, LocID={locId}, UserID={userId}, Remarks={remarks}");
-                
+
                 bool result = _statusRepo.MarkLocationAsCompleted(surveyId, locId, userId, remarks);
-                
+
                 if (result)
                 {
                     return Json(new { success = true, message = "Location marked as completed successfully." });
@@ -1145,9 +1186,9 @@ namespace SurveyApp.Controllers
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
-                
+
                 bool result = _statusRepo.MarkLocationAsInProgress(surveyId, locId, userId, remarks);
-                
+
                 if (result)
                 {
                     return Json(new { success = true, message = "Location marked as in progress successfully." });
@@ -1169,9 +1210,9 @@ namespace SurveyApp.Controllers
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
-                
+
                 bool result = _statusRepo.MarkLocationAsVerified(surveyId, locId, userId, remarks);
-                
+
                 if (result)
                 {
                     return Json(new { success = true, message = "Location marked as verified successfully." });
@@ -1193,7 +1234,7 @@ namespace SurveyApp.Controllers
             try
             {
                 var status = _statusRepo.GetLocationStatus(surveyId, locId);
-                
+
                 if (status != null)
                 {
                     return Json(new { success = true, data = status });
@@ -1241,9 +1282,9 @@ namespace SurveyApp.Controllers
                 if (!string.IsNullOrWhiteSpace(client.State))
                 {
                     var states = await _locationService.GetStatesAsync();
-                    var matchedState = states.FirstOrDefault(s => 
+                    var matchedState = states.FirstOrDefault(s =>
                         string.Equals(s.name, client.State, StringComparison.OrdinalIgnoreCase));
-                    
+
                     if (matchedState != null)
                     {
                         stateId = matchedState.id;
@@ -1252,7 +1293,7 @@ namespace SurveyApp.Controllers
                         if (!string.IsNullOrWhiteSpace(client.City))
                         {
                             var cities = await _locationService.GetCitiesByStateAsync(matchedState.id);
-                            var matchedCity = cities.FirstOrDefault(c => 
+                            var matchedCity = cities.FirstOrDefault(c =>
                                 string.Equals(c.name, client.City, StringComparison.OrdinalIgnoreCase));
                             cityId = matchedCity?.id;
                         }
@@ -1311,9 +1352,9 @@ namespace SurveyApp.Controllers
                 return Json(new { success = false, message = $"Error: {ex.Message}" });
             }
         }
-        
+
         // Survey Submission Actions
-        
+
         [HttpGet]
         public IActionResult CheckSurveyCompletion(long surveyId)
         {
@@ -1327,27 +1368,104 @@ namespace SurveyApp.Controllers
                 return Json(new { success = false, message = $"Error: {ex.Message}" });
             }
         }
-        
+
+        #region Survey-Level Cable Count Endpoints
+
+        /// <summary>
+        /// Get all cable items from ItemMaster for the cable count modal
+        /// </summary>
+        [HttpGet]
+        public IActionResult GetCableItems()
+        {
+            try
+            {
+                var cableItems = _surveyRepository.GetCableItems();
+                return Json(new { success = true, items = cableItems });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        /// <summary>
+        /// Get saved cable counts for a survey
+        /// </summary>
+        [HttpGet]
+        public IActionResult GetSurveyCableCounts(long surveyId)
+        {
+            try
+            {
+                var cableCounts = _surveyRepository.GetSurveyCableCounts(surveyId);
+                return Json(new { success = true, cableCounts = cableCounts });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        /// <summary>
+        /// Save cable counts for a survey (called before final submission)
+        /// </summary>
+        [HttpPost]
+        public IActionResult SaveSurveyCableCounts([FromBody] SaveCableCountsRequest request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
+
+                if (userId == 0)
+                {
+                    return Json(new { success = false, message = "User not logged in." });
+                }
+
+                var cableCounts = request.CableCounts?.Select(c => new SurveyCableCountModel
+                {
+                    ItemId = c.ItemId,
+                    Quantity = c.Quantity,
+                    Remarks = c.Remarks ?? ""
+                }).ToList() ?? new List<SurveyCableCountModel>();
+
+                bool result = _surveyRepository.SaveSurveyCableCounts(request.SurveyId, cableCounts, userId);
+
+                if (result)
+                {
+                    return Json(new { success = true, message = "Cable counts saved successfully." });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to save cable counts." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        #endregion
+
         [HttpPost]
         public IActionResult SubmitSurvey(long surveyId)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
-                
+
                 if (userId == 0)
                 {
                     return Json(new { success = false, message = "User not logged in." });
                 }
-                
+
                 // Check if all locations are completed
                 var completionStatus = _surveyRepository.CheckSurveyCompletionStatus(surveyId);
-                
+
                 if (!completionStatus.IsComplete)
                 {
-                    return Json(new 
-                    { 
-                        success = false, 
+                    return Json(new
+                    {
+                        success = false,
                         message = completionStatus.Message,
                         incompleteLocations = completionStatus.IncompleteLocationNames,
                         totalLocations = completionStatus.TotalLocations,
@@ -1355,9 +1473,9 @@ namespace SurveyApp.Controllers
                         pendingLocations = completionStatus.PendingLocations
                     });
                 }
-                
+
                 bool result = _surveyRepository.SubmitSurvey(surveyId, userId);
-                
+
                 if (result)
                 {
                     TempData["ResultMessage"] = "<strong>Success!</strong> Survey submitted successfully.";
@@ -1382,7 +1500,7 @@ namespace SurveyApp.Controllers
             try
             {
                 bool result = _surveyRepository.WithdrawSubmission(surveyId);
-                
+
                 if (result)
                 {
                     TempData["ResultMessage"] = "<strong>Success!</strong> Submission withdrawn successfully.";
@@ -1416,23 +1534,23 @@ namespace SurveyApp.Controllers
                 {
                     return Json(new { success = false, message = "User not logged in." });
                 }
-                
+
                 // Check if survey is submitted
                 var submission = _surveyRepository.GetSubmissionBySurveyId(surveyId);
-                
+
                 if (submission == null)
                 {
                     return Json(new { success = false, message = "Survey has no submission record." });
                 }
-                
+
                 if (submission.SubmissionStatus == "Approved")
                 {
                     return Json(new { success = false, message = "Cannot unlock an approved survey." });
                 }
-                
+
                 // Withdraw the submission (unlocks the survey and sets status to In Progress)
                 bool result = _surveyRepository.WithdrawSubmission(surveyId);
-                
+
                 if (result)
                 {
                     TempData["ResultMessage"] = "<div class='alert alert-success'><i class='bi bi-unlock'></i> Survey unlocked successfully. You can now edit locations and data.</div>";
@@ -1452,5 +1570,5 @@ namespace SurveyApp.Controllers
             }
         }
 
-}
+    }
 }
