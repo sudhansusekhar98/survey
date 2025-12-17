@@ -610,7 +610,8 @@ namespace SurveyApp.Controllers
                 return RedirectToAction("Specifications");
             }
 
-            ViewBag.Specification = spec;
+            ViewBag.SpecificationId = spec.SpecificationID;
+            ViewBag.SpecificationName = spec.SpecificationName;
             return View(new SpecificationOptionModel { SpecificationID = specificationId, IsActive = true, DisplayOrder = 1 });
         }
 
@@ -625,7 +626,9 @@ namespace SurveyApp.Controllers
                 {
                     TempData["ResultMessage"] = "<strong>Validation Error!</strong> Option Value and Text are required.";
                     TempData["ResultType"] = "warning";
-                    ViewBag.Specification = _adminRepository.GetSpecificationById(model.SpecificationID);
+                    var spec = _adminRepository.GetSpecificationById(model.SpecificationID);
+                    ViewBag.SpecificationId = spec?.SpecificationID;
+                    ViewBag.SpecificationName = spec?.SpecificationName;
                     return View(model);
                 }
 
@@ -642,7 +645,9 @@ namespace SurveyApp.Controllers
                 {
                     TempData["ResultMessage"] = "<strong>Error!</strong> Failed to create Option.";
                     TempData["ResultType"] = "danger";
-                    ViewBag.Specification = _adminRepository.GetSpecificationById(model.SpecificationID);
+                    var spec = _adminRepository.GetSpecificationById(model.SpecificationID);
+                    ViewBag.SpecificationId = spec?.SpecificationID;
+                    ViewBag.SpecificationName = spec?.SpecificationName;
                     return View(model);
                 }
             }
@@ -650,7 +655,9 @@ namespace SurveyApp.Controllers
             {
                 TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
                 TempData["ResultType"] = "danger";
-                ViewBag.Specification = _adminRepository.GetSpecificationById(model.SpecificationID);
+                var spec = _adminRepository.GetSpecificationById(model.SpecificationID);
+                ViewBag.SpecificationId = spec?.SpecificationID;
+                ViewBag.SpecificationName = spec?.SpecificationName;
                 return View(model);
             }
         }
@@ -668,7 +675,8 @@ namespace SurveyApp.Controllers
                     return RedirectToAction("Specifications");
                 }
 
-                ViewBag.Specification = _adminRepository.GetSpecificationById(option.SpecificationID);
+                var spec = _adminRepository.GetSpecificationById(option.SpecificationID);
+                ViewBag.SpecificationName = spec?.SpecificationName;
                 return View(option);
             }
             catch (Exception ex)
@@ -690,7 +698,8 @@ namespace SurveyApp.Controllers
                 {
                     TempData["ResultMessage"] = "<strong>Validation Error!</strong> Option Value and Text are required.";
                     TempData["ResultType"] = "warning";
-                    ViewBag.Specification = _adminRepository.GetSpecificationById(model.SpecificationID);
+                    var spec = _adminRepository.GetSpecificationById(model.SpecificationID);
+                    ViewBag.SpecificationName = spec?.SpecificationName;
                     return View(model);
                 }
 
@@ -707,7 +716,8 @@ namespace SurveyApp.Controllers
                 {
                     TempData["ResultMessage"] = "<strong>Error!</strong> Failed to update Option.";
                     TempData["ResultType"] = "danger";
-                    ViewBag.Specification = _adminRepository.GetSpecificationById(model.SpecificationID);
+                    var spec = _adminRepository.GetSpecificationById(model.SpecificationID);
+                    ViewBag.SpecificationName = spec?.SpecificationName;
                     return View(model);
                 }
             }
@@ -715,7 +725,8 @@ namespace SurveyApp.Controllers
             {
                 TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
                 TempData["ResultType"] = "danger";
-                ViewBag.Specification = _adminRepository.GetSpecificationById(model.SpecificationID);
+                var spec = _adminRepository.GetSpecificationById(model.SpecificationID);
+                ViewBag.SpecificationName = spec?.SpecificationName;
                 return View(model);
             }
         }
