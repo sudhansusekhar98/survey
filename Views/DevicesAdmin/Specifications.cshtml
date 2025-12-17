@@ -1,0 +1,181 @@
+@using SurveyApp.Models
+@{
+    ViewData["Title"] = "Manage Item Specifications";
+    var specifications = ViewBag.Specifications as List<ItemSpecificationModel> ?? new List<ItemSpecificationModel>();
+    var devices = ViewBag.Devices as List<DeviceViewModel> ?? new List<DeviceViewModel>();
+    var selectedItemId = ViewBag.SelectedItemId as int?;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-purple custom-header mb-3 d-flex align-items-center">
+                    <h6 class="text-white mb-0 flex-grow-1">
+                        <i class="bi bi-sliders me-2"></i>Manage Item Specifications
+                    </h6>
+                    <a href="@Url.Action("Manage")" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Devices
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (TempData["ResultMessage"] != null)
+                    {
+                        <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show" role="alert">
+                            @Html.Raw(TempData["ResultMessage"])
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <!-- Filter and Add Section -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <form method="get" class="d-flex gap-2">
+                                <select name="itemId" class="form-select" onchange="this.form.submit()">
+                                    <option value="">-- All Devices --</option>
+                                    @foreach (var device in devices)
+                                    {
+                                        <option value="@device.ItemId" selected="@(selectedItemId == device.ItemId)">
+                                            @device.Name</option>
+                                    }
+                                </select>
+                                @if (selectedItemId.HasValue)
+                                {
+                                    <a href="@Url.Action("Specifications")" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-lg"></i>
+                                    </a>
+                                }
+                            </form>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <a href="@Url.Action("CreateSpecification", new { itemId = selectedItemId })"
+                                class="btn btn-success">
+                                <i class="bi bi-plus-circle me-1"></i> Add Specification
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered datatables-basic" id="specificationsTable">
+                            <thead class="bg-purple text-white">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Device</th>
+                                    <th>Specification Name</th>
+                                    <th>Input Type</th>
+                                    <th>Display Rule</th>
+                                    <th>Multi-Instance</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (specifications.Count > 0)
+                                {
+                                    foreach (var spec in specifications)
+                                    {
+                                        var displayRule = spec.ConditionalDisplay switch
+                                        {
+                                                                    "ExistingQtyOnly" => "Existing Qty > 0",
+                                                                    "RequiredQtyOnly" => "Required Qty > 0",
+                                                                    "BothQty" => "Either Qty > 0",
+                                            _ => "Always"
+                                        };
+                                        <tr>
+                                            <td>@spec.SpecificationID</td>
+                                            <td>@spec.Options</td> @* Options holds ItemName temporarily *@
+                                            <td><strong>@spec.SpecificationName</strong></td>
+                                            <td>
+                                                @if (spec.InputType?.ToLower() == "dropdown")
+                                                {
+                                                    <span class="badge bg-info"><i class="bi bi-chevron-down"></i> Dropdown</span>
+                                                }
+                                                else if (spec.InputType?.ToLower() == "number")
+                                                {
+                                                    <span class="badge bg-warning text-dark"><i class="bi bi-123"></i> Number</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary"><i class="bi bi-fonts"></i> Text</span>
+                                                }
+                                            </td>
+                                            <td><span class="badge bg-light text-dark">@displayRule</span></td>
+                                            <td>
+                                                @if (spec.AllowMultipleInstances)
+                                                {
+                                                    <span class="badge bg-success"><i class="bi bi-check-lg"></i> Yes</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">No</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1 justify-content-center">
+                                                    @if (spec.InputType?.ToLower() == "dropdown")
+                                                    {
+                                                        <a href="@Url.Action("SpecificationOptions", new { id = spec.SpecificationID })"
+                                                            class="btn btn-sm btn-info" title="Manage Options">
+                                                            <i class="bi bi-list-ul"></i>
+                                                        </a>
+                                                    }
+                                                    <a href="@Url.Action("EditSpecification", new { id = spec.SpecificationID })"
+                                                        class="btn btn-sm btn-primary" title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-danger"
+                                                        onclick="deleteSpecification(@spec.SpecificationID, '@spec.SpecificationName.Replace("'", "\\'")' )"
+                                                        title="Delete">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-4">
+                                            <i class="bi bi-inbox display-6 d-block mb-2"></i>
+                                            No specifications found. Click "Add Specification" to create one.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Form -->
+<form id="deleteForm" method="post" asp-action="DeleteSpecification" style="display:none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" id="deleteSpecId" />
+    <input type="hidden" name="itemId" value="@selectedItemId" />
+</form>
+
+@section Scripts {
+    <script>
+        function deleteSpecification(id, name) {
+            Swal.fire({
+                title: 'Delete Specification?',
+                html: `<p>Are you sure you want to delete "<strong>${name}</strong>"?</p>
+                       <p class="text-danger small">This will also delete all associated options and cannot be undone.</p>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteSpecId').value = id;
+                    document.getElementById('deleteForm').submit();
+                }
+            });
+        }
+    </script>
+}

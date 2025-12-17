@@ -1,0 +1,119 @@
+@model SurveyApp.Models.ItemSpecificationModel
+@{
+    ViewData["Title"] = "Create Specification";
+    var devices = ViewBag.Devices as List<SurveyApp.Models.DeviceViewModel> ?? new List<SurveyApp.Models.DeviceViewModel>();
+    var conditionalDisplayOptions = ViewBag.ConditionalDisplayOptions as
+    List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>;
+    var inputTypeOptions = ViewBag.InputTypeOptions as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-purple custom-header d-flex align-items-center">
+                    <h6 class="text-white mb-0 flex-grow-1">
+                        <i class="bi bi-plus-circle me-2"></i>Create New Specification
+                    </h6>
+                    <a href="@Url.Action("Specifications", new { itemId = Model.ItemId > 0 ? Model.ItemId : (int?)null })"
+                        class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (TempData["ResultMessage"] != null)
+                    {
+                        <div class="alert alert-@TempData["ResultType"] alert-dismissible fade show" role="alert">
+                            @Html.Raw(TempData["ResultMessage"])
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <form asp-action="CreateSpecification" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-cpu text-primary me-1"></i>Device <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="ItemId" class="form-select" required>
+                                <option value="">-- Select Device --</option>
+                                @foreach (var device in devices)
+                                {
+                                    <option value="@device.ItemId">@device.Name (@device.Code)</option>
+                                }
+                            </select>
+                            <span asp-validation-for="ItemId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-tag text-success me-1"></i>Specification Name <span
+                                    class="text-danger">*</span>
+                            </label>
+                            <input asp-for="SpecificationName" class="form-control"
+                                placeholder="e.g., Pole Owner, Road Width, Height" required />
+                            <span asp-validation-for="SpecificationName" class="text-danger"></span>
+                            <div class="form-text">This is the label that will be displayed to users.</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">
+                                    <i class="bi bi-input-cursor text-info me-1"></i>Input Type
+                                </label>
+                                <select asp-for="InputType" class="form-select" asp-items="inputTypeOptions">
+                                    <option value="text">Text Input</option>
+                                </select>
+                                <div class="form-text">
+                                    Choose "Dropdown" if you want to provide predefined options.
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">
+                                    <i class="bi bi-eye text-warning me-1"></i>Display Condition
+                                </label>
+                                <select asp-for="ConditionalDisplay" class="form-select"
+                                    asp-items="conditionalDisplayOptions">
+                                    <option value="Always">Always Show</option>
+                                </select>
+                                <div class="form-text">
+                                    When should this specification be displayed?
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input asp-for="AllowMultipleInstances" class="form-check-input" type="checkbox" />
+                                <label asp-for="AllowMultipleInstances" class="form-check-label fw-semibold">
+                                    Allow Multiple Instances
+                                </label>
+                            </div>
+                            <div class="form-text">
+                                Enable this if users should enter multiple values based on quantity (e.g., one Pole
+                                Owner per pole).
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info small">
+                            <i class="bi bi-info-circle me-1"></i>
+                            <strong>Tip:</strong> After creating a Dropdown-type specification, you can add options by
+                            clicking the "Manage Options" button in the specifications list.
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="@Url.Action("Specifications", new { itemId = Model.ItemId > 0 ? Model.ItemId : (int?)null })"
+                                class="btn btn-secondary">
+                                <i class="bi bi-x-circle me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle me-1"></i> Create Specification
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

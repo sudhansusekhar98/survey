@@ -57,5 +57,19 @@ namespace AnalyticaDocs.Repo
         bool CreateDevice(DeviceViewModel model, int userId);
         bool UpdateDevice(DeviceViewModel model, int userId);
         bool DeleteDevice(int itemId, int userId);
+
+        // Item Specifications (ItemSpecificationMaster) methods
+        List<ItemSpecificationModel> GetAllSpecifications(int? itemId = null);
+        ItemSpecificationModel? GetSpecificationById(int specificationId);
+        bool CreateSpecification(ItemSpecificationModel model, int userId);
+        bool UpdateSpecification(ItemSpecificationModel model, int userId);
+        bool DeleteSpecification(int specificationId, int userId);
+
+        // Specification Options (ItemSpecificationOptionsMaster) methods
+        List<SpecificationOptionModel> GetAllSpecificationOptions(int specificationId);
+        SpecificationOptionModel? GetSpecificationOptionById(int optionId);
+        bool CreateSpecificationOption(SpecificationOptionModel model, int userId);
+        bool UpdateSpecificationOption(SpecificationOptionModel model, int userId);
+        bool DeleteSpecificationOption(int optionId, int userId);
     }
 }

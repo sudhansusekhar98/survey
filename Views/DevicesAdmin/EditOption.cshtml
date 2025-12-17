@@ -1,0 +1,80 @@
+@model SurveyApp.Models.SpecificationOptionModel
+@{
+    ViewData["Title"] = "Edit Option";
+    var specName = ViewBag.SpecificationName as string;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-purple custom-header d-flex align-items-center">
+                    <h6 class="text-white mb-0 flex-grow-1">
+                        <i class="bi bi-pencil me-2"></i>Edit Option: @Model.OptionText
+                    </h6>
+                    <a href="@Url.Action("SpecificationOptions", new { id = Model.SpecificationID })"
+                        class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i> Cancel
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info small mb-4">
+                        <i class="bi bi-info-circle me-1"></i>
+                        <strong>Specification:</strong> @specName
+                    </div>
+
+                    <form asp-action="EditOption" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="OptionID" value="@Model.OptionID" />
+                        <input type="hidden" name="SpecificationID" value="@Model.SpecificationID" />
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Option Value <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="OptionValue" required
+                                    value="@Model.OptionValue" placeholder="Enter the internal value" />
+                                <small class="text-muted">The value stored in database (e.g., "telecom")</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Display Text <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="OptionText" required
+                                    value="@Model.OptionText" placeholder="Enter the display text" />
+                                <small class="text-muted">The text shown to users (e.g., "Telecom")</small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Display Order</label>
+                                <input type="number" class="form-control" name="DisplayOrder"
+                                    value="@Model.DisplayOrder" min="0" />
+                                <small class="text-muted">Options are sorted by this order (lower = first)</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Status</label>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" name="IsActive" value="true"
+                                        id="isActiveCheck" @(Model.IsActive ? "checked" : "") />
+                                    <label class="form-check-label" for="isActiveCheck">Active</label>
+                                </div>
+                                <small class="text-muted">Inactive options won't appear in dropdowns</small>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="@Url.Action("SpecificationOptions", new { id = Model.SpecificationID })"
+                                class="btn btn-secondary">
+                                <i class="bi bi-x-circle me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-1"></i> Update Option
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1006,6 +1006,364 @@ namespace AnalyticaDocs.Repo
         }
 
         #endregion
+
+        #region Item Specifications Management
+
+        /// <summary>
+        /// Get all specifications, optionally filtered by item ID
+        /// </summary>
+        public List<ItemSpecificationModel> GetAllSpecifications(int? itemId = null)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                var sql = @"
+                    SELECT ism.ItemId, ism.SpecificationID, ism.SpecificationName, ism.InputType, 
+                           ism.ConditionalDisplay, ism.AllowMultipleInstances,
+                           im.ItemName
+                    FROM ItemSpecificationMaster ism
+                    LEFT JOIN ItemMaster im ON ism.ItemId = im.ItemId
+                    WHERE (@ItemId IS NULL OR ism.ItemId = @ItemId)
+                    ORDER BY ism.ItemId, ism.SpecificationID";
+
+                using var cmd = new SqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("@ItemId", (object?)itemId ?? DBNull.Value);
+
+                con.Open();
+                using var adapter = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                adapter.Fill(dt);
+
+                var specs = new List<ItemSpecificationModel>();
+                foreach (DataRow row in dt.Rows)
+                {
+                    specs.Add(new ItemSpecificationModel
+                    {
+                        ItemId = Convert.ToInt32(row["ItemId"]),
+                        SpecificationID = Convert.ToInt32(row["SpecificationID"]),
+                        SpecificationName = row["SpecificationName"]?.ToString() ?? "",
+                        InputType = row["InputType"]?.ToString(),
+                        ConditionalDisplay = row["ConditionalDisplay"]?.ToString(),
+                        AllowMultipleInstances = row["AllowMultipleInstances"] != DBNull.Value && Convert.ToBoolean(row["AllowMultipleInstances"]),
+                        Options = row["ItemName"]?.ToString() // Store item name in Options temporarily for display
+                    });
+                }
+                return specs;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting specifications: {ex.Message}");
+                return new List<ItemSpecificationModel>();
+            }
+        }
+
+        /// <summary>
+        /// Get a single specification by ID
+        /// </summary>
+        public ItemSpecificationModel? GetSpecificationById(int specificationId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                var sql = @"
+                    SELECT ItemId, SpecificationID, SpecificationName, InputType, 
+                           ConditionalDisplay, AllowMultipleInstances
+                    FROM ItemSpecificationMaster
+                    WHERE SpecificationID = @SpecificationID";
+
+                using var cmd = new SqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("@SpecificationID", specificationId);
+
+                con.Open();
+                using var reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    return new ItemSpecificationModel
+                    {
+                        ItemId = Convert.ToInt32(reader["ItemId"]),
+                        SpecificationID = Convert.ToInt32(reader["SpecificationID"]),
+                        SpecificationName = reader["SpecificationName"]?.ToString() ?? "",
+                        InputType = reader["InputType"]?.ToString(),
+                        ConditionalDisplay = reader["ConditionalDisplay"]?.ToString(),
+                        AllowMultipleInstances = reader["AllowMultipleInstances"] != DBNull.Value && Convert.ToBoolean(reader["AllowMultipleInstances"])
+                    };
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting specification by ID: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Create a new specification
+        /// </summary>
+        public bool CreateSpecification(ItemSpecificationModel model, int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                var sql = @"
+                    INSERT INTO ItemSpecificationMaster (ItemId, SpecificationName, InputType, ConditionalDisplay, AllowMultipleInstances)
+                    VALUES (@ItemId, @SpecificationName, @InputType, @ConditionalDisplay, @AllowMultipleInstances)";
+
+                using var cmd = new SqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("@ItemId", model.ItemId);
+                cmd.Parameters.AddWithValue("@SpecificationName", model.SpecificationName);
+                cmd.Parameters.AddWithValue("@InputType", (object?)model.InputType ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@ConditionalDisplay", (object?)model.ConditionalDisplay ?? "Always");
+                cmd.Parameters.AddWithValue("@AllowMultipleInstances", model.AllowMultipleInstances);
+
+                con.Open();
+                return cmd.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating specification: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Update an existing specification
+        /// </summary>
+        public bool UpdateSpecification(ItemSpecificationModel model, int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                var sql = @"
+                    UPDATE ItemSpecificationMaster
+                    SET ItemId = @ItemId, 
+                        SpecificationName = @SpecificationName, 
+                        InputType = @InputType, 
+                        ConditionalDisplay = @ConditionalDisplay, 
+                        AllowMultipleInstances = @AllowMultipleInstances
+                    WHERE SpecificationID = @SpecificationID";
+
+                using var cmd = new SqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("@SpecificationID", model.SpecificationID);
+                cmd.Parameters.AddWithValue("@ItemId", model.ItemId);
+                cmd.Parameters.AddWithValue("@SpecificationName", model.SpecificationName);
+                cmd.Parameters.AddWithValue("@InputType", (object?)model.InputType ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@ConditionalDisplay", (object?)model.ConditionalDisplay ?? "Always");
+                cmd.Parameters.AddWithValue("@AllowMultipleInstances", model.AllowMultipleInstances);
+
+                con.Open();
+                return cmd.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating specification: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Delete a specification and its options
+        /// </summary>
+        public bool DeleteSpecification(int specificationId, int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                con.Open();
+                using var transaction = con.BeginTransaction();
+
+                try
+                {
+                    // First delete all options for this specification
+                    using var cmdOptions = new SqlCommand(
+                        "DELETE FROM ItemSpecificationOptionsMaster WHERE SpecificationID = @SpecificationID", 
+                        con, transaction);
+                    cmdOptions.Parameters.AddWithValue("@SpecificationID", specificationId);
+                    cmdOptions.ExecuteNonQuery();
+
+                    // Then delete the specification
+                    using var cmdSpec = new SqlCommand(
+                        "DELETE FROM ItemSpecificationMaster WHERE SpecificationID = @SpecificationID", 
+                        con, transaction);
+                    cmdSpec.Parameters.AddWithValue("@SpecificationID", specificationId);
+                    cmdSpec.ExecuteNonQuery();
+
+                    transaction.Commit();
+                    return true;
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting specification: {ex.Message}");
+                return false;
+            }
+        }
+
+        #endregion
+
+        #region Specification Options Management
+
+        /// <summary>
+        /// Get all options for a specification
+        /// </summary>
+        public List<SpecificationOptionModel> GetAllSpecificationOptions(int specificationId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                var sql = @"
+                    SELECT OptionID, SpecificationID, OptionValue, OptionText, DisplayOrder, IsActive
+                    FROM ItemSpecificationOptionsMaster
+                    WHERE SpecificationID = @SpecificationID
+                    ORDER BY DisplayOrder";
+
+                using var cmd = new SqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("@SpecificationID", specificationId);
+
+                con.Open();
+                using var adapter = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                adapter.Fill(dt);
+
+                return SqlDbHelper.DataTableToList<SpecificationOptionModel>(dt);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting specification options: {ex.Message}");
+                return new List<SpecificationOptionModel>();
+            }
+        }
+
+        /// <summary>
+        /// Get a single option by ID
+        /// </summary>
+        public SpecificationOptionModel? GetSpecificationOptionById(int optionId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                var sql = @"
+                    SELECT OptionID, SpecificationID, OptionValue, OptionText, DisplayOrder, IsActive
+                    FROM ItemSpecificationOptionsMaster
+                    WHERE OptionID = @OptionID";
+
+                using var cmd = new SqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("@OptionID", optionId);
+
+                con.Open();
+                using var reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    return new SpecificationOptionModel
+                    {
+                        OptionID = Convert.ToInt32(reader["OptionID"]),
+                        SpecificationID = Convert.ToInt32(reader["SpecificationID"]),
+                        OptionValue = reader["OptionValue"]?.ToString() ?? "",
+                        OptionText = reader["OptionText"]?.ToString() ?? "",
+                        DisplayOrder = Convert.ToInt32(reader["DisplayOrder"]),
+                        IsActive = reader["IsActive"] != DBNull.Value && Convert.ToBoolean(reader["IsActive"])
+                    };
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting option by ID: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Create a new specification option
+        /// </summary>
+        public bool CreateSpecificationOption(SpecificationOptionModel model, int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                var sql = @"
+                    INSERT INTO ItemSpecificationOptionsMaster (SpecificationID, OptionValue, OptionText, DisplayOrder, IsActive)
+                    VALUES (@SpecificationID, @OptionValue, @OptionText, @DisplayOrder, @IsActive)";
+
+                using var cmd = new SqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("@SpecificationID", model.SpecificationID);
+                cmd.Parameters.AddWithValue("@OptionValue", model.OptionValue);
+                cmd.Parameters.AddWithValue("@OptionText", model.OptionText);
+                cmd.Parameters.AddWithValue("@DisplayOrder", model.DisplayOrder);
+                cmd.Parameters.AddWithValue("@IsActive", model.IsActive);
+
+                con.Open();
+                return cmd.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating option: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Update an existing specification option
+        /// </summary>
+        public bool UpdateSpecificationOption(SpecificationOptionModel model, int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                var sql = @"
+                    UPDATE ItemSpecificationOptionsMaster
+                    SET OptionValue = @OptionValue, 
+                        OptionText = @OptionText, 
+                        DisplayOrder = @DisplayOrder, 
+                        IsActive = @IsActive
+                    WHERE OptionID = @OptionID";
+
+                using var cmd = new SqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("@OptionID", model.OptionID);
+                cmd.Parameters.AddWithValue("@OptionValue", model.OptionValue);
+                cmd.Parameters.AddWithValue("@OptionText", model.OptionText);
+                cmd.Parameters.AddWithValue("@DisplayOrder", model.DisplayOrder);
+                cmd.Parameters.AddWithValue("@IsActive", model.IsActive);
+
+                con.Open();
+                return cmd.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating option: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Delete a specification option
+        /// </summary>
+        public bool DeleteSpecificationOption(int optionId, int userId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                var sql = "DELETE FROM ItemSpecificationOptionsMaster WHERE OptionID = @OptionID";
+
+                using var cmd = new SqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("@OptionID", optionId);
+
+                con.Open();
+                return cmd.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting option: {ex.Message}");
+                return false;
+            }
+        }
+
+        #endregion
     }
 
 }
