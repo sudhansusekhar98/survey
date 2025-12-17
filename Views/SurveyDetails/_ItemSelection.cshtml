@@ -273,14 +273,18 @@
                     // Find if this spec/instance exists in savedDetails
                     const existingIdx = savedDetails.findIndex(sd =>
                         sd.specificationID === domVal.specificationID &&
-                        sd.instanceNumber === domVal.instanceNumber
+                        (sd.instanceNumber || 1) === domVal.instanceNumber
                     );
                     if (existingIdx >= 0) {
-                        // Override with DOM value
-                        savedDetails[existingIdx].value = domVal.value;
+                        // Override with DOM value - use specificationDetails property
+                        savedDetails[existingIdx].specificationDetails = domVal.value;
                     } else {
-                        // Add DOM value as new entry
-                        savedDetails.push(domVal);
+                        // Add DOM value as new entry with correct property name
+                        savedDetails.push({
+                            specificationID: domVal.specificationID,
+                            instanceNumber: domVal.instanceNumber,
+                            specificationDetails: domVal.value
+                        });
                     }
                 });
 
@@ -309,11 +313,12 @@
          * Render specifications based on conditional display rules
          */
         function renderSpecifications(container, specifications, savedDetails, itemIndex, existQty, reqQty) {
-            // Clear existing specifications (except loading indicator)
-            const existingSpecs = container.querySelectorAll('.specification-field');
-            existingSpecs.forEach(el => el.remove());
-
             const card = container.closest('.card');
+
+            // Clear ALL existing specification fields from the entire card (including those inserted outside container)
+            const allExistingSpecs = card?.querySelectorAll('.specification-field') || [];
+            allExistingSpecs.forEach(el => el.remove());
+
             const existQtyParent = card?.querySelector('.cam-qty-exist')?.closest('.col-12');
             const reqQtyParent = card?.querySelector('.cam-qty-req')?.closest('.col-12');
 

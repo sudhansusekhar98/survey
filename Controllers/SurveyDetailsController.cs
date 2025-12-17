@@ -791,19 +791,18 @@ namespace SurveyApp.Controllers
         {
             try
             {
-                // Get both the specification definitions and saved values
-                var specifications = _repository.GetItemSpecifications(itemId);
+                // Get saved values directly - return all instances
                 var savedDetails = _repository.GetSpecificationDetails(surveyId, locId, itemId);
 
-                // Merge specifications with saved values
-                var result = specifications.Select(spec => new {
-                    spec.ItemId,
-                    spec.SpecificationID,
-                    spec.SpecificationName,
-                    spec.InputType,
-                    spec.Options,
-                    SpecificationDetails = savedDetails
-                        .FirstOrDefault(sd => sd.SpecificationID == spec.SpecificationID)?.SpecificationDetails ?? ""
+                // Return all saved details with their instance numbers
+                var result = savedDetails.Select(sd => new {
+                    sd.SurveyID,
+                    sd.LocID,
+                    sd.ItemID,
+                    sd.SpecificationID,
+                    sd.SpecificationName,
+                    sd.InstanceNumber,
+                    sd.SpecificationDetails
                 }).ToList();
 
                 return Json(new { success = true, specifications = result });

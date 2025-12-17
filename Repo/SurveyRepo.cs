@@ -1326,6 +1326,7 @@ namespace SurveyApp.Repo
                         sd.ItemID, 
                         sd.SpecificationID, 
                         sd.SpecificationDetails,
+                        sd.InstanceNumber,
                         sm.SpecificationName
                     FROM SpecificationDetailsMaster sd
                     LEFT JOIN ItemSpecificationMaster sm 
@@ -1333,7 +1334,7 @@ namespace SurveyApp.Repo
                     WHERE sd.SurveyID = @SurveyID 
                       AND sd.LocID = @LocID 
                       AND sd.ItemID = @ItemID
-                    ORDER BY sd.SpecificationID
+                    ORDER BY sd.SpecificationID, sd.InstanceNumber
                 ", con);
 
                 cmd.Parameters.AddWithValue("@SurveyID", surveyId);
