@@ -6,6 +6,10 @@
     var selectedItemId = ViewBag.SelectedItemId as int?;
 }
 
+@section PageStyles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+}
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -75,9 +79,9 @@
                                     {
                                         var displayRule = spec.ConditionalDisplay switch
                                         {
-                                                                    "ExistingQtyOnly" => "Existing Qty > 0",
-                                                                    "RequiredQtyOnly" => "Required Qty > 0",
-                                                                    "BothQty" => "Either Qty > 0",
+                                                                                                        "ExistingQtyOnly" => "Existing Qty > 0",
+                                                                                                        "RequiredQtyOnly" => "Required Qty > 0",
+                                                                                                        "BothQty" => "Either Qty > 0",
                                             _ => "Always"
                                         };
                                         <tr>
@@ -123,7 +127,7 @@
                                                         <i class="bi bi-pencil"></i>
                                                     </a>
                                                     <button type="button" class="btn btn-sm btn-danger"
-                                                        onclick="deleteSpecification(@spec.SpecificationID, '@spec.SpecificationName.Replace("'", "\\'")' )"
+                                                        onclick="deleteSpecification(@spec.SpecificationID, '@spec.SpecificationName.Replace("'", "\\'")')"
                                                         title="Delete">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
@@ -158,12 +162,13 @@
 </form>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function deleteSpecification(id, name) {
             Swal.fire({
                 title: 'Delete Specification?',
                 html: `<p>Are you sure you want to delete "<strong>${name}</strong>"?</p>
-                       <p class="text-danger small">This will also delete all associated options and cannot be undone.</p>`,
+                                   <p class="text-danger small">This will also delete all associated options and cannot be undone.</p>`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545',

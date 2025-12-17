@@ -52,6 +52,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGV2aWNlc0FkbWluXENyZWF0ZU1vZHVsZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/VL Access/Survey/CODES/Survey/survey/Views/DevicesAdmin/CreateOption.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGV2aWNlc0FkbWluXENyZWF0ZU9wdGlvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/CODES/Survey/survey/Views/DevicesAdmin/CreateSpecification.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGV2aWNlc0FkbWluXENyZWF0ZVNwZWNpZmljYXRpb24uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/VL Access/Survey/CODES/Survey/survey/Views/DevicesAdmin/EditDevice.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGV2aWNlc0FkbWluXEVkaXREZXZpY2UuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -60,12 +68,28 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGV2aWNlc0FkbWluXEVkaXRNb2R1bGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/VL Access/Survey/CODES/Survey/survey/Views/DevicesAdmin/EditOption.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGV2aWNlc0FkbWluXEVkaXRPcHRpb24uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/CODES/Survey/survey/Views/DevicesAdmin/EditSpecification.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGV2aWNlc0FkbWluXEVkaXRTcGVjaWZpY2F0aW9uLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/VL Access/Survey/CODES/Survey/survey/Views/DevicesAdmin/Manage.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGV2aWNlc0FkbWluXE1hbmFnZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/VL Access/Survey/CODES/Survey/survey/Views/DevicesAdmin/ModuleDevices.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGV2aWNlc0FkbWluXE1vZHVsZURldmljZXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/CODES/Survey/survey/Views/DevicesAdmin/SpecificationOptions.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGV2aWNlc0FkbWluXFNwZWNpZmljYXRpb25PcHRpb25zLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/CODES/Survey/survey/Views/DevicesAdmin/Specifications.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGV2aWNlc0FkbWluXFNwZWNpZmljYXRpb25zLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/VL Access/Survey/CODES/Survey/survey/Views/EmployeeMaster/Create.cshtml]

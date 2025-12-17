@@ -1037,9 +1037,12 @@ namespace AnalyticaDocs.Repo
                 var specs = new List<ItemSpecificationModel>();
                 foreach (DataRow row in dt.Rows)
                 {
+                    // Skip rows where SpecificationID is null
+                    if (row["SpecificationID"] == DBNull.Value) continue;
+                    
                     specs.Add(new ItemSpecificationModel
                     {
-                        ItemId = Convert.ToInt32(row["ItemId"]),
+                        ItemId = row["ItemId"] != DBNull.Value ? Convert.ToInt32(row["ItemId"]) : 0,
                         SpecificationID = Convert.ToInt32(row["SpecificationID"]),
                         SpecificationName = row["SpecificationName"]?.ToString() ?? "",
                         InputType = row["InputType"]?.ToString(),
@@ -1105,9 +1108,11 @@ namespace AnalyticaDocs.Repo
             try
             {
                 using var con = new SqlConnection(DBConnection.ConnectionString);
+                // SpecificationID is not an identity column, so we need to generate the next ID
                 var sql = @"
-                    INSERT INTO ItemSpecificationMaster (ItemId, SpecificationName, InputType, ConditionalDisplay, AllowMultipleInstances)
-                    VALUES (@ItemId, @SpecificationName, @InputType, @ConditionalDisplay, @AllowMultipleInstances)";
+                    DECLARE @NewSpecId INT = (SELECT ISNULL(MAX(SpecificationID), 0) + 1 FROM ItemSpecificationMaster);
+                    INSERT INTO ItemSpecificationMaster (SpecificationID, ItemId, SpecificationName, InputType, ConditionalDisplay, AllowMultipleInstances)
+                    VALUES (@NewSpecId, @ItemId, @SpecificationName, @InputType, @ConditionalDisplay, @AllowMultipleInstances)";
 
                 using var cmd = new SqlCommand(sql, con);
                 cmd.Parameters.AddWithValue("@ItemId", model.ItemId);
