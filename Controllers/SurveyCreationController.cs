@@ -19,8 +19,9 @@ namespace SurveyApp.Controllers
         private readonly IClientMaster _clientRepository;
         private readonly IEmpMaster _empRepository;
         private readonly SurveyApp.Services.ILocationApiService _locationService;
+        private readonly IEmailService _emailService;
 
-        public SurveyCreationController(ISurvey surveyRepository, ICommonUtil util, IAdmin adminRepository, ISurveyLocationStatus statusRepo, IClientMaster clientRepository, IEmpMaster empRepository, SurveyApp.Services.ILocationApiService locationService)
+        public SurveyCreationController(ISurvey surveyRepository, ICommonUtil util, IAdmin adminRepository, ISurveyLocationStatus statusRepo, IClientMaster clientRepository, IEmpMaster empRepository, SurveyApp.Services.ILocationApiService locationService, IEmailService emailService)
         {
             _surveyRepository = surveyRepository;
             _util = util;
@@ -29,6 +30,7 @@ namespace SurveyApp.Controllers
             _clientRepository = clientRepository;
             _empRepository = empRepository;
             _locationService = locationService;
+            _emailService = emailService;
         }
         // ...existing code...
         // ...existing code...
@@ -469,6 +471,10 @@ namespace SurveyApp.Controllers
                 int addedCount = 0;
                 int removedCount = 0;
                 int skippedCount = 0;
+                var emailsSent = 0;
+
+                // Get survey details for email notifications
+                var survey = _surveyRepository.GetSurveyById(model.SurveyID);
 
                 // Find employees to add (selected but not currently assigned)
                 var empIdsToAdd = selectedEmpIds.Except(existingEmpIds).ToList();
@@ -490,6 +496,18 @@ namespace SurveyApp.Controllers
                     if (_surveyRepository.AddSurveyAssignment(assignment))
                     {
                         addedCount++;
+                        
+                        // Send email notification to newly assigned employee
+                        var employee = _empRepository.GetEmployeeById(empId);
+                        if (employee != null && !string.IsNullOrEmpty(employee.Email))
+                        {
+                            _ = _emailService.SendSurveyAssignmentNotificationAsync(
+                                employee.EmpName ?? "Employee",
+                                employee.Email,
+                                survey?.SurveyName ?? "Survey",
+                                model.DueDate
+                            ).ContinueWith(t => { if (t.Result) emailsSent++; });
+                        }
                     }
                 }
 
@@ -520,8 +538,8 @@ namespace SurveyApp.Controllers
                 if (currentAssignments != null && currentAssignments.Count > 0)
                 {
                     // If there are assignments, update status to "Assigned"
-                    var survey = _surveyRepository.GetSurveyById(model.SurveyID);
-                    if (survey != null && survey.SurveyStatus == "Created")
+                    var currentSurvey = _surveyRepository.GetSurveyById(model.SurveyID);
+                    if (currentSurvey != null && currentSurvey.SurveyStatus == "Created")
                     {
                         _surveyRepository.UpdateSurveyStatus(model.SurveyID, "Assigned");
                     }

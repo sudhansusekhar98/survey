@@ -45,17 +45,23 @@
                     @Model.AddressLine1
                     @if (!string.IsNullOrEmpty(Model.AddressLine2))
                     {
-                        <br />@Model.AddressLine2
+                        <br />
+                        @Model.AddressLine2
                     }
                     <br />
-                    @Model.City@((!string.IsNullOrEmpty(Model.City) && !string.IsNullOrEmpty(Model.State)) ? ", " : "")@Model.State
+                    @Model.City
+                    @((!string.IsNullOrEmpty(Model.City) && !string.IsNullOrEmpty(Model.State)) ? ", " :
+                                    "")
+                    @Model.State
                     @if (!string.IsNullOrEmpty(Model.PinCode))
                     {
-                        <text> - </text>@Model.PinCode
+                        <text> - </text>
+                        @Model.PinCode
                     }
                     @if (!string.IsNullOrEmpty(Model.Country))
                     {
-                        <br />@Model.Country
+                        <br />
+                        @Model.Country
                     }
                 }
                 else
@@ -107,14 +113,14 @@
         </div>
     </div>
 
-    @if (Model.CreatedOn.HasValue || !string.IsNullOrEmpty(Model.CreatedBy))
+    @if (Model.CreatedOn.HasValue || Model.CreatedBy.HasValue)
     {
         <hr />
         <div class="row">
-            @if (!string.IsNullOrEmpty(Model.CreatedBy))
+            @if (Model.CreatedBy.HasValue)
             {
                 <div class="col-md-6 mb-2">
-                    <small class="text-muted">Created By: @Model.CreatedBy</small>
+                    <small class="text-muted">Created By: User ID @Model.CreatedBy</small>
                 </div>
             }
             @if (Model.CreatedOn.HasValue)
@@ -123,10 +129,10 @@
                     <small class="text-muted">Created On: @Model.CreatedOn.Value.ToString("dd-MMM-yyyy HH:mm")</small>
                 </div>
             }
-            @if (!string.IsNullOrEmpty(Model.ModifiedBy))
+            @if (Model.ModifiedBy.HasValue)
             {
                 <div class="col-md-6 mb-2">
-                    <small class="text-muted">Modified By: @Model.ModifiedBy</small>
+                    <small class="text-muted">Modified By: User ID @Model.ModifiedBy</small>
                 </div>
             }
             @if (Model.ModifiedDate.HasValue)

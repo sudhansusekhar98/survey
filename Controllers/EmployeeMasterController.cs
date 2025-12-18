@@ -66,8 +66,8 @@ namespace SurveyApp.Controllers
                     return View(employee);
                 }
 
-                // Set CreatedBy from session
-                employee.CreatedBy = HttpContext.Session.GetString("UserName") ?? "System";
+                // Set CreatedBy from session (UserID is int)
+                employee.CreatedBy = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
 
                 bool isSaved = _empRepository.AddEmployee(employee);
 
@@ -137,8 +137,8 @@ namespace SurveyApp.Controllers
                     return View(employee);
                 }
 
-                // Set ModifiedBy from session
-                employee.ModifiedBy = HttpContext.Session.GetString("UserName") ?? "System";
+                // Set ModifiedBy from session (UserID is int)
+                employee.ModifiedBy = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
 
                 bool isUpdated = _empRepository.UpdateEmployee(employee);
 

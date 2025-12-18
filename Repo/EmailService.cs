@@ -107,7 +107,6 @@ public class EmailService : IEmailService
                     <strong>Note:</strong> This is an automated email. Please do not reply to this message.
                 </p>
             </div>";
-
         return await SendEmailAsync(submitterEmail, subject, body);
     }
 
@@ -152,13 +151,113 @@ public class EmailService : IEmailService
         return await SendEmailAsync(submitterEmail, subject, body);
     }
 
+    public async Task<bool> SendSurveyAssignmentNotificationAsync(string employeeName, string employeeEmail, 
+        string surveyName, DateTime? dueDate)
+    {
+        var subject = $"New Survey Assigned: {surveyName}";
+        var body = $@"
+            <div style='font-family: Arial, sans-serif;'>
+                <h3 style='color: #007bff;'>New Survey Assignment</h3>
+                <p>Dear {employeeName},</p>
+                <p>A new survey has been assigned to you:</p>
+                <table style='border: 1px solid #ddd; border-collapse: collapse; width: 100%; max-width: 600px;'>
+                    <tr style='background-color: #f8f9fa;'>
+                        <td style='padding: 10px; border: 1px solid #ddd;'><strong>Survey Name:</strong></td>
+                        <td style='padding: 10px; border: 1px solid #ddd;'>{surveyName}</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 10px; border: 1px solid #ddd;'><strong>Due Date:</strong></td>
+                        <td style='padding: 10px; border: 1px solid #ddd;'>{dueDate:dd-MMM-yyyy}</td>
+                    </tr>
+                </table>
+                <p style='margin-top: 20px;'>Please complete the survey by the due date.</p>
+                <p style='margin-top: 20px;'>Best Regards,<br/>Survey Management System</p>
+                <hr style='border: none; border-top: 1px solid #ddd; margin: 20px 0;'/>
+                <p style='font-size: 12px; color: #666;'>
+                    <strong>Note:</strong> This is an automated email. Please do not reply to this message.
+                </p>
+            </div>";
+
+        return await SendEmailAsync(employeeEmail, subject, body);
+    }
+
+    public async Task<bool> SendNewUserAccountNotificationAsync(string userName, string userEmail, 
+        string loginId, string temporaryPassword)
+    {
+        var subject = "Your New Account Has Been Created - Survey Management System";
+        var body = $@"
+            <div style='font-family: Arial, sans-serif;'>
+                <h3 style='color: #007bff;'>Welcome to Survey Management System!</h3>
+                <p>Dear {userName},</p>
+                <p>Your account has been created. Please use the following credentials to login:</p>
+                <table style='border: 1px solid #ddd; border-collapse: collapse; width: 100%; max-width: 600px;'>
+                    <tr style='background-color: #f8f9fa;'>
+                        <td style='padding: 10px; border: 1px solid #ddd;'><strong>Login ID:</strong></td>
+                        <td style='padding: 10px; border: 1px solid #ddd;'>{loginId}</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 10px; border: 1px solid #ddd;'><strong>Temporary Password:</strong></td>
+                        <td style='padding: 10px; border: 1px solid #ddd; font-family: monospace; font-size: 14px;'>{temporaryPassword}</td>
+                    </tr>
+                </table>
+                <p style='margin-top: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107;'>
+                    <strong>Important:</strong> You will be required to change your password on first login. 
+                    Please keep your credentials secure and do not share them with anyone.
+                </p>
+                <p style='margin-top: 20px;'>Best Regards,<br/>Survey Management System</p>
+                <hr style='border: none; border-top: 1px solid #ddd; margin: 20px 0;'/>
+                <p style='font-size: 12px; color: #666;'>
+                    <strong>Note:</strong> This is an automated email. Please do not reply to this message.
+                </p>
+            </div>";
+
+        return await SendEmailAsync(userEmail, subject, body);
+    }
+
+    public async Task<bool> SendPasswordResetNotificationAsync(string userName, string userEmail, 
+        string loginId, string temporaryPassword, string resetByName)
+    {
+        var subject = "Password Reset - Survey Management System";
+        var body = $@"
+            <div style='font-family: Arial, sans-serif;'>
+                <h3 style='color: #dc3545;'>Password Reset Notification</h3>
+                <p>Dear {userName},</p>
+                <p>Your password has been reset by <strong>{resetByName}</strong>. Please use the following credentials to login:</p>
+                <table style='border: 1px solid #ddd; border-collapse: collapse; width: 100%; max-width: 600px;'>
+                    <tr style='background-color: #f8f9fa;'>
+                        <td style='padding: 10px; border: 1px solid #ddd;'><strong>Login ID:</strong></td>
+                        <td style='padding: 10px; border: 1px solid #ddd;'>{loginId}</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 10px; border: 1px solid #ddd;'><strong>Temporary Password:</strong></td>
+                        <td style='padding: 10px; border: 1px solid #ddd; font-family: monospace; font-size: 14px;'>{temporaryPassword}</td>
+                    </tr>
+                    <tr style='background-color: #f8f9fa;'>
+                        <td style='padding: 10px; border: 1px solid #ddd;'><strong>Reset Date:</strong></td>
+                        <td style='padding: 10px; border: 1px solid #ddd;'>{DateTime.Now:dd-MMM-yyyy hh:mm tt}</td>
+                    </tr>
+                </table>
+                <p style='margin-top: 20px; padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545;'>
+                    <strong>Action Required:</strong> You will be required to change your password on your next login. 
+                    If you did not request this password reset, please contact your administrator immediately.
+                </p>
+                <p style='margin-top: 20px;'>Best Regards,<br/>Survey Management System</p>
+                <hr style='border: none; border-top: 1px solid #ddd; margin: 20px 0;'/>
+                <p style='font-size: 12px; color: #666;'>
+                    <strong>Note:</strong> This is an automated email. Please do not reply to this message.
+                </p>
+            </div>";
+
+        return await SendEmailAsync(userEmail, subject, body);
+    }
+
     private async Task<bool> SendEmailAsync(string toEmails, string subject, string htmlBody)
     {
         try
         {
             var mail = new MailMessage
             {
-                From = new MailAddress(_emailSettings.From, "Canteen"),
+                From = new MailAddress(_emailSettings.From, "Support"),
                 Subject = subject,
                 Body = htmlBody,
                 IsBodyHtml = true

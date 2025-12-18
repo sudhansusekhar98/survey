@@ -1371,6 +1371,34 @@ namespace AnalyticaDocs.Repo
         }
 
         #endregion
+
+        /// <summary>
+        /// Get all Super Users (RoleId = 101) with active status for email notifications
+        /// </summary>
+        public List<UserModel> GetSuperUsers()
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                var sql = @"SELECT UserID as UserId, LoginId, LoginName, LoginPassword, RoleID as RoleId, 
+                            EmpID, MobileNo, EmailID, IsActive as ISActive
+                            FROM LoginMaster 
+                            WHERE RoleID = 101 AND IsActive = 'Y' AND EmailID IS NOT NULL AND EmailID != ''";
+
+                using var cmd = new SqlCommand(sql, con);
+                con.Open();
+
+                using var adapter = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                adapter.Fill(dt);
+                return SqlDbHelper.DataTableToList<UserModel>(dt);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting super users: {ex.Message}");
+                return new List<UserModel>();
+            }
+        }
     }
 
 }

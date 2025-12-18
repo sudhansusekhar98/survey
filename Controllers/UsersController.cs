@@ -13,11 +13,13 @@ namespace AnalyticaDocs.Controllers
     {
         private readonly IAdmin _repository;
         private readonly ICommonUtil _util;
+        private readonly IEmailService _emailService;
 
-        public UsersController(IAdmin repository, ICommonUtil util)
+        public UsersController(IAdmin repository, ICommonUtil util, IEmailService emailService)
         {
             _repository = repository;
             _util = util;
+            _emailService = emailService;
         }
         public IActionResult Index()
         {
@@ -83,6 +85,17 @@ namespace AnalyticaDocs.Controllers
 
             if (isSaved)
             {
+                // Send email notification with temporary password to new user
+                if (!string.IsNullOrEmpty(user.EmailID))
+                {
+                    _ = _emailService.SendNewUserAccountNotificationAsync(
+                        user.LoginName,
+                        user.EmailID,
+                        user.LoginId,
+                        user.LoginPassword
+                    );
+                }
+
                 TempData["ResultType"] = "success";
                 TempData["ResultMessage"] = "<strong>Success!</strong> User created successfully.";
                 return RedirectToAction("Index");
@@ -244,7 +257,7 @@ namespace AnalyticaDocs.Controllers
                 {
                     return Json(new { success = false, message = "User not logged in. Please login again." });
                 }
-
+                
                 int userId = Convert.ToInt32(userIdStr);
                 System.Diagnostics.Debug.WriteLine($"Parsed UserID: {userId}");
 
@@ -305,6 +318,21 @@ namespace AnalyticaDocs.Controllers
 
                 if (resetResult)
                 {
+                    // Send email notification with temporary password
+                    var targetUser = _repository.GetUserById(userId);
+                    var resetByName = HttpContext.Session.GetString("UserName") ?? "Administrator";
+                    
+                    if (targetUser != null && !string.IsNullOrEmpty(targetUser.EmailID))
+                    {
+                        _ = _emailService.SendPasswordResetNotificationAsync(
+                            targetUser.LoginName,
+                            targetUser.EmailID,
+                            targetUser.LoginId,
+                            temporaryPassword,
+                            resetByName
+                        );
+                    }
+
                     return Json(new { success = true, message = "Password reset successfully. User will be prompted to change password on next login." });
                 }
                 else

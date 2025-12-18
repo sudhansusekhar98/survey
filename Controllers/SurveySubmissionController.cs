@@ -129,23 +129,48 @@ namespace SurveyApp.Controllers
                     
                     if (survey != null)
                     {
-                        // Get supervisor (survey creator) details
+                        var emailsSent = 0;
+                        var emailRecipients = new HashSet<int>(); // Track recipients to avoid duplicates
+                        
+                        // 1. Send to Team Leader (survey creator)
                         var supervisorId = _submissionRepo.GetSurveyCreatorId(surveyId);
                         
-                        if (supervisorId.HasValue)
+                        if (supervisorId.HasValue && !emailRecipients.Contains(supervisorId.Value))
                         {
                             var supervisorUser = _adminRepo.GetUserById(supervisorId.Value);
                             
                             if (supervisorUser != null && !string.IsNullOrEmpty(supervisorUser.EmailID))
                             {
-                                // Send email notification to supervisor
-                                await _emailService.SendSurveySubmissionNotificationAsync(
+                                var emailResult = await _emailService.SendSurveySubmissionNotificationAsync(
                                     supervisorUser.LoginName ?? "Supervisor",
                                     supervisorUser.EmailID,
                                     survey.SurveyName ?? "Survey",
                                     userName ?? "User",
                                     DateTime.Now
                                 );
+                                if (emailResult) emailsSent++;
+                                emailRecipients.Add(supervisorId.Value);
+                            }
+                        }
+                        
+                        // 2. Send to all Super Users (RoleId = 101)
+                        var superUsers = _adminRepo.GetSuperUsers();
+                        foreach (var superUser in superUsers)
+                        {
+                            if (superUser.UserId.HasValue && !emailRecipients.Contains(superUser.UserId.Value))
+                            {
+                                if (!string.IsNullOrEmpty(superUser.EmailID))
+                                {
+                                    var emailResult = await _emailService.SendSurveySubmissionNotificationAsync(
+                                        superUser.LoginName ?? "Super User",
+                                        superUser.EmailID,
+                                        survey.SurveyName ?? "Survey",
+                                        userName ?? "User",
+                                        DateTime.Now
+                                    );
+                                    if (emailResult) emailsSent++;
+                                }
+                                emailRecipients.Add(superUser.UserId.Value);
                             }
                         }
                     }

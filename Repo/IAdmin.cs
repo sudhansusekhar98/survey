@@ -71,5 +71,10 @@ namespace AnalyticaDocs.Repo
         bool CreateSpecificationOption(SpecificationOptionModel model, int userId);
         bool UpdateSpecificationOption(SpecificationOptionModel model, int userId);
         bool DeleteSpecificationOption(int optionId, int userId);
+
+        /// <summary>
+        /// Get all Super Users (RoleId = 101) with active status for notifications
+        /// </summary>
+        List<UserModel> GetSuperUsers();
     }
 }
