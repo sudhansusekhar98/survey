@@ -476,6 +476,7 @@ namespace AnalyticaDocs.Repo
                         CASE WHEN ur.IsView = 'Y' THEN 1 ELSE 0 END as IsView,
                         CASE WHEN ur.IsCreate = 'Y' THEN 1 ELSE 0 END as IsCreate,
                         CASE WHEN ur.IsUpdate = 'Y' THEN 1 ELSE 0 END as IsUpdate,
+                        CASE WHEN ur.IsExecute = 'Y' THEN 1 ELSE 0 END as IsExecute,
                         CASE WHEN ur.IsDelete = 'Y' THEN 1 ELSE 0 END as IsDelete
                     FROM UserRightsMaster ur
                     INNER JOIN RightsMaster rm ON ur.RightsID = rm.RightsID
@@ -525,6 +526,7 @@ namespace AnalyticaDocs.Repo
                     cmd.Parameters.AddWithValue("@IsView", right.IsView ? 'Y' : 'N' );
                     cmd.Parameters.AddWithValue("@IsCreate", right.IsCreate ? 'Y' : 'N');
                     cmd.Parameters.AddWithValue("@IsUpdate", right.IsUpdate ? 'Y' : 'N');
+                    cmd.Parameters.AddWithValue("@IsExecute", right.IsExecute ? 'Y' : 'N');
                     cmd.Parameters.AddWithValue("@IsDelete", right.IsDelete ? 'Y' : 'N');
                     cmd.Parameters.AddWithValue("@IsActive", model.IsActive); 
                     cmd.Parameters.AddWithValue("@CreateBy", model.CreateBy); 

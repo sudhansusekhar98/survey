@@ -44,13 +44,26 @@ namespace SurveyApp.Controllers
                 }
 
                 int currentUserId = int.Parse(userId);
-                int currentRoleId = int.Parse(roleId ?? "101");
+                int currentRoleId = int.Parse(roleId ?? "102");
                 
-                // Only allow super admin (RoleId 100) or survey creators to access this page
-                // Get pending submissions for surveys created by this user
-                var submissions = currentRoleId == 100 
-                    ? _submissionRepo.GetPendingSubmissionsForReview(null) // Super admin sees all
-                    : _submissionRepo.GetPendingSubmissionsForReview(currentUserId); // Creator sees only their surveys
+                // Get the user's employee ID for assignment check
+                int? empId = null;
+                var user = _adminRepo.GetUserById(currentUserId);
+                if (user != null)
+                {
+                    empId = user.EmpID;
+                }
+                
+                // Get pending submissions visible to this user based on role and assignments
+                // Super Users (101) see all, Team Leaders see their surveys, Team Members see assigned surveys
+                var submissions = _submissionRepo.GetPendingSubmissionsForUser(currentUserId, currentRoleId, empId);
+
+                // Set CanReview flag for each submission based on user's authorization
+                foreach (var submission in submissions)
+                {
+                    submission.CanReview = _submissionRepo.CanUserReviewSubmission(
+                        submission.SurveyId, currentUserId, currentRoleId);
+                }
 
                 return View(submissions);
             }
@@ -168,18 +181,16 @@ namespace SurveyApp.Controllers
                 }
 
                 int currentUserId = int.Parse(userId);
-                int currentRoleId = int.Parse(roleId ?? "101");
+                int currentRoleId = int.Parse(roleId ?? "102");
                 
-                // Verify authorization: get submission and check if user is survey creator or super admin
+                // Verify authorization: get submission and check if user is survey creator or super user
                 var submission = _submissionRepo.GetAllSubmissions()
                     .FirstOrDefault(s => s.SubmissionId == submissionId);
                     
                 if (submission != null)
                 {
-                    var surveyCreatorId = _submissionRepo.GetSurveyCreatorId(submission.SurveyId);
-                    
-                    // Check if user is authorized (super admin or survey creator)
-                    if (currentRoleId != 100 && (!surveyCreatorId.HasValue || surveyCreatorId.Value != currentUserId))
+                    // Check if user can review (Super User or Survey Creator)
+                    if (!_submissionRepo.CanUserReviewSubmission(submission.SurveyId, currentUserId, currentRoleId))
                     {
                         TempData["ResultType"] = "error";
                         TempData["ResultMessage"] = "<div class='alert alert-danger'><i class='bi bi-shield-exclamation'></i> <strong>Unauthorized!</strong> You are not authorized to approve this survey.</div>";
@@ -252,18 +263,16 @@ namespace SurveyApp.Controllers
                 }
                 
                 int currentUserId = int.Parse(userId);
-                int currentRoleId = int.Parse(roleId ?? "101");
+                int currentRoleId = int.Parse(roleId ?? "102");
                 
-                // Verify authorization: get submission and check if user is survey creator or super admin
+                // Verify authorization: get submission and check if user is survey creator or super user
                 var submission = _submissionRepo.GetAllSubmissions()
                     .FirstOrDefault(s => s.SubmissionId == submissionId);
                     
                 if (submission != null)
                 {
-                    var surveyCreatorId = _submissionRepo.GetSurveyCreatorId(submission.SurveyId);
-                    
-                    // Check if user is authorized (super admin or survey creator)
-                    if (currentRoleId != 100 && (!surveyCreatorId.HasValue || surveyCreatorId.Value != currentUserId))
+                    // Check if user can review (Super User or Survey Creator)
+                    if (!_submissionRepo.CanUserReviewSubmission(submission.SurveyId, currentUserId, currentRoleId))
                     {
                         TempData["ResultType"] = "error";
                         TempData["ResultMessage"] = "<div class='alert alert-danger'><i class='bi bi-shield-exclamation'></i> <strong>Unauthorized!</strong> You are not authorized to reject this survey.</div>";

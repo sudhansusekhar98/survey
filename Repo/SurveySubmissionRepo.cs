@@ -231,5 +231,96 @@ namespace SurveyApp.Repo
                 throw;
             }
         }
+
+        /// <summary>
+        /// Get pending submissions visible to user based on role and assignments
+        /// </summary>
+        public List<SurveySubmissionModel> GetPendingSubmissionsForUser(int userId, int roleId, int? empId)
+        {
+            try
+            {
+                var allSubmissions = GetAllSubmissions();
+                
+                // Filter for submitted status (pending review)
+                var pendingSubmissions = allSubmissions
+                    .Where(s => s.SubmissionStatus == "Submitted")
+                    .OrderByDescending(s => s.SubmissionDate)
+                    .ToList();
+
+                // Super User (RoleId 101) sees all pending submissions
+                if (roleId == 101)
+                {
+                    return pendingSubmissions;
+                }
+
+                // For other users, filter by:
+                // 1. Surveys created by this user (Team Leader)
+                // 2. Surveys assigned to this user's employee (Team Member)
+                var filteredSubmissions = new List<SurveySubmissionModel>();
+                
+                foreach (var submission in pendingSubmissions)
+                {
+                    // Check if user is the survey creator
+                    var creatorId = GetSurveyCreatorId(submission.SurveyId);
+                    if (creatorId.HasValue && creatorId.Value == userId)
+                    {
+                        filteredSubmissions.Add(submission);
+                        continue;
+                    }
+
+                    // Check if user's employee is assigned to this survey
+                    if (empId.HasValue && IsUserAssignedToSurvey(submission.SurveyId, empId.Value))
+                    {
+                        filteredSubmissions.Add(submission);
+                    }
+                }
+                
+                return filteredSubmissions;
+            }
+            catch (Exception ex)
+            {
+                // Log error: ex.ToString()
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Check if user can approve/reject a submission (must be creator or super user)
+        /// </summary>
+        public bool CanUserReviewSubmission(Int64 surveyId, int userId, int roleId)
+        {
+            // Super User can review any submission
+            if (roleId == 101)
+            {
+                return true;
+            }
+
+            // Check if user is the survey creator (Team Leader)
+            var creatorId = GetSurveyCreatorId(surveyId);
+            return creatorId.HasValue && creatorId.Value == userId;
+        }
+
+        /// <summary>
+        /// Check if an employee is assigned to a survey
+        /// </summary>
+        private bool IsUserAssignedToSurvey(Int64 surveyId, int empId)
+        {
+            try
+            {
+                using var con = new SqlConnection(DBConnection.ConnectionString);
+                using var cmd = new SqlCommand(
+                    "SELECT COUNT(1) FROM SurveyAssignment WHERE SurveyID = @SurveyId AND EmpID = @EmpId", con);
+                cmd.Parameters.AddWithValue("@SurveyId", surveyId);
+                cmd.Parameters.AddWithValue("@EmpId", empId);
+
+                con.Open();
+                var result = cmd.ExecuteScalar();
+                return result != null && Convert.ToInt32(result) > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

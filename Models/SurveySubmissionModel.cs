@@ -47,6 +47,13 @@ namespace SurveyApp.Models
         
         [Display(Name = "Modified On")]
         public DateTime? ModifiedOn { get; set; }
+        
+        /// <summary>
+        /// Flag to indicate if the current user can review (approve/reject) this submission
+        /// Set at runtime based on user role and survey ownership
+        /// </summary>
+        [Display(Name = "Can Review")]
+        public bool CanReview { get; set; } = false;
     }
     
     public class SurveyCompletionStatus

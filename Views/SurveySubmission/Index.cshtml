@@ -15,18 +15,22 @@
             font-size: 0.75rem;
             font-weight: 600;
         }
+
         .status-draft {
             background-color: #6c757d;
             color: #fff;
         }
+
         .status-submitted {
             background-color: #ffc107;
             color: #000;
         }
+
         .status-approved {
             background-color: #28a745;
             color: #fff;
         }
+
         .status-rejected {
             background-color: #dc3545;
             color: #fff;
@@ -44,19 +48,19 @@
                             <i class="bi bi-clipboard-check"></i> Pending Survey Submissions
                         </h6>
                         <div>
-                            <a asp-controller="SurveySubmission" asp-action="MySubmissions" 
-                               class="btn btn-outline-light btn-sm">
+                            <a asp-controller="SurveySubmission" asp-action="MySubmissions"
+                                class="btn btn-outline-light btn-sm">
                                 <i class="bi bi-list-check"></i> My Submissions
                             </a>
-                            <a asp-controller="Dashboard" asp-action="Index" 
-                               class="btn btn-outline-light btn-sm">
+                            <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-light btn-sm">
                                 <i class="bi bi-speedometer2"></i> Dashboard
                             </a>
                         </div>
                     </div>
                 </div>
                 <div class="card-body">
-                    @if (TempData["ResultMessage"] != null && !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
+                    @if (TempData["ResultMessage"] != null &&
+                                        !string.IsNullOrWhiteSpace(TempData["ResultMessage"]?.ToString()))
                     {
                         @Html.Raw(TempData["ResultMessage"])
                     }
@@ -81,17 +85,17 @@
                                     {
                                         var statusClass = submission.SubmissionStatus?.ToLower() switch
                                         {
-                                            "submitted" => "status-submitted",
-                                            "approved" => "status-approved",
-                                            "rejected" => "status-rejected",
+                                                        "submitted" => "status-submitted",
+                                                        "approved" => "status-approved",
+                                                        "rejected" => "status-rejected",
                                             _ => "status-draft"
                                         };
 
                                         var statusIcon = submission.SubmissionStatus?.ToLower() switch
                                         {
-                                            "submitted" => "hourglass-split",
-                                            "approved" => "check-circle",
-                                            "rejected" => "x-circle",
+                                                        "submitted" => "hourglass-split",
+                                                        "approved" => "check-circle",
+                                                        "rejected" => "x-circle",
                                             _ => "file-earmark"
                                         };
 
@@ -111,25 +115,24 @@
                                             <td>@(submission.ReviewDate?.ToString("dd-MMM-yyyy hh:mm tt") ?? "-")</td>
                                             <td>
                                                 <div class="btn-group" role="group">
-                                                    <a asp-controller="SurveyReports" 
-                                                       asp-action="DetailedReport" 
-                                                       asp-route-surveyId="@submission.SurveyId"
-                                                       class="btn btn-sm btn-info text-white"
-                                                       title="View Report">
+                                                    <a asp-controller="SurveyReports" asp-action="DetailedReport"
+                                                        asp-route-surveyId="@submission.SurveyId"
+                                                        class="btn btn-sm btn-info text-white" title="View Report">
                                                         <i class="bi bi-eye"></i>
                                                     </a>
-                                                    <button type="button" 
-                                                            class="btn btn-sm btn-success"
+                                                    @if (submission.CanReview)
+                                                    {
+                                                        <button type="button" class="btn btn-sm btn-success"
                                                             onclick="showApproveModal(@submission.SubmissionId, '@submission.SurveyName')"
                                                             title="Approve">
-                                                        <i class="bi bi-check-circle"></i>
-                                                    </button>
-                                                    <button type="button" 
-                                                            class="btn btn-sm btn-danger"
+                                                            <i class="bi bi-check-circle"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-danger"
                                                             onclick="showRejectModal(@submission.SubmissionId, '@submission.SurveyName')"
                                                             title="Reject">
-                                                        <i class="bi bi-x-circle"></i>
-                                                    </button>
+                                                            <i class="bi bi-x-circle"></i>
+                                                        </button>
+                                                    }
                                                 </div>
                                             </td>
                                         </tr>
@@ -161,15 +164,16 @@
                     <h5 class="modal-title" id="approveModalLabel">
                         <i class="bi bi-check-circle"></i> Approve Survey
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="submissionId" id="approveSubmissionId" />
                     <p>Are you sure you want to approve the survey <strong id="approveSurveyName"></strong>?</p>
                     <div class="mb-3">
                         <label for="approveComments" class="form-label">Comments (Optional)</label>
-                        <textarea class="form-control" id="approveComments" name="reviewComments" 
-                                  rows="3" placeholder="Enter any feedback or comments..."></textarea>
+                        <textarea class="form-control" id="approveComments" name="reviewComments" rows="3"
+                            placeholder="Enter any feedback or comments..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -192,22 +196,23 @@
                     <h5 class="modal-title" id="rejectModalLabel">
                         <i class="bi bi-x-circle"></i> Reject Survey
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="submissionId" id="rejectSubmissionId" />
                     <p>You are rejecting the survey <strong id="rejectSurveyName"></strong>.</p>
                     <div class="alert alert-warning">
                         <i class="bi bi-exclamation-triangle"></i>
-                        <strong>Note:</strong> The survey will be unlocked and the submitter will be notified to make corrections.
+                        <strong>Note:</strong> The survey will be unlocked and the submitter will be notified to make
+                        corrections.
                     </div>
                     <div class="mb-3">
                         <label for="rejectionReason" class="form-label">
                             Rejection Reason <span class="text-danger">*</span>
                         </label>
-                        <textarea class="form-control" id="rejectionReason" name="rejectionReason" 
-                                  rows="4" required 
-                                  placeholder="Please provide detailed reason for rejection..."></textarea>
+                        <textarea class="form-control" id="rejectionReason" name="rejectionReason" rows="4" required
+                            placeholder="Please provide detailed reason for rejection..."></textarea>
                         <div class="invalid-feedback">
                             Rejection reason is required.
                         </div>

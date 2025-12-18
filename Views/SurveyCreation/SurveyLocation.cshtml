@@ -27,7 +27,7 @@
     <div class="row g-0">
         <div class="col-12">
             <div class="card shadow mt-0 rounded-0 full-screen-card">
-                <div class="card-header bg-purple py-2">
+                <div class="card-header bg-purple py-2 mb-3">
                     <div class="d-flex justify-content-between align-items-center gap-2">
                         <h6 class="text-white fs-4 mb-0">Survey Sub-Locations</h6>
                         <div class="d-flex flex-row align-items-center gap-2">
@@ -255,20 +255,20 @@
                                                 : "Pending";
                                                 var globalStatusClass = globalStatus switch
                                                 {
-                                                    "Pending" => "bg-secondary",
-                                                    "In Progress" => "bg-info",
-                                                    "Completed" => "bg-success",
-                                                    "Verified" => "bg-primary",
+                                                                            "Pending" => "bg-secondary",
+                                                                            "In Progress" => "bg-info",
+                                                                            "Completed" => "bg-success",
+                                                                            "Verified" => "bg-primary",
                                                     _ => "bg-secondary"
-                                                                };
+                                                };
                                                 var globalStatusIcon = globalStatus switch
                                                 {
-                                                    "Pending" => "bi-clock",
-                                                    "In Progress" => "bi-play-circle",
-                                                    "Completed" => "bi-check-circle",
-                                                    "Verified" => "bi-shield-check",
+                                                                            "Pending" => "bi-clock",
+                                                                            "In Progress" => "bi-play-circle",
+                                                                            "Completed" => "bi-check-circle",
+                                                                            "Verified" => "bi-shield-check",
                                                     _ => "bi-question-circle"
-                                                                };
+                                                };
                                             }
                                             <span class="badge @globalStatusClass">
                                                 <i class="bi @globalStatusIcon me-1"></i>@globalStatus
@@ -371,20 +371,20 @@
                                                 : "Pending";
                                                 var statusClass = status switch
                                                 {
-                                                    "Pending" => "bg-secondary",
-                                                    "In Progress" => "bg-info",
-                                                    "Completed" => "bg-success",
-                                                    "Verified" => "bg-primary",
+                                                                            "Pending" => "bg-secondary",
+                                                                            "In Progress" => "bg-info",
+                                                                            "Completed" => "bg-success",
+                                                                            "Verified" => "bg-primary",
                                                     _ => "bg-secondary"
-                                                                };
+                                                };
                                                 var statusIcon = status switch
                                                 {
-                                                    "Pending" => "bi-clock",
-                                                    "In Progress" => "bi-play-circle",
-                                                    "Completed" => "bi-check-circle",
-                                                    "Verified" => "bi-shield-check",
+                                                                            "Pending" => "bi-clock",
+                                                                            "In Progress" => "bi-play-circle",
+                                                                            "Completed" => "bi-check-circle",
+                                                                            "Verified" => "bi-shield-check",
                                                     _ => "bi-question-circle"
-                                                                };
+                                                };
                                             }
                                             <span class="badge @statusClass">
                                                 <i class="bi @statusIcon me-1"></i>@status
@@ -433,7 +433,7 @@
                                                     </button>
                                                 </form> *@
 
-                                                    @if (loc.Isactive)
+                                            @if (loc.Isactive)
                                             {
                                                 <a asp-controller="SurveyCreation" asp-action="ItemTypeMaster"
                                                     asp-route-locId="@loc.LocID" asp-route-surveyId="@surveyId"

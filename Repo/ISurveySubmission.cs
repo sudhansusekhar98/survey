@@ -41,6 +41,19 @@ namespace SurveyApp.Repo
         List<SurveySubmissionModel> GetPendingSubmissionsForReview(int? reviewerId = null);
 
         /// <summary>
+        /// Get submissions visible to user (as creator, assigned team member, or super user)
+        /// </summary>
+        /// <param name="userId">Current user ID</param>
+        /// <param name="roleId">User's role ID (101=Super User, 102=Limited User)</param>
+        /// <param name="empId">Employee ID linked to user (for assignment check)</param>
+        List<SurveySubmissionModel> GetPendingSubmissionsForUser(int userId, int roleId, int? empId);
+
+        /// <summary>
+        /// Check if user can approve/reject a submission (creator or super user)
+        /// </summary>
+        bool CanUserReviewSubmission(Int64 surveyId, int userId, int roleId);
+
+        /// <summary>
         /// Get survey creator/supervisor ID
         /// </summary>
         int? GetSurveyCreatorId(Int64 surveyId);

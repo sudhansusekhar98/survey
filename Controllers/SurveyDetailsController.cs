@@ -168,7 +168,7 @@ namespace SurveyApp.Controllers
         public IActionResult UpdateItem(Int64 surveyId, int locId, int itemTypeID, int itemId)
         {
             int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
-            var result = _util.CheckAuthorizationAll(this, 103, null, surveyId, "Update");
+            var result = _util.CheckAuthorizationAll(this, 103, null, surveyId, "Execute");
             if (result != null) return result;
 
             if (surveyId <= 0 || itemTypeID <= 0 || locId <= 0)
@@ -267,7 +267,7 @@ namespace SurveyApp.Controllers
                 public IActionResult UpdateItem(SurveyDetailsUpdate model)
                 {
                     int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
-                    var result = _util.CheckAuthorizationAll(this, 103, null, model.SurveyID, "Update");
+                    var result = _util.CheckAuthorizationAll(this, 103, null, model.SurveyID, "Execute");
                     if (result != null) return Json(new { success = false, message = "Unauthorized" });
 
                     try
@@ -548,7 +548,7 @@ namespace SurveyApp.Controllers
             try
             {
                 int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
-                var result = _util.CheckAuthorizationAll(this, 103, null, surveyId, "Update");
+                var result = _util.CheckAuthorizationAll(this, 103, null, surveyId, "Execute");
                 if (result != null) 
                     return Json(new { success = false, message = "Unauthorized access" });
 
@@ -832,7 +832,7 @@ namespace SurveyApp.Controllers
                 }
 
                 // Authorization check
-                var result = _util.CheckAuthorizationAll(this, 103, null, model.SurveyID, "Update");
+                var result = _util.CheckAuthorizationAll(this, 103, null, model.SurveyID, "Execute");
                 if (result != null) return Json(new { success = false, message = "Unauthorized" });
 
                 // Check location status

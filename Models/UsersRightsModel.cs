@@ -18,6 +18,7 @@ namespace AnalyticaDocs.Models
         public bool IsView { get; set; } = false;
         public bool IsCreate { get; set; } = false;
         public bool IsUpdate { get; set; } = false;
+        public bool IsExecute { get; set; } = false;  // New: For survey execution/participation without full update rights
 
         public bool IsDelete { get; set; } = false;
         public string? DeptName { get; set; }

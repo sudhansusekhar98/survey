@@ -370,7 +370,7 @@ namespace SurveyApp.Controllers
         //GET: SurveyCreation/SurveyAssignment
         public IActionResult SurveyAssignment(Int64 surveyId)
         {
-            int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
+            //int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
             var result = _util.CheckAuthorizationAll(this, 103, null, surveyId, "View");
             if (result != null) return result;
 
@@ -391,7 +391,7 @@ namespace SurveyApp.Controllers
         // GET: SurveyCreation/CreateSurveyAssignment
         public IActionResult CreateSurveyAssignment(Int64 surveyId)
         {
-            int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
+            //int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
             var result = _util.CheckAuthorizationAll(this, 103, null, surveyId, "Create");
             if (result != null) return result;
 
@@ -1080,11 +1080,14 @@ namespace SurveyApp.Controllers
         public IActionResult SaveItemType(AssignedItemsModel model)
         {
             int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
-            var result = _util.CheckAuthorizationAll(this, 103, null, model.SurveyId, "Update");
-            if (result != null) return Json("unauthorized");
-
+            
             // Get action value from form
             var action = Request.Form["action"].ToString();
+            
+            // Starting survey only requires Execute permission, saving requires Update
+            var requiredPermission = action == "start" ? "Execute" : "Update";
+            var result = _util.CheckAuthorizationAll(this, 103, null, model.SurveyId, requiredPermission);
+            if (result != null) return Json("unauthorized");
 
             if (!ModelState.IsValid)
             {
