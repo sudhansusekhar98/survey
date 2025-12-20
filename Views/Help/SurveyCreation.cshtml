@@ -3,68 +3,27 @@
 }
 
 @section PageStyles {
-    <style>
-        .step-card {
-            border-left: 4px solid #667eea;
-            margin-bottom: 2rem;
-        }
-
-        .step-number {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-
-        .screenshot-placeholder {
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            min-height: 300px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            margin: 1rem 0;
-        }
-
-        .tip-box {
-            background: #e7f3ff;
-            border-left: 4px solid #0d6efd;
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 4px;
-        }
-
-        .warning-box {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 4px;
-        }
-    </style>
+    <link rel="stylesheet" href="~/css/help.css" />
 }
 
-<div class="container-fluid">
+<div class="container-fluid px-4 py-3">
     <!-- Header -->
     <div class="row mb-4">
         <div class="col-12">
             <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a asp-action="Index">Help Center</a></li>
+                <ol class="breadcrumb bg-light px-3 py-2 rounded">
+                    <li class="breadcrumb-item"><a asp-action="Index"><i class="bi bi-house-door me-1"></i>Help Center</a></li>
                     <li class="breadcrumb-item active">Survey Creation</li>
                 </ol>
             </nav>
-            <h2 class="mb-3">
-                <i class="bi bi-plus-circle-fill me-2" style="color: #667eea;"></i>Creating Surveys
-            </h2>
-            <p class="lead text-muted">Step-by-step guide to create and configure new surveys</p>
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-header-custom">
+                    <h2 class="mb-2">
+                        <i class="bi bi-plus-circle-fill me-3"></i>Creating Surveys
+                    </h2>
+                    <p class="mb-0 lead">Step-by-step guide to create and configure new surveys</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -188,8 +147,8 @@
                     <ul>
                         <li><strong>Implementation Type:</strong> Type of implementation (e.g., New, Upgrade,
                             Maintenance)</li>
-                        <li><strong>Survey Team Name:</strong> Name of the team conducting the survey</li>
-                        <li><strong>Survey Team Contact:</strong> Contact number for the survey team</li>
+                        <li><strong>Team Leader:</strong> Select from employee list. <span class="badge bg-info text-dark" style="font-size: 0.7em;">Auto-Assigned</span></li>
+                        <li><strong>Team Leader Contact:</strong> Automatically selected based on Team Leader.</li>
                         <li><strong>Location Site Name:</strong> Primary site name</li>
                         <li><strong>Scope of Work:</strong> Detailed description of survey scope</li>
                         <li><strong>State/City:</strong> Geographic location details</li>

@@ -3,87 +3,7 @@
 }
 
 @section PageStyles {
-    <style>
-        .step-card {
-            border-left: 4px solid #17a2b8;
-            margin-bottom: 2rem;
-            transition: all 0.3s ease;
-        }
-
-        .step-card:hover {
-            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.15);
-            transform: translateX(5px);
-        }
-
-        .step-number {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-            color: white;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.5rem;
-            box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
-        }
-
-        .screenshot-placeholder {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border: 2px dashed #17a2b8;
-            min-height: 350px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            margin: 1.5rem 0;
-        }
-
-        .tip-box {
-            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
-            border-left: 5px solid #17a2b8;
-            padding: 1.25rem;
-            margin: 1.5rem 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(23, 162, 184, 0.1);
-        }
-
-        .warning-box {
-            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-            border-left: 5px solid #dc3545;
-            padding: 1.25rem;
-            margin: 1.5rem 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.1);
-        }
-
-        .success-box {
-            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-            border-left: 5px solid #28a745;
-            padding: 1.25rem;
-            margin: 1.5rem 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.1);
-        }
-
-        .btn-help {
-            margin: 0.5rem;
-            padding: 0.75rem 1.5rem;
-        }
-
-        .card-header-custom {
-            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-            color: white;
-            padding: 1rem 1.5rem;
-        }
-
-        .status-badge-large {
-            font-size: 1rem;
-            padding: 0.5rem 1rem;
-            margin: 0.25rem;
-        }
-    </style>
+    <link rel="stylesheet" href="~/css/help.css" />
 }
 
 <div class="container-fluid px-4 py-3">
@@ -177,16 +97,18 @@
                             </ul>
                         </li>
                         <li class="mb-3">
-                            <strong>Find Submit Button:</strong>
+                            <strong>Preview Survey:</strong>
                             <ul class="mt-2">
-                                <li>Scroll to the bottom of the survey details page</li>
-                                <li>Look for <strong>Submit for Approval</strong> button</li>
+                                <li>Click "Preview & Submit" button</li>
+                                <li>Review all entered data in the preview modal</li>
+                                <li>Verify all information is correct</li>
                             </ul>
                         </li>
                         <li class="mb-3">
-                            <strong>Click Submit:</strong>
+                            <strong>Submit for Approval:</strong>
                             <ul class="mt-2">
-                                <li>A confirmation dialog may appear</li>
+                                <li>Click <strong>Submit Survey for Approval</strong> button in the preview modal</li>
+                                <li>A confirmation dialog will appear</li>
                                 <li>Confirm you want to submit</li>
                                 <li>Wait for submission to process</li>
                             </ul>
@@ -197,7 +119,8 @@
                                 <li>Success message appears</li>
                                 <li>Survey status changes to <strong>"Submitted"</strong></li>
                                 <li>Email notification sent to survey creator</li>
-                                <li>You can no longer edit the survey</li>
+                                <li>Survey is locked - you cannot edit it</li>
+                                <li>You are redirected to "My Submissions" page</li>
                             </ul>
                         </li>
                     </ol>
@@ -206,20 +129,43 @@
                         <div class="text-center text-muted">
                             <i class="bi bi-image" style="font-size: 4rem; color: #17a2b8;"></i>
                             <p class="mt-3 mb-0"><strong>Screenshot: Submit for Approval Button</strong></p>
-                            <small>Submit button at the bottom of survey details page</small>
+                            <small>Submit button in the preview modal</small>
                         </div>
                     </div>
 
                     <div class="warning-box">
                         <h6 class="mb-2"><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>Important</h6>
-                        <p class="mb-0">Once submitted, you <strong>cannot edit</strong> the survey unless it's rejected
-                            by the reviewer. Make sure all data is complete and accurate before submitting.</p>
+                        <p class="mb-0">Once submitted, the survey is <strong>locked</strong> and you cannot edit it unless:
+                        <ul class="mt-2">
+                            <li>It's rejected by the reviewer (automatically unlocked)</li>
+                            <li>You unlock it yourself before approval (see below)</li>
+                        </ul>
+                        Make sure all data is complete and accurate before submitting.</p>
                     </div>
 
                     <div class="success-box">
                         <h6 class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>After Submission</h6>
                         <p class="mb-0">Track your submission status in <strong>Survey → My Submissions</strong>. You'll
-                            receive notification when the survey is approved or if changes are requested.</p>
+                            receive email notifications when the survey is approved or if changes are requested.</p>
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-unlock me-2"></i>Unlocking a Submitted Survey</h5>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>New Feature:</strong> You can unlock a submitted survey if you need to make changes before it's approved.
+                    </div>
+                    <ol class="ps-4">
+                        <li class="mb-2">Go to the survey list</li>
+                        <li class="mb-2">Find your submitted survey (status: "Submitted")</li>
+                        <li class="mb-2">Click the <strong>"Locations"</strong> button</li>
+                        <li class="mb-2">Confirm you want to unlock the survey</li>
+                        <li class="mb-2">Survey status changes to <strong>"In Progress"</strong></li>
+                        <li class="mb-2">You can now edit the survey and resubmit</li>
+                    </ol>
+
+                    <div class="warning-box">
+                        <h6 class="mb-2"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Note</h6>
+                        <p class="mb-0">You <strong>cannot unlock</strong> a survey that has already been approved. Once approved, the survey is permanently locked.</p>
                     </div>
                 </div>
             </div>
@@ -238,8 +184,12 @@
 
                     <div class="alert alert-info">
                         <i class="bi bi-info-circle-fill me-2"></i>
-                        <strong>Who Can Review:</strong> Only the survey creator and super administrators can review and
-                        approve/reject submissions.
+                        <strong>Who Can Review:</strong> Only the survey creator and super administrators (RoleId 101) can review and
+                        approve/reject submissions. When a survey is submitted, email notifications are sent to:
+                        <ul class="mt-2 mb-0">
+                            <li>The survey creator (Team Leader)</li>
+                            <li>All super administrators</li>
+                        </ul>
                     </div>
 
                     <h5 class="mt-4 mb-3"><i class="bi bi-list-ol me-2"></i>Review Process</h5>
@@ -379,18 +329,23 @@
                             <tbody>
                                 <tr>
                                     <td><span class="badge bg-warning text-dark">Submitted</span></td>
-                                    <td>Awaiting review by survey creator</td>
-                                    <td>Wait for approval/rejection notification</td>
+                                    <td>Survey submitted and awaiting review by creator/admin</td>
+                                    <td>Wait for approval/rejection notification. Survey is locked.</td>
                                 </tr>
                                 <tr>
-                                    <td><span class="badge bg-success">Approved</span></td>
-                                    <td>Survey approved and completed</td>
+                                    <td><span class="badge bg-success">Approved/Completed</span></td>
+                                    <td>Survey approved by reviewer and marked as completed</td>
                                     <td>No action needed - Well done!</td>
                                 </tr>
                                 <tr>
                                     <td><span class="badge bg-danger">Rejected</span></td>
                                     <td>Changes required before approval</td>
                                     <td>Review rejection reason, make corrections, resubmit</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-primary">In Progress</span></td>
+                                    <td>Survey unlocked for editing (after rejection or manual unlock)</td>
+                                    <td>Make necessary changes and resubmit when ready</td>
                                 </tr>
                             </tbody>
                         </table>

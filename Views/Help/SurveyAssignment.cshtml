@@ -3,81 +3,7 @@
 }
 
 @section PageStyles {
-<style>
-    .step-card {
-        border-left: 4px solid #28a745;
-        margin-bottom: 2rem;
-        transition: all 0.3s ease;
-    }
-
-    .step-card:hover {
-        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
-        transform: translateX(5px);
-    }
-
-    .step-number {
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        color: white;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 1.5rem;
-        box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
-    }
-
-    .screenshot-placeholder {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border: 2px dashed #28a745;
-        min-height: 350px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 12px;
-        margin: 1.5rem 0;
-    }
-
-    .tip-box {
-        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-        border-left: 5px solid #28a745;
-        padding: 1.25rem;
-        margin: 1.5rem 0;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.1);
-    }
-
-    .warning-box {
-        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-        border-left: 5px solid #ffc107;
-        padding: 1.25rem;
-        margin: 1.5rem 0;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.1);
-    }
-
-    .info-box {
-        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
-        border-left: 5px solid #17a2b8;
-        padding: 1.25rem;
-        margin: 1.5rem 0;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(23, 162, 184, 0.1);
-    }
-
-    .btn-help {
-        margin: 0.5rem;
-        padding: 0.75rem 1.5rem;
-    }
-
-    .card-header-custom {
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        color: white;
-        padding: 1rem 1.5rem;
-    }
-</style>
+    <link rel="stylesheet" href="~/css/help.css" />
 }
 
 <div class="container-fluid px-4 py-3">
@@ -196,8 +122,8 @@
                         <li class="mb-3">
                             <strong>Set Due Date:</strong>
                             <ul class="mt-2">
-                                <li>Select a due date for the assignment</li>
-                                <li>This helps track completion timelines</li>
+                                <li>Select a <strong>Due Date</strong> for the assignment (Required).</li>
+                                <li>Ensures timely completion by team members.</li>
                             </ul>
                         </li>
 

@@ -3,36 +3,7 @@
 }
 
 @section PageStyles {
-    <style>
-        .faq-category {
-            margin-bottom: 2rem;
-        }
-
-        .accordion-button:not(.collapsed) {
-            background-color: #667eea;
-            color: white;
-        }
-
-        .accordion-button:focus {
-            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
-        }
-
-        .btn-help {
-            margin: 0.5rem;
-            padding: 0.75rem 1.5rem;
-        }
-
-        .card-header-custom {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1rem 1.5rem;
-        }
-
-        .category-icon {
-            font-size: 2rem;
-            color: #667eea;
-        }
-    </style>
+    <link rel="stylesheet" href="~/css/help.css" />
 }
 
 <div class="container-fluid px-4 py-3">
@@ -368,6 +339,70 @@
                     <div class="accordion-body">
                         Yes! The application is mobile-responsive and works on smartphones and tablets. For best
                         experience, use in landscape mode for data entry.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Features FAQs -->
+    <div class="mb-4">
+        <div class="faq-category">
+            <div class="category-icon">
+                <i class="bi bi-stars"></i>
+            </div>
+            <h4>New Features</h4>
+        </div>
+
+        <div class="accordion" id="newFeaturesFAQ">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#nf1">
+                        What are Camera Remarks and how do I use them?
+                    </button>
+                </h2>
+                <div id="nf1" class="accordion-collapse collapse show" data-bs-parent="#newFeaturesFAQ">
+                    <div class="accordion-body">
+                        <strong>Camera Remarks</strong> allows you to specify direction/deployment location for each camera. When selecting cameras, a "Manage Camera Remarks" button appears. Click it to enter remarks for each camera (e.g., "Towards temple", "Main entrance").
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#nf2">
+                        How do Pole Specifications work?
+                    </button>
+                </h2>
+                <div id="nf2" class="accordion-collapse collapse" data-bs-parent="#newFeaturesFAQ">
+                    <div class="accordion-body">
+                        When selecting poles, specification fields appear automatically: <strong>Pole Owner</strong> (for existing poles) and <strong>Pole Height</strong> (for new poles). Each pole instance gets its own dropdown.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#nf3">
+                        What is the Survey Submission and Approval workflow?
+                    </button>
+                </h2>
+                <div id="nf3" class="accordion-collapse collapse" data-bs-parent="#newFeaturesFAQ">
+                    <div class="accordion-body">
+                        Workflow: <strong>In Progress → Submitted → Approved/Rejected</strong>. After completing a survey, click "Submit Survey for Approval". Survey is locked and notifications sent to creator/admins. Reviewers can approve (→ Completed) or reject (→ In Progress, unlocked).
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#nf4">
+                        How do I unlock a submitted survey?
+                    </button>
+                </h2>
+                <div id="nf4" class="accordion-collapse collapse" data-bs-parent="#newFeaturesFAQ">
+                    <div class="accordion-body">
+                        Go to survey list, find submitted survey, click "Locations", confirm unlock. Status changes to "In Progress". <strong>Note:</strong> Cannot unlock approved surveys.
                     </div>
                 </div>
             </div>

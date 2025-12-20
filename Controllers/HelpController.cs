@@ -78,7 +78,7 @@ namespace SurveyApp.Controllers
             return View();
         }
 
-        // Admin Functions Help
+        // Admin Functions Help - Restricted to Admin users only
         public IActionResult AdminFunctions()
         {
             var userId = HttpContext.Session.GetString("UserID");
@@ -87,6 +87,18 @@ namespace SurveyApp.Controllers
                 return RedirectToAction("Index", "UserLogin");
             }
 
+            // Check if user has admin access (RoleId 101 = Super Admin, 102 = Admin)
+            var roleIdStr = HttpContext.Session.GetString("RoleId");
+            int roleId = string.IsNullOrEmpty(roleIdStr) ? 0 : Convert.ToInt32(roleIdStr);
+            
+            if (roleId != 101 && roleId != 102)
+            {
+                TempData["ResultMessage"] = "<strong>Access Denied!</strong> You do not have permission to view Admin help documentation.";
+                TempData["ResultType"] = "danger";
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.UserRole = roleId;
             return View();
         }
 
@@ -110,7 +122,6 @@ namespace SurveyApp.Controllers
             {
                 return RedirectToAction("Index", "UserLogin");
             }
-
             return View();
         }
     }

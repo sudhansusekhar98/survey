@@ -3,86 +3,7 @@
 }
 
 @section PageStyles {
-<style>
-    .step-card {
-        border-left: 4px solid #667eea;
-        margin-bottom: 2rem;
-        transition: all 0.3s ease;
-    }
-
-    .step-card:hover {
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
-        transform: translateX(5px);
-    }
-
-    .step-number {
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 1.5rem;
-        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
-    }
-
-    .screenshot-placeholder {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border: 2px dashed #667eea;
-        min-height: 350px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 12px;
-        margin: 1.5rem 0;
-    }
-
-    .tip-box {
-        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
-        border-left: 5px solid #17a2b8;
-        padding: 1.25rem;
-        margin: 1.5rem 0;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(23, 162, 184, 0.1);
-    }
-
-    .warning-box {
-        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-        border-left: 5px solid #ffc107;
-        padding: 1.25rem;
-        margin: 1.5rem 0;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.1);
-    }
-
-    .success-box {
-        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-        border-left: 5px solid #28a745;
-        padding: 1.25rem;
-        margin: 1.5rem 0;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.1);
-    }
-
-    .btn-help {
-        margin: 0.5rem;
-        padding: 0.75rem 1.5rem;
-    }
-
-    .card-header-custom {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 1rem 1.5rem;
-    }
-
-    .feature-icon {
-        font-size: 2.5rem;
-        color: #667eea;
-    }
-</style>
+    <link rel="stylesheet" href="~/css/help.css" />
 }
 
 <div class="container-fluid px-4 py-3">
@@ -117,13 +38,25 @@
                             <a href="#step1" class="btn btn-outline-primary btn-sm w-100">→ Add Sub-Locations</a>
                         </div>
                         <div class="col-md-3 mb-2">
-                            <a href="#step2" class="btn btn-outline-primary btn-sm w-100">→ Select Device Types</a>
+                            <a href="#step2" class="btn btn-outline-primary btn-sm w-100">→ Global Location</a>
                         </div>
                         <div class="col-md-3 mb-2">
-                            <a href="#step3" class="btn btn-outline-primary btn-sm w-100">→ Capture Data</a>
+                            <a href="#step3" class="btn btn-outline-primary btn-sm w-100">→ Select Device Types</a>
                         </div>
                         <div class="col-md-3 mb-2">
-                            <a href="#step4" class="btn btn-outline-primary btn-sm w-100">→ Upload Photos</a>
+                            <a href="#step4" class="btn btn-outline-primary btn-sm w-100">→ Capture Data</a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="#step5" class="btn btn-outline-primary btn-sm w-100">→ Camera Remarks</a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="#step6" class="btn btn-outline-primary btn-sm w-100">→ Item Specifications</a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="#step7" class="btn btn-outline-primary btn-sm w-100">→ Upload Photos</a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="#step8" class="btn btn-outline-primary btn-sm w-100">→ Complete & Submit</a>
                         </div>
                     </div>
                 </div>
@@ -216,13 +149,53 @@
         </div>
     </div>
 
-    <!-- Step 2: Select Device Types -->
+    <!-- Step 2: Global Location (Common Devices) -->
     <div id="step2" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow border-info">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4">2</span>
+                        <h4 class="mb-0">Global Location (Common Devices)</h4>
+                    </div>
+
+                    <div class="alert alert-success">
+                        <i class="bi bi-globe me-2"></i>
+                        <strong>Global Location:</strong> Use this for items that are common to the entire survey and not specific to a single sub-location.
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-diagram-3 me-2"></i>What belongs here?</h5>
+                    <p>Items like main server room equipment, central cabling, or external perimeter devices that service the whole facility often go here.</p>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-list-ol me-2"></i>How to use</h5>
+                    <ol class="ps-4">
+                        <li class="mb-3">
+                            <strong>Find the Global Card:</strong>
+                            <ul class="mt-2">
+                                <li>Look for the card labeled <span class="badge bg-success">Global</span> on the locations page.</li>
+                                <li>It is usually the first card in the list.</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Select Devices:</strong>
+                            <ul class="mt-2">
+                                <li>Click the <strong>Devices</strong> button on the Global card.</li>
+                                <li>Select and enter data for common items just like any other location.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3: Select Device Types -->
+    <div id="step3" class="row mb-4">
         <div class="col-12">
             <div class="card step-card shadow">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-4">
-                        <span class="step-number me-4">2</span>
+                        <span class="step-number me-4">3</span>
                         <h4 class="mb-0">Starting Survey - Select Device Types</h4>
                     </div>
 
@@ -279,13 +252,13 @@
         </div>
     </div>
 
-    <!-- Step 3: Capture Survey Data -->
-    <div id="step3" class="row mb-4">
+    <!-- Step 4: Capture Survey Data -->
+    <div id="step4" class="row mb-4">
         <div class="col-12">
             <div class="card step-card shadow">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-4">
-                        <span class="step-number me-4">3</span>
+                        <span class="step-number me-4">4</span>
                         <h4 class="mb-0">Capturing Survey Data</h4>
                     </div>
 
@@ -383,13 +356,140 @@
         </div>
     </div>
 
-    <!-- Step 4: Upload Photos -->
-    <div id="step4" class="row mb-4">
+    <!-- Step 5: Camera Remarks Management -->
+    <div id="step5" class="row mb-4">
         <div class="col-12">
             <div class="card step-card shadow">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-4">
-                        <span class="step-number me-4">4</span>
+                        <span class="step-number me-4">5</span>
+                        <h4 class="mb-0">Camera Remarks Management</h4>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>New Feature:</strong> When selecting cameras, you can now specify the direction/deployment location for each camera.
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-camera-fill me-2"></i>How to Add Camera Remarks</h5>
+                    <ol class="ps-4">
+                        <li class="mb-3">
+                            <strong>Select Camera Item:</strong>
+                            <ul class="mt-2">
+                                <li>When you select a camera from the device list</li>
+                                <li>Enter the quantity (Existing + Required)</li>
+                                <li>A "Manage Camera Remarks" button will appear</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Open Remarks Modal:</strong>
+                            <ul class="mt-2">
+                                <li>Click the <strong>"Manage Camera Remarks"</strong> button</li>
+                                <li>A modal will open with input fields</li>
+                                <li>Number of fields = Total camera quantity</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Enter Direction/Location:</strong>
+                            <ul class="mt-2">
+                                <li>For each camera, specify its direction or deployment location</li>
+                                <li>Examples: "Towards temple", "Main entrance", "Parking area"</li>
+                                <li>All fields must be filled before saving</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Save Remarks:</strong>
+                            <ul class="mt-2">
+                                <li>Click <strong>"Save Camera Remarks"</strong></li>
+                                <li>Remarks will be displayed in formatted view</li>
+                                <li>Format: "#Cam1: Towards temple, #Cam2: Main entrance"</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="tip-box">
+                        <h6 class="mb-2"><i class="bi bi-lightbulb-fill text-info me-2"></i>Pro Tip</h6>
+                        <p class="mb-0">Camera remarks help identify camera locations during installation and maintenance. Be specific and clear in your descriptions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 6: Item Specifications (Poles) -->
+    <div id="step6" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4">6</span>
+                        <h4 class="mb-0">Item Specifications (Poles)</h4>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>New Feature:</strong> For poles, you can now specify owner and height for each pole instance.
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-list-check me-2"></i>Pole Specifications</h5>
+                    <p>When you select poles and enter quantities, additional specification fields will appear automatically:</p>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0"><i class="bi bi-building me-2"></i>Pole Owner</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>When it appears:</strong> Only for existing poles</p>
+                                    <p><strong>Options:</strong></p>
+                                    <ul>
+                                        <li>Telecom</li>
+                                        <li>Electrical</li>
+                                        <li>Municipality</li>
+                                    </ul>
+                                    <p class="mb-0"><strong>Example:</strong> If you have 2 existing poles, you'll see "Pole Owner #1" and "Pole Owner #2" dropdowns.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-success">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0"><i class="bi bi-rulers me-2"></i>Pole Height</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>When it appears:</strong> Only for required (new) poles</p>
+                                    <p><strong>Options:</strong></p>
+                                    <ul>
+                                        <li>4m, 5m, 6.5m, 8m, 10m, 12m</li>
+                                    </ul>
+                                    <p class="mb-0"><strong>Example:</strong> If you need 3 new poles, you'll see "Pole Height #1", "Pole Height #2", and "Pole Height #3" dropdowns.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="warning-box">
+                        <h6 class="mb-2"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Important</h6>
+                        <p class="mb-0">Specifications are conditional based on quantities:
+                        <ul>
+                            <li><strong>Pole Owner:</strong> Appears only when Existing Qty > 0</li>
+                            <li><strong>Pole Height:</strong> Appears only when Required Qty > 0</li>
+                        </ul>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 7: Uploading Photos -->
+    <div id="step7" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4">7</span>
                         <h4 class="mb-0">Uploading Photos & Documentation</h4>
                     </div>
 
@@ -456,14 +556,14 @@
         </div>
     </div>
 
-    <!-- Step 5: Complete Location -->
-    <div id="step5" class="row mb-4">
+    <!-- Step 8: Completing and Submitting -->
+    <div id="step8" class="row mb-4">
         <div class="col-12">
             <div class="card step-card shadow">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-4">
-                        <span class="step-number me-4">5</span>
-                        <h4 class="mb-0">Completing & Submitting Survey</h4>
+                        <span class="step-number me-4">8</span>
+                        <h4 class="mb-0">Completing and Submitting Survey</h4>
                     </div>
 
                     <h5 class="mt-4 mb-3"><i class="bi bi-check-all me-2"></i>Final Steps</h5>

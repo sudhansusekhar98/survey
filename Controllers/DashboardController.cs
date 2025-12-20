@@ -15,7 +15,6 @@ namespace SurveyApp.Controllers
             _surveyRepo = surveyRepo;
             _adminRepo = adminRepo;
         }
-
         public IActionResult Index(string? filter = null, string? value = null)
         {
             // Check if user is logged in - redirect to login if not

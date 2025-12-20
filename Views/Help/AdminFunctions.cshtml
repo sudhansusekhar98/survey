@@ -1,202 +1,952 @@
 @{
     ViewData["Title"] = "Admin Functions Guide";
+    var userRole = ViewBag.UserRole?.ToString() ?? "";
+    bool isSuperAdmin = userRole == "101";
 }
 
 @section PageStyles {
-    <style>
-        .admin-card {
-            border-left: 4px solid #dc3545;
-            margin-bottom: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .admin-card:hover {
-            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.15);
-            transform: translateX(5px);
-        }
-
-        .admin-icon {
-            font-size: 2.5rem;
-            color: #dc3545;
-        }
-
-        .btn-help {
-            margin: 0.5rem;
-            padding: 0.75rem 1.5rem;
-        }
-
-        .card-header-custom {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-            color: white;
-            padding: 1rem 1.5rem;
-        }
-
-        .feature-box {
-            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-            border-left: 5px solid #dc3545;
-            padding: 1.25rem;
-            margin: 1.5rem 0;
-            border-radius: 8px;
-        }
-    </style>
+    <link rel="stylesheet" href="~/css/help.css" />
 }
 
 <div class="container-fluid px-4 py-3">
+    <!-- Header -->
     <div class="row mb-4">
         <div class="col-12">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb bg-light px-3 py-2 rounded">
-                    <li class="breadcrumb-item"><a asp-action="Index"><i class="bi bi-house-door me-1"></i>Help
-                            Center</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index"><i class="bi bi-house-door me-1"></i>Help Center</a></li>
                     <li class="breadcrumb-item active">Admin Functions</li>
                 </ol>
             </nav>
             <div class="card border-0 shadow-lg mb-4">
-                <div class="card-header-custom">
+                <div class="card-header-custom" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">
                     <h2 class="mb-2">
-                        <i class="bi bi-shield-lock-fill me-3"></i>Admin Functions Guide
+                        <i class="bi bi-shield-lock-fill me-3"></i>Administrator Guide
                     </h2>
-                    <p class="mb-0 lead">User management, permissions, and system configuration</p>
+                    <p class="mb-0 lead">Complete guide to user management, permissions, and system configuration</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-4 mb-4">
-        <div class="col-md-6">
-            <div class="card admin-card h-100 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="admin-icon mb-3">
-                        <i class="bi bi-people-fill"></i>
+    <!-- Quick Navigation -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body bg-light">
+                    <h6 class="mb-3"><i class="bi bi-list-ul me-2"></i>Quick Navigation</h6>
+                    <div class="row">
+                        <div class="col-md-2 mb-2">
+                            <a href="#user-rights" class="btn btn-outline-danger btn-sm w-100">→ User Rights</a>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <a href="#employee-master" class="btn btn-outline-danger btn-sm w-100">→ Employee Master</a>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <a href="#login-master" class="btn btn-outline-danger btn-sm w-100">→ Login Master</a>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <a href="#client-master" class="btn btn-outline-danger btn-sm w-100">→ Client Master</a>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <a href="#devices-admin" class="btn btn-outline-danger btn-sm w-100">→ Devices Admin</a>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <a href="#workflow" class="btn btn-outline-danger btn-sm w-100">→ User Workflow</a>
+                        </div>
                     </div>
-                    <h5>User Management</h5>
-                    <p class="text-muted">Create and manage user accounts</p>
-                    <ul class="ps-4">
-                        <li class="mb-2">Add new users with login credentials</li>
-                        <li class="mb-2">Assign roles and permissions</li>
-                        <li class="mb-2">Activate/deactivate accounts</li>
-                        <li class="mb-2">Reset passwords</li>
-                    </ul>
-                    <p class="mb-0"><strong>Access:</strong> Admin → Users</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card admin-card h-100 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="admin-icon mb-3">
-                        <i class="bi bi-shield-check-fill"></i>
-                    </div>
-                    <h5>User Rights</h5>
-                    <p class="text-muted">Configure role-based permissions</p>
-                    <ul class="ps-4">
-                        <li class="mb-2">Define user roles and access levels</li>
-                        <li class="mb-2">Set regional access controls</li>
-                        <li class="mb-2">Configure feature permissions</li>
-                        <li class="mb-2">Manage CRUD operations rights</li>
-                    </ul>
-                    <p class="mb-0"><strong>Access:</strong> Admin → User Rights</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card admin-card h-100 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="admin-icon mb-3">
-                        <i class="bi bi-person-vcard-fill"></i>
-                    </div>
-                    <h5>Employee Master</h5>
-                    <p class="text-muted">Manage employee records</p>
-                    <ul class="ps-4">
-                        <li class="mb-2">Add/update employee information</li>
-                        <li class="mb-2">Link employees to user accounts</li>
-                        <li class="mb-2">Maintain contact details</li>
-                        <li class="mb-2">Assign to regions and departments</li>
-                    </ul>
-                    <p class="mb-0"><strong>Access:</strong> Admin → Employee Master</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card admin-card h-100 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="admin-icon mb-3">
-                        <i class="bi bi-building-fill"></i>
-                    </div>
-                    <h5>Client Master</h5>
-                    <p class="text-muted">Manage client organizations</p>
-                    <ul class="ps-4">
-                        <li class="mb-2">Add new client organizations</li>
-                        <li class="mb-2">Update client details and contacts</li>
-                        <li class="mb-2">Manage client addresses</li>
-                        <li class="mb-2">Link clients to surveys</li>
-                    </ul>
-                    <p class="mb-0"><strong>Access:</strong> Admin → Client Master</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-12">
-            <div class="card admin-card shadow-sm">
-                <div class="card-body p-4">
-                    <div class="admin-icon mb-3">
-                        <i class="bi bi-gear-fill"></i>
-                    </div>
-                    <h5>Manage Devices</h5>
-                    <p class="text-muted">Configure device types and item masters</p>
-                    <ul class="ps-4">
-                        <li class="mb-2">Add/edit device types and categories</li>
-                        <li class="mb-2">Manage item masters and specifications</li>
-                        <li class="mb-2">Configure survey templates</li>
-                        <li class="mb-2">Set system preferences</li>
-                    </ul>
-                    <p class="mb-0"><strong>Access:</strong> Admin → Manage Devices</p>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Admin Overview -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-danger">
+                <i class="bi bi-shield-exclamation me-2"></i>
+                <strong>Administrator Access Only:</strong> This documentation is only visible to users with Admin roles (Super Admin or Admin).
+                The functions described require proper authorization.
+            </div>
+        </div>
+    </div>
+
+    <!-- User Creation Workflow -->
+    <div id="workflow" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-diagram-3-fill me-2"></i>User Creation Workflow</h5>
+                </div>
+                <div class="card-body p-4">
+                    <p>Follow this sequence to create a new user with login access:</p>
+                    
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="card bg-light h-100">
+                                <div class="card-body">
+                                    <div class="rounded-circle bg-danger text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 50px; height: 50px; font-size: 1.5rem; font-weight: bold;">1</div>
+                                    <h6>Create Employee</h6>
+                                    <p class="text-muted small mb-0">Add employee in <strong>Employee Master</strong> with personal details</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="card bg-light h-100">
+                                <div class="card-body">
+                                    <div class="rounded-circle bg-danger text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 50px; height: 50px; font-size: 1.5rem; font-weight: bold;">2</div>
+                                    <h6>Create Login</h6>
+                                    <p class="text-muted small mb-0">Create login credentials in <strong>Users (Login Master)</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="card bg-light h-100">
+                                <div class="card-body">
+                                    <div class="rounded-circle bg-danger text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 50px; height: 50px; font-size: 1.5rem; font-weight: bold;">3</div>
+                                    <h6>Assign Rights</h6>
+                                    <p class="text-muted small mb-0">Configure permissions in <strong>User Rights</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tip-box mt-3">
+                        <h6 class="mb-2"><i class="bi bi-lightbulb-fill text-info me-2"></i>Quick Tip</h6>
+                        <p class="mb-0">You can also use <strong>"Sync to Login"</strong> feature to bulk create login accounts for all employees without login credentials.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 1: User Rights -->
+    <div id="user-rights" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4">1</span>
+                        <h4 class="mb-0">User Rights Management</h4>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Access:</strong> Admin → User Rights
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-shield-check me-2"></i>What are User Rights?</h5>
+                    <p>User Rights control what actions each user can perform in the system. Rights are configured per <strong>Module</strong> and <strong>Region</strong>, giving fine-grained control over user access.</p>
+
+                    <!-- Permission Types Detail -->
+                    <h5 class="mt-4 mb-3"><i class="bi bi-key me-2"></i>Permission Types Explained</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width: 15%;">Permission</th>
+                                    <th style="width: 40%;">Description</th>
+                                    <th style="width: 45%;">What It Controls</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="table-light">
+                                    <td><span class="badge bg-primary fs-6">View</span></td>
+                                    <td><strong>Read-only access</strong> to module data</td>
+                                    <td>
+                                        <ul class="mb-0 small">
+                                            <li>Can see list pages and data tables</li>
+                                            <li>Can view details/reports</li>
+                                            <li>Cannot make any changes</li>
+                                            <li><em>Required for menu visibility</em></li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-success fs-6">Create</span></td>
+                                    <td><strong>Add new records</strong> to the system</td>
+                                    <td>
+                                        <ul class="mb-0 small">
+                                            <li>Can create new surveys, employees, clients</li>
+                                            <li>Can add new locations to surveys</li>
+                                            <li>Can add team assignments</li>
+                                            <li><em>Usually paired with View</em></li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr class="table-light">
+                                    <td><span class="badge bg-warning text-dark fs-6">Update</span></td>
+                                    <td><strong>Full edit access</strong> to existing records</td>
+                                    <td>
+                                        <ul class="mb-0 small">
+                                            <li>Can modify survey settings and metadata</li>
+                                            <li>Can edit employee/client information</li>
+                                            <li>Can change locations and assignments</li>
+                                            <li><em>Higher privilege than Execute</em></li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-info fs-6">Execute</span></td>
+                                    <td><strong>Survey participation</strong> without full edit rights</td>
+                                    <td>
+                                        <ul class="mb-0 small">
+                                            <li>Can fill in survey data (devices, quantities)</li>
+                                            <li>Can upload photos and documents</li>
+                                            <li>Can submit surveys for approval</li>
+                                            <li><em>Ideal for field workers</em></li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr class="table-danger">
+                                    <td><span class="badge bg-danger fs-6">Delete</span></td>
+                                    <td><strong>Remove records</strong> from the system</td>
+                                    <td>
+                                        <ul class="mb-0 small">
+                                            <li>Can delete surveys, locations, entries</li>
+                                            <li>Can remove team assignments</li>
+                                            <li><strong class="text-danger">Use with caution!</strong></li>
+                                            <li><em>Grant only to trusted users</em></li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Module Rights Reference -->
+                    <h5 class="mt-4 mb-3"><i class="bi bi-grid-3x3-gap me-2"></i>Module Rights Reference</h5>
+                    <div class="accordion" id="moduleAccordion">
+                        <!-- Survey Module -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#surveyModule">
+                                    <i class="bi bi-clipboard-check me-2"></i> <strong>Survey Module</strong>
+                                    <span class="badge bg-primary ms-2">Core Module</span>
+                                </button>
+                            </h2>
+                            <div id="surveyModule" class="accordion-collapse collapse show" data-bs-parent="#moduleAccordion">
+                                <div class="accordion-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped">
+                                            <thead class="table-secondary">
+                                                <tr>
+                                                    <th>Permission</th>
+                                                    <th>Allows User To...</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><span class="badge bg-primary">View</span></td>
+                                                    <td>See survey list, view survey details, access locations page, see attached devices and data</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><span class="badge bg-success">Create</span></td>
+                                                    <td>Create new surveys, add locations to surveys, assign team members, add devices</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><span class="badge bg-warning text-dark">Update</span></td>
+                                                    <td>Edit survey details (name, client, dates), modify locations, change team assignments, edit all survey settings</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><span class="badge bg-info">Execute</span></td>
+                                                    <td>Fill device quantities, enter specifications, upload photos, add remarks, submit survey for approval</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><span class="badge bg-danger">Delete</span></td>
+                                                    <td>Delete entire surveys, remove locations, remove devices from locations</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="alert alert-warning small mb-0 mt-2">
+                                        <i class="bi bi-lightbulb me-1"></i>
+                                        <strong>Tip:</strong> For field surveyors, grant <strong>View + Execute</strong>. They can participate in surveys without accidentally modifying survey settings.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Client Master Module -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#clientModule">
+                                    <i class="bi bi-building me-2"></i> <strong>Client Master</strong>
+                                </button>
+                            </h2>
+                            <div id="clientModule" class="accordion-collapse collapse" data-bs-parent="#moduleAccordion">
+                                <div class="accordion-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped">
+                                            <thead class="table-secondary">
+                                                <tr>
+                                                    <th>Permission</th>
+                                                    <th>Allows User To...</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><span class="badge bg-primary">View</span></td>
+                                                    <td>See client list, view client details</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><span class="badge bg-success">Create (Add)</span></td>
+                                                    <td>Add new client organizations to the system</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><span class="badge bg-warning text-dark">Update</span></td>
+                                                    <td>Edit client information (name, contacts, address)</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><span class="badge bg-danger">Delete</span></td>
+                                                    <td>Remove clients from the system</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Employee Master Module -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#employeeModule">
+                                    <i class="bi bi-person-vcard me-2"></i> <strong>Employee Master</strong>
+                                </button>
+                            </h2>
+                            <div id="employeeModule" class="accordion-collapse collapse" data-bs-parent="#moduleAccordion">
+                                <div class="accordion-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped">
+                                            <thead class="table-secondary">
+                                                <tr>
+                                                    <th>Permission</th>
+                                                    <th>Allows User To...</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><span class="badge bg-primary">View</span></td>
+                                                    <td>See employee list, view employee details</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><span class="badge bg-success">Create</span></td>
+                                                    <td>Add new employees to the system</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><span class="badge bg-warning text-dark">Update</span></td>
+                                                    <td>Edit employee information (name, contact, status)</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><span class="badge bg-danger">Delete</span></td>
+                                                    <td>Remove employees from the system</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Users/Login Master Module -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#usersModule">
+                                    <i class="bi bi-key me-2"></i> <strong>Users (Login Master)</strong>
+                                </button>
+                            </h2>
+                            <div id="usersModule" class="accordion-collapse collapse" data-bs-parent="#moduleAccordion">
+                                <div class="accordion-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped">
+                                            <thead class="table-secondary">
+                                                <tr>
+                                                    <th>Permission</th>
+                                                    <th>Allows User To...</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><span class="badge bg-primary">View</span></td>
+                                                    <td>See list of user accounts</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><span class="badge bg-success">Create</span></td>
+                                                    <td>Create new login accounts for employees, use "Sync to Login" feature</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><span class="badge bg-warning text-dark">Update</span></td>
+                                                    <td>Edit user accounts, reset passwords, change user roles, activate/deactivate accounts</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User Rights Module -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#rightsModule">
+                                    <i class="bi bi-shield-lock me-2"></i> <strong>User Rights</strong>
+                                    <span class="badge bg-danger ms-2">Admin Only</span>
+                                </button>
+                            </h2>
+                            <div id="rightsModule" class="accordion-collapse collapse" data-bs-parent="#moduleAccordion">
+                                <div class="accordion-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped">
+                                            <thead class="table-secondary">
+                                                <tr>
+                                                    <th>Permission</th>
+                                                    <th>Allows User To...</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><span class="badge bg-primary">View</span></td>
+                                                    <td>Access User Rights page, view permissions of any user</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><span class="badge bg-warning text-dark">Update</span></td>
+                                                    <td>Modify user permissions (toggle View/Create/Update/Execute/Delete for any module)</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="alert alert-danger small mb-0 mt-2">
+                                        <i class="bi bi-shield-exclamation me-1"></i>
+                                        <strong>Critical:</strong> User Rights Update permission is extremely powerful. Only grant to trusted administrators.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- How to Assign -->
+                    <h5 class="mt-4 mb-3"><i class="bi bi-list-ol me-2"></i>How to Assign User Rights</h5>
+                    <ol class="ps-4">
+                        <li class="mb-3">
+                            <strong>Navigate to User Rights:</strong> Go to <strong>Admin → User Rights</strong>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Select a User:</strong> Use the dropdown to select the user. The system loads their current permissions in a table.
+                        </li>
+                        <li class="mb-3">
+                            <strong>Toggle Permissions:</strong> For each module/region row, use the toggle switches to enable or disable permissions:
+                            <ul class="mt-2">
+                                <li><span class="badge bg-light text-dark border">NO</span> = Permission denied</li>
+                                <li><span class="badge bg-success">Yes</span> = Permission granted</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Save Changes:</strong> Click <strong>"Update"</strong> to save. Changes apply on user's next login.
+                        </li>
+                    </ol>
+
+                    <!-- Role Cards -->
+                    <div class="row mt-4">
+                        <div class="col-md-4">
+                            <div class="card border-primary h-100">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0"><i class="bi bi-shield-fill me-2"></i>Super Admin (101)</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="mb-0 small">
+                                        <li><strong>Full access</strong> to everything</li>
+                                        <li>Cannot be restricted</li>
+                                        <li>Rights page shows info only</li>
+                                        <li>Can manage all users</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-success h-100">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0"><i class="bi bi-person-gear me-2"></i>Admin (102)</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="mb-0 small">
+                                        <li>Admin panel access</li>
+                                        <li>Can be partially restricted</li>
+                                        <li>Manages regular users</li>
+                                        <li>Cannot modify Super Admins</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-secondary h-100">
+                                <div class="card-header bg-secondary text-white">
+                                    <h6 class="mb-0"><i class="bi bi-person me-2"></i>User (103+)</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="mb-0 small">
+                                        <li>Standard user account</li>
+                                        <li>Fully customizable rights</li>
+                                        <li>No admin panel access</li>
+                                        <li>Depends entirely on rights</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="warning-box mt-4">
+                        <h6 class="mb-2"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Best Practices</h6>
+                        <ul class="mb-0">
+                            <li>Follow <strong>least privilege principle</strong> - only grant permissions users need</li>
+                            <li>Grant <strong>Execute</strong> instead of <strong>Update</strong> for field workers</li>
+                            <li>Avoid giving <strong>Delete</strong> permission unless absolutely necessary</li>
+                            <li>Review permissions regularly and revoke unused access</li>
+                            <li>Document why elevated permissions were granted</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Employee Master -->
+    <div id="employee-master" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4">2</span>
+                        <h4 class="mb-0">Employee Master</h4>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Access:</strong> Admin → Employee Master
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-person-vcard me-2"></i>What is Employee Master?</h5>
+                    <p>Employee Master is the central registry of all employees in your organization. Each employee record contains personal and contact information.</p>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-plus-circle me-2"></i>Creating a New Employee</h5>
+                    <ol class="ps-4">
+                        <li class="mb-3">
+                            <strong>Access Employee List:</strong>
+                            <ul class="mt-2">
+                                <li>Go to <strong>Admin → Employee Master</strong></li>
+                                <li>Click <strong>"+ Add Employee"</strong> button</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Fill Employee Details:</strong>
+                            <div class="table-responsive mt-2">
+                                <table class="table table-bordered table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Field</th>
+                                            <th>Description</th>
+                                            <th>Required</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Employee Name</strong></td>
+                                            <td>Full name of the employee</td>
+                                            <td><span class="badge bg-danger">Yes</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Email</strong></td>
+                                            <td>Official email address</td>
+                                            <td><span class="badge bg-danger">Yes</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Mobile</strong></td>
+                                            <td>Contact number</td>
+                                            <td><span class="badge bg-warning text-dark">Recommended</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Designation</strong></td>
+                                            <td>Job title/position</td>
+                                            <td><span class="badge bg-secondary">Optional</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Department</strong></td>
+                                            <td>Department/team</td>
+                                            <td><span class="badge bg-secondary">Optional</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Active</strong></td>
+                                            <td>Is employee currently active?</td>
+                                            <td><span class="badge bg-danger">Yes</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Save Employee:</strong>
+                            <ul class="mt-2">
+                                <li>Click <strong>"Save"</strong> to create the employee record</li>
+                                <li>The employee is now available for login creation</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="success-box">
+                        <h6 class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Next Step</h6>
+                        <p class="mb-0">After creating an employee, proceed to <strong>Users (Login Master)</strong> to create their login credentials.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Login Master (Users) -->
+    <div id="login-master" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4">3</span>
+                        <h4 class="mb-0">Users (Login Master)</h4>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Access:</strong> Admin → Users
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-key me-2"></i>What is Login Master?</h5>
+                    <p>Login Master manages user authentication credentials. This is where you create usernames and passwords that employees use to log into the system.</p>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-person-plus me-2"></i>Creating a New User Login</h5>
+                    <ol class="ps-4">
+                        <li class="mb-3">
+                            <strong>Access Users Page:</strong>
+                            <ul class="mt-2">
+                                <li>Go to <strong>Admin → Users</strong></li>
+                                <li>Click <strong>"+ Add User"</strong> button</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Select Employee:</strong>
+                            <ul class="mt-2">
+                                <li>Choose an employee from the dropdown (only employees without logins are shown)</li>
+                                <li>Employee details will auto-populate</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Fill Login Details:</strong>
+                            <div class="table-responsive mt-2">
+                                <table class="table table-bordered table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Field</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Login Name/Username</strong></td>
+                                            <td>Unique username for login (usually email or employee ID)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Password</strong></td>
+                                            <td>Initial password (min 6 characters)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Role</strong></td>
+                                            <td>User role (Super Admin, Admin, or User)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Active</strong></td>
+                                            <td>Enable/disable login access</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Save User:</strong>
+                            <ul class="mt-2">
+                                <li>Click <strong>"Save"</strong> to create the login</li>
+                                <li>Share credentials securely with the user</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-arrow-repeat me-2"></i>Sync Employees to Login (Bulk)</h5>
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <p>Use <strong>"Sync to Login"</strong> to create login accounts for all employees without credentials:</p>
+                            <ol class="mb-0">
+                                <li>Click <strong>"Sync to Login"</strong> button on Users page</li>
+                                <li>Enter a default password for all new accounts</li>
+                                <li>Select default role (usually "User")</li>
+                                <li>Click <strong>"Sync"</strong></li>
+                                <li>All employees without logins get accounts created</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-arrow-clockwise me-2"></i>Password Reset</h5>
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <p>To reset a user's password:</p>
+                            <ol class="mb-0">
+                                <li>Find the user in the Users list</li>
+                                <li>Click the <strong>"Reset Password"</strong> button</li>
+                                <li>Enter a new temporary password</li>
+                                <li>User will be prompted to change password on next login</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="warning-box mt-4">
+                        <h6 class="mb-2"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Security Best Practices</h6>
+                        <ul class="mb-0">
+                            <li>Always use strong, unique passwords</li>
+                            <li>Share initial credentials through secure channels</li>
+                            <li>Encourage users to change passwords on first login</li>
+                            <li>Deactivate accounts for departed employees immediately</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 4: Client Master -->
+    <div id="client-master" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4">4</span>
+                        <h4 class="mb-0">Client Master</h4>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Access:</strong> Admin → Client Master
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-building me-2"></i>What is Client Master?</h5>
+                    <p>Client Master maintains the database of client organizations for whom surveys are conducted. Each survey must be associated with a client.</p>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-plus-circle me-2"></i>Creating a New Client</h5>
+                    <ol class="ps-4">
+                        <li class="mb-3">
+                            <strong>Access Client Master:</strong>
+                            <ul class="mt-2">
+                                <li>Go to <strong>Admin → Client Master</strong></li>
+                                <li>Click <strong>"+ Add Client"</strong> button</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Fill Client Details:</strong>
+                            <div class="table-responsive mt-2">
+                                <table class="table table-bordered table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Field</th>
+                                            <th>Description</th>
+                                            <th>Required</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Client Name</strong></td>
+                                            <td>Organization/company name</td>
+                                            <td><span class="badge bg-danger">Yes</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Contact Person</strong></td>
+                                            <td>Primary point of contact</td>
+                                            <td><span class="badge bg-warning text-dark">Recommended</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Email</strong></td>
+                                            <td>Client email address</td>
+                                            <td><span class="badge bg-warning text-dark">Recommended</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Phone</strong></td>
+                                            <td>Contact number</td>
+                                            <td><span class="badge bg-secondary">Optional</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Address</strong></td>
+                                            <td>Client's address</td>
+                                            <td><span class="badge bg-secondary">Optional</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>State/City</strong></td>
+                                            <td>Geographic location</td>
+                                            <td><span class="badge bg-secondary">Optional</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Save Client:</strong>
+                            <ul class="mt-2">
+                                <li>Click <strong>"Save"</strong> to create the client record</li>
+                                <li>Client will be available when creating new surveys</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="tip-box">
+                        <h6 class="mb-2"><i class="bi bi-lightbulb-fill text-info me-2"></i>Pro Tip</h6>
+                        <p class="mb-0">Keep client information updated. Clear naming conventions help survey creators quickly find the correct client when creating surveys.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 5: Devices Admin -->
+    <div id="devices-admin" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4">5</span>
+                        <h4 class="mb-0">Devices Administration</h4>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Access:</strong> Admin → Manage Devices
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-cpu me-2"></i>What is Devices Admin?</h5>
+                    <p>Devices Admin allows you to configure the device types, modules, and specifications available for surveys. This is the master data that drives the survey forms.</p>
+
+                    <div class="row g-3 mt-3">
+                        <div class="col-md-4">
+                            <div class="card bg-light h-100">
+                                <div class="card-body">
+                                    <h6><i class="bi bi-folder me-2 text-primary"></i>Modules</h6>
+                                    <p class="small mb-0">Categories of devices (e.g., Networking, Power, Security)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light h-100">
+                                <div class="card-body">
+                                    <h6><i class="bi bi-hdd me-2 text-success"></i>Devices</h6>
+                                    <p class="small mb-0">Individual device types within modules (e.g., Router, Camera)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light h-100">
+                                <div class="card-body">
+                                    <h6><i class="bi bi-sliders me-2 text-info"></i>Specifications</h6>
+                                    <p class="small mb-0">Custom fields for devices (e.g., Model, Capacity)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-list-ol me-2"></i>Managing Devices</h5>
+                    <ol class="ps-4">
+                        <li class="mb-3">
+                            <strong>Create a Module:</strong>
+                            <ul class="mt-2">
+                                <li>Click <strong>"+ Add Module"</strong></li>
+                                <li>Enter module name and description</li>
+                                <li>Set display order and active status</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Add Devices to Module:</strong>
+                            <ul class="mt-2">
+                                <li>Select a module from the list</li>
+                                <li>Click <strong>"+ Add Device"</strong></li>
+                                <li>Enter device name, description, and settings</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Configure Specifications:</strong>
+                            <ul class="mt-2">
+                                <li>For devices needing custom fields, add specifications</li>
+                                <li>Define input type (text, dropdown, number, etc.)</li>
+                                <li>Add dropdown options if applicable</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="warning-box">
+                        <h6 class="mb-2"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Caution</h6>
+                        <p class="mb-0">Changes to device configurations affect all future surveys. Existing survey data is not affected, but be careful when modifying or deleting devices that are actively used.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Guidelines -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="card border-danger shadow">
                 <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>Important Security Guidelines
-                    </h5>
+                    <h5 class="mb-0"><i class="bi bi-shield-exclamation me-2"></i>Security Guidelines</h5>
                 </div>
                 <div class="card-body p-4">
-                    <ul class="ps-4 mb-0">
-                        <li class="mb-2">Only grant admin access to trusted personnel</li>
-                        <li class="mb-2">Use strong passwords for admin accounts</li>
-                        <li class="mb-2">Regularly review user permissions</li>
-                        <li class="mb-2">Deactivate accounts for terminated employees immediately</li>
-                        <li class="mb-2">Keep audit logs of admin actions</li>
-                        <li class="mb-2">Never share admin credentials</li>
-                    </ul>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-check-circle text-success me-2"></i>Do:</h6>
+                            <ul>
+                                <li>Grant minimum required permissions</li>
+                                <li>Review user access regularly</li>
+                                <li>Use strong passwords (min 8 chars, mixed case)</li>
+                                <li>Deactivate departed employee accounts immediately</li>
+                                <li>Keep audit logs of admin actions</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-x-circle text-danger me-2"></i>Don't:</h6>
+                            <ul>
+                                <li>Share admin credentials</li>
+                                <li>Give everyone Super Admin access</li>
+                                <li>Leave default passwords unchanged</li>
+                                <li>Grant Delete permissions unless necessary</li>
+                                <li>Ignore login failure notifications</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Related Topics -->
     <div class="row">
         <div class="col-12">
             <div class="card bg-light shadow-sm">
                 <div class="card-body p-4">
                     <h5 class="mb-4"><i class="bi bi-link-45deg me-2"></i>Related Topics</h5>
                     <div class="row g-3">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <a asp-action="SurveyCreation" class="btn btn-outline-danger btn-help w-100">
+                                <i class="bi bi-plus-circle me-2"></i>Survey Creation
+                            </a>
+                        </div>
+                        <div class="col-md-3">
                             <a asp-action="SurveyAssignment" class="btn btn-outline-danger btn-help w-100">
                                 <i class="bi bi-people me-2"></i>Team Assignment
                             </a>
                         </div>
-                        <div class="col-md-4">
-                            <a asp-action="SurveyCreation" class="btn btn-outline-danger btn-help w-100">
-                                <i class="bi bi-plus-circle me-2"></i>Creating Surveys
+                        <div class="col-md-3">
+                            <a asp-action="SurveySubmission" class="btn btn-outline-danger btn-help w-100">
+                                <i class="bi bi-send me-2"></i>Submission & Review
                             </a>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <a asp-action="Index" class="btn btn-outline-secondary btn-help w-100">
                                 <i class="bi bi-arrow-left me-2"></i>Help Center
                             </a>

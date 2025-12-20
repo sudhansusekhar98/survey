@@ -1,0 +1,286 @@
+/* Help Pages Premium Styling */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --secondary-gradient: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.18);
+    --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    --step-number-size: 3.5rem;
+    --text-primary: #2d3748;
+    --text-secondary: #718096;
+}
+
+body {
+    background-color: #f7f9fc;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Hero Section */
+.help-hero {
+    background: var(--primary-gradient);
+    padding: 4rem 0 6rem;
+    color: white;
+    margin-bottom: -3rem;
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+}
+
+.help-hero h1 {
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.help-hero .lead {
+    font-weight: 300;
+    opacity: 0.9;
+}
+
+/* Cards */
+.step-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: var(--glass-border);
+    border-radius: 1rem;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-top: 4px solid transparent;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.step-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.15);
+}
+
+.step-card.border-primary {
+    border-top-color: #667eea !important;
+}
+
+.step-card.border-success {
+    border-top-color: #84fab0 !important;
+}
+
+.step-card.border-info {
+    border-top-color: #8fd3f4 !important;
+}
+
+/* Step Numbers */
+.step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--step-number-size);
+    height: var(--step-number-size);
+    background: var(--primary-gradient);
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 50%;
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Quick Navigation */
+.quick-nav {
+    position: sticky;
+    top: 2rem;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: var(--card-shadow);
+}
+
+.quick-nav-link {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    margin-bottom: 0.25rem;
+}
+
+.quick-nav-link:hover,
+.quick-nav-link.active {
+    background-color: #ebf4ff;
+    color: #5a67d8;
+    font-weight: 600;
+}
+
+/* Feature Boxes */
+.feature-box {
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid;
+}
+
+.feature-box.info {
+    background-color: #ebf8ff;
+    border-left-color: #4299e1;
+}
+
+.feature-box.success {
+    background-color: #f0fff4;
+    border-left-color: #48bb78;
+}
+
+.feature-box.warning {
+    background-color: #fffaf0;
+    border-left-color: #ed8936;
+}
+
+/* Screenshots */
+.screenshot-container {
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    margin: 1.5rem 0;
+}
+
+.screenshot-placeholder {
+    background-color: #f7fafc;
+    padding: 3rem;
+    text-align: center;
+    border: 2px dashed #cbd5e0;
+    border-radius: 0.75rem;
+}
+
+/* FAQ Accordion */
+.accordion-item {
+    border: none;
+    margin-bottom: 1rem;
+    border-radius: 0.75rem !important;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.accordion-button {
+    background-color: white;
+    font-weight: 600;
+    padding: 1.25rem;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #ebf4ff;
+    color: #4c51bf;
+    box-shadow: none;
+}
+
+.accordion-body {
+    background-color: white;
+    padding: 1.5rem;
+    line-height: 1.6;
+}
+
+/* Workflow Steps (QuickStart) */
+.workflow-timeline {
+    position: relative;
+    padding-left: 3rem;
+}
+
+.workflow-timeline::before {
+    content: '';
+    position: absolute;
+    left: 1rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e2e8f0;
+}
+
+.workflow-item {
+    position: relative;
+    margin-bottom: 3rem;
+}
+
+.workflow-marker {
+    position: absolute;
+    left: -3rem;
+    width: 2rem;
+    height: 2rem;
+    background: var(--primary-gradient);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 0 0 4px #f7f9fc;
+}
+
+/* Buttons */
+.btn-premium {
+    background: var(--primary-gradient);
+    border: none;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: transform 0.2s;
+}
+
+.btn-premium:hover {
+    transform: translateY(-2px);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Alert Boxes */
+.tip-box {
+    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+    border-left: 5px solid #17a2b8;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(23, 162, 184, 0.1);
+}
+
+.warning-box {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border-left: 5px solid #ffc107;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.1);
+}
+
+.success-box {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    border-left: 5px solid #28a745;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.1);
+}
+
+.info-box {
+    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+    border-left: 5px solid #17a2b8;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(23, 162, 184, 0.1);
+}
+
+/* Card Headers */
+.card-header-custom {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-radius: 0.75rem 0.75rem 0 0;
+}
+
+/* Help Buttons */
+.btn-help {
+    margin: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-help:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
