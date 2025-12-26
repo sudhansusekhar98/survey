@@ -4,11 +4,13 @@ namespace SurveyApp.Models
     {
         // Overall Statistics
         public int TotalSurveys { get; set; }
-        public int CompletedSurveys { get; set; }
+        public int CreatedSurveys { get; set; }
+        public int AssignedSurveys { get; set; }
         public int InProgressSurveys { get; set; }
+        public int SubmittedSurveys { get; set; }
+        public int CompletedSurveys { get; set; }
         public int PendingSurveys { get; set; }
         public int OnHoldSurveys { get; set; }
-        public int AssignedSurveys { get; set; }
         public int MissedDeadlineSurveys { get; set; }
         public decimal CompletionRate { get; set; }
         

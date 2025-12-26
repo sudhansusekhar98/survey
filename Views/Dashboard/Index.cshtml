@@ -81,7 +81,8 @@
 
     <!-- Key Metrics Row -->
     <div class="row g-4 mb-4">
-        <div class="col-12 col-sm-6 col-xl-3">
+        <!-- Total Surveys -->
+        <div class="col-6 col-md-4 col-xl">
             <a asp-controller="SurveyCreation" asp-action="Index" class="text-decoration-none">
                 <div class="card stat-card h-100">
                     <div class="card-body">
@@ -101,7 +102,96 @@
             </a>
         </div>
 
-        <div class="col-12 col-sm-6 col-xl-3">
+        <!-- Created -->
+        <div class="col-6 col-md-4 col-xl">
+            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="Created"
+                class="text-decoration-none">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="metric-label mb-2">Created</p>
+                                <h2 class="metric-value text-secondary mb-0">@Model.CreatedSurveys</h2>
+                            </div>
+                            <div class="avatar avatar-lg">
+                                <div class="avatar-initial rounded-3 bg-label-secondary">
+                                    <i class="bx bx-file bx-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Assigned -->
+        <div class="col-6 col-md-4 col-xl">
+            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="Assigned"
+                class="text-decoration-none">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="metric-label mb-2">Assigned</p>
+                                <h2 class="metric-value text-info mb-0">@Model.AssignedSurveys</h2>
+                            </div>
+                            <div class="avatar avatar-lg">
+                                <div class="avatar-initial rounded-3 bg-label-info">
+                                    <i class="bx bx-user-check bx-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- In Progress -->
+        <div class="col-6 col-md-4 col-xl">
+            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="In Progress"
+                class="text-decoration-none">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="metric-label mb-2">In Progress</p>
+                                <h2 class="metric-value text-warning mb-0">@Model.InProgressSurveys</h2>
+                            </div>
+                            <div class="avatar avatar-lg">
+                                <div class="avatar-initial rounded-3 bg-label-warning">
+                                    <i class="bx bx-time-five bx-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Submitted -->
+        <div class="col-6 col-md-4 col-xl">
+            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="Submitted"
+                class="text-decoration-none">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="metric-label mb-2">Submitted</p>
+                                <h2 class="metric-value text-purple mb-0">@Model.SubmittedSurveys</h2>
+                            </div>
+                            <div class="avatar avatar-lg">
+                                <div class="avatar-initial rounded-3 bg-label-dark">
+                                    <i class="bx bx-upload bx-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Completed -->
+        <div class="col-6 col-md-4 col-xl">
             <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="Completed"
                 class="text-decoration-none">
                 <div class="card stat-card h-100">
@@ -123,28 +213,8 @@
             </a>
         </div>
 
-        <div class="col-12 col-sm-6 col-xl-3">
-            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="In Progress"
-                class="text-decoration-none">
-                <div class="card stat-card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <p class="metric-label mb-2">In Progress</p>
-                                <h2 class="metric-value text-warning mb-0">@Model.InProgressSurveys</h2>
-                            </div>
-                            <div class="avatar avatar-lg">
-                                <div class="avatar-initial rounded-3 bg-label-warning">
-                                    <i class="bx bx-time-five bx-lg"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-12 col-sm-6 col-xl-3">
+        <!-- Missed Deadline -->
+        <div class="col-6 col-md-4 col-xl">
             <a asp-controller="SurveyCreation" asp-action="Index" asp-route-missed="true" class="text-decoration-none">
                 <div class="card stat-card h-100">
                     <div class="card-body">
@@ -166,26 +236,6 @@
                 </div>
             </a>
         </div>
-
-        @*  <div class="col-12 col-sm-6 col-xl-3">
-            <a asp-controller="SurveyCreation" asp-action="Index" asp-route-status="Pending" class="text-decoration-none">
-                <div class="card stat-card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <p class="metric-label mb-2">Pending</p>
-                                <h2 class="metric-value text-secondary mb-0">@Model.PendingSurveys</h2>
-                            </div>
-                            <div class="avatar avatar-lg">
-                                <div class="avatar-initial rounded-3 bg-label-secondary">
-                                    <i class="bx bx-pause-circle bx-lg"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div> *@
     </div>
 
     <!-- Additional Metrics Row -->

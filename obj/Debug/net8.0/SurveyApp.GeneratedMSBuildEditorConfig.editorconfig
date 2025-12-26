@@ -160,6 +160,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvZmlsZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/VL Access/Survey/CODES/Survey/survey/Views/ReportOTP/AuditLog.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVwb3J0T1RQXEF1ZGl0TG9nLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/CODES/Survey/survey/Views/ReportOTP/PendingRequests.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVwb3J0T1RQXFBlbmRpbmdSZXF1ZXN0cy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/VL Access/Survey/CODES/Survey/survey/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -236,6 +244,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/VL Access/Survey/CODES/Survey/survey/Views/SurveyCreation/AssignRevision.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5Q3JlYXRpb25cQXNzaWduUmV2aXNpb24uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/CODES/Survey/survey/Views/SurveyCreation/CompletedSurveys.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5Q3JlYXRpb25cQ29tcGxldGVkU3VydmV5cy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/VL Access/Survey/CODES/Survey/survey/Views/SurveyCreation/CreateSurveyAssignment.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5Q3JlYXRpb25cQ3JlYXRlU3VydmV5QXNzaWdubWVudC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -246,6 +262,14 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/VL Access/Survey/CODES/Survey/survey/Views/SurveyCreation/ItemTypeMaster.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5Q3JlYXRpb25cSXRlbVR5cGVNYXN0ZXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/CODES/Survey/survey/Views/SurveyCreation/PendingRevisions.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5Q3JlYXRpb25cUGVuZGluZ1JldmlzaW9ucy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/VL Access/Survey/CODES/Survey/survey/Views/SurveyCreation/RevisionHistory.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VydmV5Q3JlYXRpb25cUmV2aXNpb25IaXN0b3J5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/VL Access/Survey/CODES/Survey/survey/Views/SurveyCreation/SubmissionsList.cshtml]

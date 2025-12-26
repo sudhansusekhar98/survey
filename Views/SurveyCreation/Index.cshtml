@@ -1,6 +1,6 @@
 @model List<SurveyApp.Models.SurveyModel>
 @{
-    ViewData["Title"] = "Survey List";
+    ViewData["Title"] = "Active Surveys";
 }
 
 @section VendorStyles {
@@ -32,7 +32,7 @@
                 <div class="card-header bg-purple py-2">
                     <div class="d-flex justify-content-between align-items-center">
                         <h6 class="text-white fs-4 mb-0">
-                            All Surveys
+                            Active Surveys
                             @if (ViewBag.IsFiltered == true)
                             {
                                 <span class="badge text-purple ms-2">
@@ -236,6 +236,12 @@
                                             <span class="badge bg-@statusColor">
                                                 @survey.SurveyStatus
                                             </span>
+                                            @if (survey.IsRevised)
+                                            {
+                                                <span class="badge bg-warning text-dark ms-1" title="This is a revised survey">
+                                                    <i class="bi bi-arrow-repeat me-1"></i>Rev @survey.RevisionNumber
+                                                </span>
+                                            }
                                         </div>
 
 

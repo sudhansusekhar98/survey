@@ -1,0 +1,175 @@
+@model List<SurveyApp.Models.SurveyRevisionModel>
+@{
+    ViewData["Title"] = "Pending Revisions";
+}
+
+@section VendorStyles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+}
+
+@section PageStyles {
+    <style>
+        /* Prevent horizontal overflow */
+        body {
+            overflow-x: hidden !important;
+        }
+
+        /* Mobile full-screen card */
+        @@media (max-width: 767.98px) {
+            .full-screen-card {
+                min-height: 100vh;
+                border-radius: 0 !important;
+                margin: 0 !important;
+            }
+        }
+    </style>
+}
+
+<div class="container-fluid p-0 m-0">
+    <div class="row g-0">
+        <div class="col-12">
+            <div class="card shadow mt-0 rounded-0 full-screen-card">
+                <div class="card-header bg-purple py-2 mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="text-white fs-4 mb-0">
+                            <i class="bi bi-arrow-repeat me-2"></i>Pending Revisions
+                            @if (Model != null && Model.Count > 0)
+                            {
+                                <span class="badge text-purple ms-2">@Model.Count</span>
+                            }
+                        </h6>
+                        <a asp-action="CompletedSurveys" class="btn btn-outline-light text-white border-0">
+                            <i class="bi bi-arrow-left"></i>
+                            <span class="d-none d-md-inline ms-2">Back to Completed</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        <!-- Filter/Count Section -->
+                        <div class="card mb-3 border-1 shadow-sm"
+                            style="border-radius: 10px; overflow: hidden;">
+                            <div class="card-body" style="background-color: #f8f9fa; padding: 1rem;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-info-circle text-purple me-2"></i>
+                                        <span class="text-muted">Showing all pending revisions that need to be completed</span>
+                                    </div>
+                                    <span class="badge bg-purple text-white border px-3 py-2"
+                                        style="border-radius: 8px; font-size: 0.875rem;">
+                                        <i class="bi bi-list-check me-1"></i>
+                                        <strong>@Model.Count</strong> revisions
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="revisionsTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Rev #</th>
+                                        <th>Revised Survey</th>
+                                        <th>Original Survey</th>
+                                        <th>Client</th>
+                                        <th>Assigned By</th>
+                                        <th>Assigned Date</th>
+                                        <th>Due Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var revision in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-purple text-white fs-6">
+                                                    @revision.RevisionNumber
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a asp-action="SurveyLocation" asp-route-surveyId="@revision.RevisedSurveyId" 
+                                                   class="text-decoration-none">
+                                                    <strong>@revision.RevisedSurveyName</strong>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a asp-action="SurveyLocation" asp-route-surveyId="@revision.OriginalSurveyId" 
+                                                   class="text-decoration-none text-muted">
+                                                    @revision.OriginalSurveyName
+                                                </a>
+                                            </td>
+                                            <td>@(revision.ClientName ?? "-")</td>
+                                            <td>
+                                                <i class="bi bi-person me-1"></i>@(revision.AssignedByName ?? "Unknown")
+                                            </td>
+                                            <td>
+                                                <small>@revision.AssignedDate.ToString("dd MMM yyyy")</small>
+                                            </td>
+                                            <td>
+                                                @if (revision.DueDate.HasValue)
+                                                {
+                                                    var isOverdue = revision.DueDate.Value.Date < DateTime.Today;
+                                                    <span class="badge @(isOverdue ? "bg-danger" : "bg-info")">
+                                                        @(isOverdue ? "⚠️" : "")
+                                                        @revision.DueDate.Value.ToString("dd MMM yyyy")
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge @(revision.Status == "InProgress" ? "bg-warning text-dark" : 
+                                                                    revision.Status == "Assigned" ? "bg-info" : "bg-secondary")">
+                                                    @revision.Status
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a asp-action="SurveyLocation" asp-route-surveyId="@revision.RevisedSurveyId" 
+                                                       class="btn btn-outline-purple" title="View Survey">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a asp-action="RevisionHistory" asp-route-surveyId="@revision.RevisedSurveyId" 
+                                                       class="btn btn-outline-info" title="View History">
+                                                        <i class="bi bi-clock-history"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-check-circle text-success" style="font-size: 48px;"></i>
+                            <h5 class="text-muted mt-3">No Pending Revisions</h5>
+                            <p class="text-muted">All survey revisions have been completed.</p>
+                            <a asp-action="CompletedSurveys" class="btn btn-purple mt-3">
+                                <i class="bi bi-arrow-left me-1"></i>Back to Completed Surveys
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#revisionsTable').DataTable({
+                pageLength: 25,
+                order: [[5, 'desc']] // Order by assigned date
+            });
+        });
+    </script>
+}

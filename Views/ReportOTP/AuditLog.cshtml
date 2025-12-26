@@ -1,0 +1,198 @@
+@model List<SurveyApp.Models.ReportOTPModel>
+@{
+    ViewData["Title"] = "Report OTP Audit Log";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-1">
+                        <i class="bx bx-history text-primary me-2"></i>Report Download OTP Audit Log
+                    </h4>
+                    <p class="text-muted mb-0">View all OTP requests and validations for report downloads</p>
+                </div>
+                <div>
+                    <a asp-action="PendingRequests" class="btn btn-primary">
+                        <i class="bx bx-bell me-2"></i>Pending Requests
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-label-primary h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-lg bg-primary me-3">
+                            <i class="bx bx-shield-quarter bx-lg text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-0">@Model.Count</h3>
+                            <small class="text-muted">Total Requests</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-label-success h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-lg bg-success me-3">
+                            <i class="bx bx-check-circle bx-lg text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-0">@Model.Count(x => x.OTPStatus == "Validated")</h3>
+                            <small class="text-muted">Validated</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-label-warning h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-lg bg-warning me-3">
+                            <i class="bx bx-time-five bx-lg text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-0">@Model.Count(x => x.OTPStatus == "Pending")</h3>
+                            <small class="text-muted">Pending</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-label-danger h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-lg bg-danger me-3">
+                            <i class="bx bx-x-circle bx-lg text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-0">@Model.Count(x => x.OTPStatus == "Expired" || x.OTPStatus == "Cancelled")</h3>
+                            <small class="text-muted">Expired/Cancelled</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audit Log Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="bx bx-table me-2"></i>Audit Log
+            </h5>
+            <div>
+                <button class="btn btn-outline-secondary btn-sm" id="btnRefresh">
+                    <i class="bx bx-refresh me-1"></i>Refresh
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="auditLogTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Log ID</th>
+                            <th>User</th>
+                            <th>Report Type</th>
+                            <th>OTP</th>
+                            <th>Status</th>
+                            <th>Generated At</th>
+                            <th>Expires At</th>
+                            <th>Validated At</th>
+                            <th>Downloaded At</th>
+                            <th>IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
+                        {
+                            foreach (var log in Model)
+                            {
+                                var statusClass = log.OTPStatus switch
+                                {
+                                    "Validated" => "bg-success",
+                                    "Pending" => "bg-warning",
+                                    "Expired" => "bg-danger",
+                                    "Cancelled" => "bg-secondary",
+                                    _ => "bg-info"
+                                };
+                                <tr>
+                                    <td><span class="badge bg-label-primary">#@log.LogId</span></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm me-2">
+                                                <span class="avatar-initial rounded-circle bg-label-info">
+                                                    @log.UserName?.Substring(0, 1).ToUpper()
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span class="fw-semibold">@log.UserName</span>
+                                                <br>
+                                                <small class="text-muted">ID: @log.UserId</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-label-primary">@log.ReportType</span>
+                                    </td>
+                                    <td>
+                                        <code class="text-danger">@log.OTP</code>
+                                    </td>
+                                    <td>
+                                        <span class="badge @statusClass">@log.OTPStatus</span>
+                                    </td>
+                                    <td>@log.OTPGeneratedAt.ToString("dd-MMM-yyyy HH:mm:ss")</td>
+                                    <td>@log.OTPExpiresAt.ToString("dd-MMM-yyyy HH:mm:ss")</td>
+                                    <td>@(log.ValidatedAt?.ToString("dd-MMM-yyyy HH:mm:ss") ?? "-")</td>
+                                    <td>@(log.DownloadedAt?.ToString("dd-MMM-yyyy HH:mm:ss") ?? "-")</td>
+                                    <td><small>@(log.IPAddress ?? "-")</small></td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="10" class="text-center py-4">
+                                    <i class="bx bx-info-circle bx-lg text-muted"></i>
+                                    <p class="text-muted mt-2 mb-0">No audit log entries found</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Initialize DataTable if available
+            if ($.fn.DataTable) {
+                $('#auditLogTable').DataTable({
+                    order: [[0, 'desc']],
+                    pageLength: 25
+                });
+            }
+
+            // Refresh button
+            $('#btnRefresh').on('click', function () {
+                location.reload();
+            });
+        });
+    </script>
+}

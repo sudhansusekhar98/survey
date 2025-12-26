@@ -43,6 +43,8 @@ builder.Services.AddScoped<ISurveySubmission, SurveySubmissionRepo>();
 builder.Services.AddScoped<IClientMaster, ClientMasterRepo>();
 builder.Services.AddScoped<IEmpMaster, EmpMasterRepo>();
 builder.Services.AddScoped<ISurveyCamRemarks, SurveyCamRemarksRepo>();
+builder.Services.AddScoped<IReportOTP, ReportOTPRepo>();
+builder.Services.AddScoped<ISurveyRevision, SurveyRevisionRepo>();
 
 
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;

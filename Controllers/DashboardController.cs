@@ -76,11 +76,13 @@ namespace SurveyApp.Controllers
                 
                 // Overall statistics
                 TotalSurveys = allSurveys.Count,
-                CompletedSurveys = allSurveys.Count(s => s.SurveyStatus == "Completed"),
+                CreatedSurveys = allSurveys.Count(s => s.SurveyStatus == "Created"),
+                AssignedSurveys = allSurveys.Count(s => s.SurveyStatus == "Assigned"),
                 InProgressSurveys = allSurveys.Count(s => s.SurveyStatus == "In Progress"),
+                SubmittedSurveys = allSurveys.Count(s => s.SurveyStatus == "Submitted"),
+                CompletedSurveys = allSurveys.Count(s => s.SurveyStatus == "Completed"),
                 PendingSurveys = allSurveys.Count(s => s.SurveyStatus == "Pending"),
                 OnHoldSurveys = allSurveys.Count(s => s.SurveyStatus == "On Hold"),
-                AssignedSurveys = allSurveys.Count(s => s.SurveyStatus == "Assigned"),
                 MissedDeadlineSurveys = missedDeadlineSurveys.Count,
                 
                 // Status breakdown

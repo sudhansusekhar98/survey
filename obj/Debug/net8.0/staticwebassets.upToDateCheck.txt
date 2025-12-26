@@ -441,6 +441,7 @@ wwwroot\js\pages-account-settings-account.js
 wwwroot\js\poleInfrastructure.js
 wwwroot\js\profile.js
 wwwroot\js\reportCharts.js
+wwwroot\js\reportOTP.js
 wwwroot\js\site.js
 wwwroot\js\survey-details.js
 wwwroot\js\survey-index.js

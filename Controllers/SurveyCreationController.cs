@@ -99,6 +99,8 @@ namespace SurveyApp.Controllers
                 }
 
                 // Get submission status and assignment status for each survey
+                // Filter out only Approved surveys (they go to CompletedSurveys view)
+                var activeSurveys = new List<SurveyModel>();
                 foreach (var survey in surveys)
                 {
                     var submission = _surveyRepository.GetSubmissionBySurveyId(survey.SurveyId);
@@ -106,12 +108,22 @@ namespace SurveyApp.Controllers
                     {
                         ViewData[$"IsSubmitted_{survey.SurveyId}"] = submission.SubmissionStatus == "Submitted" || submission.SubmissionStatus == "Approved";
                         ViewData[$"IsLocked_{survey.SurveyId}"] = submission.IsLockedForEditing;
+                        
+                        // Exclude only Approved surveys from main list (they go to CompletedSurveys view)
+                        if (submission.SubmissionStatus == "Approved")
+                        {
+                            continue;
+                        }
                     }
 
                     // Check if survey has team assignments
                     var assignments = _surveyRepository.GetSurveyAssignments(survey.SurveyId);
                     ViewData[$"HasAssignments_{survey.SurveyId}"] = assignments != null && assignments.Count > 0;
+                    
+                    activeSurveys.Add(survey);
                 }
+                
+                surveys = activeSurveys;
 
                 // Get all surveys for filter options
                 var allSurveys = _surveyRepository.GetAllSurveys(UserID) ?? new List<SurveyModel>();
@@ -166,6 +178,85 @@ namespace SurveyApp.Controllers
                 TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
                 TempData["ResultType"] = "danger";
                 return View("Index", new List<SurveyModel>());
+            }
+        }
+
+        // GET: SurveyCreation/CompletedSurveys - List all completed and approved surveys
+        public IActionResult CompletedSurveys(string? region = null, string? type = null, string? search = null)
+        {
+            int UserID = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
+            var roleId = HttpContext.Session.GetString("RoleId");
+            bool isAdmin = roleId == "101";
+            
+            try
+            {
+                var allSurveys = _surveyRepository.GetAllSurveys(UserID) ?? new List<SurveyModel>();
+                var completedSurveys = new List<SurveyModel>();
+                
+                // Filter to only Approved surveys (not submitted, rejected, or pending)
+                foreach (var survey in allSurveys)
+                {
+                    var submission = _surveyRepository.GetSubmissionBySurveyId(survey.SurveyId);
+                    
+                    // Only include surveys that have been explicitly Approved
+                    bool isApproved = submission != null && submission.SubmissionStatus == "Approved";
+                    
+                    if (isApproved)
+                    {
+                        ViewData[$"SubmissionStatus_{survey.SurveyId}"] = submission?.SubmissionStatus ?? "N/A";
+                        completedSurveys.Add(survey);
+                    }
+                }
+                
+                // Apply filters
+                if (!string.IsNullOrEmpty(region))
+                {
+                    completedSurveys = completedSurveys.Where(s => s.RegionName == region).ToList();
+                }
+
+                if (!string.IsNullOrEmpty(type))
+                {
+                    completedSurveys = completedSurveys.Where(s => s.ImplementationType == type).ToList();
+                }
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    var searchLower = search.ToLower();
+                    completedSurveys = completedSurveys.Where(s =>
+                        (s.SurveyName != null && s.SurveyName.ToLower().Contains(searchLower)) ||
+                        (s.LocationSiteName != null && s.LocationSiteName.ToLower().Contains(searchLower)) ||
+                        (s.ClientName != null && s.ClientName.ToLower().Contains(searchLower))
+                    ).ToList();
+                }
+
+                // Get filter options
+                ViewBag.RegionOptions = allSurveys
+                    .Where(s => !string.IsNullOrEmpty(s.RegionName))
+                    .Select(s => s.RegionName)
+                    .Distinct()
+                    .OrderBy(r => r)
+                    .ToList();
+
+                ViewBag.TypeOptions = allSurveys
+                    .Where(s => !string.IsNullOrEmpty(s.ImplementationType))
+                    .Select(s => s.ImplementationType)
+                    .Distinct()
+                    .OrderBy(t => t)
+                    .ToList();
+
+                ViewBag.CurrentRegion = region;
+                ViewBag.CurrentType = type;
+                ViewBag.CurrentSearch = search;
+                ViewBag.TotalCount = completedSurveys.Count;
+                ViewBag.IsAdmin = isAdmin;
+
+                return View(completedSurveys);
+            }
+            catch (Exception ex)
+            {
+                TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
+                TempData["ResultType"] = "danger";
+                return View(new List<SurveyModel>());
             }
         }
 
@@ -1590,6 +1681,255 @@ namespace SurveyApp.Controllers
                 return Json(new { success = false, message = "An error occurred while unlocking the survey." });
             }
         }
+
+        #region Survey Revision Methods
+
+        private readonly ISurveyRevision _revisionRepository;
+
+        // Check if a survey can be revised and get revision info
+        [HttpGet]
+        public IActionResult CanRevise(long surveyId)
+        {
+            try
+            {
+                // Get revision repository from services
+                var revisionRepo = HttpContext.RequestServices.GetService<ISurveyRevision>();
+                if (revisionRepo == null)
+                {
+                    return Json(new { canRevise = false, reason = "Revision service not available." });
+                }
+
+                var result = revisionRepo.CanRevise(surveyId);
+                return Json(new
+                {
+                    canRevise = result.CanRevise,
+                    surveyName = result.SurveyName,
+                    surveyStatus = result.SurveyStatus,
+                    submissionStatus = result.SubmissionStatus,
+                    isRevised = result.IsRevised,
+                    revisionNumber = result.RevisionNumber,
+                    reason = result.Reason
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { canRevise = false, reason = ex.Message });
+            }
+        }
+
+        // GET: Show the Assign Revision form
+        [HttpGet]
+        public IActionResult AssignRevision(long surveyId)
+        {
+            try
+            {
+                // Only Super Admin (101) or users with Admin rights can assign revisions
+                var roleId = HttpContext.Session.GetString("RoleId");
+                if (roleId != "101")
+                {
+                    TempData["ResultMessage"] = "<strong>Access Denied!</strong> Only supervisors can assign revisions.";
+                    TempData["ResultType"] = "danger";
+                    return RedirectToAction("Index");
+                }
+
+                var survey = _surveyRepository.GetSurveyById(surveyId);
+                if (survey == null)
+                {
+                    TempData["ResultMessage"] = "<strong>Error!</strong> Survey not found.";
+                    TempData["ResultType"] = "danger";
+                    return RedirectToAction("Index");
+                }
+
+                // Check if survey is approved
+                var submission = _surveyRepository.GetSubmissionBySurveyId(surveyId);
+                if (submission == null || submission.SubmissionStatus != "Approved")
+                {
+                    TempData["ResultMessage"] = "<strong>Error!</strong> Only approved surveys can be revised.";
+                    TempData["ResultType"] = "warning";
+                    return RedirectToAction("Index");
+                }
+
+                var model = new CreateRevisionModel
+                {
+                    SurveyId = surveyId,
+                    SurveyName = survey.SurveyName,
+                    ClientName = survey.ClientName,
+                    NewDueDate = DateTime.Now.AddDays(7)
+                };
+
+                // Populate team member options
+                var employees = _empRepository.GetAllEmployees().Where(e => e.IsActive).ToList();
+                model.AvailableTeamMembers = employees.Select(e => new SelectListItem
+                {
+                    Value = e.EmpID.ToString(),
+                    Text = e.EmpName
+                }).ToList();
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
+                TempData["ResultType"] = "danger";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // POST: Create a new revision of the survey
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignRevision(CreateRevisionModel model)
+        {
+            try
+            {
+                // Only Super Admin (101) can assign revisions
+                var roleId = HttpContext.Session.GetString("RoleId");
+                if (roleId != "101")
+                {
+                    return Json(new { success = false, message = "Only supervisors can assign revisions." });
+                }
+
+                var userId = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
+                if (userId == 0)
+                {
+                    return Json(new { success = false, message = "User not logged in." });
+                }
+
+                // Get revision repository from services
+                var revisionRepo = HttpContext.RequestServices.GetService<ISurveyRevision>();
+                if (revisionRepo == null)
+                {
+                    return Json(new { success = false, message = "Revision service not available." });
+                }
+
+                // Create the revision
+                var result = await revisionRepo.CreateRevisionAsync(
+                    model.SurveyId,
+                    userId,
+                    model.RevisionReason,
+                    model.AssignedTeamMembers,
+                    model.NewDueDate
+                );
+
+                if (result.Success)
+                {
+                    TempData["ResultMessage"] = $"<strong>Success!</strong> {result.Message} New survey ID: {result.NewSurveyId}";
+                    TempData["ResultType"] = "success";
+                    
+                    // Optionally send email notifications to assigned team members
+                    // This would be similar to the CreateSurveyAssignment email logic
+                    
+                    return Json(new { success = true, message = result.Message, newSurveyId = result.NewSurveyId });
+                }
+                else
+                {
+                    return Json(new { success = false, message = result.Message });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // GET: View revision history for a survey
+        [HttpGet]
+        public IActionResult RevisionHistory(long surveyId)
+        {
+            try
+            {
+                var survey = _surveyRepository.GetSurveyById(surveyId);
+                if (survey == null)
+                {
+                    TempData["ResultMessage"] = "<strong>Error!</strong> Survey not found.";
+                    TempData["ResultType"] = "danger";
+                    return RedirectToAction("Index");
+                }
+
+                // Get revision repository from services
+                var revisionRepo = HttpContext.RequestServices.GetService<ISurveyRevision>();
+                if (revisionRepo == null)
+                {
+                    TempData["ResultMessage"] = "<strong>Error!</strong> Revision service not available.";
+                    TempData["ResultType"] = "danger";
+                    return RedirectToAction("Index");
+                }
+
+                var revisions = revisionRepo.GetRevisionHistory(surveyId);
+                var originalSurvey = revisionRepo.GetOriginalSurvey(surveyId);
+
+                ViewBag.CurrentSurvey = survey;
+                ViewBag.OriginalSurvey = originalSurvey;
+                ViewBag.SurveyId = surveyId;
+
+                return View(revisions);
+            }
+            catch (Exception ex)
+            {
+                TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
+                TempData["ResultType"] = "danger";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // GET: Get all pending revisions (for supervisor dashboard)
+        [HttpGet]
+        public IActionResult PendingRevisions()
+        {
+            try
+            {
+                // Only Super Admin (101) can view all pending revisions
+                var roleId = HttpContext.Session.GetString("RoleId");
+                if (roleId != "101")
+                {
+                    TempData["ResultMessage"] = "<strong>Access Denied!</strong> Only supervisors can view pending revisions.";
+                    TempData["ResultType"] = "danger";
+                    return RedirectToAction("Index");
+                }
+
+                // Get revision repository from services
+                var revisionRepo = HttpContext.RequestServices.GetService<ISurveyRevision>();
+                if (revisionRepo == null)
+                {
+                    TempData["ResultMessage"] = "<strong>Error!</strong> Revision service not available.";
+                    TempData["ResultType"] = "danger";
+                    return RedirectToAction("Index");
+                }
+
+                var revisions = revisionRepo.GetAllPendingRevisions();
+                return View(revisions);
+            }
+            catch (Exception ex)
+            {
+                TempData["ResultMessage"] = $"<strong>Error!</strong> {ex.Message}";
+                TempData["ResultType"] = "danger";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // POST: Update revision status
+        [HttpPost]
+        public IActionResult UpdateRevisionStatus(long revisionLogId, string status, string? notes)
+        {
+            try
+            {
+                // Get revision repository from services
+                var revisionRepo = HttpContext.RequestServices.GetService<ISurveyRevision>();
+                if (revisionRepo == null)
+                {
+                    return Json(new { success = false, message = "Revision service not available." });
+                }
+
+                bool result = revisionRepo.UpdateRevisionStatus(revisionLogId, status, notes);
+                return Json(new { success = result, message = result ? "Status updated successfully." : "Failed to update status." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        #endregion
 
     }
 }

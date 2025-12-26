@@ -11,6 +11,8 @@
     {
         surveyRow = dtSurvey.Rows[0];
     }
+    var roleId = Context.Session.GetString("RoleId") ?? "102";
+    var isSuperAdmin = roleId == "101";
 }
 
 <style>
@@ -139,9 +141,20 @@
     <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <h3>Survey Detailed Report - @surveyId</h3>
-            <a asp-action="ExportDetailedReportNew" asp-route-surveyId="@surveyId" class="btn btn-success btn-sm">
-                <i class="bi bi-file-earmark-excel me-1"></i>Export to Excel
-            </a>
+            @if (isSuperAdmin)
+            {
+                <a asp-action="ExportDetailedReportNew" asp-route-surveyId="@surveyId" class="btn btn-success btn-sm">
+                    <i class="bi bi-file-earmark-excel me-1"></i>Export to Excel
+                </a>
+            }
+            else
+            {
+                <button type="button" class="btn btn-success btn-sm" id="btnExportDetailedReport"
+                        data-survey-id="@surveyId">
+                    <i class="bi bi-file-earmark-excel me-1"></i>Export to Excel
+                    <i class="bx bx-lock-alt ms-1" title="OTP Required"></i>
+                </button>
+            }
         </div>
     </div>
     @if (surveyRow != null)
@@ -619,7 +632,21 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/reportOTP.js"></script>
     <script>
+        // OTP Export Handler for Detailed Report
+        $(document).ready(function() {
+            $('#btnExportDetailedReport').on('click', function() {
+                var btn = $(this);
+                var surveyId = btn.data('survey-id');
+                var params = { surveyId: surveyId };
+                var downloadUrl = '@Url.Action("ExportDetailedReportNew")' + '?surveyId=' + surveyId;
+
+                // Use OTP module to check and download
+                ReportOTPModule.checkAndDownload('DetailedExcel', params, downloadUrl);
+            });
+        });
+
         let galleryImages = [];
         let currentIndex = 0;
 

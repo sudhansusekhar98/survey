@@ -27,5 +27,10 @@
         // Send password reset notification with temporary password
         Task<bool> SendPasswordResetNotificationAsync(string userName, string userEmail, 
             string loginId, string temporaryPassword, string resetByName);
+
+        // Send Report Download OTP notification to Super Admins
+        Task<bool> SendReportOTPNotificationAsync(string adminName, string adminEmail,
+            string requestingUserName, int requestingUserId, string reportType, 
+            string otp, DateTime expiresAt);
     }
 }

@@ -92,6 +92,25 @@ namespace SurveyApp.Models
             new SelectListItem { Text = "Restoration", Value = "Restoration" },
             new SelectListItem { Text = "AMC", Value = "AMC"}
         };
+
+        // Revision tracking fields
+        [Display(Name = "Is Revised")]
+        public bool IsRevised { get; set; }
+
+        [Display(Name = "Original Survey ID")]
+        public long? OriginalSurveyId { get; set; }
+
+        [Display(Name = "Revision Number")]
+        public int RevisionNumber { get; set; }
+
+        [Display(Name = "Revision Reason")]
+        public string? RevisionReason { get; set; }
+
+        [Display(Name = "Revision Assigned By")]
+        public int? RevisionAssignedBy { get; set; }
+
+        [Display(Name = "Revision Assigned Date")]
+        public DateTime? RevisionAssignedDate { get; set; }
     }
 }
 

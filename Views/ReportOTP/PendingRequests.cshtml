@@ -1,0 +1,161 @@
+@model List<SurveyApp.Models.ReportOTPModel>
+@{
+    ViewData["Title"] = "Pending OTP Requests";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-1">
+                        <i class="bx bx-bell text-warning me-2"></i>Pending OTP Requests
+                    </h4>
+                    <p class="text-muted mb-0">Users waiting for OTP approval to download reports</p>
+                </div>
+                <div>
+                    <a asp-action="AuditLog" class="btn btn-outline-primary">
+                        <i class="bx bx-history me-2"></i>View Audit Log
+                    </a>
+                    <button class="btn btn-primary ms-2" id="btnRefresh">
+                        <i class="bx bx-refresh me-2"></i>Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Any())
+    {
+        <!-- Alert for pending requests -->
+        <div class="alert alert-warning d-flex align-items-center mb-4">
+            <i class="bx bx-info-circle bx-lg me-3"></i>
+            <div>
+                <strong>@Model.Count active OTP request(s)</strong> waiting for approval. 
+                Share the OTP code with the requesting user to authorize their report download.
+            </div>
+        </div>
+
+        <!-- Pending Requests Cards -->
+        <div class="row g-4">
+            @foreach (var request in Model)
+            {
+                var timeRemaining = request.OTPExpiresAt - DateTime.Now;
+                var isExpiringSoon = timeRemaining.TotalMinutes < 5;
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 @(isExpiringSoon ? "border-danger" : "border-warning")">
+                        <div class="card-header bg-@(isExpiringSoon ? "danger" : "warning") text-white d-flex justify-content-between align-items-center">
+                            <span>
+                                <i class="bx bx-user me-2"></i>@request.UserName
+                            </span>
+                            <span class="badge bg-white text-dark">ID: @request.UserId</span>
+                        </div>
+                        <div class="card-body">
+                            <!-- OTP Display -->
+                            <div class="text-center mb-4">
+                                <p class="text-muted mb-2">OTP Code</p>
+                                <div class="bg-light rounded-3 p-3">
+                                    <h1 class="mb-0 text-primary" style="letter-spacing: 0.5rem; font-weight: bold;">
+                                        @request.OTP
+                                    </h1>
+                                </div>
+                            </div>
+
+                            <!-- Request Details -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Report Type:</span>
+                                    <span class="badge bg-label-primary">@request.ReportType</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Requested At:</span>
+                                    <span>@request.OTPGeneratedAt.ToString("HH:mm:ss")</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Expires At:</span>
+                                    <span class="@(isExpiringSoon ? "text-danger fw-bold" : "")">
+                                        @request.OTPExpiresAt.ToString("HH:mm:ss")
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Time Remaining -->
+                            <div class="alert @(isExpiringSoon ? "alert-danger" : "alert-warning") d-flex align-items-center mb-0">
+                                <i class="bx bx-time-five me-2"></i>
+                                @if (timeRemaining.TotalSeconds > 0)
+                                {
+                                    <span>
+                                        Expires in <strong>@((int)timeRemaining.TotalMinutes) min @((int)(timeRemaining.TotalSeconds % 60)) sec</strong>
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-danger fw-bold">Expired</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="bx bx-globe me-1"></i>@(request.IPAddress ?? "Unknown IP")
+                                </small>
+                                <button class="btn btn-sm btn-outline-primary" onclick="copyOTP('@request.OTP')">
+                                    <i class="bx bx-copy me-1"></i>Copy OTP
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- No Pending Requests -->
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <div class="avatar avatar-xl bg-label-success mx-auto mb-3">
+                    <i class="bx bx-check-circle bx-lg"></i>
+                </div>
+                <h4 class="mb-2">No Pending Requests</h4>
+                <p class="text-muted mb-0">All OTP requests have been processed or expired.</p>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-refresh every 30 seconds
+        setInterval(function () {
+            location.reload();
+        }, 30000);
+
+        // Manual refresh
+        $('#btnRefresh').on('click', function () {
+            location.reload();
+        });
+
+        // Copy OTP to clipboard
+        function copyOTP(otp) {
+            navigator.clipboard.writeText(otp).then(function () {
+                if (typeof toastr !== 'undefined') {
+                    toastr.success('OTP copied to clipboard!', 'Copied');
+                } else {
+                    alert('OTP copied to clipboard: ' + otp);
+                }
+            }).catch(function () {
+                // Fallback for older browsers
+                var tempInput = document.createElement('input');
+                tempInput.value = otp;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                alert('OTP copied: ' + otp);
+            });
+        }
+    </script>
+}

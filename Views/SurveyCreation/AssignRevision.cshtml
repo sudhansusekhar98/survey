@@ -1,0 +1,305 @@
+@model SurveyApp.Models.CreateRevisionModel
+@{
+    ViewData["Title"] = "Assign Revision";
+}
+
+@section VendorStyles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+}
+
+@section PageStyles {
+    <style>
+        .revision-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .revision-header {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            padding: 0.5rem 1rem;
+        }
+        
+        .revision-header h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .survey-info-card {
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+            border-radius: 12px;
+            border-left: 4px solid #0284c7;
+            padding: 1.25rem;
+        }
+        
+        .form-section {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-section-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 12px;
+            border-left: 4px solid #f59e0b;
+            padding: 1.25rem;
+        }
+        
+        .btn-create-revision {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.875rem 2rem;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-create-revision:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        }
+        
+        .btn-cancel {
+            border-radius: 10px;
+            padding: 0.875rem 1.5rem;
+        }
+    </style>
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10 col-xl-8">
+            <div class="card revision-card">
+                <!-- Header -->
+                <div class="revision-header">
+                    <div class="d-flex align-items-center text-white">
+                        <i class="bi bi-arrow-repeat fs-4 me-2"></i>
+                        <h5 class="mb-0">Assign Survey Revision</h5>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    <!-- Survey Info -->
+                    <div class="survey-info-card mb-4">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-clipboard-data fs-3 text-primary me-3"></i>
+                            <div>
+                                <h6 class="mb-1 text-primary">Original Survey</h6>
+                                <p class="mb-0 fw-semibold">@Model.SurveyName</p>
+                                <small class="text-muted">
+                                    <i class="bi bi-building me-1"></i>@(Model.ClientName ?? "N/A")
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="revisionForm" asp-action="AssignRevision" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="SurveyId" />
+
+                        <!-- Reason Section -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-chat-left-text me-1"></i> Revision Details
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="RevisionReason" class="form-label fw-semibold">
+                                    Reason for Revision <span class="text-danger">*</span>
+                                </label>
+                                <textarea asp-for="RevisionReason" class="form-control" rows="3" 
+                                          placeholder="Explain why this survey needs to be revised..." required></textarea>
+                                <span asp-validation-for="RevisionReason" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Assignment Section -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-person-check me-1"></i> Assignment
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        Team Leader <span class="text-danger">*</span>
+                                    </label>
+                                    <select name="AssignedTeamMembers" asp-items="Model.AvailableTeamMembers" 
+                                            class="form-select" id="teamLeaderSelect" required>
+                                        <option value="">-- Select Team Leader --</option>
+                                    </select>
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle me-1"></i>You can add more team members later
+                                    </small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="NewDueDate" class="form-label fw-semibold">
+                                        Due Date
+                                    </label>
+                                    <input type="date" asp-for="NewDueDate" class="form-control" />
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar me-1"></i>Leave blank for default (7 days)
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes Section -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="bi bi-sticky me-1"></i> Additional Notes
+                            </div>
+                            <textarea asp-for="Notes" class="form-control" rows="2" 
+                                      placeholder="Any additional instructions for the team..."></textarea>
+                        </div>
+
+                        <!-- Info Box -->
+                        <div class="info-box mb-4">
+                            <div class="d-flex">
+                                <i class="bi bi-lightbulb fs-4 text-warning me-3"></i>
+                                <div>
+                                    <h6 class="mb-2 text-dark">What happens when you create a revision:</h6>
+                                    <ul class="mb-0 ps-3 small">
+                                        <li>A complete copy of the survey will be created with all locations, items, and quantities</li>
+                                        <li>The new survey will be tagged as "<strong>Revised</strong>" with a revision number</li>
+                                        <li>The original survey remains unchanged and locked</li>
+                                        <li>The assigned Team Leader will receive the survey for update</li>
+                                        <li>All location statuses will be set to "In Progress"</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <a asp-action="CompletedSurveys" class="btn btn-outline-secondary btn-cancel">
+                                <i class="bi bi-arrow-left me-1"></i>Back to Completed Surveys
+                            </a>
+                            <button type="submit" class="btn btn-create-revision" id="btnSubmit">
+                                <i class="bi bi-arrow-repeat me-2"></i>Create Revision
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function() {
+            $('#revisionForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                var form = $(this);
+                var btn = $('#btnSubmit');
+                
+                // Validate Reason
+                if (!$('#RevisionReason').val().trim()) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Missing Information',
+                        text: 'Please provide a reason for the revision.',
+                        confirmButtonColor: '#f59e0b'
+                    });
+                    $('#RevisionReason').focus();
+                    return false;
+                }
+                
+                // Validate Team Leader
+                if (!$('#teamLeaderSelect').val()) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Missing Information',
+                        text: 'Please select a Team Leader for the revision.',
+                        confirmButtonColor: '#f59e0b'
+                    });
+                    $('#teamLeaderSelect').focus();
+                    return false;
+                }
+                
+                // Confirm action
+                Swal.fire({
+                    icon: 'question',
+                    title: 'Create Revision?',
+                    html: `<p>You are about to create a revision for:</p>
+                           <p class="fw-bold text-primary">@Model.SurveyName</p>
+                           <p class="small text-muted">This will create a complete copy of the survey for the team to update.</p>`,
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="bi bi-arrow-repeat me-1"></i>Yes, Create Revision',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#f59e0b',
+                    cancelButtonColor: '#6c757d',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading
+                        btn.prop('disabled', true).html('<i class="spinner-border spinner-border-sm me-2"></i>Creating Revision...');
+                        
+                        $.ajax({
+                            url: form.attr('action'),
+                            type: 'POST',
+                            data: form.serialize(),
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Revision Created!',
+                                        html: `<p>The revision has been created successfully.</p>
+                                               <p class="mb-0"><strong>New Survey ID:</strong> 
+                                               <span class="badge bg-success fs-6">${response.newSurveyId}</span></p>`,
+                                        confirmButtonText: 'Go to Active Surveys',
+                                        confirmButtonColor: '#10b981'
+                                    }).then(() => {
+                                        window.location.href = '@Url.Action("Index")';
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: response.message || 'Failed to create revision.',
+                                        confirmButtonColor: '#ef4444'
+                                    });
+                                    btn.prop('disabled', false).html('<i class="bi bi-arrow-repeat me-2"></i>Create Revision');
+                                }
+                            },
+                            error: function(xhr) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'An error occurred. Please try again.',
+                                    confirmButtonColor: '#ef4444'
+                                });
+                                btn.prop('disabled', false).html('<i class="bi bi-arrow-repeat me-2"></i>Create Revision');
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}

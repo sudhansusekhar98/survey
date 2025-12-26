@@ -216,7 +216,9 @@
                                     id="navbardropSurvey" data-bs-toggle="dropdown" aria-expanded="false"> Survey </a>
                                 <ul class="dropdown-menu" aria-labelledby="navbardropSurvey">
                                     <li><a class="dropdown-item" asp-controller="SurveyCreation" asp-action="Index"><i
-                                                class="bi bi-list-ul me-2"></i>All Surveys</a></li>
+                                                class="bi bi-list-ul me-2"></i>Active Surveys</a></li>
+                                    <li><a class="dropdown-item" asp-controller="SurveyCreation" asp-action="CompletedSurveys"><i
+                                                class="bi bi-check-circle-fill me-2 text-success"></i>Completed Surveys</a></li>
                                     <li><a class="dropdown-item" asp-controller="SurveyCreation" asp-action="Create"><i
                                                 class="bi bi-plus-square-fill me-2"></i>New Survey</a></li>
                                     <li>
@@ -230,6 +232,17 @@
                                             Submissions</a></li>
                                     <li><a class="dropdown-item" asp-controller="SurveySubmission" asp-action="Index"><i
                                                 class="bi bi-clipboard-check me-2"></i>Pending Reviews</a></li>
+                                    @if (roleId == 101)
+                                    {
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li>
+                                            <h6 class="dropdown-header">Revisions (Admin)</h6>
+                                        </li>
+                                        <li><a class="dropdown-item" asp-controller="SurveyCreation" asp-action="PendingRevisions"><i
+                                                    class="bi bi-arrow-repeat me-2 text-warning"></i>Pending Revisions</a></li>
+                                    }
                                 </ul>
                             </li>
                         }

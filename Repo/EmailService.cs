@@ -251,6 +251,57 @@ public class EmailService : IEmailService
         return await SendEmailAsync(userEmail, subject, body);
     }
 
+    public async Task<bool> SendReportOTPNotificationAsync(string adminName, string adminEmail,
+        string requestingUserName, int requestingUserId, string reportType, 
+        string otp, DateTime expiresAt)
+    {
+        var subject = $"Report Download OTP Request - {requestingUserName}";
+        var body = $@"
+            <div style='font-family: Arial, sans-serif;'>
+                <h3 style='color: #6f42c1;'>🔐 Report Download OTP Request</h3>
+                <p>Dear {adminName},</p>
+                <p>A user has requested authorization to download a report and requires your approval:</p>
+                
+                <table style='border: 1px solid #ddd; border-collapse: collapse; width: 100%; max-width: 600px; margin: 20px 0;'>
+                    <tr style='background-color: #f8f9fa;'>
+                        <td style='padding: 12px; border: 1px solid #ddd; width: 40%;'><strong>Requesting User:</strong></td>
+                        <td style='padding: 12px; border: 1px solid #ddd;'>{requestingUserName} (ID: {requestingUserId})</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 12px; border: 1px solid #ddd;'><strong>Report Type:</strong></td>
+                        <td style='padding: 12px; border: 1px solid #ddd;'><span style='background-color: #e7e9fd; color: #6f42c1; padding: 4px 12px; border-radius: 4px;'>{reportType}</span></td>
+                    </tr>
+                    <tr style='background-color: #f8f9fa;'>
+                        <td style='padding: 12px; border: 1px solid #ddd;'><strong>Request Time:</strong></td>
+                        <td style='padding: 12px; border: 1px solid #ddd;'>{DateTime.Now:dd-MMM-yyyy hh:mm:ss tt}</td>
+                    </tr>
+                </table>
+
+                <div style='background-color: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;'>
+                    <p style='margin: 0 0 10px 0; font-size: 14px; color: #856404;'><strong>One-Time Password (OTP)</strong></p>
+                    <h1 style='margin: 0; font-size: 48px; letter-spacing: 12px; color: #6f42c1; font-family: monospace;'>{otp}</h1>
+                    <p style='margin: 15px 0 0 0; font-size: 12px; color: #856404;'>
+                        <i>⏱️ Expires at: <strong>{expiresAt:hh:mm:ss tt}</strong> (in 10 minutes)</i>
+                    </p>
+                </div>
+
+                <p style='padding: 15px; background-color: #e8f4fd; border-left: 4px solid #007bff; margin: 20px 0;'>
+                    <strong>Instructions:</strong><br/>
+                    Share this OTP with <strong>{requestingUserName}</strong> if you approve their request to download the report. 
+                    The OTP will expire in 10 minutes and can only be used once.
+                </p>
+
+                <p style='margin-top: 20px;'>Best Regards,<br/>Survey Management System</p>
+                <hr style='border: none; border-top: 1px solid #ddd; margin: 20px 0;'/>
+                <p style='font-size: 12px; color: #666;'>
+                    <strong>Note:</strong> This is an automated security notification. Please do not reply to this message.
+                    If you did not expect this request, please contact IT immediately.
+                </p>
+            </div>";
+
+        return await SendEmailAsync(adminEmail, subject, body);
+    }
+
     private async Task<bool> SendEmailAsync(string toEmails, string subject, string htmlBody)
     {
         try

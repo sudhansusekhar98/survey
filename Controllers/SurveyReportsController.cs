@@ -21,13 +21,43 @@ namespace SurveyApp.Controllers
         private readonly IAdmin _adminRepo;
         private readonly ISurveySubmission _submissionRepo;
         private readonly ISurveyCamRemarks _camRemarksRepo;
+        private readonly IReportOTP _otpRepo;
+        private const int SUPER_ADMIN_ROLE_ID = 101;
 
-        public SurveyReportsController(ISurvey surveyRepo, IAdmin adminRepo, ISurveySubmission submissionRepo, ISurveyCamRemarks camRemarksRepo)
+        public SurveyReportsController(ISurvey surveyRepo, IAdmin adminRepo, ISurveySubmission submissionRepo, ISurveyCamRemarks camRemarksRepo, IReportOTP otpRepo)
         {
             _surveyRepo = surveyRepo;
             _adminRepo = adminRepo;
             _submissionRepo = submissionRepo;
             _camRemarksRepo = camRemarksRepo;
+            _otpRepo = otpRepo;
+        }
+
+        /// <summary>
+        /// Check if the current user is authorized to download reports (Super Admin or has valid OTP)
+        /// </summary>
+        private bool IsAuthorizedForDownload()
+        {
+            int roleId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "102");
+            
+            // Super Admins are always authorized
+            if (roleId == SUPER_ADMIN_ROLE_ID)
+                return true;
+            
+            // Non-super admins need a validated OTP
+            int userId = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
+            return _otpRepo.HasValidOTP(userId);
+        }
+
+        /// <summary>
+        /// Get authorization denied result with message
+        /// </summary>
+        private IActionResult GetUnauthorizedResult(string reportType = "report")
+        {
+            TempData["ResultMessage"] = $"<strong>Authorization Required!</strong> You need OTP verification to download this {reportType}. Please request an OTP and get it validated by a Super Admin.";
+            TempData["ResultType"] = "warning";
+            TempData["RequireOTP"] = true;
+            return RedirectToAction("SummaryReport");
         }
 
         // GET: SurveyReports/Index
@@ -539,6 +569,12 @@ namespace SurveyApp.Controllers
         {
             try
             {
+                // OTP Authorization Check - Non-super admins need validated OTP
+                if (!IsAuthorizedForDownload())
+                {
+                    return GetUnauthorizedResult("Excel report");
+                }
+
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("UserID") ?? "0");
                 var surveys = _surveyRepo.GetAllSurveys(userId) ?? new List<SurveyModel>();
 
@@ -621,6 +657,12 @@ namespace SurveyApp.Controllers
         {
             try
             {
+                // OTP Authorization Check - Non-super admins need validated OTP
+                if (!IsAuthorizedForDownload())
+                {
+                    return GetUnauthorizedResult("detailed report");
+                }
+
                 var survey = _surveyRepo.GetSurveyById(surveyId);
                 if (survey == null)
                 {
@@ -778,6 +820,12 @@ namespace SurveyApp.Controllers
         {
             try
             {
+                // OTP Authorization Check - Non-super admins need validated OTP
+                if (!IsAuthorizedForDownload())
+                {
+                    return GetUnauthorizedResult("detailed report");
+                }
+
                 // 1) Get data (same as your original)
                 DataTable dtSurveyDetails = _surveyRepo.GetSurveyDetails(surveyId, 1);
                 DataTable dtSurveyLocEmp = _surveyRepo.GetSurveyDetails(surveyId, 2);

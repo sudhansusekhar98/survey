@@ -1,0 +1,288 @@
+@model List<SurveyApp.Models.SurveyModel>
+@{
+    ViewData["Title"] = "Completed & Approved Surveys";
+    var isAdmin = ViewBag.IsAdmin ?? false;
+}
+
+@section VendorStyles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+}
+
+@section PageStyles {
+    <style>
+        /* Prevent horizontal overflow */
+        body {
+            overflow-x: hidden !important;
+        }
+
+        /* Mobile full-screen card */
+        @@media (max-width: 767.98px) {
+            .full-screen-card {
+                min-height: 100vh;
+                border-radius: 0 !important;
+                margin: 0 !important;
+            }
+        }
+    </style>
+}
+
+<div class="container-fluid p-0 m-0">
+    <div class="row g-0">
+        <div class="col-12">
+            <div class="card shadow mt-0 rounded-0 full-screen-card">
+                <div class="card-header bg-purple py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="text-white fs-4 mb-0">
+                            Completed Surveys
+                            @if (ViewBag.TotalCount > 0)
+                            {
+                                <span class="badge text-purple ms-2">
+                                    @ViewBag.TotalCount
+                                </span>
+                            }
+                        </h6>
+                        <div class="d-flex gap-2">
+                            <a asp-action="Index" class="btn btn-outline-light text-white border-0">
+                                <i class="bi bi-arrow-left"></i>
+                                <span class="d-none d-md-inline ms-2">Back to Active</span>
+                            </a>
+                            @if (isAdmin)
+                            {
+                                <a asp-action="PendingRevisions" class="btn btn-warning text-dark border-0">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                    <span class="d-none d-md-inline ms-2">Pending Revisions</span>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Filters -->
+                    <div class="card mb-2 border-1 shadow-sm"
+                        style="border-radius: 10px; overflow: hidden; margin-top: 0.5rem;">
+                        <div class="card-body" style="background-color: #f8f9fa; padding: 1.5rem;">
+                            <form method="get" class="row g-3">
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <label class="form-label fw-semibold small text-secondary mb-2">
+                                        <i class="bi bi-search me-1 text-info"></i>Search
+                                    </label>
+                                    <input type="text" name="search" class="form-control shadow-sm"
+                                        placeholder="Search surveys..." value="@ViewBag.CurrentSearch"
+                                        style="border-radius: 8px; border: 1px solid #dee2e6;">
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <label class="form-label fw-semibold small text-secondary mb-2">
+                                        <i class="bi bi-map me-1 text-success"></i>Region
+                                    </label>
+                                    <select name="region" class="form-select shadow-sm"
+                                        style="border-radius: 8px; border: 1px solid #dee2e6;">
+                                        <option value="">All Regions</option>
+                                        @foreach (var region in ViewBag.RegionOptions ?? new List<string>())
+                                        {
+                                            <option value="@region" selected="@(ViewBag.CurrentRegion == region)">@region</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <label class="form-label fw-semibold small text-secondary mb-2">
+                                        <i class="bi bi-building me-1 text-warning"></i>Implementation Type
+                                    </label>
+                                    <select name="type" class="form-select shadow-sm"
+                                        style="border-radius: 8px; border: 1px solid #dee2e6;">
+                                        <option value="">All Types</option>
+                                        @foreach (var type in ViewBag.TypeOptions ?? new List<string>())
+                                        {
+                                            <option value="@type" selected="@(ViewBag.CurrentType == type)">@type</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-3 d-flex align-items-end">
+                                    <div class="d-flex gap-2 w-100">
+                                        <button type="submit" class="btn btn-purple shadow-sm flex-grow-1"
+                                            style="border-radius: 8px;">
+                                            <i class="bi bi-filter me-1"></i>Filter
+                                        </button>
+                                        @if (!string.IsNullOrEmpty(ViewBag.CurrentSearch) || 
+                                             !string.IsNullOrEmpty(ViewBag.CurrentRegion) || 
+                                             !string.IsNullOrEmpty(ViewBag.CurrentType))
+                                        {
+                                            <a asp-action="CompletedSurveys" class="btn btn-outline-secondary shadow-sm"
+                                                style="border-radius: 8px;">
+                                                <i class="bi bi-x-circle me-2"></i>Clear All Filters
+                                            </a>
+                                        }
+                                        <div class="ms-auto d-flex align-items-center">
+                                            <span class="badge bg-purple text-white border px-2 px-md-3 py-2"
+                                                style="border-radius: 8px; font-size: 0.875rem;">
+                                                <i class="bi bi-list-check me-1"></i>
+                                                <strong>@ViewBag.TotalCount</strong> surveys
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Survey Cards -->
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        <div class="row g-3 mt-2">
+                            @foreach (var survey in Model)
+                            {
+                                var submissionStatus = ViewData[$"SubmissionStatus_{survey.SurveyId}"]?.ToString() ?? "N/A";
+                                
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <div class="card h-100 shadow-sm border-0 hover-lift">
+                                        <!-- Compact header -->
+                                        <div class="card-header border-0 d-flex justify-content-between align-items-center py-2"
+                                            style="background-color: rgb(159 139 233 / 78%);">
+                                            <span class="badge bg-purple">ID: @survey.SurveyId</span>
+                                            <div>
+                                                <span class="badge bg-success text-white">
+                                                    @submissionStatus
+                                                </span>
+                                                @if (survey.IsRevised)
+                                                {
+                                                    <span class="badge bg-warning text-dark ms-1" title="This is a revised survey">
+                                                        <i class="bi bi-arrow-repeat me-1"></i>Rev @survey.RevisionNumber
+                                                    </span>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex flex-row flex-md-column h-100">
+                                            <!-- Compact body -->
+                                            <div class="card-body flex-grow-1 py-2">
+                                                @if (!string.IsNullOrEmpty(survey.ClientName))
+                                                {
+                                                    <div class="mb-1">
+                                                        <span class="badge bg-info text-dark">
+                                                            <i class="bi bi-building-fill me-1"></i>@survey.ClientName
+                                                        </span>
+                                                    </div>
+                                                }
+
+                                                <h5 class="card-title text-dark fw-semibold mb-2">
+                                                    <i class="bi bi-clipboard-data text-primary me-2"></i>@survey.SurveyName
+                                                </h5>
+
+                                                <div class="mb-1">
+                                                    <small class="text-muted d-block">
+                                                        <i class="bi bi-building me-1"></i><strong>Type:</strong>
+                                                    </small>
+                                                    <span class="text-dark">@survey.ImplementationType</span>
+                                                </div>
+
+                                                <div class="mb-1">
+                                                    <small class="text-muted d-block">
+                                                        <i class="bi bi-calendar-event me-1"></i><strong>Date:</strong>
+                                                    </small>
+                                                    <span class="text-dark">
+                                                        @(survey.SurveyDate?.ToString("dd-MMM-yyyy") ?? "-")
+                                                    </span>
+                                                </div>
+
+                                                <div class="mb-1">
+                                                    <small class="text-muted d-block">
+                                                        <i class="bi bi-people me-1"></i><strong>Team Leader:</strong>
+                                                    </small>
+                                                    <span class="text-dark">@survey.SurveyTeamName</span>
+                                                </div>
+
+                                                <div class="mb-1">
+                                                    <small class="text-muted d-block">
+                                                        <i class="bi bi-geo-alt me-1"></i><strong>Location:</strong>
+                                                    </small>
+                                                    <span class="text-dark">@survey.LocationSiteName,
+                                                        @survey.CityDistrict</span>
+                                                </div>
+
+                                                <div class="mb-1">
+                                                    <small class="text-muted d-block">
+                                                        <i class="bi bi-map me-1"></i><strong>Region:</strong>
+                                                    </small>
+                                                    <span class="text-dark">@(survey.RegionName ?? "-")</span>
+                                                </div>
+
+                                                @* Show revision info link if this is a revised survey *@
+                                                @if (survey.IsRevised && survey.OriginalSurveyId.HasValue)
+                                                {
+                                                    <div class="mt-2 pt-2 border-top">
+                                                        <small class="text-muted">
+                                                            <i class="bi bi-link-45deg me-1"></i>
+                                                            <a asp-action="RevisionHistory" asp-route-surveyId="@survey.SurveyId" class="text-decoration-none">
+                                                                View Revision History
+                                                            </a>
+                                                        </small>
+                                                    </div>
+                                                }
+                                            </div>
+
+                                            <!-- Compact footer -->
+                                            <div class="card-footer bg-white border-0 d-flex flex-column flex-md-row gap-2 justify-content-center align-items-stretch py-2 px-2 mt-auto">
+                                                
+                                                @* Details *@
+                                                <button type="button" class="btn btn-sm btn-success" title="View Details"
+                                                    onclick="openSurveyDetailsModal(@survey.SurveyId)">
+                                                    <i class="bi bi-file-earmark-spreadsheet me-1"></i><span
+                                                        class="d-none d-sm-inline">Details</span>
+                                                </button>
+                                                
+                                                @* Assign Revision *@
+                                                <a asp-action="AssignRevision" asp-route-surveyId="@survey.SurveyId" 
+                                                   class="btn btn-sm btn-warning" title="Assign Revision">
+                                                    <i class="bi bi-arrow-repeat me-1"></i><span
+                                                        class="d-none d-sm-inline">Assign Revision</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+                            <h5 class="text-muted mt-3">No Completed Surveys</h5>
+                            <p class="text-muted fs-5">There are no completed or approved surveys at this time.</p>
+                            <a asp-action="Index" class="btn btn-primary mt-3">
+                                <i class="bi bi-arrow-left me-1"></i>Back to Active Surveys
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="editModalContent"></div>
+    </div>
+</div>
+
+@section Scripts {
+    @Html.AntiForgeryToken()
+    <link rel="stylesheet" href="~/css/survey-index.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Define URLs for JavaScript to use (same pattern as Index.cshtml)
+        var surveyUrls = {
+            getSubmissionStatus: '@Url.Action("GetSubmissionStatus", "SurveyCreation")',
+            checkCompletion: '@Url.Action("CheckSurveyCompletion", "SurveyCreation")',
+            submitSurvey: '@Url.Action("SubmitSurvey", "SurveyCreation")',
+            edit: '@Url.Action("Edit", "SurveyCreation")',
+            viewDetails: '@Url.Action("ViewDetails", "SurveyCreation")',
+            deleteSurvey: '@Url.Action("Delete", "SurveyCreation")',
+            unlockSurvey: '@Url.Action("UnlockSurvey", "SurveyCreation")',
+            getCableItems: '@Url.Action("GetCableItems", "SurveyCreation")',
+            getSurveyCableCounts: '@Url.Action("GetSurveyCableCounts", "SurveyCreation")',
+            saveCableCounts: '@Url.Action("SaveSurveyCableCounts", "SurveyCreation")'
+        };
+    </script>
+    <script src="~/js/survey-index.js"></script>
+}
