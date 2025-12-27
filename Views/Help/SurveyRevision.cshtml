@@ -1,0 +1,519 @@
+@{
+    ViewData["Title"] = "Survey Revision Guide";
+    var userRole = ViewBag.UserRole?.ToString() ?? "";
+    bool isAdmin = userRole == "101" || userRole == "102";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/help.css" />
+}
+
+<div class="container-fluid px-4 py-3">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-light px-3 py-2 rounded">
+                    <li class="breadcrumb-item"><a asp-action="Index"><i class="bi bi-house-door me-1"></i>Help Center</a></li>
+                    <li class="breadcrumb-item active">Survey Revision</li>
+                </ol>
+            </nav>
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-header-custom" style="background: linear-gradient(135deg, #6f42c1 0%, #9b59b6 100%);">
+                    <h2 class="mb-2">
+                        <i class="bi bi-arrow-repeat me-3"></i>Survey Revision Guide
+                    </h2>
+                    <p class="mb-0 lead">Request revisions on approved surveys for resurvey and corrections</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Navigation -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body bg-light">
+                    <h6 class="mb-3"><i class="bi bi-list-ul me-2"></i>Quick Navigation</h6>
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="#overview" class="btn btn-outline-purple btn-sm w-100" style="border-color: #6f42c1; color: #6f42c1;">→ Overview</a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="#assign" class="btn btn-outline-purple btn-sm w-100" style="border-color: #6f42c1; color: #6f42c1;">→ Assign Revision</a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="#pending" class="btn btn-outline-purple btn-sm w-100" style="border-color: #6f42c1; color: #6f42c1;">→ Pending Revisions</a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="#history" class="btn btn-outline-purple btn-sm w-100" style="border-color: #6f42c1; color: #6f42c1;">→ Revision History</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overview Section -->
+    <div id="overview" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4" style="background: linear-gradient(135deg, #6f42c1 0%, #9b59b6 100%);">1</span>
+                        <h4 class="mb-0">What is Survey Revision?</h4>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Purpose:</strong> Survey Revision allows supervisors to request a resurvey of an already approved survey. This is useful when:
+                        <ul class="mt-2 mb-0">
+                            <li>New devices need to be added after initial survey</li>
+                            <li>Corrections are needed after approval</li>
+                            <li>Follow-up survey is required after installation</li>
+                            <li>Site conditions have changed since original survey</li>
+                        </ul>
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-diagram-3 me-2"></i>How It Works</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="card bg-light h-100 text-center">
+                                <div class="card-body">
+                                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                         style="width: 50px; height: 50px; background: linear-gradient(135deg, #6f42c1 0%, #9b59b6 100%); color: white; font-size: 1.5rem; font-weight: bold;">1</div>
+                                    <h6>Original Approved</h6>
+                                    <p class="text-muted small mb-0">Survey is completed and approved</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light h-100 text-center">
+                                <div class="card-body">
+                                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                         style="width: 50px; height: 50px; background: linear-gradient(135deg, #6f42c1 0%, #9b59b6 100%); color: white; font-size: 1.5rem; font-weight: bold;">2</div>
+                                    <h6>Assign Revision</h6>
+                                    <p class="text-muted small mb-0">Supervisor creates revision request</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light h-100 text-center">
+                                <div class="card-body">
+                                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                         style="width: 50px; height: 50px; background: linear-gradient(135deg, #6f42c1 0%, #9b59b6 100%); color: white; font-size: 1.5rem; font-weight: bold;">3</div>
+                                    <h6>New Survey Created</h6>
+                                    <p class="text-muted small mb-0">Copy with "(Rev N)" suffix</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light h-100 text-center">
+                                <div class="card-body">
+                                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                         style="width: 50px; height: 50px; background: linear-gradient(135deg, #6f42c1 0%, #9b59b6 100%); color: white; font-size: 1.5rem; font-weight: bold;">4</div>
+                                    <h6>Complete & Submit</h6>
+                                    <p class="text-muted small mb-0">Team completes revision survey</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tip-box mt-4">
+                        <h6 class="mb-2"><i class="bi bi-lightbulb-fill text-info me-2"></i>Key Concept</h6>
+                        <p class="mb-0">A revision creates a <strong>new survey</strong> that copies all data from the original. The original survey remains unchanged and locked. Both surveys are linked, and you can view the complete revision history.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Revision Section -->
+    <div id="assign" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4" style="background: linear-gradient(135deg, #6f42c1 0%, #9b59b6 100%);">2</span>
+                        <h4 class="mb-0">Assigning a Revision</h4>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <strong>Prerequisite:</strong> Only <strong>approved/completed surveys</strong> can have revisions assigned. Surveys that are still in progress, submitted, or rejected cannot be revised.
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-list-ol me-2"></i>Steps to Assign Revision</h5>
+                    <ol class="ps-4">
+                        <li class="mb-3">
+                            <strong>Access Completed Surveys:</strong>
+                            <ul class="mt-2">
+                                <li>Go to <strong>Survey → Completed Surveys</strong></li>
+                                <li>Or find the approved survey in the main survey list</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Click "Assign Revision" Button:</strong>
+                            <ul class="mt-2">
+                                <li>Look for the <span class="badge bg-purple" style="background-color: #6f42c1 !important;">Assign Revision</span> button</li>
+                                <li>This option only appears for approved surveys</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Fill Revision Details:</strong>
+                            <div class="table-responsive mt-2">
+                                <table class="table table-bordered table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Field</th>
+                                            <th>Description</th>
+                                            <th>Required</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Team Leader</strong></td>
+                                            <td>Employee who will lead the revision survey</td>
+                                            <td><span class="badge bg-danger">Yes</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Due Date</strong></td>
+                                            <td>Deadline for completing the revision</td>
+                                            <td><span class="badge bg-warning text-dark">Recommended</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Revision Reason</strong></td>
+                                            <td>Explain why revision is needed</td>
+                                            <td><span class="badge bg-danger">Yes</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Submit Revision Request:</strong>
+                            <ul class="mt-2">
+                                <li>Click <strong>Assign Revision</strong> button</li>
+                                <li>System creates a copy of the survey</li>
+                                <li>New survey named: "Original Name (Rev 1)", "Original Name (Rev 2)", etc.</li>
+                                <li>Team leader receives notification</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="screenshot-placeholder">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-image" style="font-size: 4rem; color: #6f42c1;"></i>
+                            <p class="mt-3 mb-0"><strong>Screenshot: Assign Revision Form</strong></p>
+                            <small>Form showing team leader selection, due date, and revision reason fields</small>
+                        </div>
+                    </div>
+
+                    <div class="success-box mt-4">
+                        <h6 class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>What Gets Copied</h6>
+                        <p class="mb-0">When a revision is created, the following data is copied to the new survey:</p>
+                        <ul class="mt-2 mb-0">
+                            <li>Survey details and client information</li>
+                            <li>All sub-locations with coordinates</li>
+                            <li>All device/item selections and quantities</li>
+                            <li>Previously entered data and specifications</li>
+                            <li>Location status set to "In Progress"</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Revisions Section -->
+    <div id="pending" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4" style="background: linear-gradient(135deg, #6f42c1 0%, #9b59b6 100%);">3</span>
+                        <h4 class="mb-0">Working with Pending Revisions</h4>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Access:</strong> Survey → Pending Revisions
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-clipboard-check me-2"></i>For Supervisors</h5>
+                    <p>The Pending Revisions page shows all active revision requests:</p>
+                    <ul class="ps-4">
+                        <li>View all assigned revisions and their status</li>
+                        <li>See revision reason and assigned team</li>
+                        <li>Monitor progress and due dates</li>
+                        <li>Access the revised survey directly</li>
+                    </ul>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-person-check me-2"></i>For Assigned Team Members</h5>
+                    <ol class="ps-4">
+                        <li class="mb-3">
+                            <strong>Find Your Revision Survey:</strong>
+                            <ul class="mt-2">
+                                <li>Go to <strong>Survey → All Surveys</strong></li>
+                                <li>Look for surveys with "(Rev N)" in the name</li>
+                                <li>Status will be "Assigned" or "In Progress"</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Complete the Revision:</strong>
+                            <ul class="mt-2">
+                                <li>Review existing data (copied from original)</li>
+                                <li>Make required changes or additions</li>
+                                <li>Update quantities and specifications</li>
+                                <li>Upload new photos if needed</li>
+                            </ul>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Submit for Approval:</strong>
+                            <ul class="mt-2">
+                                <li>Click "Preview & Submit" when complete</li>
+                                <li>Revision follows same approval workflow</li>
+                                <li>Supervisor approves or rejects as usual</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="warning-box">
+                        <h6 class="mb-2"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Important</h6>
+                        <p class="mb-0">Revision surveys follow the <strong>same workflow</strong> as regular surveys. The team must complete data entry, submit for approval, and the supervisor must approve before the revision is marked complete.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revision History Section -->
+    <div id="history" class="row mb-4">
+        <div class="col-12">
+            <div class="card step-card shadow">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="step-number me-4" style="background: linear-gradient(135deg, #6f42c1 0%, #9b59b6 100%);">4</span>
+                        <h4 class="mb-0">Viewing Revision History</h4>
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-clock-history me-2"></i>Accessing Revision History</h5>
+                    <ol class="ps-4">
+                        <li class="mb-2">Find the original survey (or any of its revisions) in the survey list</li>
+                        <li class="mb-2">Click the <strong>"Revision History"</strong> button</li>
+                        <li class="mb-2">View complete timeline of all revisions</li>
+                    </ol>
+
+                    <h5 class="mt-4 mb-3"><i class="bi bi-table me-2"></i>History Information</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-secondary">
+                                <tr>
+                                    <th>Column</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Revision #</strong></td>
+                                    <td>Sequential number (Rev 1, Rev 2, etc.)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Survey Name</strong></td>
+                                    <td>Original name with revision suffix</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Revision Reason</strong></td>
+                                    <td>Why revision was requested</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Assigned By</strong></td>
+                                    <td>Supervisor who created revision</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Assigned Date</strong></td>
+                                    <td>When revision was created</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Status</strong></td>
+                                    <td>Assigned, In Progress, Submitted, Completed</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Survey Status</strong></td>
+                                    <td>Current status of the revised survey</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="tip-box mt-4">
+                        <h6 class="mb-2"><i class="bi bi-lightbulb-fill text-info me-2"></i>Pro Tip</h6>
+                        <p class="mb-0">You can access the revision history from <strong>any survey in the chain</strong> (original or any revision). The system automatically traces back to the root survey and shows all related revisions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Reference -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow" style="border-left: 5px solid #6f42c1;">
+                <div class="card-header" style="background-color: #f8f4ff;">
+                    <h5 class="mb-0"><i class="bi bi-tag me-2" style="color: #6f42c1;"></i>Revision Status Reference</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead style="background-color: #6f42c1; color: white;">
+                                <tr>
+                                    <th style="width: 20%;">Status</th>
+                                    <th style="width: 40%;">Meaning</th>
+                                    <th style="width: 40%;">Next Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="badge bg-primary">Assigned</span></td>
+                                    <td>Revision created and waiting for team to start</td>
+                                    <td>Team opens survey and begins work</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-info">In Progress</span></td>
+                                    <td>Team is actively working on revision</td>
+                                    <td>Complete all locations and submit</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-warning text-dark">Submitted</span></td>
+                                    <td>Revision submitted, awaiting supervisor approval</td>
+                                    <td>Supervisor reviews and approves/rejects</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-success">Completed</span></td>
+                                    <td>Revision approved and finalized</td>
+                                    <td>No action needed - revision complete</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-secondary">Cancelled</span></td>
+                                    <td>Revision cancelled by supervisor</td>
+                                    <td>No action needed</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-warning shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-question-circle-fill me-2"></i>Frequently Asked Questions</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="accordion" id="revisionFaq">
+                        <div class="accordion-item mb-2">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                    Can I revise a survey that hasn't been approved yet?
+                                </button>
+                            </h2>
+                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#revisionFaq">
+                                <div class="accordion-body">
+                                    <strong>No.</strong> Only approved/completed surveys can have revisions assigned. For surveys still in progress or submitted, the team can edit directly (if rejected) or the normal workflow should be followed.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item mb-2">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                    Does the original survey change when I create a revision?
+                                </button>
+                            </h2>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#revisionFaq">
+                                <div class="accordion-body">
+                                    <strong>No.</strong> The original survey remains completely unchanged and locked. A revision creates a new, separate survey that is linked to the original for tracking purposes.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item mb-2">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                    How many revisions can I create for one survey?
+                                </button>
+                            </h2>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#revisionFaq">
+                                <div class="accordion-body">
+                                    There is <strong>no limit</strong> to the number of revisions. Each revision is numbered sequentially (Rev 1, Rev 2, Rev 3, etc.) and all are tracked in the revision history.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item mb-2">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                    Can I assign a revision of a revision?
+                                </button>
+                            </h2>
+                            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#revisionFaq">
+                                <div class="accordion-body">
+                                    <strong>Yes.</strong> Once a revision survey is approved, you can create another revision from it. The system tracks the entire chain and links all revisions back to the original root survey.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                                    What's the difference between rejection and revision?
+                                </button>
+                            </h2>
+                            <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#revisionFaq">
+                                <div class="accordion-body">
+                                    <ul class="mb-0">
+                                        <li><strong>Rejection:</strong> Used when survey has errors before approval. Unlocks the <em>same</em> survey for correction.</li>
+                                        <li><strong>Revision:</strong> Used <em>after</em> approval when resurvey is needed. Creates a <em>new</em> survey linked to the original.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Topics -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-light shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="mb-4"><i class="bi bi-link-45deg me-2"></i>Related Topics</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a asp-action="SurveySubmission" class="btn btn-outline-secondary btn-help w-100">
+                                <i class="bi bi-send me-2"></i>Survey Submission
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-action="SurveyExecution" class="btn btn-outline-secondary btn-help w-100">
+                                <i class="bi bi-list-check me-2"></i>Survey Execution
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-action="Reports" class="btn btn-outline-secondary btn-help w-100">
+                                <i class="bi bi-bar-chart me-2"></i>View Reports
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-help w-100">
+                                <i class="bi bi-arrow-left me-2"></i>Help Center
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

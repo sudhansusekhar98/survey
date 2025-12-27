@@ -4,6 +4,7 @@ using AnalyticaDocs.Repository;
 using AnalyticaDocs.Util;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using SurveyApp.Repo;
 using System.Diagnostics;
 
 namespace AnalyticaDocs.Controllers
@@ -11,9 +12,12 @@ namespace AnalyticaDocs.Controllers
     public class UserLoginController : Controller
     {
         private readonly IAdmin _repository;
-        public UserLoginController(IAdmin repository)
+        private readonly IPasswordHasher _passwordHasher;
+        
+        public UserLoginController(IAdmin repository, IPasswordHasher passwordHasher)
         {
             _repository = repository;
+            _passwordHasher = passwordHasher;
         }
         public IActionResult Index()
         {
@@ -126,6 +130,9 @@ namespace AnalyticaDocs.Controllers
 
             try
             {
+                // Hash the new password with BCrypt before storing
+                var hashedPassword = _passwordHasher.HashPassword(newPassword);
+                
                 // Update password directly (bypassing current password check since this is a forced change)
                 using var con = new Microsoft.Data.SqlClient.SqlConnection(DBConnection.ConnectionString);
                 con.Open();
@@ -136,7 +143,7 @@ namespace AnalyticaDocs.Controllers
                     WHERE UserID = @UserID", con);
                 
                 cmd.Parameters.AddWithValue("@UserID", userId);
-                cmd.Parameters.AddWithValue("@Password", newPassword);
+                cmd.Parameters.AddWithValue("@Password", hashedPassword);
 
                 int result = cmd.ExecuteNonQuery();
 

@@ -46,6 +46,9 @@ builder.Services.AddScoped<ISurveyCamRemarks, SurveyCamRemarksRepo>();
 builder.Services.AddScoped<IReportOTP, ReportOTPRepo>();
 builder.Services.AddScoped<ISurveyRevision, SurveyRevisionRepo>();
 
+// Password hashing service (singleton - no state)
+builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
+
 
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 ExcelPackage.License.SetNonCommercialOrganization("ABTMS");

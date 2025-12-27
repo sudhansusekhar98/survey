@@ -489,3 +489,4 @@ wwwroot\vendor\libs\popper\popper.js
 wwwroot\js\survey-index.js
 wwwroot\js\survey-location.js
 wwwroot\css\help.css
+wwwroot\js\reportOTP.js

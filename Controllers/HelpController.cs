@@ -66,6 +66,19 @@ namespace SurveyApp.Controllers
             return View();
         }
 
+        // Survey Revision Help
+        public IActionResult SurveyRevision()
+        {
+            var userId = HttpContext.Session.GetString("UserID");
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Index", "UserLogin");
+            }
+
+            ViewBag.UserRole = HttpContext.Session.GetString("RoleId");
+            return View();
+        }
+
         // Reports Help
         public IActionResult Reports()
         {

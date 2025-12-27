@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "kvaoKdooL74=",
+  "dgSpecHash": "1bVcNW14i7E=",
   "success": true,
   "projectFilePath": "D:\\VL Access\\Survey\\CODES\\Survey\\survey\\SurveyApp.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\sudha\\.nuget\\packages\\azure.core\\1.47.1\\azure.core.1.47.1.nupkg.sha512",
     "C:\\Users\\sudha\\.nuget\\packages\\azure.identity\\1.14.2\\azure.identity.1.14.2.nupkg.sha512",
+    "C:\\Users\\sudha\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\sudha\\.nuget\\packages\\chart.js\\3.7.1\\chart.js.3.7.1.nupkg.sha512",
     "C:\\Users\\sudha\\.nuget\\packages\\cloudinarydotnet\\1.27.8\\cloudinarydotnet.1.27.8.nupkg.sha512",
     "C:\\Users\\sudha\\.nuget\\packages\\epplus\\8.1.0\\epplus.8.1.0.nupkg.sha512",

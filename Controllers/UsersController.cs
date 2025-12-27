@@ -5,6 +5,7 @@ using AnalyticaDocs.Util;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
+using SurveyApp.Repo;
 using System.Diagnostics;
 
 namespace AnalyticaDocs.Controllers
@@ -14,12 +15,14 @@ namespace AnalyticaDocs.Controllers
         private readonly IAdmin _repository;
         private readonly ICommonUtil _util;
         private readonly IEmailService _emailService;
+        private readonly IPasswordHasher _passwordHasher;
 
-        public UsersController(IAdmin repository, ICommonUtil util, IEmailService emailService)
+        public UsersController(IAdmin repository, ICommonUtil util, IEmailService emailService, IPasswordHasher passwordHasher)
         {
             _repository = repository;
             _util = util;
             _emailService = emailService;
+            _passwordHasher = passwordHasher;
         }
         public IActionResult Index()
         {
@@ -197,7 +200,7 @@ namespace AnalyticaDocs.Controllers
 
 
         /// <summary>
-        /// TEST ENDPOINT - Check password directly
+        /// TEST ENDPOINT - Check password directly (uses BCrypt verification)
         /// </summary>
         [HttpGet]
         public IActionResult TestPassword(int userId, string password)
@@ -217,15 +220,15 @@ namespace AnalyticaDocs.Controllers
                 if (reader.Read())
                 {
                     var dbPassword = reader["LoginPassword"]?.ToString() ?? "";
-                    var match = dbPassword == password;
+                    var isBCryptHash = _passwordHasher.IsBCryptHash(dbPassword);
+                    var match = _passwordHasher.VerifyPassword(password, dbPassword);
                     
                     return Json(new { 
                         success = true,
                         userId = reader["UserID"],
                         loginId = reader["LoginID"],
                         loginName = reader["LoginName"],
-                        dbPassword = dbPassword,
-                        providedPassword = password,
+                        passwordIsBCryptHash = isBCryptHash,
                         passwordMatch = match,
                         mustChangePassword = reader["MustChangePassword"]
                     });
