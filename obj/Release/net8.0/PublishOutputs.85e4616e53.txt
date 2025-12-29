@@ -26,6 +26,7 @@ D:\VL Access\Survey\CODES\Survey\survey\obj\Release\net8.0\PubTmp\Out\SurveyApp.
 D:\VL Access\Survey\CODES\Survey\survey\obj\Release\net8.0\PubTmp\Out\SurveyApp.pdb
 D:\VL Access\Survey\CODES\Survey\survey\obj\Release\net8.0\PubTmp\Out\Azure.Core.dll
 D:\VL Access\Survey\CODES\Survey\survey\obj\Release\net8.0\PubTmp\Out\Azure.Identity.dll
+D:\VL Access\Survey\CODES\Survey\survey\obj\Release\net8.0\PubTmp\Out\BCrypt.Net-Next.dll
 D:\VL Access\Survey\CODES\Survey\survey\obj\Release\net8.0\PubTmp\Out\CloudinaryDotNet.dll
 D:\VL Access\Survey\CODES\Survey\survey\obj\Release\net8.0\PubTmp\Out\EPPlus.dll
 D:\VL Access\Survey\CODES\Survey\survey\obj\Release\net8.0\PubTmp\Out\EPPlus.Interfaces.dll

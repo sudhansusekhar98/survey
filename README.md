@@ -515,8 +515,8 @@ The application includes comprehensive built-in help pages accessible from the *
 
 ### Contact Information
 
-- **IT Support:** it@aetherbreweries.com
-- **HR Department:** HR@aetherbreweries.com
+- **IT Support:** support@vlaccess.com
+- **HR Department:** hr@vlaccess.com
 - **Web:** support@vlaccess.com
 
 ### Troubleshooting
