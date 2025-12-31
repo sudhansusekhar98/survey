@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis.Elfie.Diagnostics;
 using Microsoft.Data.SqlClient;
 using SurveyApp.Models;
 using System.Data;
-
 namespace SurveyApp.Repo
 
 {
@@ -19,7 +18,7 @@ namespace SurveyApp.Repo
                 using var cmd = new SqlCommand("dbo.SpSurvey", con);
                 cmd.CommandType = CommandType.StoredProcedure;
 
-                // SpType = 1 -> Insert Survey 
+                // SpType = 1 -> Insert Survey
                 cmd.Parameters.AddWithValue("@SpType", 1);
 
                 // IMPORTANT: For INSERT (SpType=1), do NOT pass @SurveyID
@@ -240,11 +239,14 @@ namespace SurveyApp.Repo
             try
             {
                 using var conn = new SqlConnection(DBConnection.ConnectionString);
-                using var cmd = new SqlCommand("dbo.SpSurvey", conn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@SpType", 10);
+                using var cmd = new SqlCommand(@"
+                    SELECT SurveyID, LocID, LocName, LocationType, WayType, LocLat, LocLog, 
+                           CreateOn, CreateBy, CASE Isactive WHEN 'Y' THEN 1 ELSE 0 END Isactive,
+                           ISNULL(IsGlobal, 0) AS IsGlobal
+                    FROM SurveyLocation 
+                    WHERE LocID = @LocID", conn);
+                cmd.CommandType = CommandType.Text;
                 cmd.Parameters.AddWithValue("@LocID", locId);
-
                 conn.Open();
                 using var reader = cmd.ExecuteReader();
                 var dt = new DataTable();
@@ -254,7 +256,7 @@ namespace SurveyApp.Repo
             }
             catch (Exception ex)
             {
-                throw;
+                return null;
             }
         }
 
@@ -731,6 +733,7 @@ namespace SurveyApp.Repo
         //        throw;
         //    }
         //}
+        
         //------------------- Survey Details -------------------//
 
         public List<SurveyDetailsLocationModel> GetAssignedTypeList(Int64 SurveyID, int LocId)

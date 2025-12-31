@@ -1,19 +1,23 @@
-﻿<div class="modal fade" id="ErrorModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+﻿@* Error Modal - displayed when operations fail *@
+<div class="modal fade" id="ErrorModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header py-4 bg-danger">
-                <h5 class="modal-title text-white">Error!</h5>
-                  <button type="button" class="btn-close btn-warning" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header bg-danger">
+                <h5 class="modal-title text-white">
+                    <i class="bi bi-x-circle-fill"></i>
+                    Error!
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
-                <i class="bi bi-slash-circle text-danger align-middle" style="font-size: 2.0rem;"> </i> <span class="h5"> Record Not processed...  </span>
-
+                <i class="bi bi-x-circle-fill text-danger" style="font-size: 3rem;"></i>
+                <p class="h6 mb-0" id="errorModalMessage">Record not processed. Please try again.</p>
             </div>
-            <div class="modal-footer py-3">
-               
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i>Close
+                </button>
             </div>
         </div>
     </div>
 </div>
-
-

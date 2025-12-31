@@ -34,6 +34,19 @@
         background-color: #dff5dd;
     }
 
+    /* Ultra-compact table styles */
+    .table-compact th, .table-compact td {
+        padding: 2px 4px !important;
+        line-height: 1.1 !important;
+        vertical-align: middle !important;
+    }
+    .table-compact th {
+        font-size: 0.7rem !important;
+    }
+    .table-compact td {
+        font-size: 0.75rem !important;
+    }
+
     /* light green */
 
     /* Image Gallery Styles */
@@ -69,7 +82,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: 400px;
+        min-height: 300px;
         background: #f8f9fa;
         border-radius: 8px;
         margin-bottom: 15px;
@@ -77,7 +90,7 @@
 
     .main-image {
         max-width: 100%;
-        max-height: 500px;
+        max-height: 400px;
         object-fit: contain;
         border-radius: 8px;
     }
@@ -300,7 +313,7 @@
         <div class="card-body table-responsive">
             @if (dtLocEmp != null && dtLocEmp.Rows.Count > 0)
             {
-                <table class="table table-sm table-bordered mb-0">
+                <table class="table table-sm table-bordered mb-0 table-compact">
                     <thead class="table-light">
                         <tr>
                             <th class="py-1 px-2 fw-semibold text-center bg-primary" style="border-right:solid" colspan="4">
@@ -346,111 +359,286 @@
         </div>
     </div>
 
-    <!-- CARD 3: Survey Items (Pivot) -->
+    <!-- CARD 3: Requirement Summary (Locations as rows, Device Types as columns) -->
     <div class="card mb-3">
-        <div class="card-header py-2">
-            <strong>Survey Items Details</strong>
+        <div class="card-header py-2" style="background-color: #70ad47; color: white;">
+            <strong><i class="bi bi-table me-2"></i>Requirement Summary</strong>
         </div>
-        <div class="card-body table-responsive small ">
-            @if (dtItems != null && dtItems.Rows.Count > 0)
-            {
-                // Count only the original columns (excluding _Photos columns we added)
-                var originalColumns = dtItems.Columns.Cast<DataColumn>()
-                .Where(c => !c.ColumnName.EndsWith("_Photos"))
-                .ToList();
-                var originalColCount = originalColumns.Count;
-
-                // Original structure: 4 fixed + 2*locPairs + 2 totals + 1 remarks = 7 + 2*locPairs
-                int locationPairs = (originalColCount - 7) / 2;
-
-                int firstLocCol = 4; // zero-based index in DataTable
-                                     // Total columns are at fixed positions from the end of original columns
-                int totalExistingCol = 4 + (locationPairs * 2); // After all location pairs
-                int totalRequiredCol = totalExistingCol + 1;
-                int remarksCol = totalRequiredCol + 1;
-
-                <table class="table table-sm table-bordered mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="py-0 px-2 fw-bold align-middle" rowspan="2">Item Code</th>
-                            <th class="py-0 px-2 fw-bold align-middle" rowspan="2">Type</th>
-                            <th class="py-0 px-2 fw-bold align-middle" rowspan="2">Item</th>
-                            <th class="py-0 px-2 fw-bold align-middle" rowspan="2">UOM</th>
-                            @for (int i = 0; i < locationPairs; i++)
-                            {
-                                var colName = dtItems.Columns[4 + (i * 2)].ColumnName;
-                                var loc = colName.Replace("Existing", "").Replace("Required", "").Trim();
-                                <th class="py-1 px-2 text-center fw-bold" colspan="3">@loc</th>
-                            }
-                            <th class="py-1 px-2 text-center fw-bold align-middle" colspan="2" rowspan="1">Total</th>
-                            <th class="py-0 px-2 fw-bold align-middle" rowspan="2">Specification / Remarks</th>
-                        </tr>
-                        <tr>
-                            @for (int i = 0; i < locationPairs; i++)
-                            {
-                                var locClass = (i % 2 == 0) ? "loc-bg-1" : "loc-bg-2";
-                                <th class="py-1 px-1 text-center @locClass">Existing</th>
-                                <th class="py-1 px-1 text-center @locClass">Required</th>
-                                <th class="py-1 px-1 text-center @locClass">Photo</th>
-                            }
-                            <th class="py-1 px-1 text-center total-existing-bg">Existing</th>
-                            <th class="py-1 px-1 text-center total-required-bg">Required</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (DataRow row in dtItems.Rows)
+        <div class="card-body table-responsive small p-0">
+                @{
+                    var hasItemsData = dtItems != null && dtItems.Rows.Count > 0 && dtLocEmp != null && dtLocEmp.Rows.Count > 0;
+                    
+                    // Default values
+                    var deviceCategories2 = new Dictionary<string, List<string>>();
+                    var allDeviceTypes2 = new List<string>();
+                    
+                    // Sub-column visibility per device: [0]=Ex, [1]=Req, [2]=Img, [3]=Rem
+                    var devColVis2 = new Dictionary<string, bool[]>();
+                    var existingTotals2 = new Dictionary<string, int>();
+                    var requiredTotals2 = new Dictionary<string, int>();
+                    
+                    var itemUOMs2 = new Dictionary<string, string>();
+                    var locationDataList2 = new List<(int, string, string, string, Dictionary<string, (int, int, string, string)>)>();
+                    var visibleDeviceTypes2 = new List<string>();
+                    var filteredCategories2 = new Dictionary<string, List<string>>();
+                    
+                    if (hasItemsData)
+                    {
+                        // STEP 1: Extract device categories and types
+                        foreach (DataRow itemRow in dtItems.Rows)
                         {
-                            <tr>
-                                @for (int c = 0; c < 4; c++)
+                            string typeName = itemRow[1]?.ToString()?.Trim() ?? "";
+                            string itemName = itemRow[2]?.ToString()?.Trim() ?? "";
+                            
+                            if (!string.IsNullOrEmpty(itemName))
+                            {
+                                // CRITICAL: Use composite key (TypeName||ItemName)
+                                string compositeKey = string.IsNullOrEmpty(typeName) ? itemName : $"{typeName}||{itemName}";
+                                
+                                if (!allDeviceTypes2.Contains(compositeKey))
                                 {
-                                    <td class="py-1 px-1 text-start">@row[c]</td>
+                                    allDeviceTypes2.Add(compositeKey);
+                                    devColVis2[compositeKey] = new bool[] { false, false, false, false };
+                                    existingTotals2[compositeKey] = 0;
+                                    requiredTotals2[compositeKey] = 0;
+                                    string uom = "";
+                                    if (itemRow.Table.Columns.Contains("ItemUOM")) uom = itemRow["ItemUOM"]?.ToString()?.Trim() ?? "";
+                                    else if (itemRow.Table.Columns.Count > 3) uom = itemRow[3]?.ToString()?.Trim() ?? "";
+                                    itemUOMs2[compositeKey] = uom;
                                 }
-                                @for (int i = 0; i < locationPairs; i++)
+                                
+                                if (!string.IsNullOrEmpty(typeName))
                                 {
-                                    int existingColIndex = firstLocCol + (i * 2);
-                                    int requiredColIndex = existingColIndex + 1;
-                                    var locClass = (i % 2 == 0) ? "loc-bg-1" : "loc-bg-2";
-                                    <td class="py-1 px-1 text-center @locClass">@row[existingColIndex]</td>
-                                    <td class="py-1 px-1 text-center @locClass">@row[requiredColIndex]</td>
-                                    <td class="py-1 px-1 text-center @locClass">
-                                        @{
-                                            var colName = dtItems.Columns[firstLocCol + (i * 2)].ColumnName;
-                                            var locName = colName.Replace("Existing", "").Replace("Required", "").Trim();
-                                            string imageColumnName = $"{locName}_Photos";
-                                            var imageUrls = "";
-                                            if (dtItems.Columns.Contains(imageColumnName))
-                                            {
-                                                imageUrls = row[imageColumnName]?.ToString() ?? "";
-                                            }
-                                            var itemName = row[2]?.ToString() ?? "Item";
-                                        }
-                                        @if (!string.IsNullOrEmpty(imageUrls))
-                                        {
-                                            var imageArray = imageUrls.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                                            <button type="button" class="btn btn-sm btn-outline-success btn-gallery-icon"
-                                                data-bs-toggle="modal" data-bs-target="#imageGalleryModal"
-                                                onclick="showImageGallery('@Html.Raw(string.Join("|", imageArray))', '@Html.Raw(itemName)')">
-                                                <i class="bi bi-images"></i> @imageArray.Length
-                                            </button>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted small">-</span>
-                                        }
-                                    </td>
+                                    if (!deviceCategories2.ContainsKey(typeName)) deviceCategories2[typeName] = new List<string>();
+                                    if (!deviceCategories2[typeName].Contains(compositeKey)) deviceCategories2[typeName].Add(compositeKey);
                                 }
-                                <td class="py-1 px-1 text-center total-existing-bg">@row[totalExistingCol]</td>
-                                <td class="py-1 px-1 text-center total-required-bg fw-bold">@row[totalRequiredCol]</td>
-                                <td class="py-1 px-1 text-start">@row[remarksCol]</td>
-                            </tr>
+                            }
                         }
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <p class="text-muted mb-0">No survey item records found.</p>
-            }
+                        
+                        var allColumns2 = dtItems.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToList();
+                        var locationColumnPairs2 = new Dictionary<string, (string Ex, string Req, string Pho, string Rem)>();
+                        
+                        foreach (var col in allColumns2)
+                        {
+                            if (col.EndsWith("Existing"))
+                            {
+                                string locName = col.Replace("Existing", "").Trim();
+                                if (!locationColumnPairs2.ContainsKey(locName))
+                                {
+                                    string rCol = allColumns2.FirstOrDefault(c => c.Equals(locName + "Required", StringComparison.OrdinalIgnoreCase)) ?? "";
+                                    // More flexible matching for Photos column - check multiple variations
+                                    string pCol = allColumns2.FirstOrDefault(c => 
+                                        c.Equals(locName + "Photo", StringComparison.OrdinalIgnoreCase) ||
+                                        c.Equals(locName + "Photos", StringComparison.OrdinalIgnoreCase) ||
+                                        c.Equals(locName.Trim() + "Photo", StringComparison.OrdinalIgnoreCase) ||
+                                        c.Equals(locName.Trim() + "Photos", StringComparison.OrdinalIgnoreCase)) ?? "";
+                                    // More flexible matching for Remarks column
+                                    string remCol = allColumns2.FirstOrDefault(c => 
+                                        c.Equals(locName + "Remarks", StringComparison.OrdinalIgnoreCase) ||
+                                        c.Equals(locName.Trim() + "Remarks", StringComparison.OrdinalIgnoreCase)) ?? "";
+                                    
+                                    locationColumnPairs2[locName] = (col, rCol, pCol, remCol);
+                                }
+                            }
+                        }
+                        
+                        int slNo2 = 1;
+                        foreach (DataRow locRow in dtLocEmp.Rows)
+                        {
+                            string locName = locRow["LocName"]?.ToString()?.Trim() ?? "";
+                            string locType = locRow["LocationType"]?.ToString()?.Trim() ?? "";
+                            string coords = locRow["Cordinate"]?.ToString()?.Trim() ?? "";
+                            
+                            var deviceData = new Dictionary<string, (int, int, string, string)>();
+                            bool hasData = false;
+                            
+                            string mLoc = locationColumnPairs2.Keys.FirstOrDefault(l => l.Trim().Equals(locName, StringComparison.OrdinalIgnoreCase)) ?? "";
+                            
+                            if (!string.IsNullOrEmpty(mLoc))
+                            {
+                                var cols = locationColumnPairs2[mLoc];
+                                foreach (var deviceType in allDeviceTypes2)
+                                {
+                                    int exQty = 0; int reqQty = 0; string pho = ""; string rem = "";
+                                    
+                                    foreach (DataRow itemRow in dtItems.Rows)
+                                    {
+                                        string rowType = itemRow[1]?.ToString()?.Trim() ?? "";
+                                        string rowItem = itemRow[2]?.ToString()?.Trim() ?? "";
+                                        string rowKey = string.IsNullOrEmpty(rowType) ? rowItem : $"{rowType}||{rowItem}";
+                                        
+                                        if (rowKey.Equals(deviceType, StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            if (!string.IsNullOrEmpty(cols.Ex)) { int val = 0; int.TryParse(itemRow[cols.Ex]?.ToString(), out val); exQty += val; }
+                                            if (!string.IsNullOrEmpty(cols.Req)) { int val = 0; int.TryParse(itemRow[cols.Req]?.ToString(), out val); reqQty += val; }
+                                            if (!string.IsNullOrEmpty(cols.Pho)) pho = itemRow[cols.Pho]?.ToString() ?? "";
+                                            
+                                            // Remarks: Check loc-specific first, then global column
+                                            if (!string.IsNullOrEmpty(cols.Rem)) rem = itemRow[cols.Rem]?.ToString() ?? "";
+                                            else if (dtItems.Columns.Contains("Remarks")) rem = itemRow["Remarks"]?.ToString() ?? "";
+                                        }
+                                    }
+                                    
+                                    if (exQty > 0 || reqQty > 0 || !string.IsNullOrEmpty(pho) || !string.IsNullOrEmpty(rem))
+                                    {
+                                        hasData = true;
+                                        deviceData[deviceType] = (exQty, reqQty, pho, rem);
+                                        if (exQty > 0) { existingTotals2[deviceType] += exQty; devColVis2[deviceType][0] = true; }
+                                        if (reqQty > 0) { requiredTotals2[deviceType] += reqQty; devColVis2[deviceType][1] = true; }
+                                        if (!string.IsNullOrEmpty(pho)) devColVis2[deviceType][2] = true;
+                                        if (!string.IsNullOrEmpty(rem)) devColVis2[deviceType][3] = true;
+                                    }
+                                }
+                            }
+                            
+                            if (hasData)
+                            {
+                                locationDataList2.Add((slNo2, locName, locType, coords, deviceData));
+                                slNo2++;
+                            }
+                        }
+                        
+                        // Filter visible items: must have at least one sub-column visible
+                        visibleDeviceTypes2 = allDeviceTypes2.Where(dt => devColVis2[dt].Any(v => v)).ToList();
+                        foreach (var cat in deviceCategories2)
+                        {
+                            var vItems = cat.Value.Where(i => visibleDeviceTypes2.Contains(i)).ToList();
+                            if (vItems.Any()) filteredCategories2[cat.Key] = vItems;
+                        }
+                    }
+                }
+                
+                @if (hasItemsData && visibleDeviceTypes2.Any() && locationDataList2.Any())
+                {
+                    <table class="table table-sm table-bordered mb-0 table-compact" style="font-size: 0.75rem;">
+                        <thead>
+                            <tr>
+                                <th class="text-center align-middle text-white py-1 px-1" rowspan="3" style="background-color: #70ad47; min-width: 30px;">SL.No</th>
+                                <th class="text-center align-middle text-white py-1 px-1" rowspan="3" style="background-color: #70ad47; min-width: 100px;">Location Name</th>
+                                <th class="text-center text-white py-1" colspan="3" rowspan="2" style="background-color: #5b9bd5;">Geo coordinates</th>
+                                
+                                @foreach (var category in filteredCategories2)
+                                {
+                                    int catColspan = category.Value.Sum(dt => devColVis2[dt].Count(v => v));
+                                    <th class="text-center text-dark py-1" colspan="@catColspan" style="background-color: #ffc000;">@category.Key</th>
+                                }
+                            </tr>
+                            <tr>
+                                @foreach (var category in filteredCategories2)
+                                {
+                                    foreach (var deviceType in category.Value)
+                                    {
+                                        int devColspan = devColVis2[deviceType].Count(v => v);
+                                        <th class="text-center text-dark py-1" colspan="@devColspan" style="background-color: #ffeb9c; font-size: 0.7rem;">
+                                            @(deviceType.Contains("||") ? deviceType.Split(new[] { "||" }, StringSplitOptions.None).Last() : deviceType)
+                                        </th>
+                                    }
+                                }
+                            </tr>
+                            <tr>
+                                <th class="text-center text-white py-0 px-1" style="background-color: #2f75b5; font-size: 0.65rem;">Latitude</th>
+                                <th class="text-center text-white py-0 px-1" style="background-color: #2f75b5; font-size: 0.65rem;">Longitude</th>
+                                <th class="text-center text-white py-0 px-1" style="background-color: #2f75b5; font-size: 0.65rem;">Link</th>
+                                
+                                @foreach (var deviceType in visibleDeviceTypes2)
+                                {
+                                    var vis = devColVis2[deviceType];
+                                    if (vis[0]) { <th class="text-center py-0 px-1" style="background-color: #fff9e6; font-size: 0.6rem; font-weight: 600;">Existing</th> }
+                                    if (vis[1]) { <th class="text-center py-0 px-1" style="background-color: #c6efce; font-size: 0.6rem; font-weight: 600;">Required</th> }
+                                    if (vis[2]) { <th class="text-center py-0 px-1" style="background-color: #fff2cc; font-size: 0.6rem;">Images</th> }
+                                    if (vis[3]) { <th class="text-center py-0 px-1" style="background-color: #fff2cc; font-size: 0.6rem;">Remarks</th> }
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var location in locationDataList2)
+                            {
+                                var coordParts = (location.Item4 ?? "").Split(',');
+                                string lat = coordParts.Length > 0 ? coordParts[0].Trim() : "";
+                                string lng = coordParts.Length > 1 ? coordParts[1].Trim() : "";
+                                string mapsLink = (!string.IsNullOrEmpty(lat) && !string.IsNullOrEmpty(lng)) 
+                                    ? $"https://www.google.com/maps?q={lat},{lng}" : "";
+                                
+                                <tr>
+                                    <td class="text-center align-middle fw-bold py-1 px-1" style="background-color: #e2efda;">@location.Item1</td>
+                                    <td class="align-middle py-1 px-1" style="background-color: #e2efda; font-size: 0.7rem;">
+                                        @location.Item2
+                                        @if (!string.IsNullOrEmpty(location.Item3)) { <br /><small class="text-muted">(@location.Item3)</small> }
+                                    </td>
+                                    <td class="text-center align-middle py-0 px-1" style="font-size: 0.65rem; background-color: #ddebf7;">@lat</td>
+                                    <td class="text-center align-middle py-0 px-1" style="font-size: 0.65rem; background-color: #ddebf7;">@lng</td>
+                                    <td class="text-center align-middle py-0 px-1" style="background-color: #ddebf7; font-size: 0.6rem;">
+                                        @if (!string.IsNullOrEmpty(mapsLink)) { <a href="@mapsLink" target="_blank" style="color: #0563c1;">maps.google.com/</a> }
+                                    </td>
+                                    
+                                    @foreach (var deviceType in visibleDeviceTypes2)
+                                    {
+                                        var vis = devColVis2[deviceType];
+                                        var data = location.Item5.ContainsKey(deviceType) ? location.Item5[deviceType] : (0, 0, "", "");
+                                        string uomSuffix = (itemUOMs2.ContainsKey(deviceType) && itemUOMs2[deviceType].Equals("MTR", StringComparison.OrdinalIgnoreCase)) ? " mtr" : "";
+                                        
+                                        if (vis[0]) {
+                                            <td class="text-center align-middle py-0 px-1" style="background-color: @(data.Item1 > 0 ? "#fff9e6" : "#fff"); font-size: 0.75rem;">
+                                                @if (data.Item1 > 0) { <span class="fw-bold">@data.Item1@uomSuffix</span> }
+                                            </td>
+                                        }
+                                        if (vis[1]) {
+                                            <td class="text-center align-middle py-0 px-1" style="background-color: @(data.Item2 > 0 ? "#c6efce" : "#fff"); font-size: 0.75rem;">
+                                                @if (data.Item2 > 0) { <span class="fw-bold text-success">@data.Item2@uomSuffix</span> }
+                                            </td>
+                                        }
+                                        if (vis[2]) {
+                                            <td class="text-center align-middle py-0 px-1" style="background-color: #fff;">
+                                                @if (!string.IsNullOrEmpty(data.Item3)) { <button class="btn btn-link btn-sm p-0" title="View Images" onclick="showImageGallery('@data.Item3', '@deviceType')" data-bs-toggle="modal" data-bs-target="#imageGalleryModal"><i class="bi bi-image text-primary"></i></button> }
+                                            </td>
+                                        }
+                                        if (vis[3]) {
+                                            <td class="align-middle py-0 px-1" style="font-size: 0.6rem; background-color: #fff; max-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="@data.Item4">
+                                                @data.Item4
+                                            </td>
+                                        }
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr style="background-color: #fce4d6; font-weight: bold;">
+                                <td class="text-center align-middle py-1" style="background-color: #f4b084;" colspan="2"><strong>TOTAL</strong></td>
+                                <td colspan="3" style="background-color: #f4b084;"></td>
+                                
+                                @foreach (var deviceType in visibleDeviceTypes2)
+                                {
+                                    var vis = devColVis2[deviceType];
+                                    if (vis[0]) {
+                                        <td class="text-center align-middle py-0 px-1" style="background-color: #f4b084; font-size: 0.75rem;">
+                                            @if (existingTotals2[deviceType] > 0) { 
+                                                string sfx = (itemUOMs2.ContainsKey(deviceType) && itemUOMs2[deviceType].Equals("MTR", StringComparison.OrdinalIgnoreCase)) ? " mtr" : "";
+                                                <strong>@existingTotals2[deviceType]@sfx</strong> 
+                                            } else { <span class="text-muted">0</span> }
+                                        </td>
+                                    }
+                                    if (vis[1]) {
+                                        <td class="text-center align-middle py-0 px-1" style="background-color: #92d050; font-size: 0.75rem;">
+                                            @if (requiredTotals2[deviceType] > 0) { 
+                                                string sfx = (itemUOMs2.ContainsKey(deviceType) && itemUOMs2[deviceType].Equals("MTR", StringComparison.OrdinalIgnoreCase)) ? " mtr" : "";
+                                                <strong>@requiredTotals2[deviceType]@sfx</strong> 
+                                            } else { <span class="text-muted">0</span> }
+                                        </td>
+                                    }
+                                    if (vis[2]) { <td class="py-0" style="background-color: #fce4d6;"></td> }
+                                    if (vis[3]) { <td class="py-0" style="background-color: #fce4d6;"></td> }
+                                }
+                            </tr>
+                        </tfoot>
+                    </table>
+                } else if (hasItemsData) {
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                        <p class="mb-0 mt-2">No device data with quantities greater than 0 found.</p>
+                    </div>
+                } else {
+                    <p class="text-muted text-center mb-0 py-3">No survey item records found.</p>
+                }
         </div>
     </div>
 
@@ -465,7 +653,7 @@
                 <strong><i class="bi bi-ethernet me-2"></i>Global Location - Cable Details</strong>
             </div>
             <div class="card-body table-responsive small">
-                <table class="table table-sm table-bordered mb-0">
+                <table class="table table-sm table-bordered mb-0 table-compact">
                     <thead class="table-light">
                         <tr>
                             <th class="py-1 px-2 fw-semibold text-center bg-primary text-white" colspan="4">Global</th>
@@ -511,7 +699,7 @@
                 <strong><i class="bi bi-camera-video-fill me-2"></i>Camera Installation Remarks</strong>
             </div>
             <div class="card-body table-responsive small">
-                <table class="table table-sm table-bordered mb-0">
+                <table class="table table-sm table-bordered mb-0 table-compact">
                     <thead class="table-light">
                         <tr>
                             <th class="py-1 px-2 fw-semibold text-center bg-primary text-white">Location</th>

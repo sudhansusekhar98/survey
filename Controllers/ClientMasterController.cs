@@ -99,18 +99,10 @@ namespace SurveyApp.Controllers
 
             ViewBag.States = await _locationService.GetStatesAsync();
             
-            // If client has a state name, find matching state ID and load its cities
+            // If client has a state name, load its cities using state name directly
             if (!string.IsNullOrWhiteSpace(client.State))
             {
-                var states = await _locationService.GetStatesAsync();
-                var matchedState = states.FirstOrDefault(s => 
-                    string.Equals(s.name, client.State, StringComparison.OrdinalIgnoreCase));
-                
-                if (matchedState != null)
-                {
-                    ViewBag.Cities = await _locationService.GetCitiesByStateAsync(matchedState.id);
-                    ViewBag.SelectedStateId = matchedState.id;
-                }
+                ViewBag.Cities = await _locationService.GetCitiesByStateNameAsync(client.State);
             }
 
             return View(client);

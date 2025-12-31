@@ -1,6 +1,22 @@
 [
   {
     "ContainingType": "SurveyApp.Controllers.LocationController",
+    "Method": "GetCitiesByStateName",
+    "RelativePath": "api/Location/cities-by-name",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "stateName",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "SurveyApp.Controllers.LocationController",
     "Method": "GetCitiesByState",
     "RelativePath": "api/Location/cities/{stateId}",
     "HttpMethod": "GET",

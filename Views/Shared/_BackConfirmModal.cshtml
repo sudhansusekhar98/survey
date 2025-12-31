@@ -1,21 +1,25 @@
-﻿
-@* @section Scripts {
-
-    <script src="~/js/ui-modals.js"></script>
-} *@
+﻿@* Back/Cancel Confirmation Modal - used across the application *@
 <div class="modal fade" id="backConfirmModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header py-2 bg-danger">
-                <h5 class="modal-title text-white">Confirm Action</h5>
-              @*   <button type="button" class="btn-close btn-warning" data-bs-dismiss="modal" aria-label="Close"></button> *@
+            <div class="modal-header">
+                <h5 class="modal-title text-white">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Confirm Action
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                Unsaved changes will be lost. Do you want to continue?
+            <div class="modal-body text-center">
+                <i class="bi bi-question-circle text-warning" style="font-size: 2.5rem;"></i>
+                <p class="mb-0" id="backConfirmMessage">Unsaved changes will be lost. Do you want to continue?</p>
             </div>
-            <div class="modal-footer py-3">
-                <a id="confirmContinueBtn" href="#" class="btn btn-sm btn-primary me-0"><i class="bi bi-check2-circle me-2"></i>Continue</a>
-                <button type="button" class="btn btn-sm btn-secondary me-0" data-bs-dismiss="modal"><i class="bi bi-slash-circle me-2"></i>Cancel</button>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i>Cancel
+                </button>
+                <a id="confirmContinueBtn" href="#" class="btn btn-primary">
+                    <i class="bi bi-check2-circle"></i>Continue
+                </a>
             </div>
         </div>
     </div>

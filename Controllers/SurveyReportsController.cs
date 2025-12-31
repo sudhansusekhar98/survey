@@ -68,7 +68,7 @@ namespace SurveyApp.Controllers
 
         // GET: SurveyReports/SummaryReport
         public IActionResult SummaryReport(DateTime? fromDate = null, DateTime? toDate = null,
-            string? status = null, string? region = null, string? type = null)
+            string? status = null, string? region = null, string? type = null, long? selectedSurveyId = null)
         {
             try
             {
@@ -190,6 +190,24 @@ namespace SurveyApp.Controllers
                     .OrderBy(t => t)
                     .ToList();
 
+                // Fetch Requirement Summary data if a survey is selected
+                if (selectedSurveyId.HasValue && selectedSurveyId.Value > 0)
+                {
+                    var requirementSummary = GetRequirementSummaryData(selectedSurveyId.Value);
+                    ViewBag.RequirementSummary = requirementSummary;
+                    ViewBag.SelectedSurveyId = selectedSurveyId.Value;
+                    
+                    // Get selected survey details
+                    var selectedSurvey = allSurveys.FirstOrDefault(s => s.SurveyId == selectedSurveyId.Value);
+                    ViewBag.SelectedSurvey = selectedSurvey;
+                }
+                else
+                {
+                    ViewBag.RequirementSummary = null;
+                    ViewBag.SelectedSurveyId = null;
+                    ViewBag.SelectedSurvey = null;
+                }
+
                 return View(report);
             }
             catch (Exception ex)
@@ -198,6 +216,279 @@ namespace SurveyApp.Controllers
                 TempData["ResultType"] = "danger";
                 return View(new SurveyReportViewModel());
             }
+        }
+
+        /// <summary>
+        /// Get Requirement Summary data for a survey with locations as rows and device types as columns.
+        /// Excludes locations without selected devices.
+        /// </summary>
+        private RequirementSummaryModel GetRequirementSummaryData(long surveyId)
+        {
+            var result = new RequirementSummaryModel();
+            
+            try
+            {
+                // Get survey details
+                DataTable dtSurveyDetails = _surveyRepo.GetSurveyDetails(surveyId, 1);
+                DataTable dtSurveyLocEmp = _surveyRepo.GetSurveyDetails(surveyId, 2);
+                DataTable dtSurveyItems = _surveyRepo.GetSurveyDetails(surveyId, 3);
+                
+                // CRITICAL: Add image URL and Remarks columns to dtSurveyItems for Summary Report
+                DataTable dtSurveyRemarks = _surveyRepo.GetSurveyDetails(surveyId, 4);
+                dtSurveyItems = EnrichItemsTableWithImagesAndRemarks(dtSurveyItems, surveyId, dtSurveyRemarks);
+                
+                if (dtSurveyDetails == null || dtSurveyDetails.Rows.Count == 0)
+                    return result;
+                
+                var surveyRow = dtSurveyDetails.Rows[0];
+                result.SurveyId = surveyId;
+                result.SurveyName = surveyRow["SurveyName"]?.ToString() ?? "";
+                result.ClientName = surveyRow["ClientName"]?.ToString() ?? "";
+                result.StartDate = surveyRow["SurveyDate"] as DateTime?;
+                result.CompletionDate = surveyRow["SubmissionDate"] as DateTime?;
+                
+                // Get device types from the pivot table
+                // Pivot table structure: ItemCode(0), Type(1), Item(2), UOM(3), [Location Existing/Required pairs...], TotalExisting, TotalRequired, Remarks
+                if (dtSurveyItems != null && dtSurveyItems.Rows.Count > 0)
+                {
+                    // Get column names for debugging
+                    var allColumns = dtSurveyItems.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToList();
+                    System.Diagnostics.Debug.WriteLine($"Pivot Table Columns: {string.Join(", ", allColumns)}");
+                    
+                    // Find location columns - those ending with "Existing" or "Required"
+                    var locationColumnPairs = new Dictionary<string, (string ExistingCol, string RequiredCol)>();
+                    foreach (var col in allColumns)
+                    {
+                        if (col.EndsWith("Existing"))
+                        {
+                            var locName = col.Replace("Existing", "").Trim();
+                            if (!locationColumnPairs.ContainsKey(locName))
+                            {
+                                var requiredCol = allColumns.FirstOrDefault(c => c.Equals(locName + "Required", StringComparison.OrdinalIgnoreCase)) ?? "";
+                                locationColumnPairs[locName] = (col, requiredCol);
+                            }
+                        }
+                    }
+                    
+                    // Get unique item names from column index 2 (Item column - e.g., "Dome", "Bullet", "PTZ")
+                    // and build category mapping from column index 1 (Type column - e.g., "Camera")
+                    var deviceTypes = new List<string>();
+                    var deviceCategories = new Dictionary<string, List<string>>();
+                    
+                    foreach (DataRow itemRow in dtSurveyItems.Rows)
+                    {
+                        if (itemRow.ItemArray.Length > 2)
+                        {
+                            string typeName = itemRow[1]?.ToString()?.Trim() ?? "";  // Category (e.g., "Camera")
+                            string itemName = itemRow[2]?.ToString()?.Trim() ?? "";  // Item (e.g., "Dome")
+                            
+                            if (!string.IsNullOrEmpty(itemName))
+                            {
+                                // CRITICAL: Use composite key (TypeName||ItemName) to distinguish items with same name in different categories
+                                string compositeKey = string.IsNullOrEmpty(typeName) ? itemName : $"{typeName}||{itemName}";
+                                
+                                if (!deviceTypes.Contains(compositeKey))
+                                {
+                                    deviceTypes.Add(compositeKey);
+                                }
+                                
+                                // Build category -> items mapping (using composite keys)
+                                if (!string.IsNullOrEmpty(typeName))
+                                {
+                                    if (!deviceCategories.ContainsKey(typeName))
+                                    {
+                                        deviceCategories[typeName] = new List<string>();
+                                    }
+                                    if (!deviceCategories[typeName].Contains(compositeKey))
+                                    {
+                                        deviceCategories[typeName].Add(compositeKey);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    result.DeviceTypes = deviceTypes;
+                    result.DeviceCategories = deviceCategories;
+                    var devColVis = deviceTypes.ToDictionary(dt => dt, dt => new bool[] { false, false, false, false }, StringComparer.OrdinalIgnoreCase);
+                    
+                    System.Diagnostics.Debug.WriteLine($"Device Types Found: {string.Join(", ", deviceTypes)}");
+                    System.Diagnostics.Debug.WriteLine($"Device Categories Found: {string.Join(", ", deviceCategories.Select(c => $"{c.Key}:[{string.Join(",", c.Value)}]"))}");
+                    System.Diagnostics.Debug.WriteLine($"Location Columns Found: {string.Join(", ", locationColumnPairs.Keys)}");
+                    
+                    // Process each location from dtSurveyLocEmp
+                    if (dtSurveyLocEmp != null && dtSurveyLocEmp.Rows.Count > 0)
+                    {
+                        int slNo = 1;
+                        foreach (DataRow locRow in dtSurveyLocEmp.Rows)
+                        {
+                            var locationData = new LocationRequirementData
+                            {
+                                SlNo = slNo,
+                                LocId = Convert.ToInt32(locRow["LocID"]),
+                                LocationName = locRow["LocName"]?.ToString()?.Trim() ?? "",
+                                LocationType = locRow["LocationType"]?.ToString() ?? "",
+                                Coordinates = locRow["Cordinate"]?.ToString() ?? "",
+                                EmployeeName = locRow["EmpName"]?.ToString() ?? "",
+                                EmployeeId = locRow["EmpID"]?.ToString() ?? "",
+                                DeviceData = new Dictionary<string, DeviceRequirementData>()
+                            };
+                            
+                            // Parse coordinates for latitude/longitude
+                            if (!string.IsNullOrEmpty(locationData.Coordinates))
+                            {
+                                var coords = locationData.Coordinates.Split(',');
+                                if (coords.Length >= 2)
+                                {
+                                    locationData.Latitude = coords[0].Trim();
+                                    locationData.Longitude = coords[1].Trim();
+                                }
+                            }
+                            
+                            // Find matching location columns (case-insensitive, trimmed)
+                            string matchedLocName = locationColumnPairs.Keys
+                                .FirstOrDefault(k => k.Trim().Equals(locationData.LocationName.Trim(), StringComparison.OrdinalIgnoreCase)) ?? "";
+                            
+                            bool hasDevices = false;
+                            
+                                if (!string.IsNullOrEmpty(matchedLocName) && locationColumnPairs.ContainsKey(matchedLocName))
+                                {
+                                    var (existingCol, requiredCol) = locationColumnPairs[matchedLocName];
+                                    string photoCol = matchedLocName + "_Photos";
+                                    string remarkCol = matchedLocName + "_Remarks"; // Standardized remark column name if available
+                                    
+                                    // For each device type (Item), get quantities from this location's columns
+                                    foreach (var deviceType in deviceTypes)
+                                    {
+                                        var deviceData = new DeviceRequirementData { DeviceType = deviceType };
+                                        
+                                        // Find rows for this specific category and item
+                                        foreach (DataRow itemRow in dtSurveyItems.Rows)
+                                        {
+                                            string rowType = itemRow[1]?.ToString()?.Trim() ?? "";
+                                            string rowItem = itemRow[2]?.ToString()?.Trim() ?? "";
+                                            string rowKey = string.IsNullOrEmpty(rowType) ? rowItem : $"{rowType}||{rowItem}";
+                                            
+                                            if (rowKey.Equals(deviceType, StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                // 1. Existing Quantity
+                                                if (!string.IsNullOrEmpty(existingCol) && dtSurveyItems.Columns.Contains(existingCol))
+                                                {
+                                                    int.TryParse(itemRow[existingCol]?.ToString(), out int existing);
+                                                    deviceData.ExistingQty += existing;
+                                                    if (existing > 0) devColVis[deviceType][0] = true;
+                                                }
+                                                // 2. Required Quantity
+                                                if (!string.IsNullOrEmpty(requiredCol) && dtSurveyItems.Columns.Contains(requiredCol))
+                                                {
+                                                    int.TryParse(itemRow[requiredCol]?.ToString(), out int required);
+                                                    deviceData.RequiredQty += required;
+                                                    if (required > 0) devColVis[deviceType][1] = true;
+                                                }
+                                                
+                                                // 3. Images
+                                                if (dtSurveyItems.Columns.Contains(photoCol))
+                                                {
+                                                    string photoUrls = itemRow[photoCol]?.ToString() ?? "";
+                                                    if (!string.IsNullOrEmpty(photoUrls))
+                                                    {
+                                                        var imgList = photoUrls.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                                                            .Select(u => u.Trim()).ToList();
+                                                        deviceData.ImageUrls.AddRange(imgList.Where(i => !deviceData.ImageUrls.Contains(i)));
+                                                        devColVis[deviceType][2] = true;
+                                                    }
+                                                }
+                                                
+                                                // 4. Remarks
+                                                string localRemark = "";
+                                                if (dtSurveyItems.Columns.Contains(remarkCol)) localRemark = itemRow[remarkCol]?.ToString() ?? "";
+                                                else if (dtSurveyItems.Columns.Contains("Remarks")) localRemark = itemRow["Remarks"]?.ToString() ?? "";
+                                                
+                                                if (!string.IsNullOrEmpty(localRemark))
+                                                {
+                                                    if (string.IsNullOrEmpty(deviceData.Remarks)) deviceData.Remarks = localRemark;
+                                                    else if (!deviceData.Remarks.Contains(localRemark)) deviceData.Remarks += "; " + localRemark;
+                                                    devColVis[deviceType][3] = true;
+                                                }
+
+                                                // 5. UOM
+                                                if (dtSurveyItems.Columns.Contains("ItemUOM")) deviceData.UOM = itemRow["ItemUOM"]?.ToString() ?? "";
+                                                else if (itemRow.Table.Columns.Count > 3) deviceData.UOM = itemRow[3]?.ToString() ?? "";
+                                            }
+                                        }
+                                        
+                                        // Only add to DeviceData if there are quantities > 0 OR images OR remarks
+                                        if (deviceData.ExistingQty > 0 || deviceData.RequiredQty > 0 || deviceData.ImageUrls.Any() || !string.IsNullOrEmpty(deviceData.Remarks))
+                                        {
+                                            hasDevices = true;
+                                            locationData.DeviceData[deviceType] = deviceData;
+                                        }
+                                    }
+                                }
+                            
+                            // Only add locations that have at least one device with quantity
+                            if (hasDevices)
+                            {
+                                result.Locations.Add(locationData);
+                                slNo++;
+                            }
+                        }
+                    }
+                    
+                    // Filter device types to only show those with at least one location having quantity > 0
+                    // Use case-insensitive comparison for reliability
+                    var deviceTypesWithData = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    
+                    foreach (var location in result.Locations)
+                    {
+                        foreach (var deviceData in location.DeviceData)
+                        {
+                            if (deviceData.Value.ExistingQty > 0 || deviceData.Value.RequiredQty > 0)
+                            {
+                                deviceTypesWithData.Add(deviceData.Key);
+                            }
+                        }
+                    }
+                    
+                    // Keep only device types that have at least one location with data
+                    result.DeviceTypes = result.DeviceTypes
+                        .Where(dt => deviceTypesWithData.Contains(dt))
+                        .ToList();
+
+                    // Assign granular visibility to result
+                    result.DeviceColumnVisibility = devColVis;
+                    
+                    System.Diagnostics.Debug.WriteLine($"Device types with data: {string.Join(", ", deviceTypesWithData)}");
+                    System.Diagnostics.Debug.WriteLine($"Filtered DeviceTypes: {string.Join(", ", result.DeviceTypes)}");
+                    
+                    // Check if any location has existing quantities > 0
+                    result.HasAnyExisting = result.Locations.Any(l => 
+                        l.DeviceData.Any(d => d.Value.ExistingQty > 0));
+                    
+                    // Update DeviceCategories to only include device types that have data
+                    var filteredCategories = new Dictionary<string, List<string>>();
+                    foreach (var category in result.DeviceCategories)
+                    {
+                        var filteredItems = category.Value
+                            .Where(item => deviceTypesWithData.Contains(item))
+                            .ToList();
+                        if (filteredItems.Any())
+                        {
+                            filteredCategories[category.Key] = filteredItems;
+                        }
+                    }
+                    result.DeviceCategories = filteredCategories;
+                    
+                    System.Diagnostics.Debug.WriteLine($"Filtered DeviceCategories: {string.Join(", ", result.DeviceCategories.Select(c => $"{c.Key}:[{string.Join(",", c.Value)}]"))}");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in GetRequirementSummaryData: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            }
+            
+            return result;
         }
 
         // GET: SurveyReports/DetailedReport
@@ -284,9 +575,10 @@ namespace SurveyApp.Controllers
             DataTable dtSurveyLocEmp = _surveyRepo.GetSurveyDetails(surveyId, 2);
             DataTable dtSurveyItems = _surveyRepo.GetSurveyDetails(surveyId, 3);
             DataTable dtGlobalItems = _surveyRepo.GetSurveyDetails(surveyId, 5); // Global cable counts
+            DataTable dtSurveyRemarks = _surveyRepo.GetSurveyDetails(surveyId, 4);
 
-            // Add image URL columns to dtSurveyItems
-            dtSurveyItems = AddImageColumnsToItemsTable(dtSurveyItems, surveyId);
+            // Add image URL and Remarks columns to dtSurveyItems
+            dtSurveyItems = EnrichItemsTableWithImagesAndRemarks(dtSurveyItems, surveyId, dtSurveyRemarks);
 
             // Get submission information
             var submission = _submissionRepo.GetSubmissionBySurveyId(surveyId);
@@ -450,60 +742,188 @@ namespace SurveyApp.Controllers
             return Json(debugInfo);
         }
 
-        private DataTable AddImageColumnsToItemsTable(DataTable dtItems, long surveyId)
+        private DataTable EnrichItemsTableWithImagesAndRemarks(DataTable dtItems, long surveyId, DataTable dtRemarks)
         {
+            System.Diagnostics.Debug.WriteLine($"=== EnrichItemsTableWithImagesAndRemarks START for Survey {surveyId} ===");
+            
             if (dtItems == null || dtItems.Rows.Count == 0)
+            {
+                System.Diagnostics.Debug.WriteLine("dtItems is null or empty");
                 return dtItems;
+            }
 
             try
             {
                 // Get all location columns (those with "Existing" or "Required" in the name)
-                // Trim the location names to handle trailing spaces
                 var locationColumns = dtItems.Columns.Cast<DataColumn>()
                     .Where(c => c.ColumnName.Contains("Existing") || c.ColumnName.Contains("Required"))
                     .Select(c => c.ColumnName.Replace("Existing", "").Replace("Required", "").Trim())
                     .Distinct()
                     .ToList();
 
-                // Get survey item details with images from database
+                System.Diagnostics.Debug.WriteLine($"Found {locationColumns.Count} location columns: {string.Join(", ", locationColumns)}");
+
+                // 1. IMAGES
                 var itemImages = GetSurveyItemImages(surveyId);
-
-                // Debug: Log image count
-                System.Diagnostics.Debug.WriteLine($"Found {itemImages.Count} images for survey {surveyId}");
-
+                System.Diagnostics.Debug.WriteLine($"Retrieved {itemImages.Count} image records from database");
+                
                 // Add image columns for each location
                 foreach (var locationName in locationColumns)
                 {
-                    string imageColumnName = $"{locationName}_Photos";
+                    string imageColumnName = $"{locationName}Photos";
                     if (!dtItems.Columns.Contains(imageColumnName))
                     {
                         dtItems.Columns.Add(imageColumnName, typeof(string));
+                        System.Diagnostics.Debug.WriteLine($"Added image column: {imageColumnName}");
                     }
                 }
 
-                // Determine the ItemCode column name - the pivot uses "Item Code" with space
+                // 2. REMARKS - Fetch from SurveyDetails.Remarks (not camera installation remarks)
+                // Pre-process remarks into a dictionary for faster and accurate lookup
+                // Map: LocationName -> Dictionary<ItemName, JoinedRemarks>
+                var remarksLookup = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+                
+                System.Diagnostics.Debug.WriteLine("Fetching general remarks from SurveyDetails table...");
+
+                try
+                {
+                    using var con = new SqlConnection(DBConnection.ConnectionString);
+                    // Query to get general remarks from SurveyDetails (not camera installation remarks)
+                    string remarksQuery = @"
+                        SELECT 
+                            LTRIM(RTRIM(sl.LocName)) as LocationName,
+                            im.ItemName,
+                            sd.Remarks
+                        FROM SurveyDetails sd
+                        INNER JOIN SurveyLocation sl ON sd.LocID = sl.LocID AND sd.SurveyID = sl.SurveyID
+                        LEFT JOIN ItemMaster im ON sd.ItemID = im.ItemID
+                        WHERE sd.SurveyID = @SurveyID
+                            AND sd.Remarks IS NOT NULL 
+                            AND sd.Remarks != ''
+                            AND LEN(LTRIM(RTRIM(sd.Remarks))) > 0";
+
+                    using var cmd = new SqlCommand(remarksQuery, con);
+                    cmd.Parameters.AddWithValue("@SurveyID", surveyId);
+
+                    con.Open();
+                    using var reader = cmd.ExecuteReader();
+
+                    int remarksCount = 0;
+                    while (reader.Read())
+                    {
+                        string loc = reader["LocationName"]?.ToString()?.Trim() ?? "";
+                        string itemName = reader["ItemName"]?.ToString()?.Trim() ?? "";
+                        string msg = reader["Remarks"]?.ToString()?.Trim() ?? "";
+
+                        System.Diagnostics.Debug.WriteLine($"Remark from DB: Loc='{loc}', Item='{itemName}', Msg='{msg}'");
+
+                        if (!string.IsNullOrEmpty(loc) && !string.IsNullOrEmpty(itemName) && !string.IsNullOrEmpty(msg))
+                        {
+                            if (!remarksLookup.ContainsKey(loc))
+                                remarksLookup[loc] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+                            if (remarksLookup[loc].ContainsKey(itemName))
+                                remarksLookup[loc][itemName] += "; " + msg;
+                            else
+                                remarksLookup[loc][itemName] = msg;
+
+                            remarksCount++;
+                        }
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"Built remarks lookup with {remarksCount} entries from SurveyDetails across {remarksLookup.Count} locations");
+
+                    // Add remark columns for each location
+                    foreach (var locationName in locationColumns)
+                    {
+                        string remarkColumnName = $"{locationName}Remarks";
+                        if (!dtItems.Columns.Contains(remarkColumnName))
+                            dtItems.Columns.Add(remarkColumnName, typeof(string));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error fetching remarks from SurveyDetails: {ex.Message}");
+                }
+
+                // Determine the identifiers
                 string itemCodeColumnName = dtItems.Columns.Contains("Item Code") ? "Item Code"
                     : dtItems.Columns.Contains("ItemCode") ? "ItemCode"
                     : dtItems.Columns.Count > 0 ? dtItems.Columns[0].ColumnName : "";
 
-                // Populate image URLs for each row
+                // Populate Rows
                 foreach (DataRow row in dtItems.Rows)
                 {
                     string itemCode = !string.IsNullOrEmpty(itemCodeColumnName)
                         ? row[itemCodeColumnName]?.ToString()?.Trim() ?? ""
-                        : row[0]?.ToString()?.Trim() ?? "";  // Fallback to first column
+                        : row[0]?.ToString()?.Trim() ?? "";
+
+                    // Attempt to get ItemName from column index 2 (Common Pivot Structure: ItemCode, Type, ItemName...)
+                    string itemName = dtItems.Columns.Count > 2 ? row[2]?.ToString()?.Trim() ?? "" : "";
 
                     foreach (var locationName in locationColumns)
                     {
-                        string imageColumnName = $"{locationName}_Photos";
-                        // Use case-insensitive and trimmed comparison for matching
-                        // The location names from database are trimmed, the pivot column names need trimming too
-                        var imageUrl = itemImages
-                            .FirstOrDefault(img =>
+                        // 1. POPULATE IMAGES (Multiple + Clean paths)
+                        string imageColumnName = $"{locationName}Photos";
+                        
+                        // Get all matching image records for this location + item
+                        var matchingRecords = itemImages
+                            .Where(img =>
                                 img.LocationName.Trim().Equals(locationName.Trim(), StringComparison.OrdinalIgnoreCase) &&
-                                img.ItemCode.Trim().Equals(itemCode.Trim(), StringComparison.OrdinalIgnoreCase))?.ImageUrls ?? "";
+                                (
+                                    (!string.IsNullOrEmpty(itemName) && img.ItemName.Trim().Equals(itemName, StringComparison.OrdinalIgnoreCase)) ||
+                                    (!string.IsNullOrEmpty(itemCode) && img.ItemCode.Trim().Equals(itemCode, StringComparison.OrdinalIgnoreCase))
+                                ))
+                            .ToList();
 
-                        row[imageColumnName] = imageUrl;
+                        // Each record's ImageUrls could be comma-separated (multiple images per record)
+                        // Split them, clean each URL, then join ALL with pipe separator for the frontend
+                        var allImageUrls = new List<string>();
+                        foreach (var record in matchingRecords)
+                        {
+                            if (!string.IsNullOrEmpty(record.ImageUrls))
+                            {
+                                // Split by comma (original separator in DB)
+                                var urls = record.ImageUrls.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                                foreach (var url in urls)
+                                {
+                                    var cleanedUrl = url.Trim().Replace("~", "");
+                                    if (!string.IsNullOrEmpty(cleanedUrl))
+                                    {
+                                        allImageUrls.Add(cleanedUrl);
+                                    }
+                                }
+                            }
+                        }
+
+                        row[imageColumnName] = allImageUrls.Any() ? string.Join("|", allImageUrls) : "";
+                        
+                        if (allImageUrls.Any())
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Populated {allImageUrls.Count} image(s) for {locationName} / {itemName}: {string.Join("|", allImageUrls.Take(2))}...");
+                        }
+
+                        // 2. POPULATE REMARKS (From Lookup)
+                        string remarkColumnName = $"{locationName}Remarks";
+                        string remarkVal = "";
+                        
+                        if (remarksLookup.ContainsKey(locationName))
+                        {
+                            var locRem = remarksLookup[locationName];
+                            // Match by Name
+                            if (!string.IsNullOrEmpty(itemName) && locRem.ContainsKey(itemName))
+                                remarkVal = locRem[itemName];
+                            // Fallback: Match by Code (if Code matches Name logic, or we expand map keys)
+                            else if (!string.IsNullOrEmpty(itemCode) && locRem.ContainsKey(itemCode))
+                                 remarkVal = locRem[itemCode];
+                        }
+                        
+                        row[remarkColumnName] = remarkVal;
+                        
+                        if (!string.IsNullOrEmpty(remarkVal))
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Populated remark for {locationName} / {itemName}: {remarkVal}");
+                        }
                     }
                 }
 
@@ -511,8 +931,7 @@ namespace SurveyApp.Controllers
             }
             catch (Exception ex)
             {
-                // Log error and return original table
-                System.Diagnostics.Debug.WriteLine($"Error in AddImageColumnsToItemsTable: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error in EnrichItemsTableWithImagesAndRemarks: {ex.Message}");
                 return dtItems;
             }
         }
@@ -525,15 +944,16 @@ namespace SurveyApp.Controllers
             {
                 using var con = new SqlConnection(DBConnection.ConnectionString);
                 // Query to get images per location and item
-                // The pivot table uses ItemID (stored as "Item Code"), not the actual ItemCode from ItemMaster
-                // Also need to trim location names to handle trailing spaces
+                // Added ItemName fetch from ItemMaster to match with Pivot Table's Item Name column
                 string query = @"
                     SELECT 
                         LTRIM(RTRIM(sl.LocName)) as LocationName,
                         CAST(sd.ItemID AS VARCHAR(20)) as ItemCode,
+                        im.ItemName,
                         sd.ImgPath
                     FROM SurveyDetails sd
                     INNER JOIN SurveyLocation sl ON sd.LocID = sl.LocID AND sd.SurveyID = sl.SurveyID
+                    LEFT JOIN ItemMaster im ON sd.ItemID = im.ItemID
                     WHERE sd.SurveyID = @SurveyID
                         AND sd.ImgPath IS NOT NULL 
                         AND sd.ImgPath != ''
@@ -551,13 +971,13 @@ namespace SurveyApp.Controllers
                     {
                         LocationName = reader["LocationName"]?.ToString() ?? "",
                         ItemCode = reader["ItemCode"]?.ToString() ?? "",
+                        ItemName = reader["ItemName"]?.ToString() ?? "", 
                         ImageUrls = reader["ImgPath"]?.ToString() ?? ""
                     });
                 }
             }
             catch (Exception ex)
             {
-                // Log error - could add logging here for debugging
                 System.Diagnostics.Debug.WriteLine($"Error getting survey item images: {ex.Message}");
             }
             return imageList;
@@ -670,7 +1090,7 @@ namespace SurveyApp.Controllers
                     TempData["ResultType"] = "danger";
                     return RedirectToAction("SummaryReport");
                 }
-
+                
                 var locations = _surveyRepo.GetSurveyLocationById(surveyId) ?? new List<SurveyLocationModel>();
                 var assignments = _surveyRepo.GetSurveyAssignments(surveyId) ?? new List<SurveyAssignmentModel>();
 
@@ -831,6 +1251,9 @@ namespace SurveyApp.Controllers
                 DataTable dtSurveyLocEmp = _surveyRepo.GetSurveyDetails(surveyId, 2);
                 DataTable dtSurveyItems = _surveyRepo.GetSurveyDetails(surveyId, 3);
                 DataTable dtSurveyRemarks = _surveyRepo.GetSurveyDetails(surveyId, 4);
+
+                // Enrich items with images and remarks
+                dtSurveyItems = EnrichItemsTableWithImagesAndRemarks(dtSurveyItems, surveyId, dtSurveyRemarks);
 
                 if (dtSurveyDetails == null || dtSurveyDetails.Rows.Count == 0)
                 {
@@ -1025,167 +1448,275 @@ namespace SurveyApp.Controllers
                     applyBorder(locHeaderRow, 1, row - 1, 8, Color.Black);
                     row += 2;
 
-                    // ---------- REQUIREMENT SUMMARY (ITEMS PIVOT) ----------
-                    if (dtSurveyItems != null && dtSurveyItems.Rows.Count > 0)
+                    // ---------- REQUIREMENT SUMMARY (Locations as rows, Device Types as columns) ----------
+                    if (dtSurveyItems != null && dtSurveyItems.Rows.Count > 0 && dtSurveyLocEmp != null && dtSurveyLocEmp.Rows.Count > 0)
                     {
-                        int itemsCols = dtSurveyItems.Columns.Count;
-                        int reqTitleRow = row;
-                        var reqTitle = ws.Cells[reqTitleRow, 1, reqTitleRow, Math.Max(itemsCols, 8)];
-                        reqTitle.Merge = true;
-                        reqTitle.Value = "Requirement Summary";
-                        reqTitle.Style.Font.Bold = true;
-                        reqTitle.Style.Font.Size = 14;
-                        reqTitle.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                        reqTitle.Style.Fill.BackgroundColor.SetColor(headerBg);
-
-                        row++;
-
-                        // Prepare header rows (3 rows)
-                        int row1 = row;
-                        int row2 = row + 1;
-                        int row3 = row + 2;
-                        int dataStart = row + 3;
-
-                        // Calculate location pairs defensively
-                        int locPairs = Math.Max(0, (itemsCols - 7) / 2);
-                        int firstLocCol = 5;
-                        int lastLocCol = firstLocCol + locPairs * 2 - 1;
-                        int totalStartCol = Math.Max(firstLocCol, lastLocCol + 1);
-                        int totalEndCol = totalStartCol + 1;
-                        int remarksCol = totalEndCol + 1;
-
-                        // Main headers
-                        ws.Cells[row1, 1].Value = "Item Code";
-                        ws.Cells[row1, 1, row3, 1].Merge = true;
-
-                        ws.Cells[row1, 2].Value = "Type";
-                        ws.Cells[row1, 2, row3, 2].Merge = true;
-
-                        ws.Cells[row1, 3].Value = "Item";
-                        ws.Cells[row1, 3, row3, 3].Merge = true;
-
-                        ws.Cells[row1, 4].Value = "UOM";
-                        ws.Cells[row1, 4, row3, 4].Merge = true;
-
-                        // Locations header (if any)
-                        if (locPairs > 0)
+                        // STEP 1: Extract device categories and types
+                        var deviceCategories = new Dictionary<string, List<string>>();
+                        var allDeviceTypes = new List<string>();
+                        // Visibility: [0]=Ex, [1]=Req, [2]=Img, [3]=Rem
+                        var devColVis = new Dictionary<string, bool[]>();
+                        var deviceUOMs = new Dictionary<string, string>();
+                        
+                        foreach (DataRow itemRow in dtSurveyItems.Rows)
                         {
-                            ws.Cells[row1, firstLocCol].Value = "Locations";
-                            ws.Cells[row1, firstLocCol, row1, lastLocCol].Merge = true;
-
-                            // Row2: location names
-                            int colIndex = firstLocCol;
-                            for (int i = 0; i < locPairs && (colIndex - 1) < dtSurveyItems.Columns.Count; i++)
+                            string typeName = itemRow[1]?.ToString()?.Trim() ?? "";
+                            string itemName = itemRow[2]?.ToString()?.Trim() ?? "";
+                            
+                            if (!string.IsNullOrEmpty(itemName))
                             {
-                                string rawName = dtSurveyItems.Columns[colIndex - 1].ColumnName;
-                                string locName = rawName.Replace("Existing", "").Replace("Required", "").Trim();
-                                ws.Cells[row2, colIndex].Value = locName;
-                                ws.Cells[row2, colIndex, row2, colIndex + 1].Merge = true;
-                                colIndex += 2;
-                            }
-
-                            // Row3 existing/required
-                            colIndex = firstLocCol;
-                            for (int i = 0; i < locPairs; i++)
-                            {
-                                ws.Cells[row3, colIndex].Value = "Existing";
-                                ws.Cells[row3, colIndex + 1].Value = "Required";
-                                colIndex += 2;
+                                // CRITICAL: Use composite key (TypeName||ItemName)
+                                string compositeKey = string.IsNullOrEmpty(typeName) ? itemName : $"{typeName}||{itemName}";
+                                
+                                if (!allDeviceTypes.Contains(compositeKey))
+                                {
+                                    allDeviceTypes.Add(compositeKey);
+                                    devColVis[compositeKey] = new bool[] { false, false, false, false };
+                                }
+                                
+                                if (!deviceUOMs.ContainsKey(compositeKey))
+                                {
+                                    if (dtSurveyItems.Columns.Contains("ItemUOM"))
+                                        deviceUOMs[compositeKey] = itemRow["ItemUOM"]?.ToString()?.Trim() ?? "";
+                                    else if (dtSurveyItems.Columns.Count > 3)
+                                        deviceUOMs[compositeKey] = itemRow[3]?.ToString()?.Trim() ?? "";
+                                    else
+                                        deviceUOMs[compositeKey] = "";
+                                }
+                                
+                                if (!string.IsNullOrEmpty(typeName))
+                                {
+                                    if (!deviceCategories.ContainsKey(typeName)) deviceCategories[typeName] = new List<string>();
+                                    if (!deviceCategories[typeName].Contains(compositeKey)) deviceCategories[typeName].Add(compositeKey);
+                                }
                             }
                         }
-
-                        // Totals
-                        ws.Cells[row1, totalStartCol].Value = "Total";
-                        ws.Cells[row1, totalStartCol, row2, totalEndCol].Merge = true;
-                        ws.Cells[row3, totalStartCol].Value = "Existing";
-                        ws.Cells[row3, totalEndCol].Value = "Required";
-
-                        // Remarks header
-                        ws.Cells[row1, remarksCol].Value = "Specification / Remarks";
-                        ws.Cells[row1, remarksCol, row3, remarksCol].Merge = true;
-
-                        // style header block
-                        var headerRange = ws.Cells[row1, 1, row3, Math.Max(itemsCols, remarksCol)];
-                        headerRange.Style.Font.Bold = true;
-                        headerRange.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                        headerRange.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-                        headerRange.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                        headerRange.Style.Fill.BackgroundColor.SetColor(sectionBg);
-
-                        // Data rows
-                        int r = dataStart;
-                        foreach (DataRow dr in dtSurveyItems.Rows)
+                        
+                        // Find location columns
+                        var allColumns = dtSurveyItems.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToList();
+                        var locationColumnPairs = new Dictionary<string, (string, string, string, string)>(StringComparer.OrdinalIgnoreCase);
+                        foreach (var col in allColumns)
                         {
-                            for (int c = 0; c < itemsCols; c++)
+                            if (col.EndsWith("Existing"))
                             {
-                                var cell = ws.Cells[r, c + 1];
-                                object value = dr[c];
-
-                                if (c == 0)
+                                var locName = col.Replace("Existing", "").Trim();
+                                if (!locationColumnPairs.ContainsKey(locName))
                                 {
-                                    // Item code
-                                    cell.Value = value?.ToString() ?? string.Empty;
-                                    cell.Style.Numberformat.Format = "@"; // text
-                                    continue;
-                                }
-
-                                // numeric parsing (fixed: ensure PatternType is set before BackgroundColor.SetColor)
-                                if (decimal.TryParse(value?.ToString(), out decimal num))
-                                {
-                                    cell.Value = num;
-                                    cell.Style.Numberformat.Format = "###0";
-
-                                    bool isLocCol = (c + 1 >= firstLocCol && c + 1 <= lastLocCol)
-                                                    || (c + 1 == totalStartCol || c + 1 == totalEndCol);
-
-                                    if (isLocCol && num > 0)
-                                    {
-                                        // ensure a fill pattern exists before setting background color
-                                        cell.Style.Fill.PatternType = ExcelFillStyle.Solid;
-
-                                        if (c + 1 >= firstLocCol && c + 1 <= lastLocCol)
-                                        {
-                                            cell.Style.Fill.BackgroundColor.SetColor(Color.LightYellow);
-                                        }
-                                        else if (c + 1 == totalStartCol)
-                                        {
-                                            cell.Style.Fill.BackgroundColor.SetColor(totalExBg);
-                                        }
-                                        else if (c + 1 == totalEndCol)
-                                        {
-                                            cell.Style.Fill.BackgroundColor.SetColor(totalReqBg);
-                                        }
-                                    }
-                                    else if (isLocCol && num == 0)
-                                    {
-                                        // keep zero visible but grey it out
-                                        cell.Style.Font.Color.SetColor(Color.LightGray);
-                                        // optionally remove any fill if previously set:
-                                        // cell.Style.Fill.PatternType = ExcelFillStyle.None; // uncomment if you want no fill
-                                    }
-                                }
-                                else
-                                {
-                                    cell.Value = value?.ToString() ?? string.Empty;
+                                    string rCol = allColumns.FirstOrDefault(c => c.Equals(locName + "Required", StringComparison.OrdinalIgnoreCase)) ?? "";
+                                    string pCol = allColumns.FirstOrDefault(c => c.Equals(locName + "Photo", StringComparison.OrdinalIgnoreCase)) ?? 
+                                                  allColumns.FirstOrDefault(c => c.Equals(locName + "Photos", StringComparison.OrdinalIgnoreCase)) ?? "";
+                                    string remCol = allColumns.FirstOrDefault(c => c.Equals(locName + "Remarks", StringComparison.OrdinalIgnoreCase)) ?? "";
+                                    locationColumnPairs[locName] = (col, rCol, pCol, remCol);
                                 }
                             }
-                            r++;
+                        }
+                        
+                        // STEP 2: Calculate totals and build location data
+                        var existingTotals = allDeviceTypes.ToDictionary(dt => dt, dt => 0);
+                        var requiredTotals = allDeviceTypes.ToDictionary(dt => dt, dt => 0);
+                        var locationDataList = new List<(int, string, string, string, Dictionary<string, (int, int, string, string)>)>();
+                        
+                        int slNo = 1;
+                        foreach (DataRow locRow in dtSurveyLocEmp.Rows)
+                        {
+                            string locName = locRow["LocName"]?.ToString()?.Trim() ?? "";
+                            string locType = locRow["LocationType"]?.ToString()?.Trim() ?? "";
+                            string coords = locRow["Cordinate"]?.ToString()?.Trim() ?? "";
+                            
+                            var deviceData = new Dictionary<string, (int, int, string, string)>();
+                            bool hasData = false;
+                            
+                            string mLoc = locationColumnPairs.Keys.FirstOrDefault(l => l.Trim().Equals(locName, StringComparison.OrdinalIgnoreCase)) ?? "";
+                            if (!string.IsNullOrEmpty(mLoc))
+                            {
+                                var cols = locationColumnPairs[mLoc];
+                                foreach (var deviceType in allDeviceTypes)
+                                {
+                                    int exQty = 0; int reqQty = 0; string pho = ""; string rem = "";
+                                    foreach (DataRow itemRow in dtSurveyItems.Rows)
+                                    {
+                                        string rowType = itemRow[1]?.ToString()?.Trim() ?? "";
+                                        string rowItem = itemRow[2]?.ToString()?.Trim() ?? "";
+                                        string rowKey = string.IsNullOrEmpty(rowType) ? rowItem : $"{rowType}||{rowItem}";
+
+                                        if (rowKey.Equals(deviceType, StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            if (!string.IsNullOrEmpty(cols.Item1)) { int val = 0; int.TryParse(itemRow[cols.Item1]?.ToString(), out val); exQty += val; }
+                                            if (!string.IsNullOrEmpty(cols.Item2)) { int val = 0; int.TryParse(itemRow[cols.Item2]?.ToString(), out val); reqQty += val; }
+                                            if (!string.IsNullOrEmpty(cols.Item3)) pho = itemRow[cols.Item3]?.ToString() ?? "";
+                                            if (!string.IsNullOrEmpty(cols.Item4)) rem = itemRow[cols.Item4]?.ToString() ?? "";
+                                            else if (dtSurveyItems.Columns.Contains("Remarks")) rem = itemRow["Remarks"]?.ToString() ?? "";
+                                        }
+                                    }
+                                    
+                                    if (exQty > 0 || reqQty > 0 || !string.IsNullOrEmpty(pho) || !string.IsNullOrEmpty(rem))
+                                    {
+                                        hasData = true;
+                                        deviceData[deviceType] = (exQty, reqQty, pho, rem);
+                                        if (exQty > 0) { existingTotals[deviceType] += exQty; devColVis[deviceType][0] = true; }
+                                        if (reqQty > 0) { requiredTotals[deviceType] += reqQty; devColVis[deviceType][1] = true; }
+                                        if (!string.IsNullOrEmpty(pho)) devColVis[deviceType][2] = true;
+                                        if (!string.IsNullOrEmpty(rem)) devColVis[deviceType][3] = true;
+                                    }
+                                }
+                            }
+                            if (hasData) { locationDataList.Add((slNo, locName, locType, coords, deviceData)); slNo++; }
                         }
 
-                        // borders and highlight totals
-                        applyBorder(row1, 1, r - 1, Math.Max(itemsCols, remarksCol), Color.Black);
-                        ws.Cells[dataStart, totalStartCol, r - 1, totalStartCol].Style.Fill.PatternType = ExcelFillStyle.Solid;
-                        ws.Cells[dataStart, totalStartCol, r - 1, totalStartCol].Style.Fill.BackgroundColor.SetColor(totalExBg);
+                        // Force hide Images column for Excel Export (as per requirement)
+                        // "In the Excel report, the Image column must not be included"
+                        foreach (var key in devColVis.Keys.ToList())
+                        {
+                            devColVis[key][2] = false;
+                        }
+                        
+                        // STEP 3: Filter visible items
+                        // STEP 3: Filter visible items
+                        var rawVisibleTypes = allDeviceTypes.Where(dt => devColVis[dt].Any(v => v)).ToHashSet();
+                        var filteredCategories = new Dictionary<string, List<string>>();
+                        foreach (var cat in deviceCategories)
+                        {
+                            var vItems = cat.Value.Where(i => rawVisibleTypes.Contains(i)).ToList();
+                            if (vItems.Any()) filteredCategories[cat.Key] = vItems;
+                        }
 
-                        ws.Cells[dataStart, totalEndCol, r - 1, totalEndCol].Style.Fill.PatternType = ExcelFillStyle.Solid;
-                        ws.Cells[dataStart, totalEndCol, r - 1, totalEndCol].Style.Fill.BackgroundColor.SetColor(totalReqBg);
+                        // CRITICAL: Ensure visibleDeviceTypes follows the exact order of filteredCategories keys and values
+                        // This prevents header mismatch where Category Header spans over wrong devices
+                        var visibleDeviceTypes = filteredCategories.SelectMany(c => c.Value).ToList();
+                        
+                        if (visibleDeviceTypes.Any() && locationDataList.Any())
+                        {
+                            Color greenHeader = Color.FromArgb(112, 173, 71); 
+                            Color blueHeader = Color.FromArgb(91, 155, 213);
+                            Color yellowHeader = Color.FromArgb(255, 192, 0);
+                            Color yellowLight = Color.FromArgb(255, 235, 156);
+                            Color blueSubHeader = Color.FromArgb(47, 117, 181);
+                            Color existingBg = Color.FromArgb(255, 249, 230);
+                            Color requiredBg = Color.FromArgb(198, 239, 206);
+                            Color remarksBg = Color.FromArgb(255, 242, 204);
+                            Color rowBg = Color.FromArgb(226, 239, 218);
+                            Color coordBg = Color.FromArgb(221, 235, 247);
+                            Color totalOrangeBg = Color.FromArgb(244, 176, 132);
+                            Color totalGreenBg = Color.FromArgb(146, 208, 80);
+                            
+                            // Title row
+                            int reqTitleRow = row;
+                            int totalCols = 5 + visibleDeviceTypes.Sum(dt => devColVis[dt].Count(v => v));
+                            var reqTitle = ws.Cells[reqTitleRow, 1, reqTitleRow, totalCols];
+                            reqTitle.Merge = true; reqTitle.Value = "Requirement Summary"; reqTitle.Style.Font.Bold = true; reqTitle.Style.Font.Size = 12;
+                            reqTitle.Style.Fill.PatternType = ExcelFillStyle.Solid; reqTitle.Style.Fill.BackgroundColor.SetColor(greenHeader);
+                            reqTitle.Style.Font.Color.SetColor(Color.White);
+                            row++;
+                            
+                            int row1 = row; int row2 = row + 1; int row3 = row + 2;
+                            ws.Cells[row1, 1, row3, 1].Merge = true; ws.Cells[row1, 1].Value = "SL.No";
+                            ws.Cells[row1, 1].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row1, 1].Style.Fill.BackgroundColor.SetColor(greenHeader);
+                            ws.Cells[row1, 1].Style.Font.Color.SetColor(Color.White);
+                            
+                            ws.Cells[row1, 2, row3, 2].Merge = true; ws.Cells[row1, 2].Value = "Location Name";
+                            ws.Cells[row1, 2].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row1, 2].Style.Fill.BackgroundColor.SetColor(greenHeader);
+                            ws.Cells[row1, 2].Style.Font.Color.SetColor(Color.White);
+                            
+                            ws.Cells[row1, 3, row2, 5].Merge = true; ws.Cells[row1, 3].Value = "Geo coordinates";
+                            ws.Cells[row1, 3].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row1, 3].Style.Fill.BackgroundColor.SetColor(blueHeader);
+                            ws.Cells[row1, 3].Style.Font.Color.SetColor(Color.White);
+                            
+                            ws.Cells[row3, 3].Value = "Latitude"; ws.Cells[row3, 4].Value = "Longitude"; ws.Cells[row3, 5].Value = "Link";
+                            using (var rng = ws.Cells[row3, 3, row3, 5]) { rng.Style.Fill.PatternType = ExcelFillStyle.Solid; rng.Style.Fill.BackgroundColor.SetColor(blueSubHeader); rng.Style.Font.Color.SetColor(Color.White); rng.Style.Font.Size = 9; }
+                            
+                            // Category headers
+                            int col = 6;
+                            foreach (var cat in filteredCategories)
+                            {
+                                int catColspan = cat.Value.Sum(dt => devColVis[dt].Count(v => v));
+                                ws.Cells[row1, col, row1, col + catColspan - 1].Merge = true; ws.Cells[row1, col].Value = cat.Key;
+                                ws.Cells[row1, col].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row1, col].Style.Fill.BackgroundColor.SetColor(yellowHeader);
+                                col += catColspan;
+                            }
+                            
+                            // Device type headers
+                            col = 6;
+                            foreach (var dt in visibleDeviceTypes)
+                            {
+                                int devColspan = devColVis[dt].Count(v => v);
+                                ws.Cells[row2, col, row2, col + devColspan - 1].Merge = true; 
+                                // Split composite key (Category||Item) for display
+                                ws.Cells[row2, col].Value = dt.Contains("||") ? dt.Split(new[] { "||" }, StringSplitOptions.None).Last() : dt;
+                                ws.Cells[row2, col].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row2, col].Style.Fill.BackgroundColor.SetColor(yellowLight);
+                                col += devColspan;
+                            }
+                            
+                            // Sub-headers
+                            col = 6;
+                            foreach (var dt in visibleDeviceTypes)
+                            {
+                                var vis = devColVis[dt];
+                                if (vis[0]) { ws.Cells[row3, col].Value = "Existing"; ws.Cells[row3, col].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row3, col].Style.Fill.BackgroundColor.SetColor(existingBg); col++; }
+                                if (vis[1]) { ws.Cells[row3, col].Value = "Required"; ws.Cells[row3, col].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row3, col].Style.Fill.BackgroundColor.SetColor(requiredBg); col++; }
+                                if (vis[2]) { ws.Cells[row3, col].Value = "Images"; ws.Cells[row3, col].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row3, col].Style.Fill.BackgroundColor.SetColor(remarksBg); col++; }
+                                if (vis[3]) { ws.Cells[row3, col].Value = "Remarks"; ws.Cells[row3, col].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row3, col].Style.Fill.BackgroundColor.SetColor(remarksBg); col++; }
+                            }
+                            
+                            using (var hdr = ws.Cells[row1, 1, row3, totalCols]) { hdr.Style.Font.Bold = true; hdr.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center; hdr.Style.VerticalAlignment = ExcelVerticalAlignment.Center; hdr.Style.Font.Size = 9; }
+                            row = row3 + 1;
+                            
+                            // Data rows
+                            foreach (var loc in locationDataList)
+                            {
+                                var parts = (loc.Item4 ?? "").Split(','); string lat = parts.Length > 0 ? parts[0].Trim() : ""; string lng = parts.Length > 1 ? parts[1].Trim() : "";
+                                string link = (!string.IsNullOrEmpty(lat) && !string.IsNullOrEmpty(lng)) ? $"https://www.google.com/maps?q={lat},{lng}" : "";
+                                
+                                ws.Cells[row, 1].Value = loc.Item1; ws.Cells[row, 1].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row, 1].Style.Fill.BackgroundColor.SetColor(rowBg);
+                                ws.Cells[row, 2].Value = string.IsNullOrEmpty(loc.Item3) ? loc.Item2 : $"{loc.Item2} ({loc.Item3})";
+                                ws.Cells[row, 2].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row, 2].Style.Fill.BackgroundColor.SetColor(rowBg);
+                                ws.Cells[row, 3].Value = lat; ws.Cells[row, 4].Value = lng; ws.Cells[row, 5].Value = !string.IsNullOrEmpty(link) ? "maps.google.com/" : "";
+                                if (!string.IsNullOrEmpty(link)) { ws.Cells[row, 5].Hyperlink = new Uri(link); ws.Cells[row, 5].Style.Font.Color.SetColor(Color.Blue); ws.Cells[row, 5].Style.Font.UnderLine = true; }
+                                using (var rng = ws.Cells[row, 3, row, 5]) { rng.Style.Fill.PatternType = ExcelFillStyle.Solid; rng.Style.Fill.BackgroundColor.SetColor(coordBg); rng.Style.Font.Size = 9; }
+                                
+                                int dCol = 6;
+                                foreach (var dt in visibleDeviceTypes)
+                                {
+                                    var vis = devColVis[dt];
+                                    var data = loc.Item5.ContainsKey(dt) ? loc.Item5[dt] : (0, 0, "", "");
+                                    string uomSuffix = (deviceUOMs.ContainsKey(dt) && deviceUOMs[dt].Equals("MTR", StringComparison.OrdinalIgnoreCase)) ? " mtr" : "";
+                                    
+                                    if (vis[0]) { if (data.Item1 > 0) { ws.Cells[row, dCol].Value = data.Item1 > 0 ? $"{data.Item1}{uomSuffix}" : (object)data.Item1; ws.Cells[row, dCol].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row, dCol].Style.Fill.BackgroundColor.SetColor(existingBg); ws.Cells[row, dCol].Style.Font.Size = 9; } dCol++; }
+                                    if (vis[1]) { if (data.Item2 > 0) { ws.Cells[row, dCol].Value = data.Item2 > 0 ? $"{data.Item2}{uomSuffix}" : (object)data.Item2; ws.Cells[row, dCol].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row, dCol].Style.Fill.BackgroundColor.SetColor(requiredBg); ws.Cells[row, dCol].Style.Font.Bold = true; ws.Cells[row, dCol].Style.Font.Size = 9; } dCol++; }
+                                    if (vis[2]) { if (!string.IsNullOrEmpty(data.Item3)) { ws.Cells[row, dCol].Value = "View Photos"; ws.Cells[row, dCol].Style.Font.Color.SetColor(Color.Blue); ws.Cells[row, dCol].Style.Font.UnderLine = true; } dCol++; }
+                                    if (vis[3]) { ws.Cells[row, dCol].Value = data.Item4; ws.Cells[row, dCol].Style.Font.Size = 8; dCol++; }
+                                }
+                                row++;
+                            }
+                            
+                            // Total row
+                            int totRow = row;
+                            ws.Cells[totRow, 1, totRow, 2].Merge = true; ws.Cells[totRow, 1].Value = "TOTAL"; ws.Cells[totRow, 1].Style.Font.Bold = true;
+                            ws.Cells[totRow, 1].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[totRow, 1].Style.Fill.BackgroundColor.SetColor(totalOrangeBg);
+                            using (var rng = ws.Cells[totRow, 3, totRow, 5]) { rng.Style.Fill.PatternType = ExcelFillStyle.Solid; rng.Style.Fill.BackgroundColor.SetColor(totalOrangeBg); }
+                            
+                            col = 6;
+                            foreach (var dt in visibleDeviceTypes)
+                            {
+                                var vis = devColVis[dt];
+                                string uomSuffix = (deviceUOMs.ContainsKey(dt) && deviceUOMs[dt].Equals("MTR", StringComparison.OrdinalIgnoreCase)) ? " mtr" : "";
+                                
+                                if (vis[0]) { ws.Cells[totRow, col].Value = existingTotals[dt] > 0 ? $"{existingTotals[dt]}{uomSuffix}" : (object)"0"; ws.Cells[totRow, col].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[totRow, col].Style.Fill.BackgroundColor.SetColor(totalOrangeBg); ws.Cells[totRow, col].Style.Font.Bold = true; col++; }
+                                if (vis[1]) { ws.Cells[totRow, col].Value = requiredTotals[dt] > 0 ? $"{requiredTotals[dt]}{uomSuffix}" : (object)"0"; ws.Cells[totRow, col].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[totRow, col].Style.Fill.BackgroundColor.SetColor(totalGreenBg); ws.Cells[totRow, col].Style.Font.Bold = true; col++; }
+                                if (vis[2]) { ws.Cells[totRow, col].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[totRow, col].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(252, 228, 214)); col++; }
+                                if (vis[3]) { ws.Cells[totRow, col].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[totRow, col].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(252, 228, 214)); col++; }
+                            }
+                            
+                            applyBorder(reqTitleRow, 1, totRow, totalCols, Color.Black);
+                            row = totRow + 2;
+                        }
+                    }
 
-                        // Move row pointer after items block
-                        row = r + 2;
-
-                        // ---------- Camera Installation Remarks ----------
+                    // ---------- Camera Installation Remarks ----------
+                    if (dtSurveyRemarks != null && dtSurveyRemarks.Rows.Count > 0)
+                    {
                         int remarksTitleRow = row;
-                        var titleRange1 = ws.Cells[remarksTitleRow, 1, remarksTitleRow, Math.Max(itemsCols, 6)];
+                        int remarksCols = 8; // Fixed column count for remarks section
+                        var titleRange1 = ws.Cells[remarksTitleRow, 1, remarksTitleRow, remarksCols];
                         titleRange1.Merge = true;
                         titleRange1.Value = "Camera Installation Remarks";
                         titleRange1.Style.Font.Bold = true;
@@ -1199,9 +1730,9 @@ namespace SurveyApp.Controllers
                         ws.Cells[row, 2].Value = "Item Code";
                         ws.Cells[row, 3].Value = "Items";
                         ws.Cells[row, 4].Value = "Remarks";
-                        ws.Cells[row, 4, row, Math.Max(6, itemsCols)].Merge = true;
+                        ws.Cells[row, 4, row, remarksCols].Merge = true;
 
-                        using (var rng = ws.Cells[row, 1, row, Math.Max(6, itemsCols)])
+                        using (var rng = ws.Cells[row, 1, row, remarksCols])
                         {
                             rng.Style.Font.Bold = true;
                             rng.Style.Fill.PatternType = ExcelFillStyle.Solid;
@@ -1212,35 +1743,33 @@ namespace SurveyApp.Controllers
                         // populate remarks (with merging of same locations)
                         int startMergeRow = row;
                         string prevLoc = null;
-                        if (dtSurveyRemarks != null && dtSurveyRemarks.Rows.Count > 0)
+                        
+                        for (int i = 0; i < dtSurveyRemarks.Rows.Count; i++)
                         {
-                            for (int i = 0; i < dtSurveyRemarks.Rows.Count; i++)
+                            var dr = dtSurveyRemarks.Rows[i];
+                            string currentLoc = dr["LocName"]?.ToString() ?? string.Empty;
+
+                            ws.Cells[row, 1].Value = currentLoc;
+                            ws.Cells[row, 2].Value = dr["ItemID"]?.ToString() ?? string.Empty;
+                            ws.Cells[row, 3].Value = dr["Cameras"]?.ToString() ?? string.Empty;
+                            ws.Cells[row, 4].Value = dr["Remarks"]?.ToString() ?? string.Empty;
+                            ws.Cells[row, 4, row, remarksCols].Merge = true;
+
+                            if (prevLoc != null && prevLoc != currentLoc)
                             {
-                                var dr = dtSurveyRemarks.Rows[i];
-                                string currentLoc = dr["LocName"]?.ToString() ?? string.Empty;
-
-                                ws.Cells[row, 1].Value = currentLoc;
-                                ws.Cells[row, 2].Value = dr["ItemID"]?.ToString() ?? string.Empty;
-                                ws.Cells[row, 3].Value = dr["Cameras"]?.ToString() ?? string.Empty;
-                                ws.Cells[row, 4].Value = dr["Remarks"]?.ToString() ?? string.Empty;
-                                ws.Cells[row, 4, row, Math.Max(6, itemsCols)].Merge = true;
-
-                                if (prevLoc != null && prevLoc != currentLoc)
-                                {
-                                    if (row - 1 > startMergeRow)
-                                        ws.Cells[startMergeRow, 1, row - 1, 1].Merge = true;
-                                    startMergeRow = row;
-                                }
-
-                                prevLoc = currentLoc;
-                                row++;
+                                if (row - 1 > startMergeRow)
+                                    ws.Cells[startMergeRow, 1, row - 1, 1].Merge = true;
+                                startMergeRow = row;
                             }
 
-                            if (row - 1 > startMergeRow)
-                                ws.Cells[startMergeRow, 1, row - 1, 1].Merge = true;
+                            prevLoc = currentLoc;
+                            row++;
                         }
 
-                        applyBorder(remarksTitleRow, 1, row - 1, Math.Max(6, itemsCols), Color.Black);
+                        if (row - 1 > startMergeRow)
+                            ws.Cells[startMergeRow, 1, row - 1, 1].Merge = true;
+
+                        applyBorder(remarksTitleRow, 1, row - 1, remarksCols, Color.Black);
                     }
 
                     // Autosize and small polish
@@ -1273,6 +1802,7 @@ namespace SurveyApp.Controllers
     {
         public string LocationName { get; set; } = string.Empty;
         public string ItemCode { get; set; } = string.Empty;
+        public string ItemName { get; set; } = string.Empty;
         public string ImageUrls { get; set; } = string.Empty;
     }
 }

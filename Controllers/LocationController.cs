@@ -51,6 +51,26 @@ namespace SurveyApp.Controllers
             }
         }
 
+        [HttpGet("cities-by-name")]
+        public async Task<IActionResult> GetCitiesByStateName([FromQuery] string stateName)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(stateName))
+                {
+                    return BadRequest(new { message = "State name is required" });
+                }
+
+                var cities = await _locationService.GetCitiesByStateNameAsync(stateName);
+                return Ok(cities);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching cities for state '{StateName}'", stateName);
+                return StatusCode(500, new { message = "Error fetching cities", error = ex.Message });
+            }
+        }
+
         [HttpGet("state/{stateId}/name")]
         public async Task<IActionResult> GetStateName(int stateId)
         {

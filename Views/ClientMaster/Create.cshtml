@@ -148,7 +148,7 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Serialize states data for JavaScript
+        // Serialize states data for JavaScript (for reference if needed)
         var statesData = @Html.Raw(Json.Serialize(ViewBag.States ?? new List<SurveyApp.Models.StateModel>()));
         
         $(document).ready(function () {
@@ -161,15 +161,14 @@
                 citySelect.empty().append('<option value="">-- Loading Cities --</option>');
 
                 if (stateName) {
-                    // Find the state ID from the states data
-                    var selectedState = statesData.find(s => s.name === stateName);
-                    
-                    if (selectedState && selectedState.id) {
-                        $.ajax({
-                            url: '/api/Location/cities/' + selectedState.id,
-                            type: 'GET',
-                            success: function (cities) {
-                                citySelect.empty().append('<option value="">-- Select City --</option>');
+                    // Use the new endpoint that accepts state name directly
+                    $.ajax({
+                        url: '/api/Location/cities-by-name',
+                        type: 'GET',
+                        data: { stateName: stateName },
+                        success: function (cities) {
+                            citySelect.empty().append('<option value="">-- Select City --</option>');
+                            if (cities && cities.length > 0) {
                                 $.each(cities, function (index, city) {
                                     var option = $('<option></option>')
                                         .val(city.name)
@@ -177,13 +176,15 @@
                                         .attr('data-city-id', city.id);
                                     citySelect.append(option);
                                 });
-                            },
-                            error: function () {
-                                citySelect.empty().append('<option value="">-- Error loading cities --</option>');
-                                alert('Error loading cities. Please try again.');
+                            } else {
+                                citySelect.empty().append('<option value="">-- No cities found --</option>');
                             }
-                        });
-                    }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error loading cities:', error);
+                            citySelect.empty().append('<option value="">-- Error loading cities --</option>');
+                        }
+                    });
                 } else {
                     citySelect.empty().append('<option value="">-- Select City --</option>');
                 }

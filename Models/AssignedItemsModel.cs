@@ -10,6 +10,7 @@ namespace SurveyApp.Models
 
         public string SurveyName { get; set; } = string.Empty;
         public int LocID { get; set; }
+        public string LocName { get; set; } = string.Empty;
         public int? CreatedBy { get; set; }
 
         public List<AssignedItemsListModel> AssignItemList { get; set; } = new List<AssignedItemsListModel>();

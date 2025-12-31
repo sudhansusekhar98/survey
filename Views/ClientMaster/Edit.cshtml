@@ -158,9 +158,9 @@
             var citySelect = $('#citySelect');
             var savedCity = '@Model.City'; // Store the saved city value
 
-            // Function to load cities for a given state
-            function loadCities(stateId, selectCity) {
-                if (!stateId) {
+            // Function to load cities for a given state name
+            function loadCities(stateName, selectCity) {
+                if (!stateName) {
                     citySelect.empty().append('<option value="">-- Select City --</option>');
                     return;
                 }
@@ -168,42 +168,46 @@
                 citySelect.empty().append('<option value="">-- Loading Cities --</option>');
 
                 $.ajax({
-                    url: '/api/Location/cities/' + stateId,
+                    url: '/api/Location/cities-by-name',
                     type: 'GET',
+                    data: { stateName: stateName },
                     success: function (cities) {
                         citySelect.empty().append('<option value="">-- Select City --</option>');
-                        $.each(cities, function (index, city) {
-                            var option = $('<option></option>')
-                                .val(city.name)
-                                .text(city.name)
-                                .attr('data-id', city.id);
-                            
-                            // Pre-select if this is the saved city
-                            if (selectCity && city.name === selectCity) {
-                                option.attr('selected', 'selected');
-                            }
-                            
-                            citySelect.append(option);
-                        });
+                        if (cities && cities.length > 0) {
+                            $.each(cities, function (index, city) {
+                                var option = $('<option></option>')
+                                    .val(city.name)
+                                    .text(city.name)
+                                    .attr('data-id', city.id);
+                                
+                                // Pre-select if this is the saved city
+                                if (selectCity && city.name === selectCity) {
+                                    option.attr('selected', 'selected');
+                                }
+                                
+                                citySelect.append(option);
+                            });
+                        } else {
+                            citySelect.empty().append('<option value="">-- No cities found --</option>');
+                        }
                     },
-                    error: function () {
+                    error: function (xhr, status, error) {
+                        console.error('Error loading cities:', error);
                         citySelect.empty().append('<option value="">-- Error loading cities --</option>');
-                        alert('Error loading cities. Please try again.');
                     }
                 });
             }
 
             // Load cities on page load if state is already selected
-            var selectedStateId = stateSelect.find('option:selected').data('id');
-            if (selectedStateId && savedCity) {
-                loadCities(selectedStateId, savedCity);
+            var selectedStateName = stateSelect.val();
+            if (selectedStateName && savedCity) {
+                loadCities(selectedStateName, savedCity);
             }
 
             // Load cities when state is changed
             stateSelect.on('change', function () {
-                var selectedOption = $(this).find('option:selected');
-                var stateId = selectedOption.data('id');
-                loadCities(stateId, null); // Don't pre-select when changing state
+                var stateName = $(this).val();
+                loadCities(stateName, null); // Don't pre-select when changing state
             });
         });
     </script>

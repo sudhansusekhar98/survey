@@ -1374,6 +1374,7 @@ D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\SurveyApp.dll
 D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\SurveyApp.pdb
 D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\Azure.Core.dll
 D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\Azure.Identity.dll
+D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\BCrypt.Net-Next.dll
 D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\CloudinaryDotNet.dll
 D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\EPPlus.dll
 D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\EPPlus.Interfaces.dll
@@ -1687,5 +1688,3 @@ D:\VL Access\Survey\CODES\Survey\survey\obj\Debug\net8.0\refint\SurveyApp.dll
 D:\VL Access\Survey\CODES\Survey\survey\obj\Debug\net8.0\SurveyApp.pdb
 D:\VL Access\Survey\CODES\Survey\survey\obj\Debug\net8.0\SurveyApp.genruntimeconfig.cache
 D:\VL Access\Survey\CODES\Survey\survey\obj\Debug\net8.0\ref\SurveyApp.dll
-D:\VL Access\Survey\CODES\Survey\survey\bin\Debug\net8.0\BCrypt.Net-Next.dll
-D:\VL Access\Survey\CODES\Survey\survey\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

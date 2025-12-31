@@ -1115,6 +1115,7 @@ namespace SurveyApp.Controllers
                 ViewBag.LocId = locId; // Pass locId to the view if needed
                 ViewBag.SelectedSurveyId = surveyId;
                 ViewBag.SelectedSurveyName = SurveyName;
+                ViewBag.LocName = _surveyRepository.GetSurveyLocationByLocId(locId)?.LocName;
                 return View("ItemTypeMaster", itemTypes);
             }
             catch (Exception ex)
@@ -1149,6 +1150,7 @@ namespace SurveyApp.Controllers
                 ViewBag.LocId = locId;
                 ViewBag.SelectedSurveyId = surveyId;
                 ViewBag.SelectedSurveyName = SurveyName;
+                ViewBag.LocName = _surveyRepository.GetSurveyLocationByLocId(locId)?.LocName;
                 ViewBag.IsGlobalLocation = true;
                 return View("ItemTypeMaster", formModel);
             }
@@ -1178,9 +1180,12 @@ namespace SurveyApp.Controllers
             {
                 SurveyId = surveyId,
                 LocID = locId,
-
                 AssignItemList = _surveyRepository.GetItemTypebySurveyLoc(locId, surveyId) ?? new List<AssignedItemsListModel>()
             };
+            
+            // Set location name for display
+            ViewBag.LocName = _surveyRepository.GetSurveyLocationByLocId(locId)?.LocName;
+            
             return View("ItemTypeMaster", formModel);
         }
 
