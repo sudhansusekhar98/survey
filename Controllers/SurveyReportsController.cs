@@ -846,6 +846,84 @@ namespace SurveyApp.Controllers
                     System.Diagnostics.Debug.WriteLine($"Error fetching remarks from SurveyDetails: {ex.Message}");
                 }
 
+                // 3. SPECIFICATIONS - Fetch from SpecificationDetailsMaster
+                // Map: LocationName -> Dictionary<ItemName, JoinedSpecifications>
+                var specificationsLookup = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+                
+                System.Diagnostics.Debug.WriteLine("Fetching specifications from SpecificationDetailsMaster table...");
+
+                try
+                {
+                    using var con = new SqlConnection(DBConnection.ConnectionString);
+                    // Query to get specifications with their names
+                    string specificationsQuery = @"
+                        SELECT 
+                            LTRIM(RTRIM(sl.LocName)) as LocationName,
+                            im.ItemName,
+                            ism.SpecificationName,
+                            sd.SpecificationDetails,
+                            sd.InstanceNumber
+                        FROM SpecificationDetailsMaster sd
+                        INNER JOIN SurveyLocation sl ON sd.LocID = sl.LocID AND sd.SurveyID = sl.SurveyID
+                        LEFT JOIN ItemMaster im ON sd.ItemID = im.ItemID
+                        LEFT JOIN ItemSpecificationMaster ism ON sd.ItemID = ism.ItemId AND sd.SpecificationID = ism.SpecificationID
+                        WHERE sd.SurveyID = @SurveyID
+                            AND sd.SpecificationDetails IS NOT NULL 
+                            AND sd.SpecificationDetails != ''
+                            AND LEN(LTRIM(RTRIM(sd.SpecificationDetails))) > 0
+                        ORDER BY sd.LocID, sd.ItemID, sd.SpecificationID, sd.InstanceNumber";
+
+                    using var cmd = new SqlCommand(specificationsQuery, con);
+                    cmd.Parameters.AddWithValue("@SurveyID", surveyId);
+
+                    con.Open();
+                    using var reader = cmd.ExecuteReader();
+
+                    int specificationsCount = 0;
+                    while (reader.Read())
+                    {
+                        string loc = reader["LocationName"]?.ToString()?.Trim() ?? "";
+                        string itemName = reader["ItemName"]?.ToString()?.Trim() ?? "";
+                        string specName = reader["SpecificationName"]?.ToString()?.Trim() ?? "";
+                        string specDetails = reader["SpecificationDetails"]?.ToString()?.Trim() ?? "";
+                        int instanceNum = reader["InstanceNumber"] != DBNull.Value ? Convert.ToInt32(reader["InstanceNumber"]) : 1;
+
+                        System.Diagnostics.Debug.WriteLine($"Spec from DB: Loc='{loc}', Item='{itemName}', Spec='{specName}', Value='{specDetails}', Instance={instanceNum}");
+
+                        if (!string.IsNullOrEmpty(loc) && !string.IsNullOrEmpty(itemName) && !string.IsNullOrEmpty(specDetails))
+                        {
+                            if (!specificationsLookup.ContainsKey(loc))
+                                specificationsLookup[loc] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+                            // Format: "SpecName: Value" or just "Value" if no spec name
+                            string formattedSpec = !string.IsNullOrEmpty(specName) 
+                                ? $"{specName}: {specDetails}" 
+                                : specDetails;
+
+                            if (specificationsLookup[loc].ContainsKey(itemName))
+                                specificationsLookup[loc][itemName] += "; " + formattedSpec;
+                            else
+                                specificationsLookup[loc][itemName] = formattedSpec;
+
+                            specificationsCount++;
+                        }
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"Built specifications lookup with {specificationsCount} entries from SpecificationDetailsMaster across {specificationsLookup.Count} locations");
+
+                    // Add specification columns for each location
+                    foreach (var locationName in locationColumns)
+                    {
+                        string specColumnName = $"{locationName}Specification";
+                        if (!dtItems.Columns.Contains(specColumnName))
+                            dtItems.Columns.Add(specColumnName, typeof(string));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error fetching specifications from SpecificationDetailsMaster: {ex.Message}");
+                }
+
                 // Determine the identifiers
                 string itemCodeColumnName = dtItems.Columns.Contains("Item Code") ? "Item Code"
                     : dtItems.Columns.Contains("ItemCode") ? "ItemCode"
@@ -923,6 +1001,28 @@ namespace SurveyApp.Controllers
                         if (!string.IsNullOrEmpty(remarkVal))
                         {
                             System.Diagnostics.Debug.WriteLine($"Populated remark for {locationName} / {itemName}: {remarkVal}");
+                        }
+
+                        // 3. POPULATE SPECIFICATIONS (From Lookup)
+                        string specificationColumnName = $"{locationName}Specification";
+                        string specificationVal = "";
+                        
+                        if (specificationsLookup.ContainsKey(locationName))
+                        {
+                            var locSpec = specificationsLookup[locationName];
+                            // Match by Name
+                            if (!string.IsNullOrEmpty(itemName) && locSpec.ContainsKey(itemName))
+                                specificationVal = locSpec[itemName];
+                            // Fallback: Match by Code
+                            else if (!string.IsNullOrEmpty(itemCode) && locSpec.ContainsKey(itemCode))
+                                 specificationVal = locSpec[itemCode];
+                        }
+                        
+                        row[specificationColumnName] = specificationVal;
+                        
+                        if (!string.IsNullOrEmpty(specificationVal))
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Populated specification for {locationName} / {itemName}: {specificationVal}");
                         }
                     }
                 }
@@ -1454,7 +1554,7 @@ namespace SurveyApp.Controllers
                         // STEP 1: Extract device categories and types
                         var deviceCategories = new Dictionary<string, List<string>>();
                         var allDeviceTypes = new List<string>();
-                        // Visibility: [0]=Ex, [1]=Req, [2]=Img, [3]=Rem
+                        // Visibility: [0]=Ex, [1]=Req, [2]=Img, [3]=Rem, [4]=Spec
                         var devColVis = new Dictionary<string, bool[]>();
                         var deviceUOMs = new Dictionary<string, string>();
                         
@@ -1471,7 +1571,7 @@ namespace SurveyApp.Controllers
                                 if (!allDeviceTypes.Contains(compositeKey))
                                 {
                                     allDeviceTypes.Add(compositeKey);
-                                    devColVis[compositeKey] = new bool[] { false, false, false, false };
+                                    devColVis[compositeKey] = new bool[] { false, false, false, false, false };
                                 }
                                 
                                 if (!deviceUOMs.ContainsKey(compositeKey))
@@ -1494,7 +1594,7 @@ namespace SurveyApp.Controllers
                         
                         // Find location columns
                         var allColumns = dtSurveyItems.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToList();
-                        var locationColumnPairs = new Dictionary<string, (string, string, string, string)>(StringComparer.OrdinalIgnoreCase);
+                        var locationColumnPairs = new Dictionary<string, (string, string, string, string, string)>(StringComparer.OrdinalIgnoreCase); // Ex, Req, Pho, Rem, Spec
                         foreach (var col in allColumns)
                         {
                             if (col.EndsWith("Existing"))
@@ -1506,7 +1606,8 @@ namespace SurveyApp.Controllers
                                     string pCol = allColumns.FirstOrDefault(c => c.Equals(locName + "Photo", StringComparison.OrdinalIgnoreCase)) ?? 
                                                   allColumns.FirstOrDefault(c => c.Equals(locName + "Photos", StringComparison.OrdinalIgnoreCase)) ?? "";
                                     string remCol = allColumns.FirstOrDefault(c => c.Equals(locName + "Remarks", StringComparison.OrdinalIgnoreCase)) ?? "";
-                                    locationColumnPairs[locName] = (col, rCol, pCol, remCol);
+                                    string specCol = allColumns.FirstOrDefault(c => c.Equals(locName + "Specification", StringComparison.OrdinalIgnoreCase)) ?? "";
+                                    locationColumnPairs[locName] = (col, rCol, pCol, remCol, specCol);
                                 }
                             }
                         }
@@ -1514,7 +1615,7 @@ namespace SurveyApp.Controllers
                         // STEP 2: Calculate totals and build location data
                         var existingTotals = allDeviceTypes.ToDictionary(dt => dt, dt => 0);
                         var requiredTotals = allDeviceTypes.ToDictionary(dt => dt, dt => 0);
-                        var locationDataList = new List<(int, string, string, string, Dictionary<string, (int, int, string, string)>)>();
+                        var locationDataList = new List<(int, string, string, string, Dictionary<string, (int, int, string, string, string)>)>(); // slNo, locName, locType, coords, deviceData
                         
                         int slNo = 1;
                         foreach (DataRow locRow in dtSurveyLocEmp.Rows)
@@ -1523,7 +1624,7 @@ namespace SurveyApp.Controllers
                             string locType = locRow["LocationType"]?.ToString()?.Trim() ?? "";
                             string coords = locRow["Cordinate"]?.ToString()?.Trim() ?? "";
                             
-                            var deviceData = new Dictionary<string, (int, int, string, string)>();
+                            var deviceData = new Dictionary<string, (int, int, string, string, string)>(); // exQty, reqQty, pho, rem, spec
                             bool hasData = false;
                             
                             string mLoc = locationColumnPairs.Keys.FirstOrDefault(l => l.Trim().Equals(locName, StringComparison.OrdinalIgnoreCase)) ?? "";
@@ -1532,7 +1633,7 @@ namespace SurveyApp.Controllers
                                 var cols = locationColumnPairs[mLoc];
                                 foreach (var deviceType in allDeviceTypes)
                                 {
-                                    int exQty = 0; int reqQty = 0; string pho = ""; string rem = "";
+                                    int exQty = 0; int reqQty = 0; string pho = ""; string rem = ""; string spec = "";
                                     foreach (DataRow itemRow in dtSurveyItems.Rows)
                                     {
                                         string rowType = itemRow[1]?.ToString()?.Trim() ?? "";
@@ -1546,17 +1647,19 @@ namespace SurveyApp.Controllers
                                             if (!string.IsNullOrEmpty(cols.Item3)) pho = itemRow[cols.Item3]?.ToString() ?? "";
                                             if (!string.IsNullOrEmpty(cols.Item4)) rem = itemRow[cols.Item4]?.ToString() ?? "";
                                             else if (dtSurveyItems.Columns.Contains("Remarks")) rem = itemRow["Remarks"]?.ToString() ?? "";
+                                            if (!string.IsNullOrEmpty(cols.Item5)) spec = itemRow[cols.Item5]?.ToString() ?? "";
                                         }
                                     }
                                     
-                                    if (exQty > 0 || reqQty > 0 || !string.IsNullOrEmpty(pho) || !string.IsNullOrEmpty(rem))
+                                    if (exQty > 0 || reqQty > 0 || !string.IsNullOrEmpty(pho) || !string.IsNullOrEmpty(rem) || !string.IsNullOrEmpty(spec))
                                     {
                                         hasData = true;
-                                        deviceData[deviceType] = (exQty, reqQty, pho, rem);
+                                        deviceData[deviceType] = (exQty, reqQty, pho, rem, spec);
                                         if (exQty > 0) { existingTotals[deviceType] += exQty; devColVis[deviceType][0] = true; }
                                         if (reqQty > 0) { requiredTotals[deviceType] += reqQty; devColVis[deviceType][1] = true; }
                                         if (!string.IsNullOrEmpty(pho)) devColVis[deviceType][2] = true;
                                         if (!string.IsNullOrEmpty(rem)) devColVis[deviceType][3] = true;
+                                        if (!string.IsNullOrEmpty(spec)) devColVis[deviceType][4] = true;
                                     }
                                 }
                             }
@@ -1655,6 +1758,7 @@ namespace SurveyApp.Controllers
                                 if (vis[1]) { ws.Cells[row3, col].Value = "Required"; ws.Cells[row3, col].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row3, col].Style.Fill.BackgroundColor.SetColor(requiredBg); col++; }
                                 if (vis[2]) { ws.Cells[row3, col].Value = "Images"; ws.Cells[row3, col].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row3, col].Style.Fill.BackgroundColor.SetColor(remarksBg); col++; }
                                 if (vis[3]) { ws.Cells[row3, col].Value = "Remarks"; ws.Cells[row3, col].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row3, col].Style.Fill.BackgroundColor.SetColor(remarksBg); col++; }
+                                if (vis[4]) { ws.Cells[row3, col].Value = "Specification"; ws.Cells[row3, col].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row3, col].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(231, 230, 255)); col++; }
                             }
                             
                             using (var hdr = ws.Cells[row1, 1, row3, totalCols]) { hdr.Style.Font.Bold = true; hdr.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center; hdr.Style.VerticalAlignment = ExcelVerticalAlignment.Center; hdr.Style.Font.Size = 9; }
@@ -1677,13 +1781,14 @@ namespace SurveyApp.Controllers
                                 foreach (var dt in visibleDeviceTypes)
                                 {
                                     var vis = devColVis[dt];
-                                    var data = loc.Item5.ContainsKey(dt) ? loc.Item5[dt] : (0, 0, "", "");
+                                    var data = loc.Item5.ContainsKey(dt) ? loc.Item5[dt] : (0, 0, "", "", "");
                                     string uomSuffix = (deviceUOMs.ContainsKey(dt) && deviceUOMs[dt].Equals("MTR", StringComparison.OrdinalIgnoreCase)) ? " mtr" : "";
                                     
                                     if (vis[0]) { if (data.Item1 > 0) { ws.Cells[row, dCol].Value = data.Item1 > 0 ? $"{data.Item1}{uomSuffix}" : (object)data.Item1; ws.Cells[row, dCol].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row, dCol].Style.Fill.BackgroundColor.SetColor(existingBg); ws.Cells[row, dCol].Style.Font.Size = 9; } dCol++; }
                                     if (vis[1]) { if (data.Item2 > 0) { ws.Cells[row, dCol].Value = data.Item2 > 0 ? $"{data.Item2}{uomSuffix}" : (object)data.Item2; ws.Cells[row, dCol].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[row, dCol].Style.Fill.BackgroundColor.SetColor(requiredBg); ws.Cells[row, dCol].Style.Font.Bold = true; ws.Cells[row, dCol].Style.Font.Size = 9; } dCol++; }
                                     if (vis[2]) { if (!string.IsNullOrEmpty(data.Item3)) { ws.Cells[row, dCol].Value = "View Photos"; ws.Cells[row, dCol].Style.Font.Color.SetColor(Color.Blue); ws.Cells[row, dCol].Style.Font.UnderLine = true; } dCol++; }
                                     if (vis[3]) { ws.Cells[row, dCol].Value = data.Item4; ws.Cells[row, dCol].Style.Font.Size = 8; dCol++; }
+                                    if (vis[4]) { ws.Cells[row, dCol].Value = data.Item5; ws.Cells[row, dCol].Style.Font.Size = 8; dCol++; }
                                 }
                                 row++;
                             }
@@ -1704,6 +1809,7 @@ namespace SurveyApp.Controllers
                                 if (vis[1]) { ws.Cells[totRow, col].Value = requiredTotals[dt] > 0 ? $"{requiredTotals[dt]}{uomSuffix}" : (object)"0"; ws.Cells[totRow, col].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[totRow, col].Style.Fill.BackgroundColor.SetColor(totalGreenBg); ws.Cells[totRow, col].Style.Font.Bold = true; col++; }
                                 if (vis[2]) { ws.Cells[totRow, col].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[totRow, col].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(252, 228, 214)); col++; }
                                 if (vis[3]) { ws.Cells[totRow, col].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[totRow, col].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(252, 228, 214)); col++; }
+                                if (vis[4]) { ws.Cells[totRow, col].Style.Fill.PatternType = ExcelFillStyle.Solid; ws.Cells[totRow, col].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(252, 228, 214)); col++; }
                             }
                             
                             applyBorder(reqTitleRow, 1, totRow, totalCols, Color.Black);
