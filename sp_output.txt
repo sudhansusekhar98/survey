@@ -1,0 +1,21 @@
+Item Code Type Item UOM Global LocationExisting Global LocationRequired Raja ChowkExisting Raja ChowkRequired Circuit House ChowkExisting Circuit House ChowkRequired College ChowkExisting College ChowkRequired Machha Market ChowkExisting Machha Market ChowkRequired In front of entrance to medical to O & G Dept.Existing In front of entrance to medical to O & G Dept.Required Tamrit ColonyExisting Tamrit ColonyRequired Caltax Chowk Existing Caltax Chowk Required High School ChowkExisting High School ChowkRequired Similipada ChowkExisting Similipada ChowkRequired Hospital ChowkExisting Hospital ChowkRequired Mausi Maa Temple Chowk Existing Mausi Maa Temple Chowk Required Panchamahala ChowkExisting Panchamahala ChowkRequired Rantalei Over Bridge StartingExisting Rantalei Over Bridge StartingRequired Kandasar ChowkExisting Kandasar ChowkRequired FCI ChowkExisting FCI ChowkRequired totalExisting totalRequired AllRemarks
+--------- ---- ---- --- ----------------------- ----------------------- ------------------ ------------------ --------------------------- --------------------------- --------------------- --------------------- --------------------------- --------------------------- ------------------------------------------------------ ------------------------------------------------------ --------------------- --------------------- --------------------- --------------------- ------------------------- ------------------------- ------------------------ ------------------------ ---------------------- ---------------------- ------------------------------- ------------------------------- -------------------------- -------------------------- ------------------------------------- ------------------------------------- ---------------------- ---------------------- ----------------- ----------------- ------------- ------------- ----------
+1000001 Camera Bullet Camera NOS 0 0 0 4 0 3 0 4 0 4 0 1 0 2 0 4 0 3 0 5 0 3 0 2 0 3 0 3 0 3 0 3 0 47 
+1000002 Camera PTZ Camera NOS 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 
+1000004 Camera ALPR Camera NOS 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 testing purpose, later to be deleted
+1000005 UPS Online UPS 1 KVA NOS 0 0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 15 
+1000016 Outdoor - Rack 9U NUM 0 0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 15 
+1000022 Transceiver Module LR 1 G NOS 0 0 0 2 0 2 0 2 0 2 0 2 0 2 0 2 0 4 0 4 0 4 0 2 0 1 0 2 0 2 0 2 0 35 
+1000032 Cable OFC 6 core MTR 0 0 0 200 0 650 0 830 0 200 0 130 0 840 0 0 0 0 0 0 0 0 0 50 0 1250 0 2700 0 4000 0 900 0 11750 
+1000035 Announcement Public Announcement outdoor NOS 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 
+1000037 Infrastructure Pole NOS 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1 
+1000038 Infrastructure Cantilever 1 Mtr NOS 0 0 0 2 0 2 0 2 0 2 0 2 0 1 0 2 0 2 0 2 0 2 0 0 0 2 0 2 0 2 0 2 0 27 
+1000042 POE Switch 8 Port coper with 4 SFP Port NOS 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 1 0 1 0 0 0 1 0 0 0 0 0 0 0 4 
+1000043 POE Switch 8 Port coper with 2 SFP Port NOS 0 0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 0 0 0 0 0 0 1 0 0 0 1 0 1 0 1 0 11 
+1000048 Patch Cord SC-LC NOS 0 0 0 2 0 2 0 2 0 2 0 2 0 2 0 1 0 4 0 4 0 4 0 2 0 4 0 2 0 1 0 2 0 36 
+1000052 Electrical 1.5 MM MTR 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 
+1000053 Electrical 16 Amp Single Pole MCB NOS 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 
+1001097 Infrastructure Pole 6.5 Mtr NOS 0 0 0 1 0 1 0 1 0 1 0 1 0 2 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 16 
+1001163 Infrastructure Pole Foundation NOS 0 0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 0 0 1 0 1 0 1 0 1 0 14 
+
+(17 rows affected)

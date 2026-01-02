@@ -1597,18 +1597,34 @@ namespace SurveyApp.Controllers
                         var locationColumnPairs = new Dictionary<string, (string, string, string, string, string)>(StringComparer.OrdinalIgnoreCase); // Ex, Req, Pho, Rem, Spec
                         foreach (var col in allColumns)
                         {
-                            if (col.EndsWith("Existing"))
+                            // Handle both "LocationExisting" and "Location Existing" patterns
+                            string locName = null;
+                            if (col.EndsWith("Existing", StringComparison.OrdinalIgnoreCase))
                             {
-                                var locName = col.Replace("Existing", "").Trim();
-                                if (!locationColumnPairs.ContainsKey(locName))
-                                {
-                                    string rCol = allColumns.FirstOrDefault(c => c.Equals(locName + "Required", StringComparison.OrdinalIgnoreCase)) ?? "";
-                                    string pCol = allColumns.FirstOrDefault(c => c.Equals(locName + "Photo", StringComparison.OrdinalIgnoreCase)) ?? 
-                                                  allColumns.FirstOrDefault(c => c.Equals(locName + "Photos", StringComparison.OrdinalIgnoreCase)) ?? "";
-                                    string remCol = allColumns.FirstOrDefault(c => c.Equals(locName + "Remarks", StringComparison.OrdinalIgnoreCase)) ?? "";
-                                    string specCol = allColumns.FirstOrDefault(c => c.Equals(locName + "Specification", StringComparison.OrdinalIgnoreCase)) ?? "";
-                                    locationColumnPairs[locName] = (col, rCol, pCol, remCol, specCol);
-                                }
+                                locName = col.Substring(0, col.Length - "Existing".Length).Trim();
+                            }
+                            else if (col.EndsWith(" Existing", StringComparison.OrdinalIgnoreCase))
+                            {
+                                locName = col.Substring(0, col.Length - " Existing".Length).Trim();
+                            }
+                            
+                            if (!string.IsNullOrEmpty(locName) && !locationColumnPairs.ContainsKey(locName))
+                            {
+                                string rCol = allColumns.FirstOrDefault(c => 
+                                    c.Equals(locName + "Required", StringComparison.OrdinalIgnoreCase) ||
+                                    c.Equals(locName + " Required", StringComparison.OrdinalIgnoreCase)) ?? "";
+                                string pCol = allColumns.FirstOrDefault(c => 
+                                    c.Equals(locName + "Photo", StringComparison.OrdinalIgnoreCase) ||
+                                    c.Equals(locName + "Photos", StringComparison.OrdinalIgnoreCase) ||
+                                    c.Equals(locName + " Photo", StringComparison.OrdinalIgnoreCase) ||
+                                    c.Equals(locName + " Photos", StringComparison.OrdinalIgnoreCase)) ?? "";
+                                string remCol = allColumns.FirstOrDefault(c => 
+                                    c.Equals(locName + "Remarks", StringComparison.OrdinalIgnoreCase) ||
+                                    c.Equals(locName + " Remarks", StringComparison.OrdinalIgnoreCase)) ?? "";
+                                string specCol = allColumns.FirstOrDefault(c => 
+                                    c.Equals(locName + "Specification", StringComparison.OrdinalIgnoreCase) ||
+                                    c.Equals(locName + " Specification", StringComparison.OrdinalIgnoreCase)) ?? "";
+                                locationColumnPairs[locName] = (col, rCol, pCol, remCol, specCol);
                             }
                         }
                         
@@ -1627,7 +1643,25 @@ namespace SurveyApp.Controllers
                             var deviceData = new Dictionary<string, (int, int, string, string, string)>(); // exQty, reqQty, pho, rem, spec
                             bool hasData = false;
                             
-                            string mLoc = locationColumnPairs.Keys.FirstOrDefault(l => l.Trim().Equals(locName, StringComparison.OrdinalIgnoreCase)) ?? "";
+                            // More robust location matching - normalize names by removing extra whitespace
+                            string normalizedLocName = System.Text.RegularExpressions.Regex.Replace(locName.Trim(), @"\s+", " ");
+                            
+                            // Try exact match first
+                            string mLoc = locationColumnPairs.Keys.FirstOrDefault(l => 
+                                System.Text.RegularExpressions.Regex.Replace(l.Trim(), @"\s+", " ")
+                                .Equals(normalizedLocName, StringComparison.OrdinalIgnoreCase)) ?? "";
+                            
+                            // Fallback: try Contains match if exact match fails
+                            if (string.IsNullOrEmpty(mLoc))
+                            {
+                                mLoc = locationColumnPairs.Keys.FirstOrDefault(l => 
+                                    System.Text.RegularExpressions.Regex.Replace(l.Trim(), @"\s+", " ")
+                                    .Contains(normalizedLocName, StringComparison.OrdinalIgnoreCase) ||
+                                    normalizedLocName.Contains(
+                                        System.Text.RegularExpressions.Regex.Replace(l.Trim(), @"\s+", " "), 
+                                        StringComparison.OrdinalIgnoreCase)) ?? "";
+                            }
+                            
                             if (!string.IsNullOrEmpty(mLoc))
                             {
                                 var cols = locationColumnPairs[mLoc];

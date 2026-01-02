@@ -420,31 +420,64 @@
                         
                         foreach (var col in allColumns2)
                         {
-                            if (col.EndsWith("Existing"))
+                            // Handle both "LocationExisting" and "Location Existing" patterns
+                            string locName = null;
+                            if (col.EndsWith("Existing", StringComparison.OrdinalIgnoreCase))
                             {
-                                string locName = col.Replace("Existing", "").Trim();
-                                if (!locationColumnPairs2.ContainsKey(locName))
-                                {
-                                    string rCol = allColumns2.FirstOrDefault(c => c.Equals(locName + "Required", StringComparison.OrdinalIgnoreCase)) ?? "";
-                                    // More flexible matching for Photos column - check multiple variations
-                                    string pCol = allColumns2.FirstOrDefault(c => 
-                                        c.Equals(locName + "Photo", StringComparison.OrdinalIgnoreCase) ||
-                                        c.Equals(locName + "Photos", StringComparison.OrdinalIgnoreCase) ||
-                                        c.Equals(locName.Trim() + "Photo", StringComparison.OrdinalIgnoreCase) ||
-                                        c.Equals(locName.Trim() + "Photos", StringComparison.OrdinalIgnoreCase)) ?? "";
-                                    // More flexible matching for Remarks column
-                                    string remCol = allColumns2.FirstOrDefault(c => 
-                                        c.Equals(locName + "Remarks", StringComparison.OrdinalIgnoreCase) ||
-                                        c.Equals(locName.Trim() + "Remarks", StringComparison.OrdinalIgnoreCase)) ?? "";
-                                    // More flexible matching for Specification column
-                                    string specCol = allColumns2.FirstOrDefault(c => 
-                                        c.Equals(locName + "Specification", StringComparison.OrdinalIgnoreCase) ||
-                                        c.Equals(locName.Trim() + "Specification", StringComparison.OrdinalIgnoreCase)) ?? "";
+                                locName = col.Substring(0, col.Length - "Existing".Length).Trim();
+                            }
+                            else if (col.EndsWith(" Existing", StringComparison.OrdinalIgnoreCase))
+                            {
+                                locName = col.Substring(0, col.Length - " Existing".Length).Trim();
+                            }
+                            
+                            if (!string.IsNullOrEmpty(locName) && !locationColumnPairs2.ContainsKey(locName))
+                            {
+                                // Try both patterns for Required column
+                                string rCol = allColumns2.FirstOrDefault(c => 
+                                    c.Equals(locName + "Required", StringComparison.OrdinalIgnoreCase) ||
+                                    c.Equals(locName + " Required", StringComparison.OrdinalIgnoreCase)) ?? "";
                                     
-                                    locationColumnPairs2[locName] = (col, rCol, pCol, remCol, specCol);
-                                }
+                                // More flexible matching for Photos column - check multiple variations
+                                string pCol = allColumns2.FirstOrDefault(c => 
+                                    c.Equals(locName + "Photo", StringComparison.OrdinalIgnoreCase) ||
+                                    c.Equals(locName + "Photos", StringComparison.OrdinalIgnoreCase) ||
+                                    c.Equals(locName + " Photo", StringComparison.OrdinalIgnoreCase) ||
+                                    c.Equals(locName + " Photos", StringComparison.OrdinalIgnoreCase) ||
+                                    c.Equals(locName.Trim() + "Photo", StringComparison.OrdinalIgnoreCase) ||
+                                    c.Equals(locName.Trim() + "Photos", StringComparison.OrdinalIgnoreCase)) ?? "";
+                                    
+                                // More flexible matching for Remarks column
+                                string remCol = allColumns2.FirstOrDefault(c => 
+                                    c.Equals(locName + "Remarks", StringComparison.OrdinalIgnoreCase) ||
+                                    c.Equals(locName + " Remarks", StringComparison.OrdinalIgnoreCase) ||
+                                    c.Equals(locName.Trim() + "Remarks", StringComparison.OrdinalIgnoreCase)) ?? "";
+                                    
+                                // More flexible matching for Specification column
+                                string specCol = allColumns2.FirstOrDefault(c => 
+                                    c.Equals(locName + "Specification", StringComparison.OrdinalIgnoreCase) ||
+                                    c.Equals(locName + " Specification", StringComparison.OrdinalIgnoreCase) ||
+                                    c.Equals(locName.Trim() + "Specification", StringComparison.OrdinalIgnoreCase)) ?? "";
+                                
+                                locationColumnPairs2[locName] = (col, rCol, pCol, remCol, specCol);
                             }
                         }
+                        
+                        // DIAGNOSTIC: Log all available columns and location pairs
+                        System.Diagnostics.Debug.WriteLine("=== DIAGNOSTIC: Location Matching Debug ===");
+                        System.Diagnostics.Debug.WriteLine($"Total columns in dtItems: {allColumns2.Count}");
+                        System.Diagnostics.Debug.WriteLine($"Columns ending with 'Existing': {string.Join(", ", allColumns2.Where(c => c.EndsWith("Existing")))}");
+                        System.Diagnostics.Debug.WriteLine($"Location column pairs found: {locationColumnPairs2.Count}");
+                        foreach (var kvp in locationColumnPairs2)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"  - Key: '{kvp.Key}' | Ex: '{kvp.Value.Ex}' | Req: '{kvp.Value.Req}'");
+                        }
+                        System.Diagnostics.Debug.WriteLine($"Total locations in dtLocEmp: {dtLocEmp.Rows.Count}");
+                        foreach (DataRow locRow in dtLocEmp.Rows)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"  - LocID: {locRow["LocID"]} | LocName: '{locRow["LocName"]}'");
+                        }
+                        System.Diagnostics.Debug.WriteLine("===========================================");
                         
                         int slNo2 = 1;
                         foreach (DataRow locRow in dtLocEmp.Rows)
@@ -456,11 +489,31 @@
                             var deviceData = new Dictionary<string, (int, int, string, string, string)>(); // exQty, reqQty, photos, remarks, specification
                             bool hasData = false;
                             
-                            string mLoc = locationColumnPairs2.Keys.FirstOrDefault(l => l.Trim().Equals(locName, StringComparison.OrdinalIgnoreCase)) ?? "";
+                            // More robust location matching - normalize names by removing extra whitespace
+                            string normalizedLocName = System.Text.RegularExpressions.Regex.Replace(locName.Trim(), @"\s+", " ");
+                            
+                            // Try exact match first
+                            string mLoc = locationColumnPairs2.Keys.FirstOrDefault(l => 
+                                System.Text.RegularExpressions.Regex.Replace(l.Trim(), @"\s+", " ")
+                                .Equals(normalizedLocName, StringComparison.OrdinalIgnoreCase)) ?? "";
+                            
+                            // Fallback: try Contains match if exact match fails
+                            if (string.IsNullOrEmpty(mLoc))
+                            {
+                                mLoc = locationColumnPairs2.Keys.FirstOrDefault(l => 
+                                    System.Text.RegularExpressions.Regex.Replace(l.Trim(), @"\s+", " ")
+                                    .Contains(normalizedLocName, StringComparison.OrdinalIgnoreCase) ||
+                                    normalizedLocName.Contains(
+                                        System.Text.RegularExpressions.Regex.Replace(l.Trim(), @"\s+", " "), 
+                                        StringComparison.OrdinalIgnoreCase)) ?? "";
+                            }
                             
                             if (!string.IsNullOrEmpty(mLoc))
                             {
                                 var cols = locationColumnPairs2[mLoc];
+                                int itemsProcessed = 0;
+                                int itemsWithData = 0;
+                                
                                 foreach (var deviceType in allDeviceTypes2)
                                 {
                                     int exQty = 0; int reqQty = 0; string pho = ""; string rem = ""; string spec = "";
@@ -473,8 +526,27 @@
                                         
                                         if (rowKey.Equals(deviceType, StringComparison.OrdinalIgnoreCase))
                                         {
-                                            if (!string.IsNullOrEmpty(cols.Ex)) { int val = 0; int.TryParse(itemRow[cols.Ex]?.ToString(), out val); exQty += val; }
-                                            if (!string.IsNullOrEmpty(cols.Req)) { int val = 0; int.TryParse(itemRow[cols.Req]?.ToString(), out val); reqQty += val; }
+                                            itemsProcessed++;
+                                            
+                                            // Read values from columns
+                                            if (!string.IsNullOrEmpty(cols.Ex)) { 
+                                                int val = 0; 
+                                                string rawVal = itemRow[cols.Ex]?.ToString() ?? "0";
+                                                int.TryParse(rawVal, out val); 
+                                                exQty += val;
+                                                if (val > 0) {
+                                                    System.Diagnostics.Debug.WriteLine($"    Item '{rowItem}' has Existing={val} in column '{cols.Ex}'");
+                                                }
+                                            }
+                                            if (!string.IsNullOrEmpty(cols.Req)) { 
+                                                int val = 0; 
+                                                string rawVal = itemRow[cols.Req]?.ToString() ?? "0";
+                                                int.TryParse(rawVal, out val); 
+                                                reqQty += val;
+                                                if (val > 0) {
+                                                    System.Diagnostics.Debug.WriteLine($"    Item '{rowItem}' has Required={val} in column '{cols.Req}'");
+                                                }
+                                            }
                                             if (!string.IsNullOrEmpty(cols.Pho)) pho = itemRow[cols.Pho]?.ToString() ?? "";
                                             
                                             // Remarks: Check loc-specific first, then global column
@@ -489,6 +561,7 @@
                                     if (exQty > 0 || reqQty > 0 || !string.IsNullOrEmpty(pho) || !string.IsNullOrEmpty(rem) || !string.IsNullOrEmpty(spec))
                                     {
                                         hasData = true;
+                                        itemsWithData++;
                                         deviceData[deviceType] = (exQty, reqQty, pho, rem, spec);
                                         if (exQty > 0) { existingTotals2[deviceType] += exQty; devColVis2[deviceType][0] = true; }
                                         if (reqQty > 0) { requiredTotals2[deviceType] += reqQty; devColVis2[deviceType][1] = true; }
@@ -497,6 +570,20 @@
                                         if (!string.IsNullOrEmpty(spec)) devColVis2[deviceType][4] = true;
                                     }
                                 }
+                                
+                                System.Diagnostics.Debug.WriteLine($"  Processed {itemsProcessed} items, {itemsWithData} had data");
+                            }
+                            
+                            // DIAGNOSTIC: Log matching result for this location
+                            System.Diagnostics.Debug.WriteLine($"Location '{locName}' (normalized: '{normalizedLocName}') -> Matched key: '{mLoc}' | hasData: {hasData}");
+                            if (!string.IsNullOrEmpty(mLoc))
+                            {
+                                var cols = locationColumnPairs2[mLoc];
+                                System.Diagnostics.Debug.WriteLine($"  Columns - Ex: '{cols.Ex}', Req: '{cols.Req}', Pho: '{cols.Pho}', Rem: '{cols.Rem}', Spec: '{cols.Spec}'");
+                            }
+                            else
+                            {
+                                System.Diagnostics.Debug.WriteLine($"  WARNING: No matching column pair found for location '{locName}'");
                             }
                             
                             if (hasData)
@@ -504,15 +591,26 @@
                                 locationDataList2.Add((slNo2, locName, locType, coords, deviceData));
                                 slNo2++;
                             }
+                            else
+                            {
+                                System.Diagnostics.Debug.WriteLine($"  WARNING: Location '{locName}' has no data - will not be displayed");
+                            }
                         }
                         
                         // Filter visible items: must have at least one sub-column visible
-                        visibleDeviceTypes2 = allDeviceTypes2.Where(dt => devColVis2[dt].Any(v => v)).ToList();
+                        // First, filter items by visibility
+                        var rawVisibleTypes2 = allDeviceTypes2.Where(dt => devColVis2[dt].Any(v => v)).ToHashSet();
+                        
+                        // Then, build filtered categories
                         foreach (var cat in deviceCategories2)
                         {
-                            var vItems = cat.Value.Where(i => visibleDeviceTypes2.Contains(i)).ToList();
+                            var vItems = cat.Value.Where(i => rawVisibleTypes2.Contains(i)).ToList();
                             if (vItems.Any()) filteredCategories2[cat.Key] = vItems;
                         }
+                        
+                        // CRITICAL: Ensure visibleDeviceTypes2 follows the exact order of filteredCategories2 keys and values
+                        // This prevents header mismatch where Category Header spans over wrong devices
+                        visibleDeviceTypes2 = filteredCategories2.SelectMany(c => c.Value).ToList();
                     }
                 }
                 
