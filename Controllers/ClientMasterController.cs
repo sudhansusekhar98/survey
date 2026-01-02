@@ -104,7 +104,7 @@ namespace SurveyApp.Controllers
             {
                 ViewBag.Cities = await _locationService.GetCitiesByStateNameAsync(client.State);
             }
-
+            
             return View(client);
         }
 

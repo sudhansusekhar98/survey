@@ -552,7 +552,7 @@
                                 {
                                     var vis = devColVis2[deviceType];
                                     if (vis[0]) { <th class="text-center py-0 px-1" style="background-color: #fff9e6; font-size: 0.6rem; font-weight: 600;">Existing</th> }
-                                    if (vis[1]) { <th class="text-center py-0 px-1" style="background-color: #c6efce; font-size: 0.6rem; font-weight: 600;">Required</th> }
+                                    if (vis[1]) { <th class="text-center py-0 px-1" style="background-color: #b0e7bbff; font-size: 0.6rem; font-weight: 600;">Required</th> }
                                     if (vis[2]) { <th class="text-center py-0 px-1" style="background-color: #fff2cc; font-size: 0.6rem;">Images</th> }
                                     if (vis[3]) { <th class="text-center py-0 px-1" style="background-color: #fff2cc; font-size: 0.6rem;">Remarks</th> }
                                     if (vis[4]) { <th class="text-center py-0 px-1" style="background-color: #e7e6ff; font-size: 0.6rem;">Specification</th> }
@@ -592,8 +592,8 @@
                                             </td>
                                         }
                                         if (vis[1]) {
-                                            <td class="text-center align-middle py-0 px-1" style="background-color: @(data.Item2 > 0 ? "#c6efce" : "#fff"); font-size: 0.75rem;">
-                                                @if (data.Item2 > 0) { <span class="fw-bold text-success">@data.Item2@uomSuffix</span> }
+                                            <td class="text-center align-middle py-0 px-1" style="background-color: @(data.Item2 > 0 ? "#e4f5e8ff" : "#fff"); font-size: 0.75rem;">
+                                                @if (data.Item2 > 0) { <span class="fw-bold" style="color: rgb(0 0 0 / 69%) !important;">@data.Item2@uomSuffix</span> }
                                             </td>
                                         }
                                         if (vis[2]) {
@@ -635,7 +635,7 @@
                                         <td class="text-center align-middle py-0 px-1" style="background-color: #92d050; font-size: 0.75rem;">
                                             @if (requiredTotals2[deviceType] > 0) { 
                                                 string sfx = (itemUOMs2.ContainsKey(deviceType) && itemUOMs2[deviceType].Equals("MTR", StringComparison.OrdinalIgnoreCase)) ? " mtr" : "";
-                                                <strong>@requiredTotals2[deviceType]@sfx</strong> 
+                                                <strong style="color: rgb(0 0 0 / 69%) !important;">@requiredTotals2[deviceType]@sfx</strong> 
                                             } else { <span class="text-muted">0</span> }
                                         </td>
                                     }
