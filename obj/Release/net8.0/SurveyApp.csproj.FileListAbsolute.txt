@@ -1034,3 +1034,9 @@ D:\VL Access\Survey\CODES\Survey\survey\obj\Release\net8.0\SurveyApp.pdb
 D:\VL Access\Survey\CODES\Survey\survey\obj\Release\net8.0\SurveyApp.genruntimeconfig.cache
 D:\VL Access\Survey\CODES\Survey\survey\obj\Release\net8.0\ref\SurveyApp.dll
 D:\VL Access\Survey\CODES\Survey\survey\bin\Release\net8.0\BCrypt.Net-Next.dll
+D:\VL Access\Survey\CODES\Survey\survey\bin\Release\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\VL Access\Survey\CODES\Survey\survey\bin\Release\net8.0\Microsoft.OpenApi.dll
+D:\VL Access\Survey\CODES\Survey\survey\bin\Release\net8.0\Swashbuckle.AspNetCore.Swagger.dll
+D:\VL Access\Survey\CODES\Survey\survey\bin\Release\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+D:\VL Access\Survey\CODES\Survey\survey\bin\Release\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\VL Access\Survey\CODES\Survey\survey\obj\Release\net8.0\SurveyApp.MvcApplicationPartsAssemblyInfo.cs
