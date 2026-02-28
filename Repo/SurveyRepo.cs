@@ -80,6 +80,7 @@ namespace SurveyApp.Repo
                 cmd.Parameters.AddWithValue("@SurveyName", survey.SurveyName ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@ImplementationType", survey.ImplementationType ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@SurveyDate", survey.SurveyDate ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@SurveyTeamId", survey.SurveyTeamId ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@SurveyTeamName", survey.SurveyTeamName ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@SurveyTeamContact", survey.SurveyTeamContact ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@AgencyName", survey.AgencyName ?? (object)DBNull.Value);
@@ -92,8 +93,6 @@ namespace SurveyApp.Repo
                 cmd.Parameters.AddWithValue("@SurveyStatus", survey.SurveyStatus ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@RegionID", survey.RegionID ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@ClientID", survey.ClientID ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@StateId", survey.StateId ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@CityId", survey.CityId ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@CreatedBy", survey.CreatedBy);
 
                 con.Open();

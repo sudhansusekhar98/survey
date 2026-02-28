@@ -83,17 +83,17 @@
 
                                             <div class="col-12 col-md-6">
                                                 <div class="form-custom-floating">
-                                                    <input asp-for="SurveyTeamName" type="text" class="form-control"
+                                                    <input type="text" class="form-control"
                                                         placeholder=" " id="contactPersonInput" readonly>
-                                                    <label asp-for="SurveyTeamName">Contact Person</label>
+                                                    <label>Contact Person</label>
                                                 </div>
                                             </div>
 
                                             <div class="col-12 col-md-6">
                                                 <div class="form-custom-floating">
-                                                    <input asp-for="SurveyTeamContact" type="text" class="form-control"
+                                                    <input type="text" class="form-control"
                                                         placeholder=" " id="contactNumberInput" readonly>
-                                                    <label asp-for="SurveyTeamContact">Contact Number</label>
+                                                    <label>Contact Number</label>
                                                 </div>
                                             </div>
 
@@ -103,7 +103,7 @@
                                                     <label>State</label> *@
 
                                                     <input asp-for="MapMarking" type="text" class="form-control"
-                                                        placeholder=" " id="State" readonly>
+                                                        placeholder=" " id="stateInput" readonly>
                                                     <label asp-for="MapMarking">State</label>
                                                 </div>
                                             </div>
@@ -114,7 +114,7 @@
                                                     <label>City</label> *@
 
                                                     <input asp-for="CityDistrict" type="text" class="form-control"
-                                                        placeholder=" " id="City" readonly>
+                                                        placeholder=" " id="cityInput" readonly>
                                                     <label asp-for="CityDistrict">City</label>
                                                 </div>
                                             </div>
@@ -208,9 +208,7 @@
                                 </div>
                             </div>
                             <input type="hidden" asp-for="StateId" id="stateIdHidden" />
-                            <input type="hidden" asp-for="MapMarking" id="stateNameHidden" />
                             <input type="hidden" asp-for="CityId" id="cityIdHidden" />
-                            <input type="hidden" asp-for="CityDistrict" id="cityNameHidden" />
                         </div>
                     </div>
 
@@ -306,10 +304,29 @@
                 };
                 applyClientDetails(initialClientData);
             }
+
+            // If a team member is already selected, populate the team name and fetch contact number
+            var initialTeamId = $('#teamDropdown').val();
+            if (initialTeamId) {
+                var selectedText = $('#teamDropdown').find('option:selected').text().trim();
+                $('#teamNameHidden').val(selectedText !== '' ? selectedText : '');
+
+                // Fetch and populate the team contact number
+                $.ajax({
+                    url: '@Url.Action("GetEmployeePhone", "SurveyCreation")',
+                    type: 'GET',
+                    data: { empId: initialTeamId },
+                    success: function (response) {
+                        if (response.success) {
+                            $('#teamContactInput').val(response.data.phoneNumber || '');
+                        }
+                    }
+                });
+            }
         });
 
         function applyClientDetails(client) {
-            // Populate readonly fields
+            // Populate readonly display fields
             $('#agencyNameInput').val(client.clientName || '');
             $('#addressInput').val(client.address || '');
             $('#contactPersonInput').val(client.contactPerson || '');
@@ -319,14 +336,12 @@
 
             // Populate hidden fields for form submission
             $('#stateIdHidden').val(client.stateId || '');
-            $('#stateNameHidden').val(client.stateName || '');
             $('#cityIdHidden').val(client.cityId || '');
-            $('#cityNameHidden').val(client.cityName || '');
         }
 
         function clearClientFields() {
             $('#agencyNameInput, #addressInput, #contactPersonInput, #contactNumberInput, #stateInput, #cityInput').val('');
-            $('#stateIdHidden, #stateNameHidden, #cityIdHidden, #cityNameHidden').val('');
+            $('#stateIdHidden, #cityIdHidden').val('');
         }
 
         function showBackConfirmModal(url, message) {

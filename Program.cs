@@ -51,7 +51,7 @@ builder.Services.AddCors(options =>
 
 // === JWT Authentication Configuration ===
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings["SecretKey"] ?? "YourSuperSecretKeyThatIsAtLeast32CharactersLong!SurveyApp2024";
+var secretKey = jwtSettings["SecretKey"] ?? "cca028cb830260edae80187d8dcb6755";
 
 builder.Services.AddAuthentication(options =>
 {

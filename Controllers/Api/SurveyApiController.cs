@@ -264,6 +264,8 @@ namespace SurveyApp.Controllers.Api
                     LocationSiteName = request.LocationSiteName,
                     StateId = request.StateId,
                     CityId = request.CityId,
+                    MapMarking = existing.MapMarking,
+                    CityDistrict = existing.CityDistrict,
                     ScopeOfWork = request.ScopeOfWork,
                     Latitude = request.Latitude,
                     Longitude = request.Longitude,

@@ -651,6 +651,7 @@ curl -X POST "https://survey.vluccc.com:91/api/v1/auth/login" \
   -d '{"loginId": "user@example.com", "password": "yourpassword"}'
 ```
 
+
 **Get Surveys (with token):**
 ```bash
 curl -X GET "https://survey.vluccc.com:91/api/v1/surveys?page=1&pageSize=10" \
@@ -708,13 +709,14 @@ This provides a complete interactive interface to explore and test all API endpo
 ```json
 {
   "JwtSettings": {
-    "SecretKey": "your-secret-key-min-32-characters",
+    "SecretKey": "YourSuperSecretKeyThatIsAtLeast32CharactersLong!SurveyApp2025VLAccess",
     "Issuer": "SurveyApp",
-    "Audience": "SurveyAppUsers",
-    "AccessTokenExpirationMinutes": 60,
+    "Audience": "SurveyAppMobile",
+    "TokenExpirationMinutes": 60,
     "RefreshTokenExpirationDays": 7
   }
 }
+
 ```
 
 ### Cloudinary Settings (for image uploads)
@@ -722,9 +724,9 @@ This provides a complete interactive interface to explore and test all API endpo
 ```json
 {
   "Cloudinary": {
-    "CloudName": "your-cloud-name",
-    "ApiKey": "your-api-key",
-    "ApiSecret": "your-api-secret"
+    "CloudName": "dzkkf0c05",
+    "ApiKey": "668214466925985",
+    "ApiSecret": "HE7uA6r-lD6HPJdPsXymgYUZVNI"
   }
 }
 ```
