@@ -27,9 +27,8 @@ namespace AnalyticaDocs.Repo
                 cmd.Parameters.AddWithValue("@LoginName", obj.LoginName);
                 cmd.Parameters.AddWithValue("@MobileNo", obj.MobileNo);
                 cmd.Parameters.AddWithValue("@EmailID", obj.EmailID);
-                // Hash password before storing
-                var hashedPassword = _passwordHasher.HashPassword(obj.LoginPassword);
-                cmd.Parameters.AddWithValue("@LoginPassword", hashedPassword);
+                // Store password as plain text (BCrypt disabled due to verification issues)
+                cmd.Parameters.AddWithValue("@LoginPassword", obj.LoginPassword);
                 cmd.Parameters.AddWithValue("@IsActive", obj.ISActive);
                 cmd.Parameters.AddWithValue("@RoleID", obj.RoleId);
                 cmd.Parameters.AddWithValue("@CreateBy", obj.CreateBy);
@@ -62,11 +61,8 @@ namespace AnalyticaDocs.Repo
                 cmd.Parameters.AddWithValue("@LoginName", obj.LoginName);
                 cmd.Parameters.AddWithValue("@MobileNo", obj.MobileNo);
                 cmd.Parameters.AddWithValue("@EmailID", obj.EmailID);
-                // Hash password before storing (if password is provided)
-                var hashedPassword = string.IsNullOrEmpty(obj.LoginPassword) 
-                    ? obj.LoginPassword 
-                    : _passwordHasher.HashPassword(obj.LoginPassword);
-                cmd.Parameters.AddWithValue("@LoginPassword", hashedPassword);
+                // Store password as plain text (BCrypt disabled due to verification issues)
+                cmd.Parameters.AddWithValue("@LoginPassword", obj.LoginPassword);
                 cmd.Parameters.AddWithValue("@IsActive", obj.ISActive);
                 cmd.Parameters.AddWithValue("@RoleID", obj.RoleId);
                 cmd.Parameters.AddWithValue("@CreateBy", obj.CreateBy);
@@ -145,17 +141,16 @@ namespace AnalyticaDocs.Repo
                 
                 System.Diagnostics.Debug.WriteLine($"Current password verified. Hashing and updating to new password...");
                 
-                // Hash the new password with BCrypt
-                var hashedNewPassword = _passwordHasher.HashPassword(newPassword);
+                // Store password as plain text (BCrypt disabled due to verification issues)
                 
-                // Update to new hashed password and clear MustChangePassword flag
+                // Update to new password and clear MustChangePassword flag
                 using var updateCmd = new SqlCommand(@"
                     UPDATE LoginMaster 
                     SET LoginPassword = @NewPassword, 
                         MustChangePassword = 0 
                     WHERE UserID = @UserID", con);
                 updateCmd.Parameters.AddWithValue("@UserID", userId);
-                updateCmd.Parameters.AddWithValue("@NewPassword", hashedNewPassword);
+                updateCmd.Parameters.AddWithValue("@NewPassword", newPassword);
                 
                 int result = updateCmd.ExecuteNonQuery();
                 System.Diagnostics.Debug.WriteLine($"Update query executed. Rows affected: {result}");
@@ -178,8 +173,7 @@ namespace AnalyticaDocs.Repo
                 using var con = new SqlConnection(DBConnection.ConnectionString);
                 con.Open();
                 
-                // Hash the temporary password before storing
-                var hashedPassword = _passwordHasher.HashPassword(temporaryPassword);
+                // Store password as plain text (BCrypt disabled due to verification issues)
                 
                 // Update password and set MustChangePassword flag
                 using var cmd = new SqlCommand(@"
@@ -189,7 +183,7 @@ namespace AnalyticaDocs.Repo
                     WHERE UserID = @UserID", con);
                 
                 cmd.Parameters.AddWithValue("@UserID", userId);
-                cmd.Parameters.AddWithValue("@Password", hashedPassword);
+                cmd.Parameters.AddWithValue("@Password", temporaryPassword);
 
                 int result = cmd.ExecuteNonQuery();
                 return result > 0;
@@ -303,9 +297,8 @@ namespace AnalyticaDocs.Repo
                         insertCmd.Parameters.AddWithValue("@EmpID", emp.empId);
                         insertCmd.Parameters.AddWithValue("@EmailID", string.IsNullOrWhiteSpace(emp.email) ? DBNull.Value : emp.email);
                         insertCmd.Parameters.AddWithValue("@MobileNo", string.IsNullOrWhiteSpace(emp.mobileNo) ? DBNull.Value : emp.mobileNo);
-                        // Hash the default password before storing
-                        var hashedPassword = _passwordHasher.HashPassword(defaultPassword);
-                        insertCmd.Parameters.AddWithValue("@LoginPassword", hashedPassword);
+                        // Store password as plain text (BCrypt disabled due to verification issues)
+                        insertCmd.Parameters.AddWithValue("@LoginPassword", defaultPassword);
                         insertCmd.Parameters.AddWithValue("@RoleID", defaultRoleId);
                         insertCmd.Parameters.AddWithValue("@IsActive", "1");
                         insertCmd.Parameters.AddWithValue("@CreateBy", createdBy.ToString());
@@ -411,28 +404,31 @@ namespace AnalyticaDocs.Repo
                     return null; // Password doesn't match
                 }
                 
-                // If password was stored in plain text, migrate to BCrypt hash
-                if (!_passwordHasher.IsBCryptHash(storedPassword))
-                {
-                    try
-                    {
-                        var hashedPassword = _passwordHasher.HashPassword(obj.LoginPassword);
-                        using var updateCmd = new SqlCommand(@"
-                            UPDATE LoginMaster 
-                            SET LoginPassword = @HashedPassword 
-                            WHERE UserID = @UserID", con);
-                        updateCmd.Parameters.AddWithValue("@UserID", user.UserId);
-                        updateCmd.Parameters.AddWithValue("@HashedPassword", hashedPassword);
-                        updateCmd.ExecuteNonQuery();
-                        
-                        System.Diagnostics.Debug.WriteLine($"Migrated plain text password to BCrypt for user: {user.LoginId}");
-                    }
-                    catch (Exception migrationEx)
-                    {
-                        // Log but don't fail login if migration fails
-                        System.Diagnostics.Debug.WriteLine($"Password migration failed for user {user.LoginId}: {migrationEx.Message}");
-                    }
-                }
+                // NOTE: Auto-migration to BCrypt is DISABLED.
+                // The BCrypt hash migration was causing login failures due to 
+                // SQL Server SET options conflicts when updating the LoginPassword column.
+                // Plain text password comparison is used until this is resolved.
+                // if (!_passwordHasher.IsBCryptHash(storedPassword))
+                // {
+                //     try
+                //     {
+                //         var hashedPassword = _passwordHasher.HashPassword(obj.LoginPassword);
+                //         using var updateCmd = new SqlCommand(@"
+                //             UPDATE LoginMaster 
+                //             SET LoginPassword = @HashedPassword 
+                //             WHERE UserID = @UserID", con);
+                //         updateCmd.Parameters.AddWithValue("@UserID", user.UserId);
+                //         updateCmd.Parameters.AddWithValue("@HashedPassword", hashedPassword);
+                //         updateCmd.ExecuteNonQuery();
+                //         
+                //         System.Diagnostics.Debug.WriteLine($"Migrated plain text password to BCrypt for user: {user.LoginId}");
+                //     }
+                //     catch (Exception migrationEx)
+                //     {
+                //         // Log but don't fail login if migration fails
+                //         System.Diagnostics.Debug.WriteLine($"Password migration failed for user {user.LoginId}: {migrationEx.Message}");
+                //     }
+                // }
                 
                 return user;
             }

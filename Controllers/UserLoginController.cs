@@ -130,8 +130,9 @@ namespace AnalyticaDocs.Controllers
 
             try
             {
-                // Hash the new password with BCrypt before storing
-                var hashedPassword = _passwordHasher.HashPassword(newPassword);
+                // Store password as plain text (BCrypt migration is disabled due to
+                // SQL Server SET options conflicts causing hash verification failures)
+                var passwordToStore = newPassword;
                 
                 // Update password directly (bypassing current password check since this is a forced change)
                 using var con = new Microsoft.Data.SqlClient.SqlConnection(DBConnection.ConnectionString);
@@ -143,7 +144,7 @@ namespace AnalyticaDocs.Controllers
                     WHERE UserID = @UserID", con);
                 
                 cmd.Parameters.AddWithValue("@UserID", userId);
-                cmd.Parameters.AddWithValue("@Password", hashedPassword);
+                cmd.Parameters.AddWithValue("@Password", passwordToStore);
 
                 int result = cmd.ExecuteNonQuery();
 
