@@ -1,5 +1,4 @@
 using SurveyApp.Models;
-using System.Text;
 using System.Text.Json;
 
 namespace SurveyApp.Services
@@ -13,194 +12,170 @@ namespace SurveyApp.Services
 
     public class LocationApiService : ILocationApiService
     {
-        private readonly HttpClient _httpClient;
         private readonly ILogger<LocationApiService> _logger;
-        private const string COUNTRY_NAME = "India";
+        private readonly IWebHostEnvironment _env;
         
-        // Cache for Indian states data
+        // Cached data loaded from local JSON
+        private static Dictionary<string, StateWithCities>? _cachedData;
         private static List<StateModel>? _cachedStates;
-        private static DateTime _cacheExpiry = DateTime.MinValue;
-        private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(24);
+        private static readonly object _lockObj = new object();
 
-        public LocationApiService(HttpClient httpClient, ILogger<LocationApiService> logger)
+        public LocationApiService(HttpClient httpClient, ILogger<LocationApiService> logger, IWebHostEnvironment env)
         {
-            _httpClient = httpClient;
             _logger = logger;
-            
-            // Configure HttpClient for external API
-            _httpClient.Timeout = TimeSpan.FromSeconds(30);
+            _env = env;
         }
 
-        public async Task<List<StateModel>> GetStatesAsync()
+        /// <summary>
+        /// Loads the local JSON file containing all Indian states and their cities.
+        /// Data is cached in memory after first load.
+        /// </summary>
+        private void EnsureDataLoaded()
         {
-            try
-            {
-                // Return cached data if still valid
-                if (_cachedStates != null && DateTime.UtcNow < _cacheExpiry)
-                {
-                    _logger.LogInformation("Returning cached states data ({Count} states)", _cachedStates.Count);
-                    return _cachedStates;
-                }
+            if (_cachedData != null) return;
 
-                _logger.LogInformation("Fetching states from countriesnow.space API...");
-                
-                // Use the countriesnow.space API to get states for India
-                var requestBody = new { country = COUNTRY_NAME };
-                var content = new StringContent(
-                    JsonSerializer.Serialize(requestBody), 
-                    Encoding.UTF8, 
-                    "application/json"
-                );
-                
-                var response = await _httpClient.PostAsync(
-                    "https://countriesnow.space/api/v0.1/countries/states", 
-                    content
-                );
-                
-                if (!response.IsSuccessStatusCode)
+            lock (_lockObj)
+            {
+                if (_cachedData != null) return;
+
+                try
                 {
-                    _logger.LogError("Failed to fetch states: HTTP {StatusCode}", response.StatusCode);
-                    return GetFallbackIndianStates();
-                }
-                
-                var responseContent = await response.Content.ReadAsStringAsync();
-                _logger.LogInformation("States API response received");
-                
-                var apiResponse = JsonSerializer.Deserialize<CountriesNowStatesResponse>(responseContent, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-                
-                if (apiResponse?.Error == true || apiResponse?.Data?.States == null)
-                {
-                    _logger.LogWarning("API returned error or no data, using fallback");
-                    return GetFallbackIndianStates();
-                }
-                
-                var states = apiResponse.Data.States
-                    .Select((s, index) => new StateModel
+                    var jsonPath = Path.Combine(_env.WebRootPath, "data", "india_states_cities.json");
+                    
+                    if (!File.Exists(jsonPath))
                     {
-                        id = index + 1,
-                        name = s.Name,
-                        country_id = 101,
-                        iso2 = s.StateCode
-                    })
-                    .OrderBy(s => s.name)
-                    .ToList();
-                
-                // Cache the results
-                _cachedStates = states;
-                _cacheExpiry = DateTime.UtcNow.Add(CacheDuration);
-                
-                _logger.LogInformation("Successfully loaded {Count} states", states.Count);
-                return states;
+                        _logger.LogWarning("Local states/cities data file not found at {Path}. Using fallback.", jsonPath);
+                        LoadFallbackData();
+                        return;
+                    }
+
+                    var jsonContent = File.ReadAllText(jsonPath);
+                    var rawData = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonContent);
+
+                    if (rawData == null)
+                    {
+                        _logger.LogWarning("Failed to parse local states/cities JSON. Using fallback.");
+                        LoadFallbackData();
+                        return;
+                    }
+
+                    _cachedData = new Dictionary<string, StateWithCities>(StringComparer.OrdinalIgnoreCase);
+                    var states = new List<StateModel>();
+                    int stateIndex = 1;
+
+                    foreach (var kvp in rawData.OrderBy(k => k.Key))
+                    {
+                        var stateName = kvp.Key;
+                        var stateCode = "";
+                        var cities = new List<string>();
+
+                        if (kvp.Value.ValueKind == JsonValueKind.Object)
+                        {
+                            if (kvp.Value.TryGetProperty("state_code", out var codeElement))
+                                stateCode = codeElement.GetString() ?? "";
+                            
+                            if (kvp.Value.TryGetProperty("cities", out var citiesElement) && 
+                                citiesElement.ValueKind == JsonValueKind.Array)
+                            {
+                                foreach (var city in citiesElement.EnumerateArray())
+                                {
+                                    var cityName = city.GetString();
+                                    if (!string.IsNullOrWhiteSpace(cityName))
+                                        cities.Add(cityName);
+                                }
+                            }
+                        }
+
+                        var stateModel = new StateModel
+                        {
+                            id = stateIndex,
+                            name = stateName,
+                            country_id = 101,
+                            iso2 = stateCode
+                        };
+
+                        states.Add(stateModel);
+                        _cachedData[stateName] = new StateWithCities
+                        {
+                            State = stateModel,
+                            Cities = cities.OrderBy(c => c).ToList()
+                        };
+
+                        stateIndex++;
+                    }
+
+                    _cachedStates = states;
+                    _logger.LogInformation("Loaded {StateCount} states with cities from local JSON file", states.Count);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error loading local states/cities data. Using fallback.");
+                    LoadFallbackData();
+                }
             }
-            catch (HttpRequestException ex)
+        }
+
+        private void LoadFallbackData()
+        {
+            var fallbackStates = GetFallbackIndianStates();
+            _cachedStates = fallbackStates;
+            _cachedData = new Dictionary<string, StateWithCities>(StringComparer.OrdinalIgnoreCase);
+            foreach (var state in fallbackStates)
             {
-                _logger.LogError(ex, "HTTP error fetching states from API, using fallback");
-                return GetFallbackIndianStates();
+                _cachedData[state.name] = new StateWithCities
+                {
+                    State = state,
+                    Cities = new List<string>()
+                };
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error fetching states from API, using fallback");
-                return GetFallbackIndianStates();
-            }
+        }
+
+        public Task<List<StateModel>> GetStatesAsync()
+        {
+            EnsureDataLoaded();
+            return Task.FromResult(_cachedStates ?? new List<StateModel>());
         }
 
         public async Task<List<CityModel>> GetCitiesByStateAsync(int stateId)
         {
-            try
+            EnsureDataLoaded();
+            
+            var state = _cachedStates?.FirstOrDefault(s => s.id == stateId);
+            if (state == null)
             {
-                // Get the state name from the state ID
-                var states = await GetStatesAsync();
-                var state = states.FirstOrDefault(s => s.id == stateId);
-                
-                if (state == null)
-                {
-                    _logger.LogWarning("State not found for ID {StateId}", stateId);
-                    return new List<CityModel>();
-                }
-                
-                return await GetCitiesByStateNameAsync(state.name);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error fetching cities for state {StateId}", stateId);
+                _logger.LogWarning("State not found for ID {StateId}", stateId);
                 return new List<CityModel>();
             }
+
+            return await GetCitiesByStateNameAsync(state.name);
         }
 
-        public async Task<List<CityModel>> GetCitiesByStateNameAsync(string stateName)
+        public Task<List<CityModel>> GetCitiesByStateNameAsync(string stateName)
         {
-            try
+            EnsureDataLoaded();
+
+            if (_cachedData == null || !_cachedData.TryGetValue(stateName, out var stateData))
             {
-                _logger.LogInformation("Fetching cities for state '{StateName}'...", stateName);
-                
-                // Use the countriesnow.space API to get cities for a state
-                var requestBody = new { country = COUNTRY_NAME, state = stateName };
-                var content = new StringContent(
-                    JsonSerializer.Serialize(requestBody), 
-                    Encoding.UTF8, 
-                    "application/json"
-                );
-                
-                var response = await _httpClient.PostAsync(
-                    "https://countriesnow.space/api/v0.1/countries/state/cities", 
-                    content
-                );
-                
-                if (!response.IsSuccessStatusCode)
-                {
-                    _logger.LogError("Failed to fetch cities: HTTP {StatusCode}", response.StatusCode);
-                    return new List<CityModel>();
-                }
-                
-                var responseContent = await response.Content.ReadAsStringAsync();
-                _logger.LogInformation("Cities API response received for state '{StateName}'", stateName);
-                
-                var apiResponse = JsonSerializer.Deserialize<CountriesNowCitiesResponse>(responseContent, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-                
-                if (apiResponse?.Error == true || apiResponse?.Data == null)
-                {
-                    _logger.LogWarning("API returned error or no data for cities");
-                    return new List<CityModel>();
-                }
-                
-                // Get state ID for reference
-                var states = await GetStatesAsync();
-                var state = states.FirstOrDefault(s => s.name.Equals(stateName, StringComparison.OrdinalIgnoreCase));
-                int stateId = state?.id ?? 0;
-                
-                var cities = apiResponse.Data
-                    .Select((cityName, index) => new CityModel
-                    {
-                        id = index + 1,
-                        name = cityName,
-                        state_id = stateId
-                    })
-                    .OrderBy(c => c.name)
-                    .ToList();
-                
-                _logger.LogInformation("Successfully loaded {Count} cities for state '{StateName}'", cities.Count, stateName);
-                return cities;
+                _logger.LogWarning("No data found for state '{StateName}'", stateName);
+                return Task.FromResult(new List<CityModel>());
             }
-            catch (HttpRequestException ex)
-            {
-                _logger.LogError(ex, "HTTP error fetching cities for state '{StateName}'", stateName);
-                return new List<CityModel>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error fetching cities for state '{StateName}'", stateName);
-                return new List<CityModel>();
-            }
+
+            var stateId = stateData.State.id;
+            var cities = stateData.Cities
+                .Select((cityName, index) => new CityModel
+                {
+                    id = index + 1,
+                    name = cityName,
+                    state_id = stateId
+                })
+                .ToList();
+
+            _logger.LogInformation("Returning {Count} cities for state '{StateName}' (offline)", cities.Count, stateName);
+            return Task.FromResult(cities);
         }
 
         /// <summary>
-        /// Fallback Indian states list in case the API is unavailable
+        /// Fallback Indian states list in case the JSON file is missing
         /// </summary>
         private List<StateModel> GetFallbackIndianStates()
         {
@@ -245,34 +220,12 @@ namespace SurveyApp.Services
                 new StateModel { id = 37, name = "West Bengal", country_id = 101, iso2 = "WB" }
             };
         }
-    }
 
-    // Response models for countriesnow.space API
-    public class CountriesNowStatesResponse
-    {
-        public bool Error { get; set; }
-        public string? Msg { get; set; }
-        public CountriesNowStatesData? Data { get; set; }
-    }
-
-    public class CountriesNowStatesData
-    {
-        public string? Name { get; set; }
-        public string? Iso3 { get; set; }
-        public string? Iso2 { get; set; }
-        public List<CountriesNowStateItem>? States { get; set; }
-    }
-
-    public class CountriesNowStateItem
-    {
-        public string Name { get; set; } = string.Empty;
-        public string? StateCode { get; set; }
-    }
-
-    public class CountriesNowCitiesResponse
-    {
-        public bool Error { get; set; }
-        public string? Msg { get; set; }
-        public List<string>? Data { get; set; }
+        // Internal model for cached state + cities
+        private class StateWithCities
+        {
+            public StateModel State { get; set; } = new();
+            public List<string> Cities { get; set; } = new();
+        }
     }
 }

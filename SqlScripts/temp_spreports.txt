@@ -155,7 +155,7 @@ SELECT
     D.ItemID   AS [Item Code],
     D.TypeName AS [Type],
     D.ItemName AS [Item],
-    D.ItemUOM  AS [UOM],
+    D.ItemUOM  AS [],
     ' + @cols + ',
     ISNULL(SUM(D.ItemQtyExist),0) AS totalExisting,
     ISNULL(SUM(D.ItemQtyReq),0)   AS totalRequired,

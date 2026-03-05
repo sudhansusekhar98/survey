@@ -1039,4 +1039,3 @@ D:\VL Access\Survey\CODES\Survey\survey\bin\Release\net8.0\Swashbuckle.AspNetCor
 D:\VL Access\Survey\CODES\Survey\survey\bin\Release\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 D:\VL Access\Survey\CODES\Survey\survey\bin\Release\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll
 D:\VL Access\Survey\CODES\Survey\survey\obj\Release\net8.0\SurveyApp.MvcApplicationPartsAssemblyInfo.cs
-D:\VL Access\Survey\CODES\Survey\survey\obj\Release\net8.0\staticwebassets.upToDateCheck.txt

@@ -99,7 +99,7 @@ namespace AnalyticaDocs.pdfHelper
                         header.Cell().Element(CellHeaderStyle).Text("#").AlignCenter();
                         header.Cell().Element(CellHeaderStyle).Text("Date").AlignCenter();
                         header.Cell().Element(CellHeaderStyle).Text("Code").AlignCenter();
-                        //header.Cell().Element(CellHeaderStyle).Text("Item Type").AlignCenter();
+                      //header.Cell().Element(CellHeaderStyle).Text("Item Type").AlignCenter();
                         header.Cell().Element(CellHeaderStyle).Text("Item Name").AlignCenter();
                         header.Cell().Element(CellHeaderStyle).Text("UOM").AlignCenter();
                         header.Cell().Element(CellHeaderStyle).Text("Opening").AlignCenter();
