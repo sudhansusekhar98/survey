@@ -525,7 +525,8 @@ namespace SurveyApp.Controllers.Api
             var types = new List<string>
             {
                 "Traffic",
-                "Surveillance"
+                "Surveillance",
+                "Control Room"
             };
             return Ok(ApiResponse<List<string>>.Ok(types));
         }

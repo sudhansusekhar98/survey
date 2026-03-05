@@ -228,24 +228,27 @@ namespace SurveyApp.Controllers
 
                 if (result)
                 {
-                    // Get submission details for email
-                    var approvedSubmission = _submissionRepo.GetAllSubmissions()
-                        .FirstOrDefault(s => s.SubmissionId == submissionId);
-
-                    if (approvedSubmission != null && approvedSubmission.SubmittedBy.HasValue)
+                    // Use the pre-fetched submission to get submitter info (avoids double DB hit after status change)
+                    if (submission != null && submission.SubmittedBy.HasValue)
                     {
-                        var submitterUser = _adminRepo.GetUserById(approvedSubmission.SubmittedBy.Value);
+                        var submitterUser = _adminRepo.GetUserById(submission.SubmittedBy.Value);
                         
                         if (submitterUser != null && !string.IsNullOrEmpty(submitterUser.EmailID))
                         {
                             // Send approval email to submitter
-                            await _emailService.SendSurveyApprovalNotificationAsync(
+                            bool emailSent = await _emailService.SendSurveyApprovalNotificationAsync(
                                 submitterUser.LoginName ?? "User",
                                 submitterUser.EmailID,
-                                approvedSubmission.SurveyName ?? "Survey",
+                                submission.SurveyName ?? "Survey",
                                 userName ?? "Supervisor",
                                 reviewComments ?? ""
                             );
+
+                            if (!emailSent)
+                            {
+                                // Don't fail the action - approval was successful, just log a warning
+                                TempData["EmailWarning"] = "Approval notification email could not be sent.";
+                            }
                         }
                     }
 
@@ -317,24 +320,26 @@ namespace SurveyApp.Controllers
 
                 if (result)
                 {
-                    // Get submission details for email
-                    var rejectedSubmission = _submissionRepo.GetAllSubmissions()
-                        .FirstOrDefault(s => s.SubmissionId == submissionId);
-
-                    if (rejectedSubmission != null && rejectedSubmission.SubmittedBy.HasValue)
+                    // Use the pre-fetched submission to get submitter info
+                    if (submission != null && submission.SubmittedBy.HasValue)
                     {
-                        var submitterUser = _adminRepo.GetUserById(rejectedSubmission.SubmittedBy.Value);
+                        var submitterUser = _adminRepo.GetUserById(submission.SubmittedBy.Value);
                         
                         if (submitterUser != null && !string.IsNullOrEmpty(submitterUser.EmailID))
                         {
                             // Send rejection email to submitter
-                            await _emailService.SendSurveyRejectionNotificationAsync(
+                            bool emailSent = await _emailService.SendSurveyRejectionNotificationAsync(
                                 submitterUser.LoginName ?? "User",
                                 submitterUser.EmailID,
-                                rejectedSubmission.SurveyName ?? "Survey",
+                                submission.SurveyName ?? "Survey",
                                 userName ?? "Supervisor",
                                 rejectionReason
                             );
+
+                            if (!emailSent)
+                            {
+                                TempData["EmailWarning"] = "Rejection notification email could not be sent.";
+                            }
                         }
                     }
 

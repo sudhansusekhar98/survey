@@ -113,12 +113,6 @@
                                         </tr>
                                     }
                                 }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="8" class="text-center">No Devices found in this module.</td>
-                                    </tr>
-                                }
                             </tbody>
                         </table>
                     </div>
@@ -146,8 +140,11 @@
 
         $(document).ready(function() {
             $('#devicesTable').DataTable({
-                pageLength: 10,
-                order: [[0, 'asc']]
+                pageLength: 25,
+                order: [[0, 'asc']],
+                language: {
+                    emptyTable: "No Devices found in this module. Click 'Add Device' to create one."
+                }
             });
         });
     </script>

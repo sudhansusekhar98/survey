@@ -64,7 +64,7 @@ namespace AnalyticaDocs.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(UserModel user)
+        public async Task<IActionResult> Create(UserModel user)
         {
             int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
             var result = _util.CheckAuthorizationAll(this, rightsId, null, null, "Create");
@@ -83,6 +83,8 @@ namespace AnalyticaDocs.Controllers
                 return View("Create", user);
             }
 
+            // Store plain-text password before AddUser hashes it inside the repo
+            string plainTextPassword = user.LoginPassword;
             user.CreateBy = Convert.ToInt32(HttpContext.Session.GetString("UserID"));
             bool isSaved = _repository.AddUser(user);
 
@@ -91,12 +93,16 @@ namespace AnalyticaDocs.Controllers
                 // Send email notification with temporary password to new user
                 if (!string.IsNullOrEmpty(user.EmailID))
                 {
-                    _ = _emailService.SendNewUserAccountNotificationAsync(
+                    bool emailSent = await _emailService.SendNewUserAccountNotificationAsync(
                         user.LoginName,
                         user.EmailID,
                         user.LoginId,
-                        user.LoginPassword
+                        plainTextPassword
                     );
+                    if (!emailSent)
+                    {
+                        TempData["EmailWarning"] = "User created but welcome email could not be sent. Please check SMTP settings.";
+                    }
                 }
 
                 TempData["ResultType"] = "success";
@@ -299,7 +305,7 @@ namespace AnalyticaDocs.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult ResetPassword(int userId, string temporaryPassword)
+        public async Task<IActionResult> ResetPassword(int userId, string temporaryPassword)
         {
             try
             {
@@ -327,13 +333,18 @@ namespace AnalyticaDocs.Controllers
                     
                     if (targetUser != null && !string.IsNullOrEmpty(targetUser.EmailID))
                     {
-                        _ = _emailService.SendPasswordResetNotificationAsync(
+                        bool emailSent = await _emailService.SendPasswordResetNotificationAsync(
                             targetUser.LoginName,
                             targetUser.EmailID,
                             targetUser.LoginId,
                             temporaryPassword,
                             resetByName
                         );
+
+                        if (!emailSent)
+                        {
+                            return Json(new { success = true, message = "Password reset successfully, but notification email could not be sent. Please check SMTP settings." });
+                        }
                     }
 
                     return Json(new { success = true, message = "Password reset successfully. User will be prompted to change password on next login." });

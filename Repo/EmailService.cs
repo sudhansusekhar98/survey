@@ -306,32 +306,68 @@ public class EmailService : IEmailService
     {
         try
         {
+            if (string.IsNullOrWhiteSpace(_emailSettings.From))
+            {
+                _logger.LogError("Email 'From' address is not configured in appsettings.json under 'Email:From'");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(_emailSettings.Password))
+            {
+                _logger.LogError("Email 'Password' (App Password) is not configured in appsettings.json under 'Email:Password'");
+                return false;
+            }
+
             var mail = new MailMessage
             {
-                From = new MailAddress(_emailSettings.From, "Support"),
+                From = new MailAddress(_emailSettings.From, "Survey Management System"),
                 Subject = subject,
                 Body = htmlBody,
                 IsBodyHtml = true
             };
 
+            bool hasRecipients = false;
             foreach (var addr in toEmails.Split(','))
             {
-                if (!string.IsNullOrWhiteSpace(addr))
-                    mail.To.Add(new MailAddress(addr.Trim()));
+                var trimmed = addr.Trim();
+                if (!string.IsNullOrWhiteSpace(trimmed))
+                {
+                    mail.To.Add(new MailAddress(trimmed));
+                    hasRecipients = true;
+                }
             }
 
+            if (!hasRecipients)
+            {
+                _logger.LogWarning("No valid recipients found in: {Recipients}", toEmails);
+                return false;
+            }
+
+            // Gmail SMTP with App Password (STARTTLS on port 587)
+            // IMPORTANT: 'From' address must exactly match the Gmail account that owns the App Password.
+            // The App Password is generated at: https://myaccount.google.com/apppasswords
             using var smtp = new SmtpClient("smtp.gmail.com", 587)
             {
                 Credentials = new NetworkCredential(_emailSettings.From, _emailSettings.Password),
-                EnableSsl = true
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false
             };
 
+            _logger.LogInformation("Sending email to {Recipients} | Subject: {Subject} | From: {From}", toEmails, subject, _emailSettings.From);
             await smtp.SendMailAsync(mail);
+            _logger.LogInformation("Email sent successfully to {Recipients}", toEmails);
             return true;
+        }
+        catch (SmtpException smtpEx)
+        {
+            _logger.LogError(smtpEx, "SMTP error sending email to {Recipients} | Status: {Status} | Message: {Message}",
+                toEmails, smtpEx.StatusCode, smtpEx.Message);
+            return false;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to send email to {Recipients}", toEmails);
+            _logger.LogError(ex, "Failed to send email to {Recipients} | Error: {Error}", toEmails, ex.Message);
             return false;
         }
     }

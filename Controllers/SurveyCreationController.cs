@@ -525,7 +525,7 @@ namespace SurveyApp.Controllers
         //POST: SurveyCreation/SurveyAssignment/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CreateSurveyAssignment(SurveyAssignmentModel model)
+        public async Task<IActionResult> CreateSurveyAssignment(SurveyAssignmentModel model)
         {
             int rightsId = Convert.ToInt32(HttpContext.Session.GetString("RoleId") ?? "101");
             var result = _util.CheckAuthorizationAll(this, 103, null, model.SurveyID, "Create");
@@ -592,12 +592,13 @@ namespace SurveyApp.Controllers
                         var employee = _empRepository.GetEmployeeById(empId);
                         if (employee != null && !string.IsNullOrEmpty(employee.Email))
                         {
-                            _ = _emailService.SendSurveyAssignmentNotificationAsync(
+                            bool emailSent = await _emailService.SendSurveyAssignmentNotificationAsync(
                                 employee.EmpName ?? "Employee",
                                 employee.Email,
                                 survey?.SurveyName ?? "Survey",
                                 model.DueDate
-                            ).ContinueWith(t => { if (t.Result) emailsSent++; });
+                            );
+                            if (emailSent) emailsSent++;
                         }
                     }
                 }
@@ -1112,6 +1113,7 @@ namespace SurveyApp.Controllers
                 {
                     item.IsAssigned = selectedIds.Contains(item.Id);
                 }
+
                 ViewBag.LocId = locId; // Pass locId to the view if needed
                 ViewBag.SelectedSurveyId = surveyId;
                 ViewBag.SelectedSurveyName = SurveyName;
